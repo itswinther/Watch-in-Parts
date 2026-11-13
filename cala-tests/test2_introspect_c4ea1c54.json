@@ -1,0 +1,1 @@
+{"properties":["id","name","description"],"relationships":{"outgoing":[],"incoming":["INVESTED_IN"]},"numerical_observations":{}}

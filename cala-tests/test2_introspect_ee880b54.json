@@ -1,0 +1,1 @@
+{"properties":["name","id","registered_address","website","description"],"relationships":{"outgoing":["OPERATES_IN_INDUSTRY","INVESTED_IN","PARTICIPATES_IN_CORPORATE_EVENT"],"incoming":["INVESTED_IN","IS_CFO_OF","WORKS_AT"]},"numerical_observations":{}}

@@ -1,0 +1,1 @@
+{"properties":["description","founding_date","lei","name","headquarters_address","registered_address","legal_name","id"],"relationships":{"outgoing":["IS_REGISTERED_IN","HAS_HEADQUARTERS_IN"],"incoming":[]},"numerical_observations":{}}

@@ -1,0 +1,1 @@
+{"properties":["id","name","description"],"relationships":{"outgoing":["IS_SUBSIDIARY_OF","IS_REGISTERED_IN"],"incoming":[]},"numerical_observations":{}}

@@ -1,0 +1,1 @@
+{"properties":["aliases","esg_policy","id","headquarters_address","founding_date","name","lei","registered_address","legal_name","description"],"relationships":{"outgoing":["IS_REGISTERED_IN","HAS_HEADQUARTERS_IN","INVESTED_IN","PARTICIPATES_IN_FUNDING_ROUND"],"incoming":[]},"numerical_observations":{}}

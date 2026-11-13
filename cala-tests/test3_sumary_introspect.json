@@ -1,0 +1,1 @@
+{"properties":["name","description","id"],"relationships":{"outgoing":["PARTICIPATES_IN_CORPORATE_EVENT"],"incoming":["INVESTED_IN"]},"numerical_observations":{}}

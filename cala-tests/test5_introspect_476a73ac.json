@@ -1,0 +1,1 @@
+{"properties":["name","registered_address","description","id","website"],"relationships":{"outgoing":["HAS_HEADQUARTERS_IN","INVESTED_IN","PARTICIPATES_IN_FUNDING_ROUND","OPERATES_IN_INDUSTRY","PARTICIPATES_IN_CORPORATE_EVENT","HAS_PRESENCE_IN"],"incoming":["WORKS_AT","INVESTED_IN"]},"numerical_observations":{}}
