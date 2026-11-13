@@ -12,7 +12,7 @@ table. Everything below "Session entries" is append-only, newest at the bottom.
 | B | Reference script and grader (H1) | unassigned | not started | |
 | C | Hold the Line spike | unassigned | not started | |
 | D | Mentor questions, anchors, transcripts | unassigned | not started | |
-| E | Analysis, demo and story | Yoseph | started: proposed "no screws allowed" | 2026-11-14 01:35 |
+| E | Analysis, demo and story | Yoseph | started | 2026-11-14 01:35 |
 
 Spec version in use: 0.1
 
@@ -53,7 +53,13 @@ Append one line per decision: time, decision, who agreed.
 
 Append here. A human has to say yes before SPEC.md changes.
 
-- 2026-11-14 01:25 **"No screws allowed": every body clicks into place.** Proposed by Yoseph + Claude. Status: awaiting team yes/no. Would become SPEC 0.2.
+(none yet)
+
+## Ideas for later
+
+Parked ideas. Not proposals: nothing here changes SPEC.md. Move one to "Proposed spec changes" to put it to the team.
+
+- 2026-11-14 01:25 **"No screws allowed": every body clicks into place.** Proposed by Yoseph + Claude. Status: parked as an idea for later, not proposed to the team. Would become SPEC 0.2 if ever adopted.
   - **Why:** SPEC 0.1 says "screws are out of scope, parts are assumed screwed down", so nothing holds the board, lid or door. Tool-free snap-fit assembly is a real design-for-assembly rule, gives a better story for judges, and adds a constraint that interacts with the ones we already have (see "Interactions").
   - **Replaces** the Limits line "Screws are out of scope ... no check tests retention against a pull" with: "No fasteners, glue or press-fit pins. Board A, lid and door must each be held by printed geometry. The battery is held by the door (F3, unchanged)."
   - **How a snap is modelled while staying rigid-body (the hard part).** A snap arm has to bend while it is inserted, but the replay only moves rigid bodies. So the agent declares its snap arms in `assembly.json`, and gives a bend angle per pose:
@@ -113,3 +119,11 @@ Template:
 - Files changed: SESSION.md (row E, this entry).
 - Need from others: a yes or no on the no-screws proposal (Proposed spec changes) before B writes the path-replay code.
 - Next: draft the demo story and the analysis plan (which numbers and transcripts we show).
+
+### 2026-11-14 01:45 | E analysis, demo, story | Yoseph + Claude
+- Did: at Yoseph's request, moved the "No screws allowed" write-up out of Proposed spec changes into a new "Ideas for later" section. It is parked, not put to the team. Fixed row E status to "started".
+- Verified by (command and result): `git fetch origin` showed main at 2cc9197, which still has the write-up under Proposed spec changes. This move is committed on branch claude/busy-davinci-idw73v only and is not on main.
+- Not verified, or assumed: nothing run beyond git.
+- Files changed: SESSION.md.
+- Need from others: ignore the no-screws item under Proposed spec changes on main; it is an idea for later, not a proposal. Whoever merges the branch will fix main.
+- Next: Yoseph chooses a workstream or stays on E.
