@@ -12,6 +12,7 @@ table. Everything below "Session entries" is append-only, newest at the bottom.
 | B | Reference script and grader (H1) | unassigned | not started | |
 | C | Hold the Line spike | unassigned | not started | |
 | D | Mentor questions, anchors, transcripts | unassigned | not started | |
+| E | Analysis, demo and story | Yoseph | started: proposed "no screws allowed" | 2026-11-14 01:35 |
 
 Spec version in use: 0.1
 
@@ -104,3 +105,11 @@ Template:
 - Files changed: SESSION.md only (Proposed spec changes, this entry).
 - Need from others: a yes or no from the team on the proposal before B starts the path-replay code.
 - Next: if yes, edit SPEC.md to 0.2 and log it under Decisions. If no, leave SPEC 0.1 as it is.
+
+### 2026-11-14 01:35 | E analysis, demo, story | Yoseph + Claude
+- Did: Yoseph owns analysis, demo and story. CLAUDE.md lists no workstream for that, so I added row E to the Current state table. The folders and the CLAUDE.md table are not changed. Pushed the "no screws allowed" proposal to main at Yoseph's request, so the other sessions see it.
+- Verified by (command and result): `git fetch origin main` showed main still at ddf8bfa before the push.
+- Not verified, or assumed: that the team accepts an E row. If not, fold it into D.
+- Files changed: SESSION.md (row E, this entry).
+- Need from others: a yes or no on the no-screws proposal (Proposed spec changes) before B writes the path-replay code.
+- Next: draft the demo story and the analysis plan (which numbers and transcripts we show).
