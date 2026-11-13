@@ -8,11 +8,11 @@ table. Everything below "Session entries" is append-only, newest at the bottom.
 
 | ID | Workstream | Owner | Status | Last update |
 | --- | --- | --- | --- | --- |
-| A | Harness wiring | unassigned | not started | |
-| B | Reference script and grader (H1) | unassigned | not started | |
+| A | Harness wiring | Mikael | starting: adding the organisers' starter kit to the repo | 2026-11-14 02:00 |
+| B | Reference script and grader (H1) | itswinther | starting | 2026-11-14 02:00 |
 | C | Hold the Line spike | unassigned | not started | |
 | D | Mentor questions, anchors, transcripts | unassigned | not started | |
-| E | Analysis, demo and story | Yoseph | started: proposed "no screws allowed" | 2026-11-14 01:35 |
+| E | Analysis, demo and story | Yoseph | paused: Yoseph is not working overnight | 2026-11-14 02:00 |
 
 Spec version in use: 0.1
 
@@ -26,6 +26,13 @@ Spec version in use: 0.1
 - Sun 03:00 full runs and failure analysis
 - Sun 09:00 README and demo ready
 - Sun 10:00 final submission
+
+## Requests
+
+One line per request to another workstream. The addressee answers on the same
+line and ticks it. Format: `- [ ] to B, from A, HH:MM: what you need`.
+
+- [ ] to A, from B, 02:00: say here when the starter kit is in the repo, and where the verifier expects the grader entry point and the reward file. Until then B assumes `tests/grade.py <base.stl> <door.stl> <assembly.json>` taking three absolute paths.
 
 ## Open questions
 
@@ -113,3 +120,11 @@ Template:
 - Files changed: SESSION.md (row E, this entry).
 - Need from others: a yes or no on the no-screws proposal (Proposed spec changes) before B writes the path-replay code.
 - Next: draft the demo story and the analysis plan (which numbers and transcripts we show).
+
+### 2026-11-14 02:00 | B + shared docs | itswinther + Claude
+- Did: rewrote the communication part of CLAUDE.md. Reason: sessions were pushing to separate `claude/...` branches and could not see each other's SESSION.md. New rules: `origin/main` is the only shared channel, each session asks its human once for permission to push to `main`, re-reads SESSION.md before each new piece of work, and uses the new "Requests" section here for cross-workstream asks. Added workstream E to the CLAUDE.md table. Set owners: A Mikael (he adds the starter kit), B itswinther, E paused (Yoseph is not working overnight). C and D are unowned tonight.
+- Verified by (command and result): `git branch -r --no-merged origin/main` listed `origin/claude/busy-davinci-idw73v` (commit b303740, "Park 'no screws allowed' under Ideas for later"), which is not on main.
+- Not verified, or assumed: that every session's human allows pushes to `main`. The grader entry point in the Requests line is B's assumption until A confirms it.
+- Files changed: CLAUDE.md, SESSION.md (owner rows A, B and E, Requests section, this entry). Touching rows A and E is outside my own row; done on itswinther's instruction.
+- Need from others: A answers the request above. Someone merges b303740 or drops it.
+- Next: B builds `geometry/`, the supplied bodies, the reference script and the grader against SPEC 0.1 unchanged.
