@@ -49,8 +49,8 @@ THIN_DILATE_VOX = 1.0
 THIN_DEV = 0.2              # no point of a part may be further than this from what survives the opening
 # mass budget, mm3. PLACEHOLDERS: 50 % of the current reference's fixed volume (4233.68, stage 1) and 60 % of its
 # mobile volume (853.19, stage 2); builder REF replaces them with the reworked reference's values plus 10 %.
-FIXED_VOLUME_MAX = 2117.0   # union of the fixed parts
-MOBILE_VOLUME_MAX = 512.0   # sum of the volumes of every part of every mobile, the supplied barrel not counted
+FIXED_VOLUME_MAX = 346.0    # union of the fixed parts (reference at its largest stage 313.8, plus 10 percent)
+MOBILE_VOLUME_MAX = 278.0   # reference 252.1 at stages 2 and 3, plus 10 percent; sum of the volumes of every part of every mobile, the supplied barrel not counted
 MAX_PARTS = 60
 MAX_TRIANGLES = 200_000
 MAX_STL_BYTES = 32 * 1024 * 1024

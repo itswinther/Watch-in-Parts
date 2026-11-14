@@ -137,7 +137,7 @@ If either fails the score is 0.
 
 ## Scored requirements
 
-Each passes or fails. Weights in brackets; the total is 17.
+Each passes or fails. Weights in brackets; the total is 23.
 
 - **Free to turn [1].** Each mobile, turned through a full turn in 72 steps of 5
   degrees, never intersects the fixed parts by more than 0.01 mm3.
@@ -200,9 +200,9 @@ Each passes or fails. Weights in brackets; the total is 17.
   body. Ordinary gear teeth of module 0.12 or more pass; a wall, web or roof 0.2
   thick or less does not. How the grid lines up with your part is not fixed, so
   leave a little margin.
-- **Light [2].** The fixed parts together have a volume of at most 2117 mm3,
+- **Light [2].** The fixed parts together have a volume of at most 346 mm3,
   and all parts of your mobiles together (the supplied barrel not counted) at
-  most 512 mm3. The limits are the same at every stage. Volumes are those
+  most 278 mm3. The limits are the same at every stage. Volumes are those
   of the solids the grader builds from your part files: for the fixed parts, the
   volume of their union; for the mobiles, the sum of the volumes of every part
   of every mobile, each part counted on its own.
@@ -210,7 +210,7 @@ Each passes or fails. Weights in brackets; the total is 17.
 ## Score
 
 ```
-p     = (weight of scored requirements passed) / 17
+p     = (weight of scored requirements passed) / 23
 score = 0 if a hard requirement fails, otherwise
 score = 0.5 * p^2 + 0.5 * (1 if every scored requirement passes, else 0)
 ```
@@ -236,14 +236,14 @@ Hard requirements: the two of stage 1, the frozen items above, and a 24-hour
 hand is declared (`hands.day` names a mobile and one of that mobile's parts,
 and that part is a new part, not one of the received parts).
 
-Scored requirements (total weight 21): all eleven of stage 1, still passing with
+Scored requirements (total weight 27): all fourteen of stage 1, still passing with
 their weights, plus
 
 - **24-hour hand [3].** It moves as a 24-hour hand does.
 - **24-hour hand placement [1].** Its axis is at least 6.0 from the hour hand's
   axis, and the hand part reaches at least 3.0 from its own axis.
 
-Score: the stage-1 formula with p out of 21.
+Score: the stage-1 formula with p out of 27.
 
 ## Stage 3: change request, a faster barrel
 
@@ -257,8 +257,8 @@ the received part files as you can.
 Nothing is frozen: you may change, add, remove and rename anything. The hard
 requirements are the two of stage 1, plus: **the change request is met**, that
 is, the hour hand, minute hand, seconds hand and 24-hour hand requirements all
-pass with the barrel turning once every 6 hours. The scored requirements are all thirteen of
-stage 2 with their weights (total 21), tested with the barrel turning once every
+pass with the barrel turning once every 6 hours. The scored requirements are all sixteen of
+stage 2 with their weights (total 27), tested with the barrel turning once every
 6 hours. The hands must still move as the hands of a watch do, and the 24-hour
 hand as a 24-hour hand does.
 
@@ -279,7 +279,7 @@ is not kept.
 ```
 kept share = (received part files that are kept) / (received part files)
 factor     = min(1, kept share / (15/17))
-p          = (weight of scored requirements passed) / 21
+p          = (weight of scored requirements passed) / 27
 score      = 0 if a hard requirement fails, otherwise
 score      = (0.5 * p^2 + 0.5 * (1 if every scored requirement passes, else 0)) * factor
 ```

@@ -229,8 +229,9 @@ def dup_mobile_part(d, base):
 
 
 def swap_within_mobile(d, base):
-    """Stage 4: of two parts of one mobile that are closest in the order, the later one (it sits on the
-    earlier, e.g. a wheel on its arbor) is put in first. The earlier one then has to pass through it."""
+    """Stage 4: of two parts of one mobile that are closest in the order, the earlier one (e.g. an arbor) is put
+    in right after the later one (a wheel that sits on it) instead of before it. It then has to pass through
+    that part, and only it fails: the parts in between keep their places in the order."""
     doc = _doc_of(d)
     with open(os.path.join(d, "assembly.json")) as f:
         order = json.load(f)["order"]
@@ -243,9 +244,24 @@ def swap_within_mobile(d, base):
     a, b = order[best[0]], order[best[1]]
 
     def fn(asm):
-        asm["order"].remove(b)
-        asm["order"].insert(asm["order"].index(a), b)
+        asm["order"].remove(a)
+        asm["order"].insert(asm["order"].index(b) + 1, a)
     edit(d, fn, "assembly.json")
+
+
+def fat_seconds_pinion(d, base):
+    """Stage 1: the seconds pinion remade with fat teeth (backlash allowance -0.075 on the pitch circle instead
+    of +0.03). Measured on the reference: drawn, the pair still runs (worst overlap 0.0067 of 0.01 allowed);
+    moved 0.03 towards the fourth wheel it jams (0.0144)."""
+    from geometry import watch_gears_cad as GC
+    from geometry import core
+    P = ref.place()
+    T, S = P["fourth"], P["seconds"]
+    lo, hi = ref.PLATE[1] + 0.1, ref.BRIDGE[0] - 0.1
+    ph_w3 = math.degrees(ref.ang(T, S))                       # the fourth wheel is drawn with a tooth on the line
+    _, ph = ref.gear_at(S, 12, ref.M_D, ref.Z["D"], ref.ang(S, T), (96, ph_w3))
+    p4 = GC.gear(12, ref.M_D, ref.Z["D"][0], ref.Z["D"][1], phase_deg=ph, x=S[0], y=S[1], backlash=-0.075)
+    core.write_step(part_file(d, "seconds"), ref.hand_arbor(S, lo, hi, p4))
 
 
 ANCHORS = [
@@ -280,16 +296,21 @@ ANCHORS = [
     ("s4 a part file changed", 4, lambda d, b: touch_part(d, "dial"), 0.0),
     ("s4 centre before third", 4, lambda d, b: edit(d, reorder("centre_36", "third_54"), "assembly.json"), parts_score(1)),
     ("s4 dial jumps into place in one step", 4, lambda d, b: edit(d, teleport, "assembly.json"), parts_score(1)),
-    # the dial stands in place from the start, so the 13 parts ORDER puts in before it cannot come down from above
+    # the dial stands in place from the start. The reference's dial is a skeleton of bosses and bars, so of the
+    # 13 parts ORDER puts in before it only those lying under a boss or bar are blocked: 11 of them, plus the
+    # dial itself (measured on the reference, builder REF)
     ("s4 dial left out of the order", 4, lambda d, b: edit(d, lambda doc: doc["order"].remove("dial"), "assembly.json"),
-     parts_score(1 + ref.ORDER.index("dial"))),
-    # Valid once the reference seats every part (builder REF). Moving the wheel 0.4 up its arbor takes it off
-    # its shoulder and must change nothing else: the reference leaves 0.4 of vertical play above each wheel.
-    ("s1 a wheel moved 0.4 up its arbor, off its shoulder", 1, move_part_up(0.4), fails(1, "seated")),
+     parts_score(12)),
+    # In the reference the part picked is the cannon on the centre arbor. The hour wheel rests on it (held needs
+    # the hour wheel's tube within 0.3 above the cannon; it is 0.2), so the cannon cannot rise 0.4 without
+    # running into the hour wheel: the hard requirement "assembled" fails and the score is 0 (builder REF).
+    ("s1 a wheel moved 0.4 up its arbor, off its shoulder", 1, move_part_up(0.4), 0.0),
     ("s1 two parts of one mobile overlap", 1, dup_mobile_part, 0.0),
     ("s4 a part put in after the part of its mobile that blocks it", 4, swap_within_mobile,
      lambda d: parts_score(1, len(W.load_movement(d).all_parts()))),     # all parts, the barrel included
-    ("s4 bridge on before the wheels", 4, lambda d, b: edit(d, reorder("bridge", "barrel"), "assembly.json"), parts_score(6)),
+    ("s1 seconds pinion with fat teeth (no backlash)", 1, fat_seconds_pinion, fails(1, "tolerant")),
+    # the reference's bridge is a skeleton: it blocks the barrel, third, centre, fourth and seconds (measured)
+    ("s4 bridge on before the wheels", 4, lambda d, b: edit(d, reorder("bridge", "barrel"), "assembly.json"), parts_score(5)),
 ]
 
 
