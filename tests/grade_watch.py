@@ -207,7 +207,7 @@ def grade_design(folder, stage=1, prev=None, skip=()):
         return d >= W.DAY_HAND_OFFSET and reach >= W.DAY_HAND_REACH, {"axis_distance": d, "reach": reach}
 
     def printable():
-        r = {n: W.thin(solid) for n, (solid, _) in m.all_parts().items() if n != "barrel"}
+        r = {n: W.thin(solid) for n, solid in m.all_parts().items() if n != "barrel"}
         info = {n: {"pieces": v[0], "max_deviation": v[1]} for n, v in r.items()}
         return all(v[0] >= 1 and v[1] <= W.THIN_DEV for v in r.values()), info
 

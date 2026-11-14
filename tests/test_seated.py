@@ -62,7 +62,7 @@ def drop_from_above(folder, order):
     lo, hi = m.assembly_box()
     paths = {}
     for n in order:
-        solid = m.all_parts()[n][0]
+        solid = m.all_parts()[n]
         lift = hi[2] + 0.5 - solid.bounding_box()[2]
         k = int(math.ceil(lift / 0.19))
         paths[n] = [[[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, lift * (1 - i / k)], [0, 0, 0, 1]] for i in range(k + 1)]

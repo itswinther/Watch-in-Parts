@@ -12,7 +12,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."
 from geometry import watch as W
 from geometry.core import ivol, union
 
-MOVE, SHIFT = 0.3, 0.03
+MOVE, SHIFT = W.HELD_MOVE, W.MESH_SHIFT
 
 
 def volumes(m):
@@ -81,11 +81,9 @@ def tolerant(m):
 def stage4(folder):
     m = W.load_movement(folder)
     order, paths = W.load_assembly(folder, m)
-    base = m.all_parts
-    m.all_parts = lambda: {n: (s, "own:" + n) for n, (s, g) in base().items()}     # every part its own group
     res, installed = m.assembly_replay(order, paths)
     bad = {n: (r["worst_volume"], r["hit"], r["format_messages"]) for n, r in res.items() if n not in installed}
-    print("stage 4 all-pairs replay: installed %d of %d; not installed: %s" % (len(installed), len(base()), bad))
+    print("stage 4 all-pairs replay: installed %d of %d; not installed: %s" % (len(installed), len(m.all_parts()), bad))
 
 
 def main(out, stages):
