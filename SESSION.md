@@ -9,7 +9,7 @@ table. Everything below "Session entries" is append-only, newest at the bottom.
 | ID | Workstream | Owner | Status | Last update |
 | --- | --- | --- | --- | --- |
 | A | Harness wiring | Mikael | paused harness work overnight to run three task spikes (see 03:55 entry, `spikes/README.md`): none showed a gap. Docker installed, not yet started | 2026-11-14 03:55 |
-| B | Reference script and grader | itswinther | NOW: building a first runnable version of the mechanical watch task (barrel mesh, grader, tools, a reference movement to prove the grader) and then running clean agents on it | 2026-11-14 03:42 |
+| B | Reference script and grader | itswinther | Watch task runnable: reference movement scores 1.0, grading takes 35 s. Three clean agents (Fable, Opus, Sonnet) running on it now | 2026-11-14 03:51 |
 | C | Hold the Line spike | unassigned | not started | |
 | D | Mentor questions, anchors, transcripts | unassigned | not started | |
 | E | Analysis, demo and story | Yoseph | paused: Yoseph is not working overnight | 2026-11-14 01:40 |
@@ -70,6 +70,8 @@ Append one line per decision: time, decision, who agreed.
 - 2026-11-14 03:22 Interface for A (Moving Day): one artifact, `plan.json`. Grader call: `python -I tests/grade_md.py /abs/plan.json [--instance flat-1] --reward FILE [--details FILE]`. `python environment/make_bundle_md.py DIR` writes everything the agent may see; the tools are `tools/tools_md.py` and the agent may import `tools/geometry`. Units are centimetres.
 - 2026-11-14 03:33 Moving Day stays in the back pocket: built and measured, but it shows no real gap (Fable 1.0, Opus 1.0). It is not the chosen challenge. Decided: itswinther.
 - 2026-11-14 03:42 The mechanical watch gear train (write-up in `MECHANICAL_WATCH_IDEA.md`) is now the main idea. Moving Day, H2 and H1 are backups. Decided: itswinther.
+- 2026-11-14 03:51 Interface for A (watch task): the artifact is a folder holding `movement.json` and `parts/<name>.stl`. Grader call: `python -I tests/grade_watch.py /abs/folder --reward FILE [--details FILE]`; it opens only the files `movement.json` names. `python environment/make_bundle_watch.py DIR` writes everything the agent may see. Grading the reference takes about 35 s.
+- 2026-11-14 03:51 Choices B made while building the watch task, different from or beyond the write-up, open to a human no: (1) all arbors are parallel to z and this is stated; (2) the size limit is stated (radius 23, height 16), not hidden, because a hidden number we chose would be withheld information; (3) only the hour and minute hands must share an axis, since real watches often have a small seconds hand elsewhere; (4) the hand speeds, clockwise direction and that shared axis are the only unstated requirements; (5) the barrel is 96 teeth, module 0.2, 25 degree pressure angle, all stated; (6) the agent is not given a gear maker; (7) "held" accepts another mobile as the thing that holds a mobile, because an hour wheel rides on the centre arbor in real watches; (8) there is no minimum-feature (printability) check yet.
 
 ## Proposed spec changes
 
@@ -352,3 +354,15 @@ Template:
 - Files changed: new `spikes/` (README, gear_train, wrist_tracker), `holdtheline/` (sim, policies, server, agent kit, results); SESSION.md (row A, this entry). No existing files of other workstreams touched.
 - Need from others: the team decision under Open questions is still open, and these results bear on it.
 - Next: harness work (Harbor task around B's grader) whichever idea wins.
+
+### 2026-11-14 03:51 | B watch task, first runnable version | itswinther + Claude
+- Did: built the mechanical watch gear-train task from `MECHANICAL_WATCH_IDEA.md`. `geometry/watch.py` (public: movement.json parser, exact speeds from tooth counts, free-spin, held, mesh-run and clearance measurements), `geometry/watch_gears.py` (involute gear maker, not shipped to the agent), `geometry/data/barrel.stl`, `tests/grade_watch.py` (2 gates, 10 checks, weight 16; the required hand speeds live only here), `solution/reference_watch.py`, `environment/tools_watch.py`, `environment/make_bundle_watch.py`, `environment/public/SPEC_WATCH.md` and `INSTRUCTION_WATCH.md`, `tests/test_anchors_watch.py`.
+- Verified by (command and result):
+  - Two-gear check of the mesh test: barrel with a correct 12-tooth pinion gives overlap 0.0, largest gap 0.027, drive overlap 0.051; the same pinion declared as 13 teeth jams (0.103 mm3); moved 0.4 further away it disengages (gap 0.216, drive overlap 0.0).
+  - `python3 solution/reference_watch.py OUT` wrote 11 parts. `cd tests && python3 -I grade_watch.py OUT --reward R` printed reward 1.0 with both gates and all 10 checks true, in 35 s. Speeds from the tool: centre 1, hour wheel 1/12, seconds 60 clockwise turns per hour.
+  - Bundle: `tools_watch.py speeds`, `spin`, `held`, `mesh`, `clear`, `extent`, `submit` all ran on the reference inside a fresh bundle. `grep` for the hand speeds, the gear maker and "reference" in the bundle found nothing.
+- Reference train: barrel 96 to 24, 60 to 30 (centre, minute hand), 90 to 12, 96 to 12 (seconds); motion work 12 to 36 and 12 to 48 (hour wheel, a tube round the centre arbor). Two meshes between barrel and centre are needed because one mesh would turn the minute hand anticlockwise.
+- Not verified, or assumed: whether agents fail; the anchor script was still running when this was written; no printability check; nothing in Harbor.
+- Files changed: those listed, SESSION.md.
+- Need from others: Abhishek, see the choices listed under Decisions and say if any is wrong.
+- Next: grade the three agent runs and report.
