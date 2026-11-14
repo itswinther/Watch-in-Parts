@@ -198,6 +198,8 @@ Append one line per decision: time, decision, who agreed.
 
 - 2026-11-14 18:39 (B) Grader time limits raised so they can never decide a result: `TIMEOUT_S` 600 -> 1800 s per condition or check, `JOB_TIME_LIMIT_S` 3600 -> 7200 s for the whole inspection (both stated in QA-W100, generated). Reason (builder N): on this machine at load 16 the gold delivery lost `printable` to the 600 s limit (17 thickness tests took 273 s in one process at that load, with the P1 printable check one call over all parts). Harbor's verifier must allow at least 7800 s (Requests).
 
+- 2026-11-14 20:14 (B) Decided by itswinther (about 20:15): the hand speeds are stated. Old (03:51, kept until now): what the hands of a watch do is unstated professional knowledge. New: QA-W100 checks 7 to 9 and Part 2 check 1 say each hand turns clockwise at a constant speed: hour one turn every 12 h, minute one turn every hour, seconds one turn every minute, 24-hour one turn every 24 h. Reason: since 17:56 the job's rule is that nothing graded is withheld; a fresh reviewer flagged the gap twice. `make_brief_job.hand_speeds()` fails if the grader's `HAND_SPEED` or `DAY_SPEED` change. Nothing graded changed.
+
 ## Proposed spec changes
 
 Append here. A human has to say yes before SPEC.md changes.
