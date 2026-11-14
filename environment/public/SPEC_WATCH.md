@@ -208,7 +208,8 @@ What is frozen:
 You may add mobiles, add parts, add meshes, and replace or add fixed parts.
 
 Hard requirements: the two of stage 1, the frozen items above, and a 24-hour
-hand is declared (`hands.day` names a mobile and one of that mobile's parts).
+hand is declared (`hands.day` names a mobile and one of that mobile's parts,
+and that part is a new part, not one of the received parts).
 
 Scored requirements (total weight 21): all eleven of stage 1, still passing with
 their weights, plus
@@ -302,7 +303,8 @@ follow.
 
 ```
 p     = (parts installed) / (all parts, the barrel included)
-score = 0 if movement.json or a part file was changed, or assembly.json cannot be read
+score = 0 if the Files requirement of stage 1 fails, if movement.json or a part file was changed,
+        or if assembly.json cannot be read
 score = 0.5 * p^2 + 0.5 * (1 if every part is installed, else 0)
 ```
 

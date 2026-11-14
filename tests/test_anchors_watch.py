@@ -122,6 +122,12 @@ def drop_mesh(a, b):
     return fn
 
 
+def day_on_received(d, base):
+    """The stage-1 movement with only hands.day pointed at the received seconds hand."""
+    use_stage(1)(d, base)
+    edit(d, lambda doc: doc["hands"].update(day={"mobile": "seconds", "part": "seconds_hand"}))
+
+
 def paper_edit(d, base):
     """The received stage-2 movement with only the third/centre tooth counts changed to 54/36 in movement.json."""
     use_stage(2)(d, base)
@@ -154,7 +160,8 @@ ANCHORS = [
     ("s2 gold", 2, lambda d, b: None, 1.0),
     ("s2 stage-1 design handed back unchanged", 2, use_stage(1), 0.0),          # no day hand declared: hard requirement
     ("s2 seconds hand declared as the 24-hour hand", 2,
-     lambda d, b: edit(d, lambda doc: doc["hands"].update(day={"mobile": "seconds", "part": "seconds_hand"})), fails(2, "day_hand")),
+     lambda d, b: edit(d, lambda doc: doc["hands"].update(day={"mobile": "seconds", "part": "seconds_hand"})), 0.0),   # received part: gate
+    ("s2 day hand declared on a received hand part", 2, day_on_received, 0.0),   # stage-1 movement plus one line of JSON
     ("s2 a frozen wheel file changed", 2, lambda d, b: touch_part(d, "third"), 0.0),
     ("s3 gold", 3, lambda d, b: None, 1.0 * kept(2)),
     ("s3 do nothing", 3, lambda d, b: nothing(d), 0.0),
