@@ -1,0 +1,494 @@
+/bin/bash -lc 'cat BRIEF.md'
+
+---
+
+/bin/bash -lc 'ls -la'
+
+---
+
+/bin/bash -lc 'cat frozen.json && find submission -maxdepth 3 -type f'
+
+---
+
+/bin/bash -lc "mkdir -p scripts
+python - <<'PY'
+import trimesh, pathlib
+for p in pathlib.Path('frozen').glob('*.stl'):
+ m=trimesh.load(p);print(p.name, m.bounds.tolist(),m.volume)
+PY"
+
+---
+
+/bin/bash -lc "python - <<'PY'
+import manifold3d as m
+print(m.Manifold.__doc__)
+print([x for x in dir(m.Manifold) if not x.startswith('_')])
+print(m.Mesh.__doc__)
+PY"
+
+---
+
+/bin/bash -lc 'date -u +%H:%M:%S'
+
+---
+
+/bin/bash -lc "cat > scripts/envelope.py <<'PY'
+import numpy as np
+from scipy.optimize import minimize
+from pathlib import Path
+P=2*np.pi/30
+
+def envelope(n=481):
+ phis=np.linspace(-P/2,P/2,n)
+ vals=[]; sols=[]
+ prev=None
+ for i,phi in enumerate(phis):
+  def calc(v):
+   a,t=v; q=.1*(1+.3*np.cos(3*(t-a)))
+   y=q*np.cos(t)
+   return q*np.sin(t)/np.sqrt(1+y*y), a/10-np.arctan(y)-phi
+  def obj(v):return -calc(v)[0]
+  def con(v):return calc(v)[1]
+  best=None
+  seeds=[(10*phi, t) for t in [0.4,1.,1.57,2.2,2.8]]
+  if prev is not None:seeds.insert(0,prev)
+  for seed in seeds:
+   r=minimize(obj,seed,method='SLSQP',constraints={'type':'eq','fun':con},bounds=[(10*phi-1.4,10*phi+1.4),(0,np.pi)],options={'ftol':1e-13,'maxiter':100})
+   if r.success and (best is None or r.fun<best.fun):best=r
+  if best is None: raise RuntimeError(i)
+  vals.append(-best.fun);prev=best.x;sols.append(best.x)
+ np.savez('scripts/envelope.npz',phi=phis,h=vals,sol=sols)
+ print('envelope',min(vals),max(vals),'period endpoints',vals[0],vals[-1],flush=True)
+ return phis,np.array(vals)
+if __name__=='__main__':envelope()
+PY
+OPENBLAS_NUM_THREADS=1 python scripts/envelope.py"
+
+---
+
+/bin/bash -lc "cat > scripts/build.py <<'PY'
+import numpy as np, trimesh, manifold3d as mf, json
+from pathlib import Path
+OUT=Path('submission/parts'); OUT.mkdir(parents=True,exist_ok=True)
+
+def solid(v,f):
+ m=trimesh.Trimesh(vertices=v,faces=f,process=True)
+ if m.volume<0:m.invert()
+ r=mf.Manifold(mf.Mesh(np.asarray(m.vertices,np.float32),np.asarray(m.faces,np.uint32)))
+ if r.status()"'!=mf.Error.NoError:raise RuntimeError(r.status())
+ return r
+
+def cyl(r,z0,z1,n=128):return mf.Manifold.cylinder(z1-z0,r,r,n).translate((0,0,z0))
+def box(x0,x1,y0,y1,z0,z1):return mf.Manifold.cube((x1-x0,y1-y0,z1-z0)).translate((x0,y0,z0))
+def xcyl(r,x0,x1,n=128):return mf.Manifold.cylinder(x1-x0,r,r,n).rotate((0,90,0)).translate((x0,0,-3.9))
+def export(s,name):
+ m=s.to_mesh();t=trimesh.Trimesh(m.vert_properties[:,:3],m.tri_verts,process=True)
+ t.export(OUT/(name+'"'.stl'));print(name,'volume',t.volume,'tris',len(t.faces),'components',len(t.split()),'bounds',t.bounds.tolist(),flush=True)
+
+# Three-lobed conical pinion. Apex lies at the axis intersection.
+n=1440; ang=np.arange(n)*2*np.pi/n;q=.1*(1+.3*np.cos(3*ang))
+v=[]
+for x in [-5.4,-2.3]:
+ v.extend(np.c_[np.full(n,x),-x*q*np.cos(ang),-3.9-x*q*np.sin(ang)])
+v.extend([[-5.4,0,-3.9],[-2.3,0,-3.9]])
+f=[]
+for i in range(n):
+ j=(i+1)%n
+ f.extend([[i,j,n+j],[i,n+j,n+i],[2*n,j,i],[2*n+1,n+i,n+j]])
+pinion=solid(v,f)
+stem=pinion+xcyl(.12,-16.8,-2.3)+xcyl(.34,-8.8,-8.4)+xcyl(.78,-16.8,-15.6)
+export(stem,'stem_pinion')
+# Conjugate bevel wheel: underside is the envelope of the turning pinion.
+data=np.load('scripts/envelope.npz');p=data['phi'][:-1];h=data['h'][:-1]
+ang=np.concatenate([p+2*np.pi*j/30 for j in range(30)])+np.pi
+hh=np.tile(h,30);n=len(ang);v=[]
+for r,top in [(.9,False),(5.1,False),(.9,True),(5.1,True)]:
+ z=np.full(n,-3.05) if top else -3.9+r*hh+.00005
+ v.extend(np.c_[r*np.cos(ang),r*np.sin(ang),z])
+f=[]
+for i in range(n):
+ j=(i+1)%n
+ for a,b,c,d in [(i,j,n+j,n+i),(2*n+i,3*n+i,3*n+j,2*n+j),(i,2*n+i,2*n+j,j),(n+i,n+j,3*n+j,3*n+i)]:f.extend([[a,b,c],[a,c,d]])
+wheel=solid(v,f)
+hub=cyl(1.32,-3.65,-1.92)
+wheel=wheel+hub
+# Clears the supplied flange; closely seats the square only over its square section.
+wheel=wheel-cyl(1.018,-3.9,-2.499)-box(-.301,.301,-.301,.301,-2.5,-1.90)
+export(wheel,'ratchet_bevel')
+# Captive journal and thrust collar, carried by a bridge just below the plate.
+bearing=xcyl(.49,-10.4,-5.7)
+bearing=bearing-xcyl(.145,-10.5,-5.6)-xcyl(.365,-8.83,-8.37)
+bearing=bearing+box(-9.5,-8.5,-.8,-.05,-3.9,-1.72)+box(-6.9,-5.9,-.8,-.05,-3.9,-1.72)
+# Restore running bores after adding the bridge posts.
+bearing=bearing-xcyl(.145,-10.5,-5.6)-xcyl(.365,-8.83,-8.37)
+export(bearing,'stem_bridge')
+config={'mobiles':{'stem':{'point':[0,0,-3.9],'direction':[1,0,0],'parts':['stem_pinion']},'arbor':{'parts':['ratchet_bevel']}},'fixed':['stem_bridge'],'meshes':[{'driver':'stem','driver_teeth':3,'driven':'arbor','driven_teeth':30,'sense':'opposite'}]}
+Path('submission/winding.json').write_text(json.dumps(config,indent=2)+'\\n')
+PY"
+
+---
+
+/bin/bash -lc 'OPENBLAS_NUM_THREADS=1 python scripts/build.py'
+
+---
+
+/bin/bash -lc "cat > scripts/check.py <<'PY'
+import numpy as np,trimesh,manifold3d as mf,json,time
+from pathlib import Path
+
+def load(p):
+ t=trimesh.load(p,process=True)
+ return mf.Manifold(mf.Mesh(np.asarray(t.vertices,np.float32),np.asarray(t.faces,np.uint32)))
+def vol(a,b):return (a"'^b).volume()
+def stemrot(s,a):return s.translate((0,0,3.9)).rotate((a,0,0)).translate((0,0,-3.9))
+def arborrot(s,a):return s.rotate((0,0,a))
+parts={p.stem:load(p) for p in Path('"'submission/parts').glob('*.stl')}
+frozen={p.stem:load(p) for p in Path('frozen').glob('*.stl')}
+arbor=load('arbor_square.stl');stem=parts['stem_pinion'];wheel=parts['ratchet_bevel'];fixed=parts['stem_bridge']
+r={}
+r['files']={}
+for p in Path('submission/parts').glob('*.stl'):
+ t=trimesh.load(p);r['files'][p.stem]={'watertight':bool(t.is_watertight),'winding':bool(t.is_winding_consistent),'shells':len(t.split()),'volume':t.volume,'triangles':len(t.faces)}
+r['frozen_rest']={}
+for name,s in parts.items():
+ r['frozen_rest'][name]={n:vol(s,f) for n,f in frozen.items()}
+print('REST',r['frozen_rest'],flush=True)
+# full slow wheel turn at six samples per pinion tooth
+r['mesh']=[]
+start=time.time()
+for i,a in enumerate(np.linspace(0,3600,180,endpoint=False)):
+ s=stemrot(stem,float(a));w=arborrot(wheel,float(-a/10));b=arborrot(wheel,float(-a/10+.36))
+ r['mesh'].append([float(a),vol(s,w),vol(s,b)])
+ if i%18==0: print('MESH',i,r['mesh'][-1], 'elapsed',round(time.time()-start,1),flush=True)
+print('MESH result overlap max',max(v[1] for v in r['mesh']),'push min',min(v[2] for v in r['mesh']),flush=True)
+Path('submission/check_results.json').write_text(json.dumps(r,indent=2))
+# clear each mobile individually against fixtures and frozen
+r['clear']={}
+for name,s,rot in [('stem',stem,stemrot),('arbor',wheel+arbor,arborrot)]:
+ vals=[]
+ for a in np.arange(36)*10:
+  ss=rot(s,float(a));vals.append([float(a),vol(ss,fixed),max(vol(ss,f) for f in frozen.values())])
+ r['clear'][name]=vals
+ print('CLEAR',name,np.max(np.array(vals)[:,1:],axis=0).tolist(),flush=True)
+r['held']={}
+for name,s in [('stem',stem)]:
+ r['held'][name]=[]
+ for axis in range(3):
+  for sign in [-1,1]:
+   delta=np.eye(3)[axis]*.3*sign
+   r['held'][name].append([delta.tolist(),vol(s.translate(delta),fixed)])
+print('HELD',r['held'],flush=True)
+r['anchored']={}
+for axis in range(3):
+ for sign in [-1,1]:
+  delta=np.eye(3)[axis]*.05*sign
+  r['anchored'][str(delta.tolist())]=sum(vol(fixed.translate(delta),f) for f in frozen.values())
+print('ANCHOR',r['anchored'],flush=True)
+# square seating: 0.04 thick surrounding shell
+outer=mf.Manifold.cube((.68,.68,.6)).translate((-.34,-.34,-2.5))
+inner=mf.Manifold.cube((.6,.6,.6)).translate((-.3,-.3,-2.5))
+shell=outer-inner
+r['seated']={'shell_volume':shell.volume(),'filled_volume':vol(wheel,shell),'square_overlap':vol(wheel,inner),'arbor_overlap':vol(wheel,arbor)}
+print('SEATED',r['seated'],flush=True)
+r['bounds']={}
+for name in parts:
+ t=trimesh.load('submission/parts/'+name+'.stl');v=t.vertices
+ radial=np.linalg.norm(v[:,:2]-np.array([4.0391,-9.6417]),axis=1)
+ r['bounds'][name]={'zmin':float(v[:,2].min()),'zmax':float(v[:,2].max()),'radial_max':float(radial.max())}
+print('BOUNDS',r['bounds'],flush=True)
+Path('submission/check_results.json').write_text(json.dumps(r,indent=2))
+PY
+OPENBLAS_NUM_THREADS=1 python scripts/check.py"
+
+---
+
+/bin/bash -lc "python - <<'PY'
+import json
+r=json.load(open('submission/check_results.json'));print(r['mesh'][:18])
+PY"
+
+---
+
+/bin/bash -lc "cat > scripts/profile.py <<'PY'
+import numpy as np
+N=12
+pitch=.1;module=2*pitch/N; rb=pitch*np.cos(np.deg2rad(20));root=pitch-1.25*module;tip=pitch+module
+inv=lambda t:np.tan(t)-t
+ha=np.pi/(2*N)+inv(np.deg2rad(20))
+r=np.linspace(rb,tip,65)
+th=ha-inv(np.arccos(rb/r))
+# one tooth traced counterclockwise, include circular root and tip
+th1=np.r_[-np.pi/N,-ha,-th, np.linspace(-th[-1],th[-1],12)[1:-1],th[::-1],ha,np.pi/N]
+rr1=np.r_[root,root,r,np.full(10,tip),r[::-1],root,root]
+# eliminate duplicate angular values and make periodic polygon
+keep=np.r_[True,np.diff(th1)>1e-10]
+th1=th1[keep];rr1=rr1[keep]
+angles=np.concatenate([th1[:-1]+i*2*np.pi/N for i in range(N)])
+radii=np.tile(rr1[:-1],N)
+y=radii*np.cos(angles);z=radii*np.sin(angles)
+np.savez('scripts/profile.npz',angles=angles,radii=radii,y=y,z=z,N=N)
+print('profile',len(y),'root',root,'tip',tip)
+PY
+cat > scripts/envelope_polygon.py <<'PY'
+import numpy as np
+from scipy.optimize import minimize_scalar
+from pathlib import Path
+p=np.load('scripts/profile.npz');y=p['y'];z=p['z'];N=int(p['N']);pitch=2*np.pi/(10*N)
+
+def top(a,phi):
+ a=np.atleast_1d(a); beta=phi-a/10
+ c=np.cos(a)[:,None];s=np.sin(a)[:,None]
+ yy=y*c-z*s;zz=y*s+z*c
+ yn=np.roll(yy,-1,axis=1);zn=np.roll(zz,-1,axis=1)
+ target=-np.tan(beta)[:,None]
+ with np.errstate(divide='ignore',invalid='ignore'):
+  k=(target-yy)/(yn-yy)
+  heights=np.where((k>=0)&(k<=1),zz+k*(zn-zz),-100)
+ return heights.max(axis=1)*np.cos(beta)
+
+phis=np.linspace(-pitch/2,pitch/2,241);hs=[];aa=[]
+for i,phi in enumerate(phis):
+ a=np.linspace(10*phi-1.25,10*phi+1.25,501);h=top(a,phi)
+ idx=np.where((h[1:-1]>=h[:-2])&(h[1:-1]>=h[2:]))[0]+1
+ best=(-100,0)
+ for j in idx:
+  opt=minimize_scalar(lambda v:-top(v,phi)[0],bounds=(a[j-1],a[j+1]),method='bounded',options={'xatol':1e-12})
+  if -opt.fun>best[0]:best=(-opt.fun,opt.x)
+ hs.append(best[0]);aa.append(best[1])
+ if i%40==0:print('envelope',i,best,flush=True)
+np.savez('scripts/envelope.npz',phi=phis,h=hs,sol=aa)
+print('H range',min(hs),max(hs),flush=True)
+PY
+python scripts/profile.py
+OPENBLAS_NUM_THREADS=1 python scripts/envelope_polygon.py"
+
+---
+
+/bin/bash -lc "python - <<'PY'
+p='scripts/envelope_polygon.py'
+s=open(p).read().replace('beta=phi-a/10','beta=phi+a/10').replace('10*phi-1.25,10*phi+1.25','-10*phi-1.25,-10*phi+1.25')
+open(p,'w').write(s)
+p='scripts/build.py';s=open(p).read();s=s.replace('n=1440; ang=np.arange(n)*2*np.pi/n;q=.1*(1+.3*np.cos(3*ang))',\"profile=np.load('scripts/profile.npz');ang=profile['angles'];q=profile['radii'];n=len(ang)\")
+s=s.replace('range(30)','range(120)').replace('2*np.pi*j/30','2*np.pi*j/120').replace('np.tile(h,30)','np.tile(h,120)')
+s=s.replace('wheel=solid(v,f)','wheel=solid(v,f).mirror((0,0,1)).translate((0,0,-7.8))')
+s=s.replace('cyl(1.32,-3.65,-1.92)','cyl(1.32,-4.6,-1.92)').replace('cyl(1.018,-3.9,-2.499)','cyl(1.018,-4.9,-2.499)')
+s=s.replace(\"'driver_teeth':3\",\"'driver_teeth':12\").replace(\"'driven_teeth':30\",\"'driven_teeth':120\")
+open(p,'w').write(s)
+p='scripts/check.py';s=open(p).read().replace('3600,180','3600,720').replace('-a/10+.36','-a/10+.09').replace('i%18','i%72');open(p,'w').write(s)
+PY
+OPENBLAS_NUM_THREADS=1 python scripts/envelope_polygon.py"
+
+---
+
+/bin/bash -lc 'date -u +%H:%M:%S
+OPENBLAS_NUM_THREADS=1 python scripts/build.py'
+
+---
+
+/bin/bash -lc 'OPENBLAS_NUM_THREADS=1 python scripts/check.py'
+
+---
+
+/bin/bash -lc "cat > scripts/quick_mesh.py <<'PY'
+# Small phase sweep; cone teeth repeat every 30 stem degrees.
+exec(open('scripts/check.py').read().split(\"r={}\\n\")[0])
+for a in np.linspace(0,30,25,endpoint=False):
+ s=stemrot(stem,float(a));print(round(float(a),3),vol(s,arborrot(wheel,-float(a)/10)),vol(s,arborrot(wheel,-float(a)/10+.09)),flush=True)
+PY
+OPENBLAS_NUM_THREADS=1 python scripts/quick_mesh.py"
+
+---
+
+/bin/bash -lc "cat > scripts/diagnose.py <<'PY'
+import numpy as np
+p=np.load('scripts/profile.npz');y=p['y'];z=p['z'];N=int(p['N']);pitch=2*np.pi/(10*N)
+exec(open('scripts/envelope_polygon.py').read().split('phis=np.linspace')[0].split(\"p=np.load('scripts/profile.npz');\")[1].split('y=p')[0] if False else 'pass')
+src=open('scripts/envelope_polygon.py').read();exec(src[src.index('def top('):src.index('phis=np.linspace')])
+d=np.load('scripts/envelope.npz');phi=d['phi'];h=d['h'];actual=top(np.zeros(len(phi)),phi)
+print('a0 predicted difference min',np.min(h-actual))
+for i in np.argsort(h-actual)[:12]:print(i,phi[i],h[i],actual[i],h[i]-actual[i])
+# interpolation convexity error checking midpoint phases
+for a in np.deg2rad([0,5,10,15,20,25]):
+ ph=np.linspace(-pitch/2,pitch/2,2401);act=top(np.full(len(ph),a),ph);interp=np.interp(ph,phi,h)
+ print('phase',a,'diff',min(interp-act))
+PY
+OPENBLAS_NUM_THREADS=1 python scripts/diagnose.py"
+
+---
+
+/bin/bash -lc "cat > scripts/contact_location.py <<'PY'
+exec(open('scripts/check.py').read().split(\"r={}\\n\")[0])
+i=stem"'^wheel
+m=i.to_mesh();t=trimesh.Trimesh(m.vert_properties[:,:3],m.tri_verts,process=True)
+print('"'overlap',t.volume,'bounds',t.bounds.tolist())
+for part in t.split():print(part.volume,part.bounds.tolist(),part.center_mass.tolist())
+PY
+OPENBLAS_NUM_THREADS=1 python scripts/contact_location.py"
+
+---
+
+/bin/bash -lc "python - <<'PY'
+p='scripts/profile.py';s=open(p).read();s=s.replace('keep=np.r_[True,np.diff(th1)>1e-10]\\nth1=th1[keep];rr1=rr1[keep]','')
+open(p,'w').write(s)
+PY
+python scripts/profile.py
+OPENBLAS_NUM_THREADS=1 python scripts/envelope_polygon.py"
+
+---
+
+/bin/bash -lc 'OPENBLAS_NUM_THREADS=1 python scripts/build.py
+OPENBLAS_NUM_THREADS=1 python scripts/quick_mesh.py'
+
+---
+
+/bin/bash -lc "python - <<'PY'
+p='scripts/check.py';s=open(p).read().replace(\"Path('submission/check_results.json')\",\"Path('scripts/check_results.json')\");open(p,'w').write(s)
+p='scripts/build.py';s=open(p).read().replace('# Three-lobed conical pinion. Apex lies at the axis intersection.','# Twelve-tooth involute conical pinion; apex at the axis intersection.').replace('# Conjugate bevel wheel: underside is the envelope of the turning pinion.','# Generate the upper-wheel envelope, then reflect below the stem for opposite rotation.');open(p,'w').write(s)
+PY
+OPENBLAS_NUM_THREADS=1 python scripts/check.py"
+
+---
+
+/bin/bash -lc 'date -u +%H:%M:%S
+ls -l submission/parts'
+
+---
+
+/bin/bash -lc "cat > scripts/README.md <<'MD'
+# Winding works generation and verification
+
+Run from "'`/app`, using the installed Python environment:
+
+1. `python scripts/profile.py` creates the 12-tooth involute pinion section.
+2. `python scripts/envelope_polygon.py` computes the conjugate wheel envelope at a 10:1 ratio.
+3. `python scripts/build.py` exports the three binary STL solids and `submission/winding.json`.
+4. `python scripts/check.py` checks the final files and saves `scripts/check_results.json`.
+
+The wheel envelope is computed above the stem and reflected below it. This gives negative arbor rotation about +z for positive stem rotation about +x. The wheel has 120 repeated teeth. Its integral hub clears the supplied arbor flange and has a 0.602 mm square socket from z=-2.499 to -1.92 mm. The stem has an integral pinion, crown, and thrust collar. A single bridge provides two journal regions and the collar pocket, with two arms ending 0.02 mm below the movement plate.
+
+`quick_mesh.py` checks additional phases within one 30-degree pinion tooth cycle. `diagnose.py` and `contact_location.py` were used to locate numerical/profile errors during development. `envelope.py` is the abandoned initial three-lobed profile experiment; the final generator uses `envelope_polygon.py`.
+MD
+python - <<'"'PY'
+import json,struct,pathlib,trimesh
+j=json.load(open('submission/winding.json'))
+names=[n for m in j['mobiles'].values() for n in m['parts']]+j['fixed']
+assert len(names)==len(set(names))
+for n in names:
+ p=pathlib.Path('submission/parts')/(n+'.stl')
+ with p.open('rb') as f:
+  f.read(80);ntri=struct.unpack('<I',f.read(4))[0]
+ assert p.stat().st_size==84+50*ntri
+ assert 0<ntri<=400000
+ print(n,'binary STL',ntri,'triangles')
+print('Declared stem/arbor speed ratio:',j['meshes'][0]['driven_teeth']/j['meshes'][0]['driver_teeth'])
+print('Arbor sign about +z:',j['meshes'][0]['sense'])
+PY"
+
+---
+
+/bin/bash -lc "cat > scripts/summarize.py <<'PY'
+import json,numpy as np
+from pathlib import Path
+r=json.loads(Path('scripts/check_results.json').read_text())
+mesh=np.array(r['mesh']);maxrest=max(v for d in r['frozen_rest'].values() for v in d.values());maxclear=max(v for rows in r['clear'].values() for row in rows for v in row[1:]);minheld=min(row[1] for rows in r['held'].values() for row in rows)
+seat=r['seated']['filled_volume']/r['seated']['shell_volume']
+assert all(f['watertight'] and f['winding'] and f['shells']==1 and f['volume']>0 and f['triangles']<=400000 for f in r['files'].values())
+assert maxrest<=.002
+assert len(mesh)==720 and mesh[:,1].max()<=.002 and mesh[:,2].min()>=.0002
+assert maxclear<=.002 and minheld>.002
+assert max(r['anchored'].values())>0
+assert seat>=.5 and r['seated']['square_overlap']<=.002
+assert r['seated']['arbor_overlap']<=.002
+for name,b in r['bounds'].items():
+ assert b['zmin']>=-5 and b['zmax']<=11.4
+ if name"'!='"'stem_pinion':assert b['radial_max']<=20.7
+assert r['bounds']['stem_pinion']['radial_max']>=21.2
+print('PASS: file, frozen-rest, drive, clearance, held, seated, anchored, bounds checks')
+print('Mesh samples:',len(mesh))
+print('Max winding overlap:',mesh[:,1].max())
+print('Min backoff overlap:',mesh[:,2].min())
+print('Max frozen-rest overlap:',maxrest)
+print('Max moving/fixed or frozen overlap:',maxclear)
+print('Min displaced-stem overlap:',minheld)
+print('Square-shell fill:',seat)
+print('Square and supplied-arbor overlap:',r['seated']['square_overlap'],r['seated']['arbor_overlap'])
+print('Anchor overlap after +0.05 z:',r['anchored']['[0.0, 0.0, 0.05]'])
+PY"
+
+---
+
+/bin/bash -lc 'mv submission/check_results.json scripts/prior_asymmetric_check_results.json
+cat submission/winding.json'
+
+---
+
+/bin/bash -lc 'python scripts/summarize.py'
+
+---
+
+/bin/bash -lc "python - <<'PY'
+import json
+r=json.load(open('scripts/check_results.json'));print(r['files'])
+PY"
+
+---
+
+/bin/bash -lc "cat > scripts/topology.py <<'PY'
+import trimesh,numpy as np,manifold3d as mf
+p='submission/parts/ratchet_bevel.stl'
+t=trimesh.load(p,process=True)
+e=t.edges_sorted;u,c=np.unique(e,axis=0,return_counts=True);bad=u[c"'!=2];print('"'bad edges',len(bad),'counts',np.unique(c,return_counts=True));print('bad bounds',t.vertices[np.unique(bad)].min(axis=0),t.vertices[np.unique(bad)].max(axis=0));print('bad edges lengths',np.linalg.norm(t.vertices[bad[:,0]]-t.vertices[bad[:,1]],axis=1));print('degenerate',np.sum(~t.nondegenerate_faces(height=1e-10)))
+m=mf.Manifold(mf.Mesh(np.asarray(t.vertices,np.float32),np.asarray(t.faces,np.uint32)));print('manifold status',m.status(),m.num_tri(),m.volume())
+for digs in [8,7,6,5]:
+ tt=trimesh.load(p,process=False);tt.merge_vertices(digits_vertex=digs);tt.update_faces(tt.nondegenerate_faces(height=1e-9));tt.update_faces(tt.unique_faces());tt.remove_unreferenced_vertices();print('digits',digs,'watertight',tt.is_watertight,'faces',len(tt.faces),'volume',tt.volume,'winding',tt.is_winding_consistent)
+PY
+python scripts/topology.py"
+
+---
+
+/bin/bash -lc "python - <<'PY'
+p='scripts/build.py';s=open(p).read();s=s.replace(\"t.export(OUT/(name+'.stl'));print\", \"t.merge_vertices(digits_vertex=6)\\n t.update_faces(t.nondegenerate_faces(height=1e-9))\\n t.update_faces(t.unique_faces())\\n t.remove_unreferenced_vertices()\\n assert t.is_watertight and t.is_winding_consistent and len(t.split())==1\\n t.export(OUT/(name+'.stl'));print\")
+open(p,'w').write(s)
+PY
+cp scripts/check_results.json scripts/pre_cleanup_check_results.json
+OPENBLAS_NUM_THREADS=1 python scripts/build.py
+OPENBLAS_NUM_THREADS=1 python scripts/check.py"
+
+---
+
+/bin/bash -lc "python - <<'PY'
+import trimesh,pathlib
+for p in pathlib.Path('submission/parts').glob('*.stl'):
+ t=trimesh.load(p)
+ print(p.name,'watertight',t.is_watertight,'winding',t.is_winding_consistent,'shells',len(t.split()),'triangles',len(t.faces))
+ assert t.is_watertight and t.is_winding_consistent and len(t.split())==1
+PY"
+
+---
+
+/bin/bash -lc 'python scripts/summarize.py'
+
+---
+
+/bin/bash -lc "cat > REPORT.md <<'MD'
+Submitted "'`submission/winding.json` and three binary STL parts: the integrated stem/pinion/crown, the square-seated bevel ratchet wheel, and the captive stem bridge. The 12:120 drive turns the arbor negatively about +z for positive stem rotation about +x, with ten stem turns per arbor turn.
+
+Local verification passed the brief'"'s file, movement clearance, drive, direction, ratio, retention, seating, anchoring, and bounds requirements. All three STLs reload as watertight, consistently oriented single shells with positive volume; the largest has 205,168 triangles. Across 720 mesh samples, winding overlap was zero and minimum backoff overlap was 0.000981 mm3 (required at least 0.0002). The 36-position clearance checks passed. All six stem displacement tests exceeded 0.002 mm3 overlap; the minimum was 0.080189 mm3. Square-shell fill was 94.23%, with zero overlap into the square or supplied arbor. Bridge anchoring and case/grip bounds passed. Scripts and numerical results are in "'`scripts/`.
+
+Difficulties, in order: the initial three-lobed profile lost contact; placing the wheel below the stem corrected the natural drive direction; a root-profile asymmetry was corrected; the final STL audit exposed degenerate wheel triangles, which were removed before repeating the full verification. No material ambiguity in the brief affected the result.
+
+Outside access: none
+MD
+python - <<'"'PY'
+import pathlib,struct,json
+j=json.load(open('submission/winding.json'))
+names=[n for m in j['mobiles'].values() for n in m['parts']]+j['fixed']
+assert set(names)=={p.stem for p in pathlib.Path('submission/parts').glob('*.stl')}
+for n in names:
+ p=pathlib.Path('submission/parts')/(n+'.stl')
+ with p.open('rb') as f:
+  f.read(80);count=struct.unpack('<I',f.read(4))[0]
+ assert p.stat().st_size==84+50*count and count<=400000
+ print(n,count,'binary triangles')
+print('Final submission manifest and binary file audit passed.')
+PY"

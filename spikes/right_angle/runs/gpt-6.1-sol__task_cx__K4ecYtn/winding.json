@@ -1,0 +1,37 @@
+{
+  "mobiles": {
+    "stem": {
+      "point": [
+        0,
+        0,
+        -3.9
+      ],
+      "direction": [
+        1,
+        0,
+        0
+      ],
+      "parts": [
+        "winding_stem"
+      ]
+    },
+    "arbor": {
+      "parts": [
+        "ratchet"
+      ]
+    }
+  },
+  "fixed": [
+    "outer_bearing",
+    "inner_bearing"
+  ],
+  "meshes": [
+    {
+      "driver": "stem",
+      "driver_teeth": 12,
+      "driven": "arbor",
+      "driven_teeth": 108,
+      "sense": "opposite"
+    }
+  ]
+}
