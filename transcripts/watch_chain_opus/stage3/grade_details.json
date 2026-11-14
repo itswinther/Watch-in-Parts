@@ -1,0 +1,300 @@
+{
+ "reward": 1.0,
+ "p": 1.0,
+ "gates": {
+  "files": true,
+  "locked": true,
+  "plan": true
+ },
+ "checks": {
+  "barrel": true,
+  "bottom_plate": true,
+  "barrel_bridge": true,
+  "t_cock": true,
+  "top_plate": true,
+  "mw_cock": true,
+  "day_bridge": true,
+  "t_arbor": true,
+  "t_pinion": true,
+  "t_wheel": true,
+  "m_arbor": true,
+  "m_pinion": true,
+  "m_wheel": true,
+  "m_collar": true,
+  "cannon_pinion": true,
+  "minute_hand": true,
+  "s1_arbor": true,
+  "s1_pinion": true,
+  "s1_wheel": true,
+  "s_arbor": true,
+  "s_pinion": true,
+  "seconds_hand": true,
+  "mw_arbor": true,
+  "mw_wheel": true,
+  "mw_pinion": true,
+  "h_wheel": true,
+  "h_tube": true,
+  "hour_hand": true,
+  "idler_arbor": true,
+  "idler_wheel": true,
+  "idler_pinion": true,
+  "day_arbor": true,
+  "day_wheel": true,
+  "day_collar": true,
+  "day_hand": true
+ },
+ "details": {
+  "files": {},
+  "locked": {
+   "changed": []
+  },
+  "plan": {},
+  "parts": {
+   "top_plate": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 65
+   },
+   "s1_wheel": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 69
+   },
+   "m_wheel": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 64
+   },
+   "t_cock": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 59
+   },
+   "t_wheel": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 55
+   },
+   "t_pinion": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 49
+   },
+   "t_arbor": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 58
+   },
+   "seconds_hand": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 44
+   },
+   "s_pinion": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 69
+   },
+   "s_arbor": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 97
+   },
+   "s1_pinion": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 64
+   },
+   "s1_arbor": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 72
+   },
+   "mw_wheel": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 59
+   },
+   "mw_pinion": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 54
+   },
+   "mw_arbor": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 61
+   },
+   "cannon_pinion": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 59
+   },
+   "h_wheel": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 54
+   },
+   "mw_cock": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 49
+   },
+   "hour_hand": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 41
+   },
+   "h_tube": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 54
+   },
+   "minute_hand": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 39
+   },
+   "m_pinion": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 55
+   },
+   "m_collar": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 69
+   },
+   "m_arbor": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 97
+   },
+   "day_wheel": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 59
+   },
+   "idler_wheel": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 54
+   },
+   "idler_pinion": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 59
+   },
+   "idler_arbor": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 59
+   },
+   "day_collar": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 52
+   },
+   "day_bridge": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 59
+   },
+   "day_hand": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 37
+   },
+   "day_arbor": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 59
+   },
+   "barrel_bridge": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 55
+   },
+   "barrel": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 53
+   },
+   "bottom_plate": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 43
+   }
+  }
+ }
+}

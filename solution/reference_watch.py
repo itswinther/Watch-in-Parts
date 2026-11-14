@@ -72,9 +72,10 @@ def gear_at(axis, teeth, module, z, toward, partner=None):
     return G.gear(teeth, module, z[0], z[1], phase_deg=phase).translate([axis[0], axis[1], 0]), phase
 
 
-def arbor(axis, z0, z1, r=0.5, pivot=0.3, plen=0.7):
+def arbor(axis, z0, z1, r=0.5, pivot=0.3, plen=0.7, top=None):
     x, y = axis
-    return union([W.cyl(x, y, z0, z1, r), W.cyl(x, y, z0 - plen, z0 + 0.01, pivot), W.cyl(x, y, z1 - 0.01, z1 + plen, pivot)])
+    top = plen if top is None else top
+    return union([W.cyl(x, y, z0, z1, r), W.cyl(x, y, z0 - plen, z0 + 0.01, pivot), W.cyl(x, y, z1 - 0.01, z1 + top, pivot)])
 
 
 def hand(axis, z0, z1, length, hub_r, hole_r):
@@ -95,10 +96,10 @@ def frame(P, with_day):
     ph = [W.cyl(0, 0, -1.1, PLATE[1] + 1, 0.6)] + [W.cyl(a[0], a[1], lo - 0.8, PLATE[1] + 1, 0.4) for a in (I, T, C, S)]
     bh = [W.cyl(a[0], a[1], BRIDGE[0] - 1, hi + 0.8, 0.4) for a in (I, T)] + [W.cyl(a[0], a[1], BRIDGE[0] - 1, BRIDGE[1] + 1, 0.6) for a in (C, S)]
     bh += [W.cyl(Mw[0], Mw[1], BRIDGE[1] - 0.7, BRIDGE[1] + 1, 0.4)]
-    dh = [W.cyl(Mw[0], Mw[1], DIAL[0] - 1, DIAL[0] + 0.7, 0.4), W.cyl(cx, cy, DIAL[0] - 1, DIAL[1] + 1, 1.15), W.cyl(S[0], S[1], DIAL[0] - 1, DIAL[1] + 1, 0.6)]
+    dh = [W.cyl(Mw[0], Mw[1], DIAL[0] - 1, DIAL[0] + 0.45, 0.4), W.cyl(cx, cy, DIAL[0] - 1, DIAL[1] + 1, 1.15), W.cyl(S[0], S[1], DIAL[0] - 1, DIAL[1] + 1, 0.6)]
     if with_day:
         bh += [W.cyl(a[0], a[1], BRIDGE[1] - 0.7, BRIDGE[1] + 1, 0.4) for a in (Id, D)]
-        dh += [W.cyl(Id[0], Id[1], DIAL[0] - 1, DIAL[0] + 0.7, 0.4), W.cyl(D[0], D[1], DIAL[0] - 1, DIAL[1] + 1, 0.6)]
+        dh += [W.cyl(Id[0], Id[1], DIAL[0] - 1, DIAL[0] + 0.45, 0.4), W.cyl(D[0], D[1], DIAL[0] - 1, DIAL[1] + 1, 0.6)]
     return {"main_plate": plate - union(ph), "bridge": bridge - union(bh), "dial": dial - union(dh),
             "barrel_cock": W.cyl(0, 0, 1.15, 2.45, 3.0) - W.cyl(0, 0, 1.0, 1.7, 0.6)}
 
@@ -124,7 +125,7 @@ def build_stage1():
     parts["seconds"] = union([W.cyl(sx, sy, lo, hi, 0.8), W.cyl(sx, sy, lo - 0.7, lo + 0.01, 0.3), W.cyl(sx, sy, hi - 0.01, 10.3, 0.5), p4])
     w5, _ = gear_at(Mw, 36, M_E, Z["E"], ang(Mw, C), (12, ph_can))
     p5, ph_p5 = gear_at(Mw, 12, M_F, Z["F"], ang(Mw, C))
-    parts["minute_wheel"] = union([arbor(Mw, BRIDGE[1] + 0.1, DIAL[0] - 0.1), w5, p5])
+    parts["minute_wheel"] = union([arbor(Mw, BRIDGE[1] + 0.1, DIAL[0] - 0.1, top=0.4), w5, p5])
     w6, phase["hour"] = gear_at(C, 48, M_F, Z["F"], ang(C, Mw), (12, ph_p5))
     parts["hour_wheel"] = union([W.cyl(cx, cy, 7.4, 10.3, 1.0), W.cyl(cx, cy, 8.4, 8.65, 1.6), w6]) - W.cyl(cx, cy, 7.0, 10.6, 0.7)
     parts["hour_hand"] = hand(C, 9.9, 10.2, 6.0, 1.3, 0.85)
@@ -164,7 +165,7 @@ def build_stage2(doc, parts, P, phase):
     C, Id, D = P["centre"], P["day_idler"], P["day"]
     ga, _ = gear_at(Id, 24, M_F, Z["F"], ang(Id, C), (48, phase["hour"]))
     gb, ph_gb = gear_at(Id, 12, M_DAY, Z["E"], ang(Id, D))
-    parts["day_idler"] = union([arbor(Id, BRIDGE[1] + 0.1, DIAL[0] - 0.1), ga, gb])
+    parts["day_idler"] = union([arbor(Id, BRIDGE[1] + 0.1, DIAL[0] - 0.1, top=0.4), ga, gb])
     dw, _ = gear_at(D, 48, M_DAY, Z["E"], ang(D, Id), (12, ph_gb))
     dx, dy = D
     z0, z1 = BRIDGE[1] + 0.1, DIAL[0] - 0.1

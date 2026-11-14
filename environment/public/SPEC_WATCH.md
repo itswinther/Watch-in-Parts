@@ -93,7 +93,7 @@ If either fails the score is 0.
 
 ## Scored requirements
 
-Each passes or fails. Weights in brackets; the total is 16.
+Each passes or fails. Weights in brackets; the total is 17.
 
 - **Free to turn [1].** Each mobile, turned through a full turn in 72 steps of 5
   degrees, never intersects the fixed parts by more than 0.01 mm3.
@@ -127,11 +127,21 @@ Each passes or fails. Weights in brackets; the total is 16.
 - **Size [1].** Everything, as it turns, stays within 23.0 of the vertical line
   through `case_centre`, and the whole movement including the barrel is at most
   16.0 tall in z.
+- **Printable [1].** The smallest printable feature is 0.2. Each of your parts
+  (not the barrel) is tested like this: it is turned into voxels on a 0.05 grid,
+  a voxel being solid when its centre is inside the part. A solid voxel survives
+  if its centre is at least 0.075 (1.5 voxels) from the centre of the nearest
+  voxel that is not solid. The printable body is every solid voxel whose centre
+  is within 0.05 of a surviving voxel's centre. The part passes if something
+  survives and no solid voxel's centre is further than 0.2 from the printable
+  body. Ordinary gear teeth of module 0.12 or more pass; a wall, web or roof 0.2
+  thick or less does not. How the grid lines up with your part is not fixed, so
+  leave a little margin.
 
 ## Score
 
 ```
-p     = (weight of scored requirements passed) / 16
+p     = (weight of scored requirements passed) / 17
 score = 0 if a hard requirement fails, otherwise
 score = 0.5 * p^2 + 0.5 * (1 if every scored requirement passes, else 0)
 ```
@@ -154,14 +164,14 @@ You may add mobiles, add parts, add meshes, and replace or add fixed parts.
 
 Hard requirements: the two of stage 1, plus the frozen items above.
 
-Scored requirements (total weight 20): all ten of stage 1, still passing with
+Scored requirements (total weight 21): all eleven of stage 1, still passing with
 their weights, plus
 
 - **24-hour hand [3].** It moves as a 24-hour hand does.
 - **24-hour hand placement [1].** Its axis is at least 6.0 from the hour hand's
   axis, and the hand part reaches at least 3.0 from its own axis.
 
-Score: the stage-1 formula with p out of 20.
+Score: the stage-1 formula with p out of 21.
 
 ## Stage 3: assemble it
 

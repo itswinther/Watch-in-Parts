@@ -1,0 +1,220 @@
+{
+ "reward": 1.0,
+ "p": 1.0,
+ "gates": {
+  "files": true,
+  "locked": true,
+  "plan": true
+ },
+ "checks": {
+  "barrel": true,
+  "main_plate": true,
+  "top_plate": true,
+  "day_bridge": true,
+  "inter_arbor": true,
+  "inter_pinion": true,
+  "inter_wheel": true,
+  "centre_wheel": true,
+  "cannon_pinion": true,
+  "minute_hand": true,
+  "third_arbor": true,
+  "third_wheel": true,
+  "third_pinion": true,
+  "seconds_arbor": true,
+  "seconds_hand": true,
+  "mw_arbor": true,
+  "mw_wheel": true,
+  "hour_wheel": true,
+  "hour_hand": true,
+  "idler_arbor": true,
+  "idler_wheel": true,
+  "idler_pinion": true,
+  "day_arbor": true,
+  "day_wheel": true,
+  "day_hand": true
+ },
+ "details": {
+  "files": {},
+  "locked": {
+   "changed": []
+  },
+  "plan": {},
+  "parts": {
+   "top_plate": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 80
+   },
+   "mw_arbor": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 77
+   },
+   "centre_wheel": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 88
+   },
+   "third_wheel": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 39
+   },
+   "third_pinion": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 56
+   },
+   "third_arbor": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 62
+   },
+   "mw_wheel": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 56
+   },
+   "cannon_pinion": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 56
+   },
+   "hour_wheel": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 49
+   },
+   "hour_hand": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 38
+   },
+   "minute_hand": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 35
+   },
+   "seconds_hand": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 31
+   },
+   "seconds_arbor": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 91
+   },
+   "inter_wheel": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 47
+   },
+   "inter_pinion": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 39
+   },
+   "inter_arbor": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 62
+   },
+   "barrel": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 42
+   },
+   "main_plate": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 59
+   },
+   "day_wheel": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 56
+   },
+   "idler_wheel": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 49
+   },
+   "idler_pinion": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 56
+   },
+   "idler_arbor": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 56
+   },
+   "day_arbor": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 56
+   },
+   "day_bridge": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 56
+   },
+   "day_hand": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 37
+   }
+  }
+ }
+}

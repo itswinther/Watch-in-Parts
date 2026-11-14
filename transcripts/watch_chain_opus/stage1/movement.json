@@ -1,0 +1,136 @@
+{
+ "case_centre": [
+  3.0,
+  6.0
+ ],
+ "fixed": [
+  "bottom_plate",
+  "barrel_bridge",
+  "t_cock",
+  "top_plate",
+  "mw_cock"
+ ],
+ "mobiles": {
+  "T": {
+   "axis": [
+    10.8,
+    0.0
+   ],
+   "parts": [
+    "t_arbor",
+    "t_pinion",
+    "t_wheel"
+   ]
+  },
+  "minute": {
+   "axis": [
+    9.247085729384876,
+    5.79555495773441
+   ],
+   "parts": [
+    "m_arbor",
+    "m_pinion",
+    "m_wheel",
+    "m_collar",
+    "cannon_pinion",
+    "minute_hand"
+   ]
+  },
+  "S1": {
+   "axis": [
+    0.9738057436999146,
+    12.737661142349037
+   ],
+   "parts": [
+    "s1_arbor",
+    "s1_pinion",
+    "s1_wheel"
+   ]
+  },
+  "seconds": {
+   "axis": [
+    -7.859653374901358,
+    7.637661142349036
+   ],
+   "parts": [
+    "s_arbor",
+    "s_pinion",
+    "seconds_hand"
+   ]
+  },
+  "MW": {
+   "axis": [
+    13.489726416504162,
+    10.038195644853694
+   ],
+   "parts": [
+    "mw_arbor",
+    "mw_wheel",
+    "mw_pinion"
+   ]
+  },
+  "hour": {
+   "axis": [
+    9.247085729384876,
+    5.79555495773441
+   ],
+   "parts": [
+    "h_wheel",
+    "h_tube",
+    "hour_hand"
+   ]
+  }
+ },
+ "meshes": [
+  {
+   "driver": "barrel",
+   "driver_teeth": 96,
+   "driven": "T",
+   "driven_teeth": 12
+  },
+  {
+   "driver": "T",
+   "driver_teeth": 30,
+   "driven": "minute",
+   "driven_teeth": 30
+  },
+  {
+   "driver": "minute",
+   "driver_teeth": 96,
+   "driven": "S1",
+   "driven_teeth": 12
+  },
+  {
+   "driver": "S1",
+   "driver_teeth": 90,
+   "driven": "seconds",
+   "driven_teeth": 12
+  },
+  {
+   "driver": "minute",
+   "driver_teeth": 15,
+   "driven": "MW",
+   "driven_teeth": 45
+  },
+  {
+   "driver": "MW",
+   "driver_teeth": 12,
+   "driven": "hour",
+   "driven_teeth": 48
+  }
+ ],
+ "hands": {
+  "hour": {
+   "mobile": "hour",
+   "part": "hour_hand"
+  },
+  "minute": {
+   "mobile": "minute",
+   "part": "minute_hand"
+  },
+  "seconds": {
+   "mobile": "seconds",
+   "part": "seconds_hand"
+  }
+ }
+}

@@ -1,0 +1,203 @@
+{
+ "reward": 1.0,
+ "p": 1.0,
+ "gates": {
+  "files": true,
+  "assembled": true
+ },
+ "checks": {
+  "spin": true,
+  "held": true,
+  "train": true,
+  "clear": true,
+  "minute": true,
+  "hour": true,
+  "seconds": true,
+  "coaxial": true,
+  "hands": true,
+  "size": true
+ },
+ "details": {
+  "files": {},
+  "assembled": {
+   "worst_volume": 0.0,
+   "pair": null,
+   "fixed_parts_worst": 0.0,
+   "fixed_pair": null
+  },
+  "spin": {
+   "barrel": {
+    "worst_volume": 0.0,
+    "step": 0,
+    "steps": 72
+   },
+   "intermediate": {
+    "worst_volume": 0.0,
+    "step": 0,
+    "steps": 72
+   },
+   "centre": {
+    "worst_volume": 0.0,
+    "step": 0,
+    "steps": 72
+   },
+   "third": {
+    "worst_volume": 0.0,
+    "step": 0,
+    "steps": 72
+   },
+   "seconds": {
+    "worst_volume": 0.0,
+    "step": 0,
+    "steps": 72
+   },
+   "minute_wheel": {
+    "worst_volume": 0.0,
+    "step": 0,
+    "steps": 72
+   },
+   "hour": {
+    "worst_volume": 0.0,
+    "step": 0,
+    "steps": 72
+   }
+  },
+  "held": {
+   "barrel": {
+    "+x": 0.505336983976443,
+    "-x": 0.505336983976443,
+    "+y": 0.6331531552541564,
+    "-y": 0.32492473604070227,
+    "+z": 2.319477287770875,
+    "-z": 57.338450801866614
+   },
+   "intermediate": {
+    "+x": 0.7174439892693762,
+    "-x": 0.34385552449502566,
+    "+y": 0.28284023371567707,
+    "-y": 0.9090877281778399,
+    "+z": 0.20701183586234484,
+    "-z": 3.438634660620563
+   },
+   "centre": {
+    "+x": 2.7784428181924423,
+    "-x": 2.998935788527175,
+    "+y": 3.155394961447732,
+    "-y": 2.632716346897576,
+    "+z": 2.140589372597593,
+    "-z": 2.5714183334534755
+   },
+   "third": {
+    "+x": 0.16322429936517968,
+    "-x": 0.6274837475948892,
+    "+y": 0.4067337491357876,
+    "-y": 0.31916703837021737,
+    "+z": 0.20701170443058958,
+    "-z": 20.565302811040144
+   },
+   "seconds": {
+    "+x": 1.5150891879343618,
+    "-x": 1.2806906823822848,
+    "+y": 1.364768703274733,
+    "-y": 1.4078019813162397,
+    "+z": 0.3201790127013762,
+    "-z": 0.9323071340891278
+   },
+   "minute_wheel": {
+    "+x": 0.5903724936554534,
+    "-x": 0.43619880521091847,
+    "+y": 0.16785706085420013,
+    "-y": 0.6879839415209955,
+    "+z": 0.5002785615513972,
+    "-z": 12.446136748697269
+   },
+   "hour": {
+    "+x": 0.9886406429242536,
+    "-x": 1.0660483115294115,
+    "+y": 1.1428931592419491,
+    "-y": 0.8719593074208353,
+    "+z": 1.378316969089795,
+    "-z": 0.8729244320932793
+   }
+  },
+  "train": {
+   "conflicts": [],
+   "meshes": [
+    {
+     "worst_volume": 0.0,
+     "step": 0,
+     "steps": 768,
+     "largest_gap": 0.02052749339634843,
+     "smallest_drive_overlap": 0.0937500855075183,
+     "pair": "barrel/intermediate"
+    },
+    {
+     "worst_volume": 0.0,
+     "step": 0,
+     "steps": 320,
+     "largest_gap": 0.013956294665292815,
+     "smallest_drive_overlap": 0.2721529097788024,
+     "pair": "intermediate/centre"
+    },
+    {
+     "worst_volume": 0.0,
+     "step": 0,
+     "steps": 768,
+     "largest_gap": 0.013669998981911978,
+     "smallest_drive_overlap": 0.05253629316933808,
+     "pair": "centre/third"
+    },
+    {
+     "worst_volume": 0.0,
+     "step": 0,
+     "steps": 720,
+     "largest_gap": 0.013844208990103685,
+     "smallest_drive_overlap": 0.058973503757387045,
+     "pair": "third/seconds"
+    },
+    {
+     "worst_volume": 0.0,
+     "step": 0,
+     "steps": 288,
+     "largest_gap": 0.013959585970242284,
+     "smallest_drive_overlap": 0.11058109393701318,
+     "pair": "centre/minute_wheel"
+    },
+    {
+     "worst_volume": 0.0,
+     "step": 0,
+     "steps": 384,
+     "largest_gap": 0.0138836171104567,
+     "smallest_drive_overlap": 0.07943097432388661,
+     "pair": "minute_wheel/hour"
+    }
+   ]
+  },
+  "clear": {
+   "worst_volume": 0.0,
+   "pair": null
+  },
+  "minute": {
+   "clockwise_turns_per_hour": "1"
+  },
+  "hour": {
+   "clockwise_turns_per_hour": "1/12"
+  },
+  "seconds": {
+   "clockwise_turns_per_hour": "60"
+  },
+  "coaxial": {
+   "distance": 0.0
+  },
+  "hands": {
+   "hour": 5.813776953770775,
+   "minute": 8.003905304681432,
+   "seconds": 9.001249918532258
+  },
+  "size": {
+   "radius": 21.000001189106232,
+   "z_min": -1.0,
+   "z_max": 11.0
+  }
+ }
+}

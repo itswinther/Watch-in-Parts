@@ -22,7 +22,7 @@ HAND_SPEED = {"hour": Fraction(1, 12), "minute": Fraction(1), "seconds": Fractio
 DAY_SPEED = Fraction(1, 24)
 WEIGHTS_2 = {"day_hand": 3, "day_place": 1}
 WEIGHTS = {"spin": 1, "held": 2, "train": 3, "clear": 1, "minute": 2, "hour": 2, "seconds": 2,
-           "coaxial": 1, "hands": 1, "size": 1}
+           "coaxial": 1, "hands": 1, "size": 1, "printable": 1}
 GATES = ("files", "assembled")
 TIMEOUT_S = 600
 
@@ -53,6 +53,8 @@ def grade_design(folder, stage=1, prev=None):
     from geometry import watch as W
     from geometry.core import ivol
     weights = dict(WEIGHTS, **(WEIGHTS_2 if stage == 2 else {}))
+    for k in os.environ.get("WATCH_SKIP", "").split(","):      # only for grading runs made before a check existed
+        weights.pop(k, None)
     gates = {g: False for g in GATES + (("locked",) if stage == 2 else ())}
     checks = {k: False for k in weights}
     details = {}
@@ -151,15 +153,15 @@ def grade_design(folder, stage=1, prev=None):
         d, reach = math.hypot(a[0] - b[0], a[1] - b[1]), m.hand_reach("day")
         return d >= W.DAY_HAND_OFFSET and reach >= W.DAY_HAND_REACH, {"axis_distance": d, "reach": reach}
 
-    table = {"day_hand": day_hand, "day_place": day_place, "spin": spin, "held": held, "train": train, "clear": clear, "minute": hand("minute"), "hour": hand("hour"),
+    def printable():
+        r = {n: W.thin(solid) for n, (solid, _) in m.all_parts().items() if n != "barrel"}
+        info = {n: {"pieces": v[0], "max_deviation": v[1]} for n, v in r.items()}
+        return all(v[0] >= 1 and v[1] <= W.THIN_DEV for v in r.values()), info
+
+    table = {"printable": printable, "day_hand": day_hand, "day_place": day_place, "spin": spin, "held": held, "train": train, "clear": clear, "minute": hand("minute"), "hour": hand("hour"),
              "seconds": hand("seconds"), "coaxial": coaxial, "hands": hands, "size": size}
     for k in weights:
         checks[k], details[k] = _run(table[k])
-    if os.environ.get("WATCH_THIN"):          # information only, not scored yet: the minimum-thickness measurement
-        def thin_info():
-            r = {n: W.thin(solid) for n, (solid, _) in m.all_parts().items()}
-            return True, {n: {"pieces": v[0], "max_deviation": v[1], "ok": v[0] >= 1 and v[1] <= W.THIN_DEV} for n, v in r.items()}
-        _, details["printable_info"] = _run(thin_info)
     return result()
 
 

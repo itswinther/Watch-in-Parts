@@ -1,0 +1,148 @@
+{
+ "reward": 0.439453125,
+ "p": 0.9375,
+ "gates": {
+  "files": true,
+  "locked": true,
+  "plan": true
+ },
+ "checks": {
+  "barrel": true,
+  "main_plate": false,
+  "barrel_cock": true,
+  "A_body": true,
+  "B_body": true,
+  "C_body": true,
+  "T_body": true,
+  "T_top": true,
+  "S_body": true,
+  "hand_sec": true,
+  "M_body": true,
+  "hand_min": true,
+  "H_body": true,
+  "hand_hour": true,
+  "D_body": true,
+  "hand_day": true
+ },
+ "details": {
+  "files": {},
+  "locked": {
+   "changed": []
+  },
+  "plan": {},
+  "parts": {
+   "barrel": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 86
+   },
+   "A_body": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 87
+   },
+   "B_body": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 87
+   },
+   "C_body": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 87
+   },
+   "S_body": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 87
+   },
+   "M_body": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 87
+   },
+   "T_body": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 87
+   },
+   "H_body": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 54
+   },
+   "hand_hour": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 37
+   },
+   "D_body": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 183
+   },
+   "T_top": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 50
+   },
+   "barrel_cock": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 72
+   },
+   "hand_sec": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 41
+   },
+   "hand_min": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 34
+   },
+   "hand_day": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 46
+   },
+   "main_plate": {
+    "format_messages": [],
+    "worst_volume": 171.9079824180037,
+    "pose_index": 101,
+    "hit": "barrel",
+    "poses": 107
+   }
+  }
+ }
+}

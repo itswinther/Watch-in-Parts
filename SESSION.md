@@ -9,7 +9,7 @@ table. Everything below "Session entries" is append-only, newest at the bottom.
 | ID | Workstream | Owner | Status | Last update |
 | --- | --- | --- | --- | --- |
 | A | Harness wiring | Mikael | Harbor + Codex (GPT-6.1-sol) running sandboxed on Mikael's Mac; network locked to the model only, separate verifier. Five-step watch task: no gap (3x 1.0). Regulation task with hidden physics in a sealed sidecar: runs in progress. See 05:10 entry | 2026-11-14 05:10 |
-| B | Reference script and grader | itswinther | Single-stage watch: Fable, Opus and Sonnet all 1.0. Built a three-stage watch task (design, add a 24-hour hand to a frozen design, assemble) with the test code withheld; three clean chains running since 04:12 | 2026-11-14 04:13 |
+| B | Reference script and grader | itswinther | Staged watch chains done: Fable 1.0/1.0/1.0, Opus 1.0/1.0/1.0, Sonnet 1.0/1.0/0.44 (its own stage-1 design cannot be assembled). Thickness check now scored. Docker and Harbor 0.26.0 work in this cloud session; preparing real sandboxed runs | 2026-11-14 04:34 |
 | C | Hold the Line spike | unassigned | not started | |
 | D | Mentor questions, anchors, transcripts | unassigned | not started | |
 | E | Analysis, demo and story | Yoseph | paused: Yoseph is not working overnight | 2026-11-14 01:40 |
@@ -74,6 +74,7 @@ Append one line per decision: time, decision, who agreed.
 - 2026-11-14 03:51 Choices B made while building the watch task, different from or beyond the write-up, open to a human no: (1) all arbors are parallel to z and this is stated; (2) the size limit is stated (radius 23, height 16), not hidden, because a hidden number we chose would be withheld information; (3) only the hour and minute hands must share an axis, since real watches often have a small seconds hand elsewhere; (4) the hand speeds, clockwise direction and that shared axis are the only unstated requirements; (5) the barrel is 96 teeth, module 0.2, 25 degree pressure angle, all stated; (6) the agent is not given a gear maker; (7) "held" accepts another mobile as the thing that holds a mobile, because an hour wheel rides on the centre arbor in real watches; (8) there is no minimum-feature (printability) check yet.
 - 2026-11-14 04:13 Watch task, two changes agreed by itswinther: (1) three stages with frozen hand-over, each stage a fresh agent conversation: design; add a 24-hour hand to a frozen design; give an assembly order and paths for the frozen result. (2) For these runs the agent gets the full written contract, the raw geometry kernel and a format-only submit, but no test code and no measuring tools. This reverses the earlier "tools measure everything" principle on purpose; every graded number is still stated in the spec, except what a watch hand does.
 - 2026-11-14 04:13 Interface for A (staged watch): `python -I tests/grade_watch.py /abs/folder --stage N [--prev /abs/previous_stage_folder] --reward FILE`. Stage 3 adds `assembly.json` to the folder. `python environment/make_bundle_watch.py DIR --stage N [--prev FOLDER] --tools no` writes what the agent may see. `environment/run_clean_chain.sh RUN_DIR MODEL` runs the three stages headless; `python tests/grade_chain.py RUN_DIR` grades them.
+- 2026-11-14 04:34 Watch task: the minimum-thickness check is now a scored requirement ("printable", weight 1; stage 1 total 17, stage 2 total 21). Decided: itswinther. Runs made before this are graded with `WATCH_SKIP=printable`.
 
 ## Proposed spec changes
 
@@ -416,3 +417,22 @@ Template:
 - Not verified, or assumed: one seed per task; GPT-6.1-sol only in Harbor; the planted watch reference is not optimal (GPT beat it on layers).
 - Files changed: `spikes/gear_task/` (movement.py, build_task.py, harbor_task_s8, runs_gpt), `spikes/regulate/` (timing.py, server.py, timer.py, BRIEF.md, build_task.py, harbor_task_s4242), `spikes/IDEAS_CODE_IS_NOT_ENOUGH.md`, `spikes/README.md`, SESSION.md (row A, this entry).
 - Next: regulation results, then whichever idea shows a gap gets more seeds.
+
+### 2026-11-14 04:34 | B staged watch chains, test code withheld: results | itswinther + Claude
+- Did: ran `environment/run_clean_chain.sh` for three models (one fresh headless conversation per stage, bundle built with `--tools no`), graded with `WATCH_SKIP=printable python3 tests/grade_chain.py RUN_DIR` because these agents' spec had no thickness rule. Also acted on a five-point review from itswinther (see below).
+
+  | Model | Stage 1 design | Stage 2 add 24-hour hand | Stage 3 assemble | Chain mean |
+  | --- | --- | --- | --- | --- |
+  | Fable 5.2 | 1.0 (5.9 min, 5 calls) | 1.0 (4.8 min, 8 calls) | 1.0 (1.4 min, 6 calls) | 1.00 |
+  | Opus 5.5 | 1.0 (10.3 min, 10 calls) | 1.0 (4.0 min, 9 calls) | 1.0 (1.6 min, 9 calls) | 1.00 |
+  | Sonnet 5.5 | 1.0 (7.0 min, 8 calls) | 1.0 (3.9 min, 11 calls) | 0.44 (1.7 min, 10 calls) | 0.81 |
+
+  No stage was killed by the 39-minute limit. No tool call left its folder (the grader flagged one Opus call; it was the string `../../meshes/barrel` in dead code inside its own script).
+- The one failure, and it is inherited: Sonnet's stage-1 design gave every mobile a foot of radius 1.0 below the main plate on a 0.5 shaft through a 0.6 hole, with the wheel above the plate. That satisfied "held" at stage 1, where assembly was not tested, but no rigid path can put the one-piece plate on. The stage-3 agent diagnosed this correctly, installed 15 of 16 parts and left the plate out: `main_plate` hits `barrel` by 171.9 mm3. The stage-1 instruction and spec did say the movement would be assembled part by part later.
+- Findings: (1) withholding the test code did not lower any stage-1 or stage-2 score; Sonnet was faster without the tools (7 min) than with them (17 min). (2) Freezing earlier work produced the first real shortfall of the night against any model: a stage-1 choice that passes its own checks but breaks a later stage. It happened for one model in one chain, so it is one data point.
+- Review points handled: anchors rewritten for three stages, `python3 tests/test_anchors_watch.py` gave 17 of 17 as expected with the grader as it was before the thickness check; the foreground rule and the 39-minute stop are now in the three instruction files; `tests/grade_chain.py` prints "KILLED BY THE TIME LIMIT" and splits stage-2 failures into inherited and new; thickness check added (`geometry/watch.py` `thin`, 0.05 grid, ball radius 0.1, deviation limit 0.2) and scored.
+- Sandbox: `dockerd` starts in this cloud session, `docker pull python:3.13-slim` worked, `uv tool install harbor` gave 0.26.0. Containers cannot reach the network proxy without extra settings (host network, the proxy CA), and there is no model API key in this environment.
+- Not verified, or assumed: the reference and the anchors have not been rerun since the thickness check became scored (a run was in progress when this was written); nothing has run in Harbor yet; one chain per model only.
+- Files changed: `tests/grade_watch.py`, `tests/grade_chain.py`, `tests/test_anchors_watch.py`, `geometry/watch.py`, `solution/reference_watch.py`, `environment/public/SPEC_WATCH.md`, the three instruction files, `transcripts/watch_chain_*`, SESSION.md.
+- Need from others: A, do you already have a Harbor task skeleton that runs (`oracle`, `nop`)? If so push it; I can run Harbor here too. A model API key is needed for sandboxed agent runs.
+- Next: confirm the reference at 1.0 with the thickness check, rerun the anchors, package the stages as Harbor tasks.

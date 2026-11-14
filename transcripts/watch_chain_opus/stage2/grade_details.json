@@ -1,0 +1,258 @@
+{
+ "reward": 1.0,
+ "p": 1.0,
+ "gates": {
+  "files": true,
+  "assembled": true,
+  "locked": true
+ },
+ "checks": {
+  "spin": true,
+  "held": true,
+  "train": true,
+  "clear": true,
+  "minute": true,
+  "hour": true,
+  "seconds": true,
+  "coaxial": true,
+  "hands": true,
+  "size": true,
+  "day_hand": true,
+  "day_place": true
+ },
+ "details": {
+  "files": {},
+  "assembled": {
+   "worst_volume": 0.0,
+   "pair": null,
+   "fixed_parts_worst": 0.0,
+   "fixed_pair": null
+  },
+  "locked": {
+   "changed": []
+  },
+  "spin": {
+   "barrel": {
+    "worst_volume": 0.0,
+    "step": 0,
+    "steps": 72
+   },
+   "T": {
+    "worst_volume": 0.0,
+    "step": 0,
+    "steps": 72
+   },
+   "minute": {
+    "worst_volume": 0.0,
+    "step": 0,
+    "steps": 72
+   },
+   "S1": {
+    "worst_volume": 0.0,
+    "step": 0,
+    "steps": 72
+   },
+   "seconds": {
+    "worst_volume": 0.0,
+    "step": 0,
+    "steps": 72
+   },
+   "MW": {
+    "worst_volume": 0.0,
+    "step": 0,
+    "steps": 72
+   },
+   "hour": {
+    "worst_volume": 0.0,
+    "step": 0,
+    "steps": 72
+   },
+   "idler": {
+    "worst_volume": 0.0,
+    "step": 0,
+    "steps": 72
+   },
+   "day": {
+    "worst_volume": 0.0,
+    "step": 0,
+    "steps": 72
+   }
+  },
+  "held": {
+   "barrel": {
+    "+x": 0.5450916802703613,
+    "-x": 0.32492473604070227,
+    "+y": 0.4445080987659327,
+    "-y": 0.4445080987659327,
+    "+z": 26.50266553758111,
+    "-z": 57.495082210876944
+   },
+   "T": {
+    "+x": 0.40259725915655437,
+    "-x": 0.7147755959306928,
+    "+y": 0.6480069716787309,
+    "-y": 0.44525802331135655,
+    "+z": 1.3000998821984602,
+    "-z": 0.8054671885671663
+   },
+   "minute": {
+    "+x": 1.4282165886966214,
+    "-x": 1.3322260484082311,
+    "+y": 1.4399001564381404,
+    "-y": 1.275734955744198,
+    "+z": 1.581983541259583,
+    "-z": 3.3448393109135206
+   },
+   "S1": {
+    "+x": 0.4786424040018959,
+    "-x": 0.4759958395791551,
+    "+y": 0.32466949813318574,
+    "-y": 0.6508354234621468,
+    "+z": 50.5070488420017,
+    "-z": 0.15682742743907502
+   },
+   "seconds": {
+    "+x": 0.6332772274999907,
+    "-x": 0.4419870423371107,
+    "+y": 0.6236171377481056,
+    "-y": 0.47076677039074627,
+    "+z": 0.6486401434924853,
+    "-z": 0.15682742306811503
+   },
+   "MW": {
+    "+x": 0.15647440651817987,
+    "-x": 0.5243751040979828,
+    "+y": 0.15690919875041817,
+    "-y": 0.5204924026672637,
+    "+z": 0.8054676607469696,
+    "-z": 12.504258163240163
+   },
+   "hour": {
+    "+x": 0.8234675074251014,
+    "-x": 0.8403134462477069,
+    "+y": 0.7827088163471438,
+    "-y": 0.8602749173497943,
+    "+z": 0.7908903444700537,
+    "-z": 1.1444348587932391
+   },
+   "idler": {
+    "+x": 0.5059985191034017,
+    "-x": 0.3191680576257096,
+    "+y": 0.4336502834943758,
+    "-y": 0.33704088194140164,
+    "+z": 1.3382849148069236,
+    "-z": 0.8771218832665194
+   },
+   "day": {
+    "+x": 0.27840915053938087,
+    "-x": 0.3111506145199701,
+    "+y": 0.33704089233960033,
+    "-y": 0.1860996890786787,
+    "+z": 0.4375486838561125,
+    "-z": 14.317066742291443
+   }
+  },
+  "train": {
+   "conflicts": [],
+   "meshes": [
+    {
+     "worst_volume": 0.0,
+     "step": 0,
+     "steps": 768,
+     "largest_gap": 0.027315039242870966,
+     "smallest_drive_overlap": 0.06356013396924866,
+     "pair": "barrel/T"
+    },
+    {
+     "worst_volume": 0.0,
+     "step": 0,
+     "steps": 240,
+     "largest_gap": 0.02723163038712377,
+     "smallest_drive_overlap": 0.05977019335437204,
+     "pair": "T/minute"
+    },
+    {
+     "worst_volume": 0.0,
+     "step": 0,
+     "steps": 768,
+     "largest_gap": 0.027279016197902184,
+     "smallest_drive_overlap": 0.04879382134246669,
+     "pair": "minute/S1"
+    },
+    {
+     "worst_volume": 0.0,
+     "step": 0,
+     "steps": 720,
+     "largest_gap": 0.027261022749963747,
+     "smallest_drive_overlap": 0.04853630908117576,
+     "pair": "S1/seconds"
+    },
+    {
+     "worst_volume": 0.0,
+     "step": 0,
+     "steps": 360,
+     "largest_gap": 0.02733713413658421,
+     "smallest_drive_overlap": 0.0525270017925791,
+     "pair": "minute/MW"
+    },
+    {
+     "worst_volume": 0.0,
+     "step": 0,
+     "steps": 384,
+     "largest_gap": 0.027312768098158,
+     "smallest_drive_overlap": 0.04436732201473726,
+     "pair": "MW/hour"
+    },
+    {
+     "worst_volume": 0.0,
+     "step": 0,
+     "steps": 384,
+     "largest_gap": 0.027426690549313713,
+     "smallest_drive_overlap": 0.06151994942039517,
+     "pair": "hour/idler"
+    },
+    {
+     "worst_volume": 0.0,
+     "step": 0,
+     "steps": 384,
+     "largest_gap": 0.027496347822892078,
+     "smallest_drive_overlap": 0.047554080702712026,
+     "pair": "idler/day"
+    }
+   ]
+  },
+  "clear": {
+   "worst_volume": 0.0,
+   "pair": null
+  },
+  "minute": {
+   "clockwise_turns_per_hour": "1"
+  },
+  "hour": {
+   "clockwise_turns_per_hour": "1/12"
+  },
+  "seconds": {
+   "clockwise_turns_per_hour": "60"
+  },
+  "coaxial": {
+   "distance": 0.0
+  },
+  "hands": {
+   "hour": 6.007495492585805,
+   "minute": 8.002499765643941,
+   "seconds": 5.502044912197814
+  },
+  "size": {
+   "radius": 22.800000999615317,
+   "z_min": -1.600000023841858,
+   "z_max": 10.100000381469727
+  },
+  "day_hand": {
+   "clockwise_turns_per_hour": "1/24"
+  },
+  "day_place": {
+   "axis_distance": 12.75400309263627,
+   "reach": 5.499999970902556
+  }
+ }
+}

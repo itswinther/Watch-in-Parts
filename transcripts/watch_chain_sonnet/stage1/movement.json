@@ -1,0 +1,136 @@
+{
+ "case_centre": [
+  8.878571428571428,
+  8.072853856459629
+ ],
+ "fixed": [
+  "main_plate",
+  "barrel_cock"
+ ],
+ "mobiles": {
+  "A": {
+   "axis": [
+    11.2,
+    0.0
+   ],
+   "parts": [
+    "A_body"
+   ]
+  },
+  "B": {
+   "axis": [
+    15.056725658119236,
+    -4.596266658713868
+   ],
+   "parts": [
+    "B_body"
+   ]
+  },
+  "C": {
+   "axis": [
+    18.056725658119237,
+    0.5998857639927637
+   ],
+   "parts": [
+    "C_body"
+   ]
+  },
+  "T": {
+   "axis": [
+    4.635930741452143,
+    12.315494543578914
+   ],
+   "parts": [
+    "T_body"
+   ]
+  },
+  "S": {
+   "axis": [
+    18.056725658119237,
+    7.799885763992764
+   ],
+   "parts": [
+    "S_body",
+    "hand_sec"
+   ]
+  },
+  "M": {
+   "axis": [
+    8.878571428571428,
+    8.072853856459629
+   ],
+   "parts": [
+    "M_body",
+    "hand_min"
+   ]
+  },
+  "H": {
+   "axis": [
+    8.878571428571428,
+    8.072853856459629
+   ],
+   "parts": [
+    "H_body",
+    "hand_hour"
+   ]
+  }
+ },
+ "meshes": [
+  {
+   "driver": "barrel",
+   "driver_teeth": 96,
+   "driven": "A",
+   "driven_teeth": 16
+  },
+  {
+   "driver": "A",
+   "driver_teeth": 48,
+   "driven": "B",
+   "driven_teeth": 12
+  },
+  {
+   "driver": "B",
+   "driver_teeth": 48,
+   "driven": "C",
+   "driven_teeth": 12
+  },
+  {
+   "driver": "C",
+   "driver_teeth": 60,
+   "driven": "S",
+   "driven_teeth": 12
+  },
+  {
+   "driver": "A",
+   "driver_teeth": 48,
+   "driven": "M",
+   "driven_teeth": 36
+  },
+  {
+   "driver": "M",
+   "driver_teeth": 15,
+   "driven": "T",
+   "driven_teeth": 45
+  },
+  {
+   "driver": "T",
+   "driver_teeth": 12,
+   "driven": "H",
+   "driven_teeth": 48
+  }
+ ],
+ "hands": {
+  "hour": {
+   "mobile": "H",
+   "part": "hand_hour"
+  },
+  "minute": {
+   "mobile": "M",
+   "part": "hand_min"
+  },
+  "seconds": {
+   "mobile": "S",
+   "part": "hand_sec"
+  }
+ }
+}
