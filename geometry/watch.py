@@ -57,7 +57,7 @@ MESH_CUT_MARGIN = 1.05      # mm, private speed-up of mesh_run: material further
 MESH_GAP_SEARCH = 0.15      # mm, private speed-up of mesh_run: gaps are searched this far first, then to 1.0 if none found
 TEETH_MIN_DEPTH = 0.1       # mm: mesh test, a section whose outline's largest and smallest distance from the axis differ
                             # by less than this has no teeth (a round, faceted disc is not a gear)
-TEETH_RAYS = 7200           # private: the outline of a section is measured along this many equally spaced directions
+TEETH_RAYS = 7200           # mesh test: the outline of a section is measured along this many equally spaced directions
                             # (0.05 degrees apart; a tooth of the finest printable pitch spans dozens of them)
 CLEAR_STEPS = 144
 HAND_REACH = 5.0

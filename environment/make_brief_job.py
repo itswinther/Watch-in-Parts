@@ -113,7 +113,15 @@ def _literals():
     src_thin = inspect.getsource(W.thin)
     src_asm = inspect.getsource(W._asm_messages)
     need = [(src_mesh, "i % 4 == 0"), (src_mesh, "i % 8 == 0"), (src_asm, "> 1e-6"),
-            (inspect.getsource(W.Movement.clear_run), "if abs(wa - wb) > 1e-12")]
+            (inspect.getsource(W.Movement.clear_run), "if abs(wa - wb) > 1e-12"),
+            # the mesh test's tooth-count condition, as QA-W100 states it
+            (src_mesh, "teeth = self.tooth_counts(a, ta, b, tb)"),
+            (inspect.getsource(W.Movement.mesh_passes), 'return x["teeth_match"] and'),
+            (inspect.getsource(W.Movement.tooth_counts), "got[name] = BARREL_TEETH"),
+            (inspect.getsource(W.count_teeth), "up = r > (lo + hi) / 2.0"),
+            (inspect.getsource(W.count_teeth), "if hi - lo < TEETH_MIN_DEPTH:"),
+            (inspect.getsource(W.meet_height), "key=lambda i: (-(zs[i + 1] - zs[i]), zs[i])"),
+            (inspect.getsource(W.meet_height), "if reach(A, ax_a, z) + reach(B, ax_b, z) > d:")]
     for src, text in need:
         if text not in src:
             raise SystemExit("geometry/watch.py changed: %r not found; update make_brief_job.py" % text)
@@ -325,7 +333,18 @@ Checks. Each passes or fails.
    Starting from the assembled positions, at step i (i = 0, 1, ..., {spt} x max({zd}, {zn}) - 1) D is turned
    counter-clockwise by i x 360 / ({spt} x {zd}) degrees about its axis, and N clockwise by that angle x {zd} / {zn}
    about its own axis. These turning senses are a convention of the test; they do not depend on the running sense
-   of the barrel. Three conditions must hold:
+   of the barrel. Four conditions must hold:
+   - teeth as declared: each declared tooth count must be the number of teeth of that gear, counted on its section
+     at the height where the two gears meet ({zd} for D, {zn} for N; for `barrel`, the teeth of its catalogue
+     data, DS-W01, section 2, not counted). That height is found in the assembled positions on D and N as whole
+     mobiles: the heights at which the mesh of D or of N has a vertex cut the z range that both cover into layers,
+     and it is the middle of the thickest layer (the lowest of equals) at whose middle the largest distance of D's
+     section from D's axis and the largest distance of N's section from N's axis add up to more than the distance
+     between the two axes (if no layer qualifies, this condition fails). A section's teeth are counted on its
+     outline about its mobile's axis: in each of {rays} equally spaced directions from the axis (one along +x), the
+     distance to the furthest point of the section in that direction (0 where there is none). Going once round,
+     the count is the number of times that distance rises from at most to above the value halfway between its
+     smallest and its largest value; if those two differ by less than {tdepth} mm, the section has no teeth;
    - no jam: at every step, and at two more positions after every {pe}th step (i + {f1} and i + {f2} in the formula
      above, for i = 0, {pe}, {pe2}, ...), D and N intersect by at most {vt};
    - engaged: at every {ge}th step (i = 0, {ge}, {ge2}, ...) at which their intersection is empty, their smallest
@@ -362,7 +381,7 @@ Checks. Each passes or fails.
            spt=W.SAMPLES_PER_TOOTH, pe=L["push_every"], pe2=2 * L["push_every"], ge=L["gap_every"],
            ge2=2 * L["gap_every"], f1=str(W.MESH_OFFGRID[0]), f2=str(W.MESH_OFFGRID[1]), gap=num(W.ENGAGE_GAP),
            frac=num(W.DRIVE_FRACTION), push=num(W.DRIVE_FRACTION * 360), dmin=num(W.DRIVE_MIN_VOLUME),
-           ratio=num(W.DRIVE_AREA_RATIO), shift=num(W.MESH_SHIFT), cs=W.CLEAR_STEPS, reach=num(W.HAND_REACH),
+           ratio=num(W.DRIVE_AREA_RATIO), tdepth=num(W.TEETH_MIN_DEPTH), rays=num(W.TEETH_RAYS), shift=num(W.MESH_SHIFT), cs=W.CLEAR_STEPS, reach=num(W.HAND_REACH),
            hcm=num(W.HAND_CENTRE_MIN), speed=SPEED_CITE,
            fits=wrap("12. **Fits the case.** Everything stays within the inner radius of the case named in the work "
                      "order (%s) of the vertical line through `case_centre` as it turns: every point of every fixed "
@@ -1091,6 +1110,10 @@ def traceability_rows(L, B, S=None):
              Q, p1, "*Mesh test.*", None, [W.SAMPLES_PER_TOOTH, str(W.MESH_OFFGRID[0]), str(W.MESH_OFFGRID[1]),
                                           pe, 2 * pe, ge, 2 * ge]),
         cell("ENGAGE_GAP", W.ENGAGE_GAP, Q, p1, "*Mesh test.*", None, [num(W.ENGAGE_GAP)]),
+        cell("TEETH_MIN_DEPTH (mesh test, teeth as declared; the barrel's count is BARREL_TEETH, cited from DS-W01)",
+             W.TEETH_MIN_DEPTH, Q, p1, "*Mesh test.*", None, [num(W.TEETH_MIN_DEPTH)]),
+        cell("TEETH_RAYS (mesh test, teeth as declared: directions of a section's outline)", W.TEETH_RAYS, Q, p1,
+             "*Mesh test.*", None, [num(W.TEETH_RAYS)]),
         cell("DRIVE_FRACTION (and 360 x DRIVE_FRACTION degrees)", W.DRIVE_FRACTION, Q, p1, "*Mesh test.*", None,
              [num(W.DRIVE_FRACTION), num(W.DRIVE_FRACTION * 360)]),
         cell("DRIVE_MIN_VOLUME", W.DRIVE_MIN_VOLUME, Q, p1, "*Mesh test.*", None, [num(W.DRIVE_MIN_VOLUME)]),

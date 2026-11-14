@@ -467,6 +467,16 @@ def b_third_brass(d):
     _both(d, fn)
 
 
+def b_false_teeth_brass(d):
+    """The judge rehearsal's attempt 1 (JUDGE_REHEARSAL.md section 4, e1_false_teeth.py): the third mobile made
+    brass and the barrel/third mesh declared 48:12 on the 96:24 geometry (same ratio), in both movements."""
+    def fn(doc):
+        doc["mobiles"]["third"]["material"] = "AD-CW614N"
+        doc["mobiles"]["third"].pop("part_materials", None)
+        _set_teeth("barrel", "third", 48, 12)(doc)
+    _both(d, fn)
+
+
 def b_material_missing(d):
     _edit(d, "movement.json", lambda doc: doc["mobiles"]["day"].pop("material"))
 
@@ -671,6 +681,25 @@ ANCHORS = [
      X(P1={"checks": ["strength"]}, P3={"checks": ["strength"]}),
      [detail(["P1", "details", "strength", "meshes", 0, "gears", "third", "material"], lambda v: v == "AD-CW614N", "AD-CW614N"),
       detail(["P1", "details", "strength", "meshes", 0, "gears", "third", "margin"], lambda v: -0.2 < v < 0, "about -0.12")]),
+    # The judge rehearsal's attempt 1: the same brass third, and the barrel/third mesh declared 48:12 on the 96:24
+    # parts (same ratio, so every declared speed is unchanged). Before the tooth-count condition (Decisions
+    # 2026-11-15 01:19, A3) the strength check took m and z from the declaration (m 0.4, z 12) and passed (89.6
+    # MPa against 110), and the delivery scored 1.0. Now the mesh test counts 96 (the barrel, its stated count) and
+    # 24 (the third's section at the meeting height) against 48 and 12 declared: the barrel/third mesh fails and
+    # drives nothing, in both movements. Nothing downstream of it is driven from the barrel: P1 fails train 3,
+    # tolerant 2, hour 2, minute 2, seconds 2, strength 2 (no going train) = 13 of 23; clear still passes (it
+    # turns mobiles at their declared speeds, unchanged). P2 fails day_hand 3 of 4 (the day mobile is not driven).
+    # P3 fails the same as P1 and day_hand = 16 of 27. P4 passes (geometry unchanged).
+    # D = (1/4)(13/23) + (1/10)(3/4) + (3/20)(16/27) = 2527/8280; R = 1/2 - 2527/12420 = 3683/12420;
+    # x 16/17 = 14732/52785 = 0.279095
+    ("job rehearsal attempt 1: false 48:12 on the 96:24 barrel/third pair, third brass", b_false_teeth_brass,
+     X(P1={"checks": ["train", "tolerant", "hour", "minute", "seconds", "strength"]},
+       P2={"checks": ["day_hand"]},
+       P3={"checks": ["train", "tolerant", "hour", "minute", "seconds", "day_hand", "strength"]}),
+     [mesh_fact("P1", "barrel/third", "teeth_match", lambda v: v is False, "False"),
+      mesh_fact("P1", "barrel/third", "measured_teeth", lambda v: v == {"barrel": 96, "third": 24}, "barrel 96, third 24"),
+      mesh_fact("P3", "barrel/third", "measured_teeth", lambda v: v == {"barrel": 96, "third": 24}, "barrel 96, third 24"),
+      mesh_fact("P1", "third/centre", "teeth_match", lambda v: v is True, "True")]),
 
     # ---- 5. Part 2 ----
     # hands.day names the hour hand's mobile and part: C3 fails, s2 = 0. P2's checks still run and both fail:
@@ -701,13 +730,14 @@ ANCHORS = [
     ("job variant = the 8-hour movement unchanged", b_variant_is_movement,
      X(P3={"checks": ["hour", "minute", "seconds", "day_hand"]}),
      [detail(["P3", "details", "minute", "clockwise_turns_per_hour_through_working_meshes"], lambda v: v == "4/3", "4/3")]),
-    # The variant declares third/centre 54/36 but names the 8-hour parts third and centre (cut 60/30): turned
-    # at 54/36 the teeth jam, the mesh drives nothing, so every hand stands and the seconds mobile is not driven
+    # The variant declares third/centre 54/36 but names the 8-hour parts third and centre (cut 60/30): the teeth
+    # are counted 60 and 30 against 54 and 36 declared (and turned at 54/36 they also jam), the mesh drives nothing, so every hand stands and the seconds mobile is not driven
     # from the barrel: train 3, tolerant 2, hour 2, minute 2, seconds 2, day_hand 3, strength 2 = 16 of 27.
     # D = (3/20)(16/27) = 4/45; R = 1/2 - 8/135 = 119/270; x 16/17 = 56/135 = 0.414815
     ("job variant with 6-hour tooth counts on the 8-hour parts", b_variant_paper_counts,
      X(P3={"checks": ["train", "tolerant", "hour", "minute", "seconds", "day_hand", "strength"]}),
-     [mesh_fact("P3", "third/centre", "passes", lambda v: v is False, "False")]),
+     [mesh_fact("P3", "third/centre", "passes", lambda v: v is False, "False"),
+      mesh_fact("P3", "third/centre", "measured_teeth", lambda v: v == {"third": 60, "centre": 30}, "third 60, centre 30")]),
     # The variant's main_plate renamed plate_6h (a byte copy): C4 fails, s3 = 0; every P3 check still passes.
     # R = 2/5; x 16/17 = 32/85 = 0.376471
     ("job variant with one fixed part renamed", b_variant_plate_renamed,

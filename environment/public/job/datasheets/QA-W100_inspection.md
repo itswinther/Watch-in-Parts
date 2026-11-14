@@ -113,7 +113,18 @@ Checks. Each passes or fails.
    Starting from the assembled positions, at step i (i = 0, 1, ..., 8 x max(z_D, z_N) - 1) D is turned
    counter-clockwise by i x 360 / (8 x z_D) degrees about its axis, and N clockwise by that angle x z_D / z_N
    about its own axis. These turning senses are a convention of the test; they do not depend on the running sense
-   of the barrel. Three conditions must hold:
+   of the barrel. Four conditions must hold:
+   - teeth as declared: each declared tooth count must be the number of teeth of that gear, counted on its section
+     at the height where the two gears meet (z_D for D, z_N for N; for `barrel`, the teeth of its catalogue
+     data, DS-W01, section 2, not counted). That height is found in the assembled positions on D and N as whole
+     mobiles: the heights at which the mesh of D or of N has a vertex cut the z range that both cover into layers,
+     and it is the middle of the thickest layer (the lowest of equals) at whose middle the largest distance of D's
+     section from D's axis and the largest distance of N's section from N's axis add up to more than the distance
+     between the two axes (if no layer qualifies, this condition fails). A section's teeth are counted on its
+     outline about its mobile's axis: in each of 7,200 equally spaced directions from the axis (one along +x), the
+     distance to the furthest point of the section in that direction (0 where there is none). Going once round,
+     the count is the number of times that distance rises from at most to above the value halfway between its
+     smallest and its largest value; if those two differ by less than 0.1 mm, the section has no teeth;
    - no jam: at every step, and at two more positions after every 8th step (i + 1/3 and i + 1/5 in the formula
      above, for i = 0, 8, 16, ...), D and N intersect by at most 0.01 mm3;
    - engaged: at every 4th step (i = 0, 4, 8, ...) at which their intersection is empty, their smallest

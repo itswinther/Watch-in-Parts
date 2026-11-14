@@ -49,6 +49,8 @@ hand speeds and directions, and the weights of the checks.
 | SEAT_TOUCH | 0.02 | `datasheets/QA-W100_inspection.md` | 5. Part 1 | **Seated.** | statement |
 | SAMPLES_PER_TOOTH, MESH_OFFGRID, every 4th and 8th step | (8, (Fraction(1, 3), Fraction(1, 5)), 4, 8) | `datasheets/QA-W100_inspection.md` | 5. Part 1 | *Mesh test.* | statement |
 | ENGAGE_GAP | 0.1 | `datasheets/QA-W100_inspection.md` | 5. Part 1 | *Mesh test.* | statement |
+| TEETH_MIN_DEPTH (mesh test, teeth as declared; the barrel's count is BARREL_TEETH, cited from DS-W01) | 0.1 | `datasheets/QA-W100_inspection.md` | 5. Part 1 | *Mesh test.* | statement |
+| TEETH_RAYS (mesh test, teeth as declared: directions of a section's outline) | 7200 | `datasheets/QA-W100_inspection.md` | 5. Part 1 | *Mesh test.* | statement |
 | DRIVE_FRACTION (and 360 x DRIVE_FRACTION degrees) | 0.25 | `datasheets/QA-W100_inspection.md` | 5. Part 1 | *Mesh test.* | statement |
 | DRIVE_MIN_VOLUME | 0.001 | `datasheets/QA-W100_inspection.md` | 5. Part 1 | *Mesh test.* | statement |
 | DRIVE_AREA_RATIO | 0.5 | `datasheets/QA-W100_inspection.md` | 5. Part 1 | *Mesh test.* | statement |
