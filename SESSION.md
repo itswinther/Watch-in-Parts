@@ -1034,3 +1034,19 @@ This is information, so nobody duplicates it. The to-do list says nobody has pac
   - (a) **Scoring rule.** Keyless uses in-order gating (a step counts only if the earlier ones passed). itswinther's decision (4) says every part counts even when an earlier part failed, plus a whole-build term. One rule should hold for both.
   - (b) **Where keyless fits.** B's parts list (going train and hands, 24-hour hand, 6-hour variant, assembly) has no keyless works. Either keyless becomes a fifth part of the one job, or it stays a separate task.
 - Input wanted from itswinther on (a), (b) and the datasheet quantities: what B's grader needs (case, barrel, module, speed, capacity, printable feature, mass or volume). The keyless datasheets already carry mainspring, materials, jewels, crown and stem, and human factors.
+### 2026-11-14 16:40 | A: real downloadable datasheets (catalogue, no task change) | Mikael + Claude
+- Did: wrote `REAL_DATASHEETS.md`: 70 URLs tried, 57 documents downloaded in Docker (`curlimages/curl`, outside the repo), text read with `pypdf`. For each: URL, sha256, pages, terms, Wayback status, the values the keyless task needs. Also a gap list, a scale note, and a Dockerfile snippet with a sha256-pinned `datasheets.lock` (Sellita SW200-1 left out: its drawings say "confidential").
+- Key finds:
+  - TMI NH3 guide: full wind = 55 crown turns = 8 ratchet turns (about 6.9 per barrel turn).
+  - Sellita SW200-1: stem travel 0.80 mm, stem S 0.90, minimum 27 crown turns. SW215-1: minimum 23.
+  - Miyota 8215 and 9015: "turn the crown 40 times".
+  - ETA 6497-2: 53 h, 21,600 A/h. ETA 6498-1: 46 h, 18,000 A/h. Primary; this corrects STANDARDS.md 3.5.
+  - MIL-STD-1472H fig. 10: knobs of 25 mm or less, at most 32 mN·m; minimum knob Ø 10 mm.
+  - Imrhan 2013: MVC torque on 3.3 and 5 mm cylinders.
+  - Grossmann 1905 (public domain): a mainspring torque law with a worked example, and friction 0.15 metal on stone.
+- Public-domain items that could be shipped: Grossmann 1905, Saunier 1887 and 1892, Lewis 1896, MIL-STD-1472H, FAA HF-STD-001B, NACA TR-1062.
+- Scale: the keyless plan view is 1:1 (Ø 17.4 is about a 7¾‴), but its depth and modules are about 1.5 to 2× real. Scale-free data (turns, hours, torque, materials) fit as they are; dimensions (S 0.90, 0.80 mm travel, jewels, mainspring sizes) fit only at 1:1. What to change for 1:1 is in section 9.
+- Verified by: sha256 of every file, as downloaded in Docker on 14 Nov. Wayback copies re-downloaded: identical for SW200-1, Miyota 8215 and 9015 specs, FAA; truncated for ETA 2824-2 (1 MiB), MIL-STD-1472H and 6497-2 (5 MiB); HTML for the NH3 guide.
+- Not verified: the Imrhan column alignment for the 3.3 and 5 mm rows (our reading); the S 0.90 pitch (vendor only); any licence beyond what each document or site says.
+- Files changed: `REAL_DATASHEETS.md` (new), SESSION.md (this entry). No PDFs committed. `spikes/keyless/datasheets/` untouched.
+- Need from others: a human decision on (1) real parts lists in `/app` versus the TASK_DOCS_TEMPLATE no-method-hint rule; (2) fetching at build time versus vendoring the public-domain files; (3) 1:1 versus the current scale.
