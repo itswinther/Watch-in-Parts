@@ -132,7 +132,7 @@ class World:
             m = (b.man.transform(T[:3, :4].tolist()), None)
             bb = m[0].bounding_box()
             m = (m[0], bb)
-            if len(b._cache) > 600:
+            if len(b._cache) > 12:          # transformed meshes are large: keep only a few poses
                 b._cache.clear()
             b._cache[key] = m
         return (m[0], m[1], key) if with_key else m[0]
@@ -165,7 +165,7 @@ class World:
                 v = (mb ^ mo).volume()
                 if not math.isfinite(v):
                     raise ArithmeticError("non-finite volume")
-                if len(self.pair_cache) > 200000:
+                if len(self.pair_cache) > 50000:
                     self.pair_cache.clear()
                 self.pair_cache[ck] = v
             tot = max(tot, v)
@@ -351,7 +351,7 @@ class World:
             self.bodies[n].q, self.bodies[n].p = q, p
 
     # ----- one input step -----
-    def step(self, driver, dq=0.0, dp=0.0, main_try_arc=0.02):
+    def step(self, driver, dq=0.0, dp=0.0, main_try_arc=0.06):
         """Move the driven body by dq (rotation) and dp (pull). Returns (ok, jammed)."""
         snap = self.snapshot()
         d = self.bodies[driver]

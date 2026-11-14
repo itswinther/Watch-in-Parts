@@ -37,6 +37,11 @@ HOLD_SHIFT = 0.3                 # a non-driven moving part moved this far off i
 MAX_TRIANGLES = 200_000
 MAX_BYTES = 20_000_000
 NAME_RE = r"^[A-Za-z0-9_\-]{1,40}$"
-RESERVED = ("main_plate", "dial_plate", "barrel_arbor", "minute_wheel", "minute_post")
+RESERVED = ("main_plate", "dial_plate", "barrel_arbor", "minute_wheel", "minute_post", "fixed")
 
-WEIGHTS = {"wind": 3, "slip": 2, "click": 2, "set": 3, "sweep": 3, "held": 2, "bounds": 1}
+WEIGHTS = {"wind": 3, "slip": 3, "set": 3, "sweep": 3, "click": 2, "held": 1, "bounds": 1}
+CORE = ("wind", "slip", "set", "sweep")   # slip counts only if wind passes; click, held and bounds count
+CORE_NEEDED = 3                            # only if at least 3 of the 4 core behaviours pass
+CLICK_RUNBACK = 20.0             # after winding, with the crown let go, the arbor may run back at most this much
+HOLD_STEPS = 40                  # ... over this many steps
+MAIN_TRY = 0.06                  # mm of surface travel the mainspring tries to turn the arbor back per step
