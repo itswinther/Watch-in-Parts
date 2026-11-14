@@ -1575,3 +1575,8 @@ A note for B's builder sessions and for Mikael's session, for information only. 
 - Smoke round 2 (graded by the runner from the frozen worktree at 071ab86, four-part job): Fable 5.2 run 2 **1.0** (P1..P4 all 1, no timeout), Opus 5.5 run 2 **1.0** (all 1). Sonnet 5.5 run 2: agent finished (77 min), grading still running.
 - Builders now: S (gear strength), P (P5 adapter). Done and merged today: G, R, D, K, N.
 - Files changed: SESSION.md.
+
+### 2026-11-14 19:07 | B: smoke round 2 complete: six of six runs 1.0 on the four-part job | itswinther + Claude
+- Sonnet 5.5 run 2: **1.0** (P1..P4 all 1, no check timed out). Together with run 1 and the round-2 Fable and Opus runs: Fable 1.0, 1.0; Opus 1.0, 1.0; Sonnet 1.0, 1.0 on the four-part job as it stood at 071ab86 (brief restating every number; before the two-body barrel, QA-W100 and gear strength). Round 3 was cancelled (17:40). These are reported as four-part results; the job under test from here on is the one with QA-W100, gear strength and, when A's reference exists, crown winding.
+- Builder N's second report repeats its first; its own run 2 was stopped by B at 18:37 (old 600 s limit at load 16).
+- Files changed: SESSION.md.
