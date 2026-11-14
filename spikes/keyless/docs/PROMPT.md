@@ -160,7 +160,9 @@ The acceptance test is run on a simulated test rig:
   step that cannot proceed is blocked, and nothing moves.
 - **At the start**, parts may overlap by up to 0.3 (surface travel). The rig first lets the movement
   come to rest: each mobile clears its overlaps within that travel, meshing wheels are turned into their
-  gaps, and the springs return their parts. This is the starting state of every step.
+  gaps, and the springs return their parts. This is the starting state of every step. Coming to rest
+  is bounded (at most $PHASE_MAX_RESOLVES resolutions of the contacts, and at most $PHASE_MAX_SECONDS
+  seconds); where it stops, the movement is judged as it stands.
 - **What the rig does not model.** Parts do not bend, so a flexing arm or blade is rigid on the rig. A
   mobile rides on another only through `carrier`, one level deep, and only on a carrier that turns; every
   other axis and slide line is fixed in the frame. A spring has no body of its own: it is a force on its

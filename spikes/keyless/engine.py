@@ -50,6 +50,9 @@ SCAN_ARC = 0.002    # mm of surface travel between samples when searching for th
 FORCE_EPS = 1e-7    # mm^3: overlap difference below which a contact is taken to push neither way
 SPRING_PUSH_ARC = 0.01  # mm of surface travel per increment when a returning spring pushes free parts
 SETTLE_RELAX_ROUNDS = 40  # at the start, springs return (pushing what they may) until nothing moves
+PHASE_MAX_RESOLVES = 1000  # phase(): at most this many resolves. Measured: reference 2, GPT repeats 0, Marco Lang's
+                           # unphased ml01 123 (119 s), the overlap anchors 181 and 361 (they fail either way)
+PHASE_MAX_SECONDS = 600.0  # phase(): and at most this much wall-clock time; then the state is judged as it is
 # Length floors (mm). Module constants so a caller working at another scale (B's joined job) can set them
 # to their value x s; the defaults are the standalone task's.
 RADIUS_FLOOR = 0.05     # a body's radius about its axis is taken as at least this (surface travel per radian)
@@ -118,6 +121,7 @@ class World:
     # brief says springs never drive other bodies can set World.spring_push = False for every world.
     spring_push = True
     _start = None                       # start-of-step poses while a step resolves (see resolve)
+    n_resolves = 0                      # resolves so far (phase() is bounded by them)
 
     def __init__(self, bodies):
         self.bodies = {b.name: b for b in bodies}
@@ -502,6 +506,7 @@ class World:
         start: the poses before this step's input move (a snapshot). With it, budget() lets only the
         contacts that push in this step lend a friction allowance, not contacts that were already there
         (a part resting on a fast surface does not slip through a face that should lock)."""
+        self.n_resolves += 1
         prev = self._start
         self._start = start
         try:
@@ -637,16 +642,21 @@ class World:
                 self.restore(s2)
         return True
 
-    def settle(self, budget=0.3):
-        """Start: let every mover clear any overlap at its rest pose (up to `budget` mm of travel)."""
+    def settle(self, budget=0.3, capped=None):
+        """Start: let every mover clear any overlap at its rest pose (up to `budget` mm of travel).
+        capped: from phase(), a check that stops the spring rounds once phase's bound is reached."""
         self.dqs = {}
         for _ in range(3):
             for b in self.movers:
+                if capped is not None and capped():
+                    break
                 self.push(b, b.coord_from_arc(budget))
         # then the springs bring their parts home, pushing free parts on their way, until nothing moves
         for _ in range(SETTLE_RELAX_ROUNDS):
             moved = 0.0
             for b in self.order_spring:
+                if capped is not None and capped():
+                    break
                 moved += self.relax(b)
             if moved < 1e-9:
                 break
@@ -655,13 +665,38 @@ class World:
     def phase(self, budget=0.3):
         """Settle, then clear what is still overlapping by turning each overlapping mobile together with
         the free mobiles it touches (meshing wheels drawn tooth through tooth are turned into their
-        gaps, as an assembler would). Each mobile moves at most `budget` mm of surface travel."""
-        self.settle(budget)
+        gaps, as an assembler would). Each mobile moves at most `budget` mm of surface travel.
+        Bounded: after PHASE_MAX_RESOLVES resolves or PHASE_MAX_SECONDS it stops and leaves the state
+        as it is (self.phase_stats says whether it was capped)."""
+        import time as _time
+        t0 = _time.time()
+        self.phase_stats = {"resolves": 0, "seconds": 0.0, "capped": False}
+        n0 = self.n_resolves
+
+        def capped():
+            self.phase_stats["resolves"] = self.n_resolves - n0
+            if (self.phase_stats["resolves"] >= PHASE_MAX_RESOLVES
+                    or _time.time() - t0 > PHASE_MAX_SECONDS):
+                self.phase_stats["capped"] = True
+            return self.phase_stats["capped"]
+
+        try:
+            return self._phase(budget, capped)
+        finally:
+            self.phase_stats["seconds"] = round(_time.time() - t0, 1)
+            self.dqs = {}
+
+    def _phase(self, budget, capped):
+        self.settle(budget, capped)
+        if capped():
+            return self.max_pen() <= TOL
         for _ in range(3):
             bad = [b for b in self.movers if self.pen(b) > TOL]
             if not bad:
                 return True
             for b in bad:
+                if capped():
+                    return self.max_pen() <= TOL
                 if self.pen(b) <= TOL:
                     continue
                 if self.push(b, b.coord_from_arc(budget)):
@@ -677,6 +712,8 @@ class World:
                     self.movers = [o for o in movers if o is not b]
                     try:
                         for i in range(1, n + 1):
+                            if capped():
+                                break
                             b.q = snap[b.name][0] + sgn * h * i
                             self.dqs = {b.name: (h, 0.0) if b.dof in ("rot", "stem") else (0.0, h)}
                             self.resolve()

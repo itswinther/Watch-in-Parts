@@ -314,6 +314,26 @@ def pull_without_spec():
     return ok
 
 
+def phase_is_bounded():
+    """phase() (coming to rest) stops at its cap on a grossly overlapping world and leaves the state as it
+    is; the rest check then judges it."""
+    bodies = []
+    for k in range(3):
+        g = G.spur(16, 0.2, 0, 1.0, thin=0.01).translate([1.2 * k, 0, 0])      # far too close: teeth deep in teeth
+        bodies.append(E.Body("w%d" % k, g, "contact", dof="rot", point=(1.2 * k, 0, 0), direction=(0, 0, 1)))
+    w = E.World(bodies)
+    old = E.PHASE_MAX_RESOLVES
+    E.PHASE_MAX_RESOLVES = 10
+    try:
+        t = time.time()
+        ok = w.phase()
+        dt = time.time() - t
+    finally:
+        E.PHASE_MAX_RESOLVES = old
+    print("gross overlap (max %.3f mm^3): phase ok=%s %s in %.1f s" % (w.max_pen(), ok, w.phase_stats, dt))
+    return w.phase_stats["capped"] and not ok and w.phase_stats["resolves"] < 10 + 30
+
+
 def touching_can_be_pushed():
     """A part resting on a fixed face with an overlap between TOL/2 and TOL (touching) can still be
     pushed along that face: one threshold, TOL."""
@@ -430,7 +450,7 @@ if __name__ == "__main__":
            "spring_through_link": spring_through_link(), "pull_moves_no_rider": pull_moves_no_rider(),
            "rider_gives_way": rider_gives_way(), "rider_drives_steep_face": rider_drives_steep_face(),
            "rider_drives_when_chain_blocked": rider_drives_when_chain_blocked(),
-           "many_tiny_patches": many_tiny_patches(), "pull_without_spec": pull_without_spec(), "resting_rub_lends_no_allowance": resting_rub_lends_no_allowance(), "spring_push_switch": spring_push_switch(), "main_try_from_constants": main_try_from_constants(),
+           "many_tiny_patches": many_tiny_patches(), "phase_is_bounded": phase_is_bounded(), "pull_without_spec": pull_without_spec(), "resting_rub_lends_no_allowance": resting_rub_lends_no_allowance(), "spring_push_switch": spring_push_switch(), "main_try_from_constants": main_try_from_constants(),
            "spring_carrier_stops_at_wheel_contact": spring_carrier_stops_at_wheel_contact(),
            "spring_pushes_while_touching_plate": spring_pushes_while_touching_plate(), "touching_can_be_pushed": touching_can_be_pushed(), "fit_clearance": fit_clearance(),
            "phase_gears": phase_gears(), "carried_wheel": carried_wheel(), "force_direction": force_direction(),
