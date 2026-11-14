@@ -169,6 +169,15 @@ Append here. A human has to say yes before SPEC.md changes.
   6. Drive test: a threshold that does not shrink with face width and module (an honest module 0.12 pair with a 0.5 face fails today at 0.0084 against 0.01).
   7. Thickness test run in slabs so that memory does not grow with part height; same pass and fail.
 
+- 2026-11-14 12:40 **Grade the watch as a whole: an owner's acceptance test, scored in order.** Proposed by Mikael + Claude (A). Status: awaiting yes/no from the team; being tried first in `spikes/keyless/`, nothing in B's task changed.
+  - Why: today a design earns most of its points part by part. A gear train with a winding mechanism that cannot hold its wind (no click, so the mainspring unwinds back through the crown) still scores high. GPT trial 1 in `spikes/right_angle/` did exactly that and scored 1.0, because that spike never asked for a click (see its README, "Known spec weakness"). A watch that stops when you let go of the crown is not most of a watch.
+  - Proposed spec wording: "The movement is graded the way a watchmaker accepts a finished watch: by using it. The grader runs one fixed sequence of operations on the assembled movement, in order, the way an owner would. A step only counts if every step before it passed. Part-level checks (clearances, support, printability) are conditions on the whole; they do not earn points on their own."
+  - Sequence, from a flat mainspring: (1) wind: crown in, turned forward N turns, the mainspring stores the stated turns; (2) hold: let go, the click holds, nothing spins back; (3) run: the train drives the hands at the right rates for at least the stated power reserve, from the stored turns; (4) backward: crown turned backward, nothing winds or jams, stored turns stay; (5) set: crown pulled and turned, the hands move, the barrel does not unwind; (6) return: pushed in and wound again, never half-engaged on the way.
+  - Score: consecutive steps passed from step 1 divided by the number of steps, times the part-level conditions. No click gives about 0.17, with a one-line reason anyone can check ("it cannot hold its wind").
+  - What it serves: meaningful difficulty (every shortfall has an owner's-eye explanation), the gap (it rewards how parts work together over time, which is where every frontier shortfall so far came from: decisions that pass locally and fail later), and reward integrity (part-level tricks earn nothing unless the whole works).
+  - What it needs in B's task: a winding stage (the keyless works: crown, stem, sliding pinion with Breguet teeth, crown and ratchet wheels, click, setting lever; prototype in `spikes/keyless/`), a stated mainspring model (capacity in turns, running at the barrel's stated speed) and the in-order scoring. The existing stage 4 assembly test fits as step 0: it has to assemble before it can be used.
+  - Real-world basis: the end-of-line functional test of a finished watch (wind, check it holds, check it runs, set the hands). Results of the keyless trial with old and new scoring will be posted here.
+
 ## Ideas for later
 
 Parked ideas. Not proposals: nothing here changes SPEC.md. Move one to "Proposed spec changes" to put it to the team.
@@ -845,3 +854,9 @@ This is information, so nobody duplicates it. The to-do list says nobody has pac
 - Found: B's orchestrator session is live and its agents are editing the same files (X1 to X5 review fixes). Asked it by message and by the request above what it is still changing; no shared file edited until it answers.
 - Not verified: nothing run yet.
 - Next: read and measure only (reference, exploits) until B answers; then fixes 1 to 7 in the order of the handoff.
+
+### 2026-11-14 12:40 | A: proposal to grade the watch as a whole (owner's acceptance test) | Mikael + Claude
+- Did: added a proposal under "Proposed spec changes" (12:40): the movement is graded by using it in a fixed order (wind, hold, run, backward, set, return), and a step counts only if all earlier steps passed. Part-level checks become conditions on the whole. It came from Mikael looking at GPT's right-angle design in the viewer: one face gear with no click, valid kinematically, useless as a watch, scored 1.0.
+- Being tried first in `spikes/keyless/` (scoring switched after its current anchor run, old and new scoring compared on the same anchors), then with OpenCode on Opus and Sonnet and with GPT on Codex.
+- Also new on main: `tools/viewer/export_axes.py`, a viewer for mechanisms with axes in any direction, and the right-angle README note "Known spec weakness".
+- Need from others: the team's yes or no on the proposal. B owns the watch spec.
