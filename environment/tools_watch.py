@@ -109,6 +109,10 @@ def t_extent(a):
     m = W.load_movement(WORK)
     out = m.extent()
     out["hand_reach"] = {h: m.hand_reach(h) for h in m.hands}
+    shape = {h: m.hand_shape(h) for h in m.hands}
+    out["hand_lowest_z_above_highest_fixed_z"] = {h: v[0] for h, v in shape.items()}
+    out["hand_centre_of_volume_from_axis"] = {h: v[1] for h, v in shape.items()}
+    out["fixed_parts_joined_within_%g" % W.FRAME_JOIN] = m.frame()[1]
     return out
 
 

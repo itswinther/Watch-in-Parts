@@ -35,7 +35,7 @@ def movement(tmp, label, **kw):
 
 
 def passes(x):
-    return x["worst_volume"] <= W.VOL_TOL and x["largest_gap"] <= W.ENGAGE_GAP and x["smallest_drive_overlap"] > W.VOL_TOL
+    return W.Movement.mesh_passes(x)
 
 
 def positions(m, cut=True):

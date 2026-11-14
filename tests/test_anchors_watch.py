@@ -29,9 +29,23 @@ def fails(stage, *ids):
     return 0.5 * p * p if ids else 1.0
 
 
-def kept(n_lost, received=17):
-    """Stage-3 kept-parts factor when n_lost of the received part files do not count."""
-    return float(min(Fraction(1), Fraction(received - n_lost, received) / W.REF_KEPT_SHARE))
+def kept(lost):
+    """Stage-3 kept factor when the received parts named in `lost` do not count (every part when lost is
+    None): kept volume over received volume, fixed and mobile parts separately, the smaller share against
+    the reference's. An expected value computed from the reference's stage-2 files: call it with (d, base)."""
+    def factor(d, base):
+        prev = os.path.join(base, "stage2")
+        doc = json.load(open(os.path.join(prev, "movement.json")))
+        groups = {"fixed": doc["fixed"], "mobile": [p for mo in doc["mobiles"].values() for p in mo["parts"]]}
+        shares = []
+        for names in groups.values():
+            v = {n: float(W.load_part_file(W.part_path(prev, n)).volume()) for n in names}
+            shares.append(sum(x for n, x in v.items() if lost is not None and n not in lost) / sum(v.values()))
+        return min(1.0, min(shares) / W.REF_KEPT_VOLUME_SHARE)
+    return factor
+
+
+REF_REMADE = ("third", "centre")     # the received parts the reference remakes at stage 3
 
 
 def parts_score(missing, total=18):
@@ -314,13 +328,13 @@ ANCHORS = [
      lambda d, b: edit(d, lambda doc: doc["hands"].update(day={"mobile": "seconds", "part": "seconds_hand"})), 0.0),   # received part: gate
     ("s2 day hand declared on a received hand part", 2, day_on_received, 0.0),   # stage-1 movement plus one line of JSON
     ("s2 a frozen wheel file changed", 2, lambda d, b: touch_part(d, "third"), 0.0),
-    ("s3 gold", 3, lambda d, b: None, 1.0 * kept(2)),
+    ("s3 gold", 3, lambda d, b: None, kept(REF_REMADE)),
     ("s3 do nothing", 3, lambda d, b: nothing(d), 0.0),
     ("s3 stage-2 movement handed back unchanged", 3, use_stage(2), 0.0),        # change request not met: hard requirement
     ("s3 tooth counts edited on paper only", 3, paper_edit, 0.0),
-    ("s3 every part file regenerated", 3, lambda d, b: touch_all(d), 1.0 * kept(17)),
-    ("s3 a kept fixed part regenerated", 3, lambda d, b: touch_part(d, "dial"), 1.0 * kept(3)),
-    ("s3 a kept mobile renamed", 3, lambda d, b: edit(d, rename_mobile("fourth", "fourth_b")), 1.0 * kept(3)),
+    ("s3 every part file regenerated", 3, lambda d, b: touch_all(d), kept(None)),
+    ("s3 a kept fixed part regenerated", 3, lambda d, b: touch_part(d, "dial"), kept(REF_REMADE + ("dial",))),
+    ("s3 a kept mobile renamed", 3, lambda d, b: edit(d, rename_mobile("fourth", "fourth_b")), kept(REF_REMADE + ("fourth",))),
     ("s3 old third wheel kept as a fixed ornament", 3, old_wheel_as_fixed, 0.0),
     ("s3 day train left undriven", 3, lambda d, b: edit(d, drop_mesh("hour_wheel", "day_idler")), 0.0),   # day hand fails: change not met
     ("s4 gold", 4, lambda d, b: None, 1.0),
@@ -339,10 +353,70 @@ ANCHORS = [
     ("s1 a wheel moved 0.4 up its arbor, off its shoulder", 1, move_part_up(0.4), 0.0),
     ("s1 two parts of one mobile overlap", 1, dup_mobile_part, 0.0),
     ("s4 a part put in after the part of its mobile that blocks it", 4, swap_within_mobile,
-     lambda d: parts_score(1, len(W.load_movement(d).all_parts()))),     # all parts, the barrel included
+     lambda d, b: parts_score(1, len(W.load_movement(d).all_parts()))),     # all parts, the barrel included
     ("s1 seconds pinion with fat teeth (no backlash)", 1, fat_seconds_pinion, fails(1, "tolerant")),
     # the reference's bridge is a skeleton: it blocks the barrel, third, centre, fourth and seconds (measured)
     ("s4 bridge on before the wheels", 4, lambda d, b: edit(d, reorder("bridge", "barrel"), "assembly.json"), parts_score(5)),
+]
+
+
+# ---------------- exploits (HANDOFF_EXPLOITS.md), grader-exploits session ----------------
+# Each was a submission that scored 1.0 before the rules that close it. Mesh-level cases (false tooth counts,
+# the drive test, mutual holding) are in tests/test_exploit_rules.py.
+def x_islands(d, base):
+    """Every plate cut down to discs of radius 2 round the arbors it carries: fourteen floating fixed parts."""
+    import cadquery as cq
+    from geometry import watch_gears_cad as GC
+    doc = _doc_of(d)
+    axes = [(0.0, 0.0)] + [tuple(mo["axis"]) for mo in doc["mobiles"].values()]
+    fixed = []
+    for name in doc["fixed"]:
+        shape = cq.importers.importStep(part_file(d, name)).val()
+        os.remove(part_file(d, name))
+        if name == "barrel_cock":
+            shape = shape.intersect(cq.Solid.makeBox(4, 4, 2.4, cq.Vector(-2, -2, 0.5))).clean()   # its post goes too
+        k = 0
+        for x, y in axes:
+            piece = shape.intersect(cq.Solid.makeCylinder(2.0, 40, cq.Vector(x, y, -20))).clean()
+            for sol in piece.Solids():
+                if sol.Volume() > 0.05:
+                    n = "%s_%d" % (name, k)
+                    k += 1
+                    GC.export(os.path.join(d, "parts", n + ".step"), sol)
+                    fixed.append(n)
+    doc["fixed"] = fixed
+    json.dump(doc, open(os.path.join(d, "movement.json"), "w"), indent=1)
+
+
+def x_cock_without_post(d, base):
+    """The barrel cock as it was before the frame rule: it holds the barrel but touches no other fixed part."""
+    from geometry import watch_gears_cad as GC
+    GC.export(part_file(d, "barrel_cock"), GC.cut(GC.cyl(0, 0, 1.15, 2.45, 1.6), GC.cyl(0, 0, 1.0, 1.7, 0.6)))
+
+
+def x_dummy_ring(d, base):
+    """An extra mobile nothing drives: a ring loose round the barrel cock's post."""
+    from geometry import watch_gears_cad as GC
+    GC.export(os.path.join(d, "parts", "dummy_ring.step"), GC.tube(0, 0, 3.4, 3.6, 1.0, 0.65))
+    edit(d, lambda doc: doc["mobiles"].update(dummy={"axis": [0.0, 0.0], "parts": ["dummy_ring"]}))
+
+
+def x_wheel_as_minute_hand(d, base):
+    """The minute hand part deleted; hands.minute names the centre wheel, which sits under the dial."""
+    def fn(doc):
+        doc["mobiles"]["centre"]["parts"].remove("minute_hand")
+        doc["hands"]["minute"]["part"] = "centre"
+    edit(d, fn)
+    os.remove(part_file(d, "minute_hand"))
+
+
+ANCHORS += [
+    ("x s1 plates cut into islands round the arbors", 1, x_islands, 0.0),                 # Assembled: one frame
+    ("x s1 barrel cock touching no other fixed part", 1, x_cock_without_post, 0.0),        # Assembled: one frame
+    ("x s1 an undriven ring on the barrel cock's post", 1, x_dummy_ring, fails(1, "train", "held")),
+    ("x s1 the centre wheel declared as the minute hand", 1, x_wheel_as_minute_hand, fails(1, "hands")),
+    ("x s3 five more received wheels remade", 3, lambda d, b: [touch_part(d, n) for n in ("fourth", "seconds", "minute_wheel", "hour_wheel", "day_idler")],
+     kept(REF_REMADE + ("fourth", "seconds", "minute_wheel", "hour_wheel", "day_idler"))),
 ]
 
 
@@ -353,7 +427,7 @@ def run_one(args):
     shutil.rmtree(d)
     shutil.copytree(os.path.join(base, "stage%d" % stage), d)
     if callable(want):                  # an expected value that depends on the reference (e.g. its part count)
-        want = want(d)
+        want = want(d, base)
     change(d, base)
     r = grade(d, stage, os.path.join(base, "stage%d" % (stage - 1)) if stage > 1 else None)
     failed = [k for dd in (r["gates"], r["checks"]) for k, v in dd.items() if not v]

@@ -9,7 +9,7 @@ of the stage before:
 1. **Design** the movement (this document up to "Stage 2").
 2. **Extend** it with a 24-hour hand, without touching the existing wheels.
 3. **Change** it: the barrel now turns faster; rework the movement for that while
-   keeping as many of the received part files as you can.
+   keeping as much of the received parts as you can.
 4. **Assemble** it: an order and a collision-free path for every part.
 
 Your instruction file says which stage you are doing. Read the later stages too:
@@ -134,7 +134,11 @@ If either fails the score is 0.
   of the same mobile intersect each other by more than 0.01 mm3 (they may touch,
   like a wheel on its arbor). Because curved surfaces are meshed to within 0.001
   of the true surface, a bore and a shaft drawn with the same radius can overlap
-  by slivers; a fit needs a small radial clearance.
+  by slivers; a fit needs a small radial clearance. And the fixed parts form one
+  frame: two fixed parts are joined when their smallest distance is at most 0.01,
+  and every fixed part must be joined to every other through a chain of joined
+  fixed parts. (This asks only that the frame's parts touch; it does not test how
+  they are fastened.)
 
 ## Scored requirements
 
@@ -142,12 +146,14 @@ Each passes or fails. Weights in brackets; the total is 23.
 
 - **Free to turn [1].** Each mobile, turned through a full turn in 72 steps of 5
   degrees, never intersects the fixed parts by more than 0.01 mm3.
-- **Held [2].** Each mobile, the barrel included, is moved 0.3 along +x, -x, +y,
-  -y, +z and -z in turn and must intersect what holds it by more than 0.01 mm3
-  every time. For the four sideways moves, anything else counts (fixed parts and
-  other mobiles). For the two moves along z, only the fixed parts and mobiles on
-  the same axis (within 0.01) count: a wheel may not be kept in place by a wheel
-  on a different arbor. So each mobile can turn but cannot wander.
+- **Held [2].** Only the frame holds. Each mobile, the barrel included, is moved
+  0.3 along +x, -x, +y, -y, +z and -z in turn, and must be held in every one of
+  the six directions. Moved in a direction, a mobile is held when it intersects
+  the fixed parts by more than 0.01 mm3, or intersects by more than 0.01 mm3 a
+  mobile on the same axis (within 0.01) that is itself held in that direction;
+  this is worked out until nothing changes. So an hour wheel may rest on a cannon
+  pinion that rests on the frame, but two mobiles cannot hold each other up, and a
+  mobile on another axis never holds. So each mobile can turn but cannot wander.
 - **Seated [2].** Every part of a mobile that has more than one part is seated
   on the rest of its mobile: moved 0.3 along +x, -x, +y and -y in turn it must
   intersect the other parts of the same mobile by more than 0.01 mm3 every time,
@@ -159,18 +165,30 @@ Each passes or fails. Weights in brackets; the total is 23.
   so a group of parts that hold only each other fails. The
   supplied barrel and mobiles of one part are not tested.
 - **The train runs [3].** No mobile is given two different speeds by the
-  declared meshes, each of the three hand mobiles is driven from the barrel, and
-  every declared mesh passes this test. Starting from the assembled position,
+  declared meshes, each of the three hand mobiles is driven from the barrel, every
+  declared mesh passes this test, and every mobile is driven from the barrel
+  through declared meshes that pass it (a mobile nothing drives fails this). Starting from the assembled position,
   at step i (i = 0, 1, ..., 8 x max(driver teeth, driven teeth) - 1) the driver
   is turned counter-clockwise (seen from +z) by i x 360 / (8 x driver teeth)
   degrees about its axis and the driven mobile clockwise by that angle x driver
   teeth / driven teeth about its own. Then
-  - at every step the two mobiles intersect by at most 0.01 mm3 (no jam);
+  - at every step the two mobiles intersect by at most 0.01 mm3 (no jam), and
+    so they do at two more positions after every eighth step: one third and one
+    fifth of a step further on (i + 1/3 and i + 1/5 in the formula above, for
+    i = 0, 8, 16, ...), so tooth counts that differ from the real ones are found;
   - at every fourth step the smallest distance between them is at most 0.1
     (they stay engaged);
   - at every eighth step, turning the driver a further quarter of its tooth
     pitch (90 / driver teeth degrees, counter-clockwise) while the driven mobile
-    is held makes them intersect by more than 0.01 mm3 (the teeth really drive).
+    is held makes the teeth really drive. Call the extra intersection that this
+    push creates V (the intersection after the push less the intersection before
+    it), H the height in z of the region where the two intersect after the push,
+    and m = 2 x (distance between the two axes) / (driver teeth + driven teeth),
+    the mesh's module. Then V must be at least 0.001 mm3, and V / H must be more
+    than 0.5 x m x m. V / H is the area the push cuts into the other gear's teeth,
+    so this does not depend on how wide the gears are, and m x m scales it to the
+    size of the teeth: an honest involute pair at module 0.12 with a total
+    backlash of 0.06 gives about 1.2 x m x m, at module 0.25 about 1.6 x m x m.
 - **The train runs with its arbors slightly out of place [2].** Arbors are never
   exactly where they were drawn. Every declared mesh must also pass the test of
   "The train runs" twice more: with the driven mobile (the one declared as
@@ -192,7 +210,10 @@ Each passes or fails. Weights in brackets; the total is 23.
   declared mesh that fails that test drives nothing, so the hand speeds are
   worked out from the barrel through the passing meshes only. (The same holds
   for the 24-hour hand of stages 2 and 3.)
-- **Hands reach [1].** Each hand part reaches at least 5.0 from its axis.
+- **Hands reach [1].** Each hand part reaches at least 5.0 from its axis, lies
+  wholly above the frame (its lowest point is no lower than the highest point of
+  any fixed part), and points: its centre of volume is at least 0.5 from its
+  axis.
 - **Size [1].** Everything, as it turns, stays within 20.7 of the vertical line
   through `case_centre`, and the whole movement including the barrel is at most
   13.4 tall in z. These limits are the same at every stage.
@@ -206,7 +227,7 @@ Each passes or fails. Weights in brackets; the total is 23.
   body. Ordinary gear teeth of module 0.12 or more pass; a wall, web or roof 0.2
   thick or less does not. How the grid lines up with your part is not fixed, so
   leave a little margin.
-- **Light [2].** The fixed parts together have a volume of at most 346 mm3,
+- **Light [2].** The fixed parts together have a volume of at most 355 mm3,
   and all parts of your mobiles together (the supplied barrel not counted) at
   most 278 mm3. The limits are the same at every stage. Volumes are those
   of the solids the grader builds from your part files: for the fixed parts, the
@@ -250,7 +271,9 @@ their weights, plus
 
 - **24-hour hand [3].** It moves as a 24-hour hand does.
 - **24-hour hand placement [1].** Its axis is at least 6.0 from the hour hand's
-  axis, and the hand part reaches at least 3.0 from its own axis.
+  axis, the hand part reaches at least 3.0 from its own axis, and like the other
+  hands it lies wholly above the frame and its centre of volume is at least 0.5
+  from its axis.
 
 Score: the stage-1 formula with p out of 27.
 
@@ -260,8 +283,8 @@ You receive a finished stage-2 movement in `work/` (the same files are in
 `previous/` for reference). The barrel is replaced by one that is identical in
 every way (same `meshes/barrel.stl`, same place, same teeth) except that it turns
 **clockwise once every 6 hours** instead of once every 8. Rework the movement so
-that it meets every requirement of stage 2 with this barrel, and keep as many of
-the received part files as you can.
+that it meets every requirement of stage 2 with this barrel, and keep as much of
+the received parts as you can.
 
 Nothing is frozen: you may change, add, remove and rename anything. The hard
 requirements are the two of stage 1, plus: **the change request is met**, that
@@ -286,17 +309,22 @@ mobile, to a renamed mobile or to `fixed`, or that sits on a mobile nothing driv
 is not kept.
 
 ```
-kept share = (received part files that are kept) / (received part files)
-factor     = min(1, kept share / (15/17))
+fixed share  = (volume of the received fixed parts that are kept) / (volume of the received fixed parts)
+mobile share = (volume of the received parts of mobiles that are kept) / (volume of the received parts of mobiles)
+kept share   = the smaller of the two
+factor       = min(1, kept share / 0.626)
 p          = (weight of scored requirements passed) / 27
 score      = 0 if a hard requirement fails, otherwise
 score      = (0.5 * p^2 + 0.5 * (1 if every scored requirement passes, else 0)) * factor
 ```
 
-The share counts part files: each file counts once, whatever its size or what it
-holds. 15/17 (about 0.882) is the kept share of a reference solution, which keeps 15 of
-the 17 part files it receives. The factor is exactly 1 at a kept share of 15/17
-or more.
+The shares count material, not files: a received part counts with its volume
+(the volume of the solid the grader builds from the received file, each part on
+its own), so splitting a design into many files, or adding small parts, does not
+change them. The fixed parts and the parts of mobiles are counted separately and
+the smaller share is used, so the plates cannot outweigh the wheels. A reference
+solution keeps all of the fixed volume and 0.6267 of the mobile volume it
+receives; the factor is exactly 1 at a kept share of 0.626 or more.
 
 ## Stage 4: assemble it
 

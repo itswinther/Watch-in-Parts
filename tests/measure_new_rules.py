@@ -71,7 +71,7 @@ def tolerant(m):
         row = {"pair": "%s/%s" % (a, b)}
         for lab, s in (("-0.03", -SHIFT), ("0", 0.0), ("+0.03", SHIFT)):
             r = shifted(m, b, (u[0] * s, u[1] * s)).mesh_run(a, ta, b, tb)
-            ok = r["worst_volume"] <= W.VOL_TOL and r["largest_gap"] <= W.ENGAGE_GAP and r["smallest_drive_overlap"] > W.VOL_TOL
+            ok = W.Movement.mesh_passes(r)
             row[lab] = (round(r["worst_volume"], 5), round(r["largest_gap"], 4), round(r["smallest_drive_overlap"], 4), ok)
         rows.append(row)
         print("   mesh", row, flush=True)
