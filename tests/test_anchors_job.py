@@ -145,10 +145,12 @@ def _third(wheel_z=None, top_shoulder=True):
     if top_shoulder:
         arb = ref.arbor(I, lo, hi)
     else:
-        # the shaft is 0.5 only up to the wheel; above it, the arbor is the 0.3 pivot all the way through the bridge
+        # the shaft is 0.5 only up to the wheel; above it the arbor is the 0.3 pivot, up into the bridge's 0.4
+        # hole (blind, its end at hi + 0.8 = 5.7) but ending at hi + 0.45 = 5.35 instead of the reference's 5.6,
+        # so 0.3 higher it still stops 0.05 short of the hole's end
         x, y = I
         zt = ref.Z["B"][1]
-        arb = ref.union([ref.cyl(x, y, lo, zt, 0.5), ref.cyl(x, y, lo - 0.7, lo + 0.01, 0.3), ref.cyl(x, y, zt - 0.01, hi + 0.7, 0.3)])
+        arb = ref.union([ref.cyl(x, y, lo, zt, 0.5), ref.cyl(x, y, lo - 0.7, lo + 0.01, 0.3), ref.cyl(x, y, zt - 0.01, hi + 0.45, 0.3)])
     return ref.union([arb, p1, w1])
 
 
@@ -162,8 +164,7 @@ def _centre(neck=False, tip_top=11.4):
     w2, _ = ref.wheel_at(C, 90, ref.M_C, ref.Z["C"], ref.ang(C, T), hub_r=1.2)
     cx, cy = C
     cyl = ref.cyl
-    shaft = [cyl(cx, cy, 6.39, 10.7, 0.5)] if not neck else \
-        [cyl(cx, cy, 6.39, 6.41, 0.5), cyl(cx, cy, 6.4, 7.3, 0.2), cyl(cx, cy, 7.29, 10.7, 0.5)]
+    shaft = [cyl(cx, cy, 6.39, 10.7, 0.5)] if not neck else [cyl(cx, cy, 6.39, 7.3, 0.2), cyl(cx, cy, 7.29, 10.7, 0.5)]
     return ref.union([cyl(cx, cy, lo, 6.4, 0.6), cyl(cx, cy, lo - 0.7, lo + 0.01, 0.3)] + shaft +
                      [cyl(cx, cy, 10.69, tip_top, 0.35), p2, w2])
 
@@ -316,6 +317,12 @@ def b_day_too_close(d):
                           c(x, y, z1 - 0.01, 10.3, 0.5), c(x, y, 10.29, 10.7, 0.3), gear_solid])
     ref.place_day, ref.hand, ref.hand_arbor = (lambda P: Dn), hand, hand_arbor
     ref.main_job(d)
+    # the day wheel now lies under the hour wheel's rim (5.96 < 5.0 + 3.36), so it goes in before the hour wheel
+    # (measured: in the reference's order it is the one part not installed, blocked by the hour wheel)
+    order = [n for n in ORDER_8H if n != "day"]
+    order.insert(order.index("hour_wheel"), "day")
+    with open(os.path.join(d, "assembly.json"), "w") as f:
+        json.dump(ref.build_assembly(d, order), f)
 
 
 def b_variant_is_movement(d):
@@ -462,8 +469,10 @@ ANCHORS = [
     ("job a hand at the wrong speed (seconds pair 95/13)", b_wrong_speed,
      X(P1={"checks": ["seconds"]}, P3={"checks": ["seconds"]}),
      [detail(["P1", "details", "seconds", "clockwise_turns_per_hour_through_working_meshes"], lambda v: v == "1425/26", "1425/26 (7.5 x 95/13)")]),
-    # The 8-hour third arbor without its top shoulder (0.3 pivot from the wheel up through the bridge, which has a
-    # 0.4 hole): moved +z it touches nothing. third is in movement.json only: P1 fails held (2). Deficit
+    # The 8-hour third arbor with nothing to stop it rising: no top shoulder (0.3 pivot from the wheel up into
+    # the bridge's 0.4 hole) and the pivot ending 0.35 short of the hole's blind end (the reference's ends 0.1
+    # short, so it is held by the end too). Moved +z it touches nothing. (Measured: removing the shoulder alone
+    # leaves it held by the pivot's end.) third is in movement.json only: P1 fails held (2). Deficit
     # 0.25 x 2/21 = 1/42; reward 1/2 - 1/63 = 61/126 = 0.484127
     ("job a mobile not held (third arbor without its top shoulder)", b_not_held,
      X(P1={"checks": ["held"]}),
@@ -510,8 +519,9 @@ ANCHORS = [
     ("job 24-hour hand at the wrong rate (day pair 15/35)", b_day_wrong_rate,
      X(P2={"checks": ["day_hand"]}, P3={"checks": ["day_hand"]}),
      [detail(["P2", "details", "day_hand", "clockwise_turns_per_hour_through_working_meshes"], lambda v: v == "1/14", "1/14")]),
-    # The reference rebuilt with the day axis 5.961 from the hour axis (< 6.0), the hour hand shortened to 5.0
-    # and the day hand lifted to clear it (see b_day_too_close). The frame changes for both movements alike:
+    # The reference rebuilt with the day axis 5.961 from the hour axis (< 6.0), the hour hand shortened to 5.0,
+    # the day hand lifted to clear it, and the day put in before the hour wheel (see b_day_too_close). The
+    # frame changes for both movements alike:
     # P2 and P3 fail day_place (1). Deficit 0.10/4 + 0.15/25 = 0.031; reward 1/2 - 0.0206667 = 0.479333
     ("job 24-hour hand axis too close to the hour axis (5.96 mm)", b_day_too_close,
      X(P2={"checks": ["day_place"]}, P3={"checks": ["day_place"]}),
