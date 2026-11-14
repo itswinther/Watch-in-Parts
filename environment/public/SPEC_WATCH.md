@@ -42,6 +42,8 @@ The dial side is +z: the hands are read looking from +z towards -z, and
 - An arbor of radius 0.5 from z -1.0 to z 1.6.
 
 The barrel is a mobile named `barrel`. You must hold it like any other mobile.
+The name `barrel` is reserved: none of your parts or mobiles may be called
+`barrel` (a file that does so fails the Files requirement).
 
 ## What you submit
 
@@ -160,7 +162,11 @@ Each passes or fails. Weights in brackets; the total is 17.
   the two, then 144 equal steps covering one full turn of one relative to the
   other. At every step they intersect by at most 0.01 mm3.
 - **Hour hand [2], minute hand [2], seconds hand [2], hand arrangement [1].** The
-  watch must tell the time: the hands must move as the hands of a watch do.
+  watch must tell the time: the hands must move as the hands of a watch do. A
+  hand is driven only through meshes that pass the test of "The train runs": a
+  declared mesh that fails that test drives nothing, so the hand speeds are
+  worked out from the barrel through the passing meshes only. (The same holds
+  for the 24-hour hand of stages 2 and 3.)
 - **Hands reach [1].** Each hand part reaches at least 5.0 from its axis.
 - **Size [1].** Everything, as it turns, stays within 20.7 of the vertical line
   through `case_centre`, and the whole movement including the barrel is at most
@@ -192,7 +198,8 @@ and night. Declare it as `"day"` under `hands`.
 
 What is frozen:
 
-- every mobile of the received movement keeps its name and its axis;
+- every mobile of the received movement keeps its name and its axis (the same
+  two numbers, unchanged);
 - every part file of those mobiles stays byte-for-byte the same and stays in its
   mobile (you may add new parts to a mobile);
 - every declared mesh stays, and the hour, minute and seconds entries under
@@ -200,7 +207,8 @@ What is frozen:
 
 You may add mobiles, add parts, add meshes, and replace or add fixed parts.
 
-Hard requirements: the two of stage 1, plus the frozen items above.
+Hard requirements: the two of stage 1, the frozen items above, and a 24-hour
+hand is declared (`hands.day` names a mobile and one of that mobile's parts).
 
 Scored requirements (total weight 21): all eleven of stage 1, still passing with
 their weights, plus
@@ -221,7 +229,9 @@ that it meets every requirement of stage 2 with this barrel, and keep as many of
 the received part files as you can.
 
 Nothing is frozen: you may change, add, remove and rename anything. The hard
-requirements are the two of stage 1. The scored requirements are all thirteen of
+requirements are the two of stage 1, plus: **the change request is met**, that
+is, the hour hand, minute hand, seconds hand and 24-hour hand requirements all
+pass with the barrel turning once every 6 hours. The scored requirements are all thirteen of
 stage 2 with their weights (total 21), tested with the barrel turning once every
 6 hours. The hands must still move as the hands of a watch do, and the 24-hour
 hand as a 24-hour hand does.
@@ -232,22 +242,24 @@ file and
 
 - for a received fixed part: it is still listed under `fixed`;
 - for a received part of a mobile: it is still in a mobile of the same name, whose
-  axis is the same as the received mobile's axis, and that mobile is driven from
-  the barrel by the declared meshes.
+  axis is the same as the received mobile's axis (the same two numbers,
+  unchanged), and that mobile is driven from the barrel through declared meshes
+  that pass the test of "The train runs".
 
 A received file that is not named in your `movement.json`, that moves to another
 mobile, to a renamed mobile or to `fixed`, or that sits on a mobile nothing drives,
 is not kept.
 
 ```
-kept share = (received parts that are kept) / (received parts)
+kept share = (received part files that are kept) / (received part files)
 factor     = min(1, kept share / (15/17))
 p          = (weight of scored requirements passed) / 21
 score      = 0 if a hard requirement fails, otherwise
 score      = (0.5 * p^2 + 0.5 * (1 if every scored requirement passes, else 0)) * factor
 ```
 
-15/17 (about 0.882) is the kept share of a reference solution, which keeps 15 of
+The share counts part files: each file counts once, whatever its size or what it
+holds. 15/17 (about 0.882) is the kept share of a reference solution, which keeps 15 of
 the 17 part files it receives. The factor is exactly 1 at a kept share of 15/17
 or more.
 
@@ -263,7 +275,10 @@ Write `work/assembly.json`:
 ```
 
 `order` lists every part named in `movement.json`, and `barrel`, in the order
-they are put in. Each P is a 4x4 matrix as four rows of four numbers that moves
+they are put in. A name that is not a part is ignored; a name that appears more
+than once counts at its first place only. A part that is not in `order` is not
+installed, and it stands in its assembled position from the start, so every part
+in `order` is tested against it. Each P is a 4x4 matrix as four rows of four numbers that moves
 the part from its assembled position (`world = R * assembled + t`, last row
 `0 0 0 1`); the parts are given in their assembled position, so the last pose of
 every path is the identity.

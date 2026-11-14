@@ -122,6 +122,17 @@ def drop_mesh(a, b):
     return fn
 
 
+def paper_edit(d, base):
+    """The received stage-2 movement with only the third/centre tooth counts changed to 54/36 in movement.json."""
+    use_stage(2)(d, base)
+
+    def fn(doc):
+        for e in doc["meshes"]:
+            if (e["driver"], e["driven"]) == ("third", "centre"):
+                e["driver_teeth"], e["driven_teeth"] = 54, 36
+    edit(d, fn)
+
+
 def old_wheel_as_fixed(d, base):
     """Keep the received third-wheel file and declare it a fixed ornament, moved out of the way by
     renaming nothing: it stands where it always stood, so it collides with the new third wheel."""
@@ -141,23 +152,27 @@ ANCHORS = [
      fails(1, "train", "minute", "hour", "seconds")),
     ("s1 barrel not held from above", 1, lambda d, b: edit(d, lambda doc: doc["fixed"].remove("barrel_cock")), fails(1, "held")),
     ("s2 gold", 2, lambda d, b: None, 1.0),
-    ("s2 stage-1 design handed back unchanged", 2, use_stage(1), fails(2, "day_hand", "day_place")),
+    ("s2 stage-1 design handed back unchanged", 2, use_stage(1), 0.0),          # no day hand declared: hard requirement
     ("s2 seconds hand declared as the 24-hour hand", 2,
      lambda d, b: edit(d, lambda doc: doc["hands"].update(day={"mobile": "seconds", "part": "seconds_hand"})), fails(2, "day_hand")),
     ("s2 a frozen wheel file changed", 2, lambda d, b: touch_part(d, "third"), 0.0),
     ("s3 gold", 3, lambda d, b: None, 1.0 * kept(2)),
     ("s3 do nothing", 3, lambda d, b: nothing(d), 0.0),
-    ("s3 stage-2 movement handed back unchanged", 3, use_stage(2), fails(3, "hour", "minute", "seconds", "day_hand") * kept(0)),
+    ("s3 stage-2 movement handed back unchanged", 3, use_stage(2), 0.0),        # change request not met: hard requirement
+    ("s3 tooth counts edited on paper only", 3, paper_edit, 0.0),
     ("s3 every part file regenerated", 3, lambda d, b: touch_all(d), 1.0 * kept(17)),
     ("s3 a kept fixed part regenerated", 3, lambda d, b: touch_part(d, "dial"), 1.0 * kept(3)),
     ("s3 a kept mobile renamed", 3, lambda d, b: edit(d, rename_mobile("fourth", "fourth_b")), 1.0 * kept(3)),
     ("s3 old third wheel kept as a fixed ornament", 3, old_wheel_as_fixed, 0.0),
-    ("s3 day train left undriven", 3, lambda d, b: edit(d, drop_mesh("hour_wheel", "day_idler")), fails(3, "day_hand", "clear") * kept(5)),
+    ("s3 day train left undriven", 3, lambda d, b: edit(d, drop_mesh("hour_wheel", "day_idler")), 0.0),   # day hand fails: change not met
     ("s4 gold", 4, lambda d, b: None, 1.0),
     ("s4 no assembly.json", 4, lambda d, b: os.remove(os.path.join(d, "assembly.json")), 0.0),
     ("s4 a part file changed", 4, lambda d, b: touch_part(d, "dial"), 0.0),
     ("s4 centre before third", 4, lambda d, b: edit(d, reorder("centre_36", "third_54"), "assembly.json"), parts_score(1)),
     ("s4 dial jumps into place in one step", 4, lambda d, b: edit(d, teleport, "assembly.json"), parts_score(1)),
+    # the dial stands in place from the start, so the 13 parts ORDER puts in before it cannot come down from above
+    ("s4 dial left out of the order", 4, lambda d, b: edit(d, lambda doc: doc["order"].remove("dial"), "assembly.json"),
+     parts_score(1 + ref.ORDER.index("dial"))),
     ("s4 bridge on before the wheels", 4, lambda d, b: edit(d, reorder("bridge", "barrel"), "assembly.json"), parts_score(6)),
 ]
 
