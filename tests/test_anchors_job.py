@@ -399,7 +399,7 @@ def b_day_too_close(d):
         return ref.union([c(x, y, z0, z1, 0.6), c(x, y, z1 - 0.4, z1, 0.8), c(x, y, z0 - 0.7, z0 + 0.01, 0.3),
                           c(x, y, z1 - 0.01, 10.3, 0.5), c(x, y, 10.29, 10.7, 0.3), gear_solid])
     ref.place_day, ref.hand, ref.hand_arbor = (lambda P: Dn), hand, hand_arbor
-    ref.main_job(d)
+    ref.main_job(d, split=False)     # the one-part layout the suite is written for (B, after builder M)
     # the day wheel now lies under the hour wheel's rim (5.96 < 5.0 + 3.36), so it goes in before the hour wheel
     # (measured: in the reference's order it is the one part not installed, blocked by the hour wheel)
     order = [n for n in ORDER_8H if n != "day"]
