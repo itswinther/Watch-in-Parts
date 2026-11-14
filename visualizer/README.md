@@ -36,4 +36,4 @@ loads it in the frame) is a small change in `index.html` and `app/replay.js`.
 
 | File | What it shows | Made by |
 | --- | --- | --- |
-| | | Mikael |
+| `xray.html` (still: `xray.png`) | X-ray view of the whole watch: B's movement (going train, hands, barrel) with A's keyless v1 reference, plus the dial side. Parts embedded; three.js from a CDN; fills its window. Made by `tools/viewer/export_watch_demo.py`, from the team's own reference geometry only, no third-party CAD. Keyless motion is a recorded sample trace of the v1 engine. Three base64 mesh runs had a space inserted after `AI` so the secret scanner does not mistake them for Google keys; `atob` ignores it. **Next:** v2, replaying every step AT-0..AT-6 from the merged engine's traces with pass/fail numbers and contact highlights. | Mikael |

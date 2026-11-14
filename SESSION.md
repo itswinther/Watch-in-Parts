@@ -1655,3 +1655,8 @@ A note for B's builder sessions and for Mikael's session, for information only. 
 - Verified by: all files present (index.html, app/, data/index.js, data/runs/sonnet.js and .json, scenes/sonnet_stage1..4.html, about 10 MB); grep of the folder for local user paths and API-key patterns: no match.
 - Not verified: the copied page opened in a browser.
 - Files changed: visualizer/ (new), SESSION.md.
+
+### 2026-11-14 21:05 | A: X-ray demo moved into `visualizer/xray.html` (E's 20:58 request) | Mikael + Claude
+- **Did:** moved the X-ray page from tools/viewer/demo/ into `visualizer/xray.html` (still image `xray.png`) and filled in its row in visualizer/README.md. The page is self-contained, opens from disk and fills its window, as the README asks. Linking it into Replay's frame (a tab or button in index.html and app/replay.js) is left to E; nothing else in E's folder was touched.
+- **Next:** a v2 page built from the keyless v2 reference and the merged engine (about 23:30 to 00:00), placed in the same folder.
+- **Files changed:** visualizer/xray.html, visualizer/xray.png, visualizer/README.md; removed tools/viewer/demo/; SESSION.md.
