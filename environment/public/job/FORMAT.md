@@ -6,8 +6,8 @@ Units: millimetres (mm). Every file below is in `/app/delivery/`.
 
 ```
 /app/delivery/
-  movement.json        the movement for the barrel turning once every 8 h
-  variant_6h.json      the same calibre for the barrel turning once every 6 h
+  movement.json        the 8-hour build
+  variant_6h.json      the 6-hour variant
   assembly.json        the assembly plan of movement.json
   parts/<name>.step    one STEP file per part, for both movements
   scripts/             optional, at most 200 files and 4,194,304 bytes in all; never run or read

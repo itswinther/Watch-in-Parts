@@ -29,7 +29,8 @@ JOB = os.path.join(ROOT, "environment", "public", "job")
 EXTERNAL_SHEETS = []
 
 FORBIDDEN_NAMES = {"solution", "tests", "anchors", "solution.md", "step_by_step.md", "context.md", "claude.md",
-                   "session.md", ".git", "spec.md", "grade_watch.py"}
+                   "session.md", ".git", "spec.md", "grade_watch.py",
+                   "traceability_watch.md"}     # environment/public/job/TRACEABILITY_WATCH.md stays in the repository
 # case-insensitive regular expressions; none may occur in any file of the bundle
 FORBIDDEN_WORDS = [r"reference", r"solution", r"\bstages?\b", r"hand_speed", r"1/12", r"1/24", r"60 turns",
                    r"weight", r"anchor", r"board-in-a-box", r"session", r"\bkept\b", r"grade_watch", r"oracle"]

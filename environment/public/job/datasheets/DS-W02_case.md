@@ -1,19 +1,21 @@
-# DS-W02 Case
+# Watch cases, demonstration-scale series: catalogue sheet
 
 | Document | Revision | Date | Status |
 |---|---|---|---|
 | DS-W02 | A | 2026-11-14 | Released |
 
-**Source:** the case supplied for this calibre. It is not a catalogue or a cited document.
+**Issued by:** the case maker. **Document type:** catalogue sheet.
 
-## 1. Inner space
+## 1. Scope
 
-The case's inner space is a cylinder whose axis is parallel to z. The movement files state where that axis lies
-(`case_centre`, x and y in mm).
+Round cases for demonstration-scale movements. The inner space of each case is a cylinder; its axis is parallel
+to the arbors of the movement it holds. All lengths in millimetres.
 
-| Quantity | Value |
-|---|---|
-| Inner radius | 20.7 mm (inner diameter 41.4 mm) |
-| Inner height, along z | 13.4 mm |
+## 2. Catalogue
 
-Units: millimetres.
+| Part no. | Inner radius (mm) | Inner height along the axis (mm) |
+|---|---|---|
+| CS-376-118 | 18.8 | 11.8 |
+| CS-414-134 | 20.7 | 13.4 |
+| CS-414-152 | 20.7 | 15.2 |
+| CS-452-140 | 22.6 | 14 |

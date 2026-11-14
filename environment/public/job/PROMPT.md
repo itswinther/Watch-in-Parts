@@ -7,13 +7,22 @@ its smallest feature is 0.2 mm.
 ## The goal
 
 The wearer reads the time from four hands: hours and minutes on a common centre, seconds, and a 24-hour hand that
-shows the hour of the day. The movement takes its power from the supplied mainspring barrel, which turns once
-every 8 h, and it fits the case. The same calibre is also made for the 6-hour version of the barrel, which turns
-once every 6 h, on the same frame. The workshop assembles the 8-hour movement part by part, following your
-assembly plan.
+shows the hour of the day. The movement takes its power from the barrel below, fits the case below, and its parts
+can be printed by the process below. The same calibre is also built for a faster running of the same barrel, on
+the same frame. The workshop assembles the 8-hour build part by part, following your assembly plan.
 
 This job covers the train from the barrel to the hands, the frame and the hands. The movement has no escapement
-and no winding or setting works: the barrel is the driver and turns at the steady speed stated on its datasheet.
+and no winding or setting works: the barrel is the driver and turns at the steady speed given in the order.
+
+## Order
+
+| Item | Specification |
+|---|---|
+| Barrel | part no. BR-096-20, catalogue sheet DS-W01; supplied as `/app/supplied/barrel.stl` |
+| Case | part no. CS-414-134, catalogue sheet DS-W02 |
+| Parts | printed by the process of sheet DS-W03 |
+| 8-hour build (`movement.json`) | barrel BR-096-20 turning clockwise, seen from the dial side, once every 8 h |
+| 6-hour variant (`variant_6h.json`) | the same barrel BR-096-20, in the same place, turning clockwise, seen from the dial side, once every 6 h |
 
 ## Deliverables
 
@@ -21,8 +30,8 @@ Everything goes into the folder `/app/delivery/`:
 
 | Path | Content |
 |---|---|
-| `/app/delivery/movement.json` | the movement for the barrel turning once every 8 h, with hour, minute, seconds and 24-hour hands |
-| `/app/delivery/variant_6h.json` | the same calibre for the barrel turning once every 6 h, on the same frame |
+| `/app/delivery/movement.json` | the 8-hour build, with hour, minute, seconds and 24-hour hands |
+| `/app/delivery/variant_6h.json` | the 6-hour variant: the same calibre on the same frame, with hour, minute, seconds and 24-hour hands |
 | `/app/delivery/assembly.json` | the order in which the parts of `movement.json` are put in, and the path of each |
 | `/app/delivery/parts/<name>.step` | every part of both movements, one STEP file per part; a part used in both movements is one file |
 | `/app/delivery/scripts/` | optional: the scripts that made the parts. Archived with the delivery; never run or read |
@@ -43,10 +52,10 @@ Installed software: Python 3 with CadQuery 2.8.0 (OpenCASCADE, importable as `ca
 
 ## Supplied
 
-- `/app/datasheets/`: the datasheets of the supplied barrel (DS-W01), the case (DS-W02) and the manufacturing
-  process (DS-W03); `/app/datasheets/INDEX.md` lists them.
-- `/app/supplied/barrel.stl`: the supplied barrel as a mesh (binary STL, millimetres, in its place in the
-  movement). It is not part of the delivery.
+- `/app/datasheets/`: the barrel catalogue (DS-W01), the case catalogue (DS-W02) and the print service's
+  process sheet (DS-W03); `/app/datasheets/INDEX.md` lists them.
+- `/app/supplied/barrel.stl`: barrel BR-096-20 as a mesh, in its assembled position (DS-W01, section 3). It is not
+  part of the delivery.
 
 ## Acceptance test
 
@@ -67,12 +76,12 @@ Terms used below:
 - **A mobile** is a set of parts that turn together as one rigid body about the vertical line through its axis.
   The barrel is the mobile `barrel`, with its axis on x = 0 mm, y = 0 mm.
 - **Speeds** are worked out from the tooth counts declared under `meshes`, as exact fractions, starting from the
-  barrel at the speed given for the part being judged. Every declared mesh is external: its two mobiles turn in
-  opposite directions.
+  barrel at the speed the order gives for the build being judged. Every declared mesh is external: its two
+  mobiles turn in opposite directions.
 
 ### Part 1: going train and hands (`movement.json`)
 
-The barrel turns clockwise once every 8 h.
+The 8-hour build: the barrel turns clockwise once every 8 h.
 
 Conditions. If one fails, Part 1 fails and none of its checks passes.
 
@@ -133,11 +142,12 @@ Checks. Each passes or fails.
 11. **Hands.** Each of the hour, minute and seconds hand parts reaches at least 5 mm from its mobile's axis;
     lies wholly above the frame (its lowest point is no lower than the highest point of any fixed part); and
     points: its centre of volume is at least 0.5 mm from its mobile's axis.
-12. **Fits the case.** Everything stays within 20.7 mm of the vertical line through `case_centre` as it turns:
-    every point of every fixed part, and, for each mobile, its largest distance from its own axis plus the distance
-    from its axis to `case_centre`. The whole movement, the barrel included, is at most 13.4 mm tall in z.
+12. **Fits the case.** Everything stays within 20.7 mm (the inner radius of case CS-414-134, DS-W02) of the
+    vertical line through `case_centre` as it turns: every point of every fixed part, and, for each mobile, its
+    largest distance from its own axis plus the distance from its axis to `case_centre`. The whole movement, the
+    barrel included, is at most 13.4 mm tall in z (the inner height of case CS-414-134).
 13. **Printable.** Each part you make (not the barrel) is printable by the test of the manufacturing process
-    (datasheet DS-W03, section 2), which is:
+    (sheet DS-W03, section 3), which is:
 
     The part is divided into cubic voxels of side 0.05 mm whose centres lie at 0.05 x k + 0.0113 mm along x, y and z
     (k any integer); a voxel is solid when its centre is inside the part. A solid voxel survives when its centre
@@ -148,7 +158,7 @@ Checks. Each passes or fails.
 
 ### Part 2: 24-hour hand (`movement.json`)
 
-The barrel turns clockwise once every 8 h.
+The 8-hour build: the barrel turns clockwise once every 8 h.
 
 Conditions: C1 and C2 of Part 1, and **C3 24-hour hand declared**: `hands.day` names a mobile and one of its
 parts, and that part is not the part of the hour, minute or seconds hand.
@@ -164,7 +174,7 @@ Checks:
 
 ### Part 3: the 6-hour variant (`variant_6h.json`)
 
-The same barrel (the same part, in the same place) turns clockwise once every 6 h.
+The 6-hour variant: the same barrel, in the same place, turns clockwise once every 6 h.
 
 Conditions: C1, C2 and C3 for `variant_6h.json`, and **C4 Same frame**: its `fixed` list is the same as that of
 `movement.json` (the same names in the same order, so the same part files), and its `case_centre` is the same

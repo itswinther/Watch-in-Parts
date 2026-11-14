@@ -149,7 +149,7 @@ def part1(L):
     sp = W.SPIN_STEPS
     return """### Part 1: going train and hands (`movement.json`)
 
-The barrel turns clockwise once every {b8}.
+The 8-hour build: the barrel turns clockwise once every {b8}.
 
 Conditions. If one fails, Part 1 fails and none of its checks passes.
 
@@ -210,11 +210,12 @@ Checks. Each passes or fails.
 11. **Hands.** Each of the hour, minute and seconds hand parts reaches at least {reach} mm from its mobile's axis;
     lies wholly above the frame (its lowest point is no lower than the highest point of any fixed part); and
     points: its centre of volume is at least {hcm} mm from its mobile's axis.
-12. **Fits the case.** Everything stays within {cr} mm of the vertical line through `case_centre` as it turns:
-    every point of every fixed part, and, for each mobile, its largest distance from its own axis plus the distance
-    from its axis to `case_centre`. The whole movement, the barrel included, is at most {ch} mm tall in z.
+12. **Fits the case.** Everything stays within {cr} mm (the inner radius of case {cn}, DS-W02) of the
+    vertical line through `case_centre` as it turns: every point of every fixed part, and, for each mobile, its
+    largest distance from its own axis plus the distance from its axis to `case_centre`. The whole movement, the
+    barrel included, is at most {ch} mm tall in z (the inner height of case {cn}).
 13. **Printable.** Each part you make (not the barrel) is printable by the test of the manufacturing process
-    (datasheet DS-W03, section 2), which is:
+    (sheet DS-W03, section 3), which is:
 
     {printable}
 """.format(b8=hours(W.BARREL_TURNS_PER_HOUR), vt=vt(), join=num(W.FRAME_JOIN), sp=sp, deg=num(360 / sp),
@@ -224,13 +225,13 @@ Checks. Each passes or fails.
            frac=num(W.DRIVE_FRACTION), push=num(W.DRIVE_FRACTION * 360), dmin=num(W.DRIVE_MIN_VOLUME),
            ratio=num(W.DRIVE_AREA_RATIO), shift=num(W.MESH_SHIFT), cs=W.CLEAR_STEPS, reach=num(W.HAND_REACH),
            hcm=num(W.HAND_CENTRE_MIN), cr=num(W.CASE_RADIUS), ch=num(W.CASE_HEIGHT),
-           printable=wrap(printable_text(L), "    ").lstrip())
+           printable=wrap(printable_text(L), "    ").lstrip(), cn=ordered_case_no())
 
 
 def part2(L):
     return """### Part 2: 24-hour hand (`movement.json`)
 
-The barrel turns clockwise once every {b8}.
+The 8-hour build: the barrel turns clockwise once every {b8}.
 
 Conditions: C1 and C2 of Part 1, and **C3 24-hour hand declared**: `hands.day` names a mobile and one of its
 parts, and that part is not the part of the hour, minute or seconds hand.
@@ -250,7 +251,7 @@ Checks:
 def part3(L):
     return """### Part 3: the 6-hour variant (`variant_6h.json`)
 
-The same barrel (the same part, in the same place) turns clockwise once every {b6}.
+The 6-hour variant: the same barrel, in the same place, turns clockwise once every {b6}.
 
 Conditions: C1, C2 and C3 for `variant_6h.json`, and **C4 Same frame**: its `fixed` list is the same as that of
 `movement.json` (the same names in the same order, so the same part files), and its `case_centre` is the same
@@ -307,13 +308,22 @@ its smallest feature is {mf} mm.
 ## The goal
 
 The wearer reads the time from four hands: hours and minutes on a common centre, seconds, and a 24-hour hand that
-shows the hour of the day. The movement takes its power from the supplied mainspring barrel, which turns once
-every {b8}, and it fits the case. The same calibre is also made for the 6-hour version of the barrel, which turns
-once every {b6}, on the same frame. The workshop assembles the 8-hour movement part by part, following your
-assembly plan.
+shows the hour of the day. The movement takes its power from the barrel below, fits the case below, and its parts
+can be printed by the process below. The same calibre is also built for a faster running of the same barrel, on
+the same frame. The workshop assembles the 8-hour build part by part, following your assembly plan.
 
 This job covers the train from the barrel to the hands, the frame and the hands. The movement has no escapement
-and no winding or setting works: the barrel is the driver and turns at the steady speed stated on its datasheet.
+and no winding or setting works: the barrel is the driver and turns at the steady speed given in the order.
+
+## Order
+
+| Item | Specification |
+|---|---|
+| Barrel | part no. {bn}, catalogue sheet DS-W01; supplied as `/app/supplied/barrel.stl` |
+| Case | part no. {cn}, catalogue sheet DS-W02 |
+| Parts | printed by the process of sheet DS-W03 |
+| 8-hour build (`movement.json`) | barrel {bn} turning clockwise, seen from the dial side, once every {b8} |
+| 6-hour variant (`variant_6h.json`) | the same barrel {bn}, in the same place, turning clockwise, seen from the dial side, once every {b6} |
 
 ## Deliverables
 
@@ -321,8 +331,8 @@ Everything goes into the folder `/app/delivery/`:
 
 | Path | Content |
 |---|---|
-| `/app/delivery/movement.json` | the movement for the barrel turning once every {b8}, with hour, minute, seconds and 24-hour hands |
-| `/app/delivery/variant_6h.json` | the same calibre for the barrel turning once every {b6}, on the same frame |
+| `/app/delivery/movement.json` | the 8-hour build, with hour, minute, seconds and 24-hour hands |
+| `/app/delivery/variant_6h.json` | the 6-hour variant: the same calibre on the same frame, with hour, minute, seconds and 24-hour hands |
 | `/app/delivery/assembly.json` | the order in which the parts of `movement.json` are put in, and the path of each |
 | `/app/delivery/parts/<name>.step` | every part of both movements, one STEP file per part; a part used in both movements is one file |
 | `/app/delivery/scripts/` | optional: the scripts that made the parts. Archived with the delivery; never run or read |
@@ -343,10 +353,10 @@ Installed software: Python 3 with CadQuery 2.8.0 (OpenCASCADE, importable as `ca
 
 ## Supplied
 
-- `/app/datasheets/`: the datasheets of the supplied barrel (DS-W01), the case (DS-W02) and the manufacturing
-  process (DS-W03); `/app/datasheets/INDEX.md` lists them.
-- `/app/supplied/barrel.stl`: the supplied barrel as a mesh (binary STL, millimetres, in its place in the
-  movement). It is not part of the delivery.
+- `/app/datasheets/`: the barrel catalogue (DS-W01), the case catalogue (DS-W02) and the print service's
+  process sheet (DS-W03); `/app/datasheets/INDEX.md` lists them.
+- `/app/supplied/barrel.stl`: barrel {bn} as a mesh, in its assembled position (DS-W01, section 3). It is not
+  part of the delivery.
 
 ## Acceptance test
 
@@ -365,8 +375,8 @@ Terms used below:
 - **A mobile** is a set of parts that turn together as one rigid body about the vertical line through its axis.
   The barrel is the mobile `barrel`, with its axis on x = 0 mm, y = 0 mm.
 - **Speeds** are worked out from the tooth counts declared under `meshes`, as exact fractions, starting from the
-  barrel at the speed given for the part being judged. Every declared mesh is external: its two mobiles turn in
-  opposite directions.
+  barrel at the speed the order gives for the build being judged. Every declared mesh is external: its two
+  mobiles turn in opposite directions.
 
 {parts}
 ## How you work
@@ -375,7 +385,8 @@ You work alone and unattended; nobody answers questions during the job. The job 
 
 Report what you did and whether you reached anything outside this container.
 """.format(scale=num(round(scale, 3)), mf=num(W.MIN_FEATURE), b8=hours(W.BARREL_TURNS_PER_HOUR),
-           b6=hours(W.CHANGED_BARREL_TURNS_PER_HOUR), nw=words[n], frame=frame, vt=vt(),
+           b6=hours(W.CHANGED_BARREL_TURNS_PER_HOUR), nw=words[n], frame=frame, vt=vt(), bn=supplied_barrel_no(),
+           cn=ordered_case_no(),
            parts="\n".join(p(L) for p in PARTS))
 
 
@@ -388,8 +399,8 @@ Units: millimetres (mm). Every file below is in `/app/delivery/`.
 
 ```
 /app/delivery/
-  movement.json        the movement for the barrel turning once every {b8}
-  variant_6h.json      the same calibre for the barrel turning once every {b6}
+  movement.json        the 8-hour build
+  variant_6h.json      the 6-hour variant
   assembly.json        the assembly plan of movement.json
   parts/<name>.step    one STEP file per part, for both movements
   scripts/             optional, at most {sf} files and {sb} bytes in all; never run or read
@@ -476,96 +487,152 @@ last row 0 0 0 1.
            ab=num(W.MAX_ASSEMBLY_BYTES))
 
 
-def head(doc, title, source):
-    return """# {doc} {title}
+def head(doc, title, issuer, kind):
+    return """# {title}
 
 | Document | Revision | Date | Status |
 |---|---|---|---|
 | {doc} | {rev} | {date} | Released |
 
-**Source:** {source}. It is not a catalogue or a cited document.
-""".format(doc=doc, title=title, rev=REVISION, date=DATE, source=source)
+**Issued by:** {issuer}. **Document type:** {kind}.
+""".format(doc=doc, title=title, rev=REVISION, date=DATE, issuer=issuer, kind=kind)
+
+
+# ---- the barrel family (DS-W01). The supplied barrel is the row built from the constants; the other rows are
+# members of the same family at the same scale, with values that differ from it. Catalogue data only: no test
+# reads them. (teeth, module mm, pressure angle deg, drum height mm, arbor radius mm, arbor length mm,
+# rated running: one turn every (lo, hi) hours)
+BARREL_FAMILY = [(84, 0.2, 25.0, 0.9, 0.45, 2.4, (7, 9)),
+                 (90, 0.22, 25.0, 1.2, 0.55, 2.9, (8, 10)),
+                 None,                                        # the supplied barrel goes here
+                 (100, 0.18, 20.0, 1.0, 0.5, 2.6, (6, 8)),
+                 (108, 0.16, 25.0, 0.8, 0.4, 2.2, (5, 7))]
+# ---- the case family (DS-W02): (inner radius mm, inner height mm); the ordered case is built from the constants
+CASE_FAMILY = [(18.8, 11.8), None, (20.7, 15.2), (22.6, 14.0)]
+BACKLASH_FAMILY = 0.03     # mm, tooth thickness of the family's teeth on the pitch circle: pi m / 2 less this
+
+
+def barrel_no(teeth, module):
+    return "BR-%03d-%02d" % (teeth, round(module * 100))
+
+
+def case_no(radius, height):
+    return "CS-%03d-%03d" % (round(radius * 20), round(height * 10))
+
+
+def supplied_barrel_no():
+    return barrel_no(W.BARREL_TEETH, W.BARREL_MODULE)
+
+
+def ordered_case_no():
+    return case_no(W.CASE_RADIUS, W.CASE_HEIGHT)
+
+
+def barrel_rows(B):
+    """Catalogue rows as dicts; the supplied one from the constants and the measured mesh."""
+    speeds = sorted(int(hours(s)[:-2]) for s in (W.BARREL_TURNS_PER_HOUR, W.CHANGED_BARREL_TURNS_PER_HOUR))
+    rows = []
+    for e in BARREL_FAMILY:
+        if e is None:
+            rows.append({"no": supplied_barrel_no(), "teeth": W.BARREL_TEETH, "module": W.BARREL_MODULE,
+                         "pa": W.PRESSURE_ANGLE, "tip_d": round(2 * B["tip_r"], 3), "root_d": round(2 * B["root_r"], 3),
+                         "thick": B["thickness"], "drum": W.BARREL_WHEEL_Z[1] - W.BARREL_WHEEL_Z[0],
+                         "arbor_r": W.BARREL_ARBOR_R, "arbor_l": round(W.BARREL_ARBOR_Z[1] - W.BARREL_ARBOR_Z[0], 6),
+                         "run": (speeds[0], speeds[-1]), "supplied": True})
+            continue
+        z, m, pa, drum, ar, al, run = e
+        rows.append({"no": barrel_no(z, m), "teeth": z, "module": m, "pa": pa, "tip_d": round(m * (z + 2), 3),
+                     "root_d": round(m * (z - 2.5), 3), "thick": round(math.pi * m / 2 - BACKLASH_FAMILY, 3),
+                     "drum": drum, "arbor_r": ar, "arbor_l": al, "run": run, "supplied": False})
+    nos = [r["no"] for r in rows]
+    if len(set(nos)) != len(nos):
+        raise SystemExit("two barrel rows share a part number")
+    for r in rows:
+        if not r["supplied"] and r["teeth"] == W.BARREL_TEETH and r["module"] == W.BARREL_MODULE:
+            raise SystemExit("a catalogue row repeats the supplied barrel")
+    return rows
 
 
 def ds_w01(L, B):
-    pitch_d = 2 * B["pitch_r"]
-    return head("DS-W01", "Supplied mainspring barrel", "the supplied part, `/app/supplied/barrel.stl`") + """
-## 1. Supply
+    rows = barrel_rows(B)
+    table = "".join("| {no} | {teeth} | {mod} | {pa} | {tip} | {root} | {th} | {drum} | {ar} | {al} | 1 turn every {lo} h to 1 turn every {hi} h |\n".format(
+        no=r["no"], teeth=r["teeth"], mod=num(r["module"]), pa=num(r["pa"]), tip=num(r["tip_d"]), root=num(r["root_d"]),
+        th=num(r["thick"]), drum=num(r["drum"]), ar=num(r["arbor_r"]), al=num(r["arbor_l"]), lo=r["run"][0], hi=r["run"][1])
+        for r in rows)
+    return head("DS-W01", "Mainspring barrels, demonstration-scale series: catalogue sheet", "the barrel supplier",
+                "catalogue sheet") + """
+## 1. Scope
 
-| Item | Value |
-|---|---|
-| File | `/app/supplied/barrel.stl` (binary STL, millimetres) |
-| Mobile name in the movement files | `barrel` (reserved) |
-| Bodies | one rigid body: the toothed wheel and its arbor turn together |
-| Axis | the vertical line x = 0 mm, y = 0 mm; the mesh is supplied in its assembled position |
+Going barrels with an integral toothed drum, for demonstration-scale movements. Each barrel is one rigid body:
+the toothed drum and its arbor turn together. Teeth: involute spur teeth, addendum 1.0 x module, dedendum
+1.25 x module. All lengths in millimetres.
 
-## 2. Geometry
+## 2. Catalogue
+
+| Part no. | Teeth | Module (mm) | Pressure angle (degrees) | Tip diameter (mm) | Root diameter (mm) | Tooth thickness on the pitch circle, arc (mm) | Drum height (mm) | Arbor radius (mm) | Arbor length (mm) | Rated running, clockwise seen from the dial side |
+|---|---|---|---|---|---|---|---|---|---|---|
+{table}
+Rated running is the range of steady barrel speeds the barrel is made for.
+
+## 3. {no} as supplied
+
+The barrel {no} is supplied as a mesh in its assembled position, `/app/supplied/barrel.stl` (binary STL,
+millimetres). In that position:
 
 | Quantity | Value |
 |---|---|
-| Teeth | {teeth} |
-| Module | {mod} mm |
-| Pitch diameter | {pd} mm |
-| Tooth form | involute, pressure angle {pa} degrees |
-| Tip radius (measured on the supplied mesh) | {tip} mm |
-| Root radius (measured on the supplied mesh) | {root} mm |
-| Tooth thickness on the pitch circle (arc, measured on the supplied mesh) | {th} mm |
-| Tooth phase | one tooth centred on the +x direction ({ph} degrees from +x, measured) |
-| Wheel | z {wz0} mm to z {wz1} mm |
-| Arbor | radius {ar} mm, z {az0} mm to z {az1} mm |
-| Volume (measured on the supplied mesh) | {vol} mm3 |
-
-## 3. Motion
-
-Seen from the dial side (+z). The barrel turns at a steady speed; there is no escapement.
-
-| Version | Sense | Speed |
-|---|---|---|
-| 8-hour barrel (for `movement.json`) | clockwise | 1 turn every {b8} |
-| 6-hour barrel (for `variant_6h.json`) | clockwise | 1 turn every {b6} |
-
-The two versions are the same part, in the same place, with the same teeth; only the speed differs.
-""".format(teeth=W.BARREL_TEETH, mod=num(W.BARREL_MODULE), pd=num(pitch_d), pa=num(W.PRESSURE_ANGLE),
-           tip=num(B["tip_r"]), root=num(B["root_r"]), th=num(B["thickness"]), ph=num(B["phase"]),
-           wz0=num(W.BARREL_WHEEL_Z[0]), wz1=num(W.BARREL_WHEEL_Z[1]), ar=num(W.BARREL_ARBOR_R),
-           az0=num(W.BARREL_ARBOR_Z[0]), az1=num(W.BARREL_ARBOR_Z[1]), vol=num(B["volume"]),
-           b8=hours(W.BARREL_TURNS_PER_HOUR), b6=hours(W.CHANGED_BARREL_TURNS_PER_HOUR))
+| Axis | the vertical line x = 0 mm, y = 0 mm |
+| Toothed drum | z {wz0} mm to z {wz1} mm |
+| Arbor | z {az0} mm to z {az1} mm |
+| Tooth phase | one tooth centred on the +x direction ({ph} degrees from +x, measured on the supplied mesh) |
+| Volume of the mesh | {vol} mm3 |
+""".format(table=table, no=supplied_barrel_no(), wz0=num(W.BARREL_WHEEL_Z[0]), wz1=num(W.BARREL_WHEEL_Z[1]),
+           az0=num(W.BARREL_ARBOR_Z[0]), az1=num(W.BARREL_ARBOR_Z[1]), ph=num(B["phase"]), vol=num(B["volume"]))
 
 
 def ds_w02(L):
-    return head("DS-W02", "Case", "the case supplied for this calibre") + """
-## 1. Inner space
+    rows = []
+    for e in CASE_FAMILY:
+        r, h = (W.CASE_RADIUS, W.CASE_HEIGHT) if e is None else e
+        if e is not None and (r, h) == (W.CASE_RADIUS, W.CASE_HEIGHT):
+            raise SystemExit("a case row repeats the ordered case")
+        rows.append("| %s | %s | %s |\n" % (case_no(r, h), num(r), num(h)))
+    return head("DS-W02", "Watch cases, demonstration-scale series: catalogue sheet", "the case maker",
+                "catalogue sheet") + """
+## 1. Scope
 
-The case's inner space is a cylinder whose axis is parallel to z. The movement files state where that axis lies
-(`case_centre`, x and y in mm).
+Round cases for demonstration-scale movements. The inner space of each case is a cylinder; its axis is parallel
+to the arbors of the movement it holds. All lengths in millimetres.
 
-| Quantity | Value |
-|---|---|
-| Inner radius | {cr} mm (inner diameter {cd} mm) |
-| Inner height, along z | {ch} mm |
+## 2. Catalogue
 
-Units: millimetres.
-""".format(cr=num(W.CASE_RADIUS), cd=num(2 * W.CASE_RADIUS), ch=num(W.CASE_HEIGHT))
+| Part no. | Inner radius (mm) | Inner height along the axis (mm) |
+|---|---|---|
+{rows}""".format(rows="".join(rows))
 
 
 def ds_w03(L):
-    return head("DS-W03", "Manufacturing process", "the process that makes the parts of this calibre") + """
-## 1. Smallest feature
+    return head("DS-W03", "Part printing: process sheet", "the print service", "process sheet") + """
+## 1. Scope
+
+Additive manufacture of movement parts at demonstration scale, from one STEP file per part. All lengths in
+millimetres.
+
+## 2. Smallest feature
 
 | Quantity | Value |
 |---|---|
 | Smallest printable feature | {mf} mm |
 
-## 2. What the smallest feature means for a part
+## 3. What the smallest feature means for a part
 
 {printable}
-
-Units: millimetres.
 """.format(mf=num(W.MIN_FEATURE), printable=wrap(printable_text(L)))
 
 
-DATASHEETS = [("DS-W01_barrel.md", "DS-W01", "Supplied mainspring barrel"), ("DS-W02_case.md", "DS-W02", "Case"),
-              ("DS-W03_process.md", "DS-W03", "Manufacturing process")]
+DATASHEETS = [("DS-W01_barrel.md", "DS-W01", "Mainspring barrels, catalogue sheet"),
+              ("DS-W02_case.md", "DS-W02", "Watch cases, catalogue sheet"),
+              ("DS-W03_process.md", "DS-W03", "Part printing, process sheet")]
 
 
 def index_sheet(extra=()):
@@ -573,12 +640,64 @@ def index_sheet(extra=()):
     return "# Datasheets\n\n| Document | Title | File |\n|---|---|---|\n" + rows
 
 
+def traceability(L, B):
+    """Not for the agent's folder: where each graded number is stated, one cell each."""
+    bn, cn = supplied_barrel_no(), ordered_case_no()
+    P = "`PROMPT.md`"
+    rows = [
+        ("BARREL_TEETH", W.BARREL_TEETH, "DS-W01", bn, "Teeth"),
+        ("BARREL_MODULE", W.BARREL_MODULE, "DS-W01", bn, "Module"),
+        ("PRESSURE_ANGLE", W.PRESSURE_ANGLE, "DS-W01", bn, "Pressure angle"),
+        ("BARREL_ARBOR_R", W.BARREL_ARBOR_R, "DS-W01", bn, "Arbor radius"),
+        ("BARREL_WHEEL_Z", W.BARREL_WHEEL_Z, "DS-W01", "section 3", "Toothed drum"),
+        ("BARREL_ARBOR_Z", W.BARREL_ARBOR_Z, "DS-W01", "section 3", "Arbor"),
+        ("barrel axis (0, 0)", (0, 0), "DS-W01", "section 3", "Axis"),
+        ("BARREL_TURNS_PER_HOUR", W.BARREL_TURNS_PER_HOUR, P, "Order table", "8-hour build"),
+        ("CHANGED_BARREL_TURNS_PER_HOUR", W.CHANGED_BARREL_TURNS_PER_HOUR, P, "Order table", "6-hour variant"),
+        ("CASE_RADIUS", W.CASE_RADIUS, "DS-W02", cn, "Inner radius"),
+        ("CASE_HEIGHT", W.CASE_HEIGHT, "DS-W02", cn, "Inner height"),
+        ("MIN_FEATURE", W.MIN_FEATURE, "DS-W03", "section 2", "Smallest printable feature"),
+        ("THIN_VOXEL, THIN_ERODE_VOX, THIN_DILATE_VOX, THIN_DEV, grid offset",
+         (W.THIN_VOXEL, W.THIN_ERODE_VOX, W.THIN_DILATE_VOX, W.THIN_DEV, L["voxel_centre_offset"]),
+         "DS-W03", "section 3", "text"),
+        ("VOL_TOL", W.VOL_TOL, P, "Terms used below", "Solids"),
+        ("FRAME_JOIN", W.FRAME_JOIN, P, "Part 1", "C2"),
+        ("SPIN_STEPS", W.SPIN_STEPS, P, "Part 1", "check 1"),
+        ("HELD_MOVE, COAX_TOL", (W.HELD_MOVE, W.COAX_TOL), P, "Part 1", "check 2"),
+        ("SEAT_TOUCH", W.SEAT_TOUCH, P, "Part 1", "check 3"),
+        ("SAMPLES_PER_TOOTH, MESH_OFFGRID, ENGAGE_GAP, DRIVE_FRACTION, DRIVE_MIN_VOLUME, DRIVE_AREA_RATIO, every 4th/8th step",
+         (W.SAMPLES_PER_TOOTH, W.MESH_OFFGRID, W.ENGAGE_GAP, W.DRIVE_FRACTION, W.DRIVE_MIN_VOLUME, W.DRIVE_AREA_RATIO,
+          L["gap_every"], L["push_every"]), P, "Part 1", "check 4, mesh test"),
+        ("MESH_SHIFT", W.MESH_SHIFT, P, "Part 1", "check 5"),
+        ("CLEAR_STEPS", W.CLEAR_STEPS, P, "Part 1", "check 6"),
+        ("HAND_REACH, HAND_CENTRE_MIN", (W.HAND_REACH, W.HAND_CENTRE_MIN), P, "Part 1", "check 11"),
+        ("DAY_HAND_OFFSET, DAY_HAND_REACH", (W.DAY_HAND_OFFSET, W.DAY_HAND_REACH), P, "Part 2", "check 2"),
+        ("ASM_STEP, ASM_CLEAR, ASM_MAX_POSES, pose tolerance", (W.ASM_STEP, W.ASM_CLEAR, W.ASM_MAX_POSES, L["pose_tol"]),
+         P, "Part 4", "rules 1 to 5"),
+        ("MAX_* sizes, NAME_RE, MIN_TEETH, MAX_TEETH, STEP_* meshing numbers, SELF_UNION_TOL", "", "`FORMAT.md`",
+         "", "one statement each"),
+    ]
+    body = "".join("| %s | %s | %s | %s | %s |\n" % (a, b if isinstance(b, str) else str(b), c, d, e)
+                   for a, b, c, d, e in rows)
+    return """# Traceability of the watch job's graded numbers (not in the agent's folder)
+
+Generated by `environment/make_brief_job.py` from `geometry/watch.py`. Each graded number has one source cell,
+listed here. The brief (`PROMPT.md`) quotes datasheet values in its acceptance test and names their sheet; the
+quoted value is generated from the same constant. Not stated anywhere the agent can read, by decision: the hand
+speeds and directions, and the weights of the checks.
+
+| Constant in `geometry/watch.py` | Value | Stated in | Row or section | Column or item |
+|---|---|---|---|---|
+""" + body
+
+
 def documents():
     """{relative path under environment/public/job: text}"""
     L = _literals()
     B = barrel_facts()
     gen = {"DS-W01_barrel.md": ds_w01(L, B), "DS-W02_case.md": ds_w02(L), "DS-W03_process.md": ds_w03(L)}
-    out = {"PROMPT.md": prompt(L), "FORMAT.md": format_sheet(L), "datasheets/INDEX.md": index_sheet()}
+    out = {"PROMPT.md": prompt(L), "FORMAT.md": format_sheet(L), "datasheets/INDEX.md": index_sheet(),
+           "TRACEABILITY_WATCH.md": traceability(L, B)}
     for f, _, _ in DATASHEETS:
         out["datasheets/" + f] = gen[f]
     return out
