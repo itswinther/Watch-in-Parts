@@ -124,11 +124,3 @@ The judged model and effort setting, per-trial timeout, rerun time budget, credi
 grant, how the stop-early baseline is defined, which environment provider the
 judges use, and whether the organisers' OpenCode registers MCP servers declared
 in `task.toml`. Answers go under Open questions in `SESSION.md`.
-
-## Internal note for workstream B
-
-The reference design is expected to tilt the board in at 20 to 25 degrees with J2
-entering its window first, slide toward +X, flatten, slide back toward -X, and
-drop onto two locating pegs; the door laps on the outside of the floor. This was
-worked out by hand and is not confirmed. If the reference cannot pass, report it
-before relaxing anything.

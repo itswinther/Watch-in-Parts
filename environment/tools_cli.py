@@ -6,7 +6,7 @@ and never run submitted code.
 
 Part names: your own files  work/base.stl -> "base", work/door.stl -> "door";
 supplied bodies "board" (PCB with components), "pcb", "J1", "J2", "C1", "J4", "lid",
-"battery" (in its own frame unless --battery-pose is given), "keepout_J1", "keepout_J2", "envelope".
+"battery" (in its own frame; use --move to pose it), "keepout_J1", "keepout_J2", "envelope".
 """
 import argparse
 import json
