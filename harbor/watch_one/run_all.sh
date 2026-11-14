@@ -34,7 +34,10 @@ AGENT=${AGENT:-opencode}
 ORACLE_K=${ORACLE_K:-3}; NOP_K=${NOP_K:-1}; N_CONCURRENT=${N_CONCURRENT:-2}
 TASK=$OUT/task; JOBS=$OUT/jobs; LOG=$OUT/run_all.log
 SLUG=$(echo "$MODEL" | tr '/:' '__'); TS=$(date +%Y%m%d-%H%M%S)
-case "$AGENT" in opencode) HOST=api.anthropic.com ;; codex) HOST=chatgpt.com ;;
+# the allowlist build_task.py writes for this agent (its HOSTS table); the check below accepts exactly that
+case "$AGENT" in
+  opencode) HOSTS_EXPECTED='"api.anthropic.com", "api.openai.com", "generativelanguage.googleapis.com", "openrouter.ai"' ;;
+  codex) HOSTS_EXPECTED='"chatgpt.com", "api.openai.com"' ;;
   *) echo "AGENT must be opencode or codex" >&2; exit 2 ;; esac
 
 say() { echo "[$(date +%H:%M:%S)] $*" | tee -a "$LOG"; }
@@ -64,8 +67,8 @@ if [ "${SKIP_BUILD:-0}" != 1 ]; then
     python -B -I /repo/harbor/watch_one/build_task.py /out/task --agent "$AGENT" ${GRADER:+--grader "$GRADER"} | tee -a "$LOG"
 fi
 [ -f "$TASK/task.toml" ] || { echo "no task at $TASK" >&2; exit 1; }
-grep -q 'network_mode = "allowlist"' "$TASK/task.toml" && grep -q "allowed_hosts = \[\"$HOST\"\]" "$TASK/task.toml" \
-  || { echo "task.toml: the agent network is not the $HOST allowlist; refusing to run" >&2; exit 1; }
+grep -q 'network_mode = "allowlist"' "$TASK/task.toml" && grep -qF "allowed_hosts = [$HOSTS_EXPECTED]" "$TASK/task.toml" \
+  || { echo "task.toml: the agent network is not the allowlist [$HOSTS_EXPECTED]; refusing to run" | tee -a "$LOG" >&2; exit 1; }
 grep -q 'network_mode = "no-network"' "$TASK/task.toml" || { echo "task.toml: verifier is not no-network" >&2; exit 1; }
 say "lint: $(harbor lint "$TASK" >> "$LOG" 2>&1 && echo clean || echo 'findings, see log')"
 mkdir -p "$JOBS"
