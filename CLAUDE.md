@@ -6,6 +6,13 @@ for the AfterQuery challenge at Junction 2026. Final submission is Sunday 15 Nov
 other teammates at the same time; who is active is in the Current state table in
 `SESSION.md`. The files below are how you stay in step with them.
 
+## Current focus (updated 14 Nov, 04:50)
+
+The task named in this file, Board in a Box, is retired: clean agents scored 1.0
+on it. The current task is the staged mechanical watch gear train. Its state and
+the plan for the overnight build are in `HANDOFF_OVERNIGHT.md`. The rules in this
+file still apply to every session.
+
 - `README.md`  what the project is
 - `SPEC.md`    the task, the checks and the score. Single source of truth.
 - `SESSION.md` who owns what, what is done, what is decided, what is open

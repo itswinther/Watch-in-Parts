@@ -9,7 +9,7 @@ table. Everything below "Session entries" is append-only, newest at the bottom.
 | ID | Workstream | Owner | Status | Last update |
 | --- | --- | --- | --- | --- |
 | A | Harness wiring | Mikael | Harbor + Codex sandbox works (see 05:10). Five-step watch: GPT 1.0 x3. Watch regulation with hidden physics: GPT 1.0 x3, beat the reference. No gap found in either; waiting for Mikael | 2026-11-14 05:30 |
-| B | Reference script and grader | itswinther | Staged watch chains done: Fable 1.0/1.0/1.0, Opus 1.0/1.0/1.0, Sonnet 1.0/1.0/0.44 (its own stage-1 design cannot be assembled). Thickness check now scored. Docker and Harbor 0.26.0 work in this cloud session; preparing real sandboxed runs | 2026-11-14 04:34 |
+| B | Reference script and grader | itswinther | Staged watch task: reference 1.0 at all three stages with the thickness check. Handoff written for an overnight orchestrator session (`HANDOFF_OVERNIGHT.md`, `HANDOFF_PROMPT.md`); that session takes over row B | 2026-11-14 04:47 |
 | C | Hold the Line spike | unassigned | not started | |
 | D | Mentor questions, anchors, transcripts | unassigned | not started | |
 | E | Analysis, demo and story | Yoseph | paused: Yoseph is not working overnight | 2026-11-14 01:40 |
@@ -75,6 +75,7 @@ Append one line per decision: time, decision, who agreed.
 - 2026-11-14 04:13 Watch task, two changes agreed by itswinther: (1) three stages with frozen hand-over, each stage a fresh agent conversation: design; add a 24-hour hand to a frozen design; give an assembly order and paths for the frozen result. (2) For these runs the agent gets the full written contract, the raw geometry kernel and a format-only submit, but no test code and no measuring tools. This reverses the earlier "tools measure everything" principle on purpose; every graded number is still stated in the spec, except what a watch hand does.
 - 2026-11-14 04:13 Interface for A (staged watch): `python -I tests/grade_watch.py /abs/folder --stage N [--prev /abs/previous_stage_folder] --reward FILE`. Stage 3 adds `assembly.json` to the folder. `python environment/make_bundle_watch.py DIR --stage N [--prev FOLDER] --tools no` writes what the agent may see. `environment/run_clean_chain.sh RUN_DIR MODEL` runs the three stages headless; `python tests/grade_chain.py RUN_DIR` grades them.
 - 2026-11-14 04:34 Watch task: the minimum-thickness check is now a scored requirement ("printable", weight 1; stage 1 total 17, stage 2 total 21). Decided: itswinther. Runs made before this are graded with `WATCH_SKIP=printable`.
+- 2026-11-14 04:47 Overnight plan agreed by itswinther: a new Fable 5.2 session orchestrates two Opus builders in separate worktrees and a Sonnet reviewer, unattended. Builder TASK adds a change-request stage, tightens the case to fit the reference, and makes the chain score the product of the stage scores. Builder CAD moves submissions to STEP from a real CAD kernel (CadQuery or build123d) and packages each run as a trajectory record. Spec changes inside that scope are pre-approved; each must be logged here with old and new values.
 
 ## Proposed spec changes
 
@@ -444,3 +445,11 @@ Template:
 - Transcript audit: every command was the timer CLI, local Python, or file writes in /app; no network attempt, no reads of other paths. All three final messages said they used only the brief, /app and the timing machine.
 - Files changed: `spikes/regulate/runs_gpt/`, `spikes/README.md`, `spikes/IDEAS_CODE_IS_NOT_ENOUGH.md`, SESSION.md.
 - Next: needs a human decision (see the ideas file): the only levers left that I can see reduce what the agent is told (unstated model structure, scarcer measurements).
+
+### 2026-11-14 04:47 | B handoff for the overnight orchestrator | itswinther + Claude
+- Did: wrote `HANDOFF_OVERNIGHT.md` (context, state, build plan, definition of done, how to orchestrate) and `HANDOFF_PROMPT.md` (the message to paste into a new Fable 5.2 session). Added a "Current focus" note to `CLAUDE.md` saying Board in a Box is retired and the watch task is current. Confirmed the reference with the thickness check scored.
+- Verified by (command and result): `python3 solution/reference_watch.py OUT` then `python3 -I tests/grade_watch.py OUT/stageN --stage N [--prev ...]`: reward 1.0 at stages 1, 2 and 3 with "printable" true; grading took 160 s, 177 s and 2 s on a loaded machine. Largest thickness deviation in the reference: 0.15 mm (the day wheel) against the 0.2 limit. `pip download` found wheels for cadquery 2.8.0, build123d 0.13.0 and cadquery-ocp 8.0.1.1.0 for Python 3.13.
+- Not verified, or assumed: the anchor script has not been rerun since "printable" became scored (the handoff tells the next session to do it first). Nothing in the handoff's build plan exists yet. The orchestration itself (worktrees, model overrides, heartbeat) is untested.
+- Files changed: `HANDOFF_OVERNIGHT.md`, `HANDOFF_PROMPT.md`, `CLAUDE.md` (Current focus note only), SESSION.md.
+- Need from others: A, the overnight session will put what Harbor needs (grader call, artifact list, image packages incl. cadquery) under Requests once the STEP path works; sandboxed runs stay with A.
+- Next: the overnight session.
