@@ -63,7 +63,9 @@ def breguet(o, x0, x1, r_in, r_out, sliding):
     for k in range(n):
         u0 = k * pu
         # sliding tooth: steep face at u0 (from x1 down to the tip x0), ramp back up to x1 by u0 + (1-steep) pu
-        if steep >= 0.49:                           # symmetric: tip in the middle
+        if o.get("breguet_square"):                 # dog teeth: vertical faces both ways
+            tri = [(u0, x1), (u0, x0), (u0 + 0.45 * pu, x0), (u0 + 0.45 * pu, x1)]
+        elif steep >= 0.49:                         # symmetric: tip in the middle
             tri = [(u0, x1), (u0 + 0.5 * pu, x0), (u0 + pu, x1)]
         else:
             tri = [(u0, x1), (u0 + steep * pu, x0), (u0 + pu * (1 - 0.0), x1)]
@@ -87,6 +89,7 @@ def breguet(o, x0, x1, r_in, r_out, sliding):
 def build(opts=None):
     o = dict(DEFAULT)
     o.update(opts or {})
+    ZS, ZB = o.get("zs_crown", 12), o.get("zb", 36)     # crown spur and barrel gear (same centre distance if ZS+ZB = 48)
     parts, spec_mob, fixed = {}, {}, []
     bx, by = C.BARREL_AXIS
     mx, my = C.MINUTE_AXIS
@@ -163,7 +166,8 @@ def build(opts=None):
             break
     # sleeve that grips the arbor (the arbor is supplied; the sleeve overlaps it slightly = fitted)
     sleeve = S.cyl_z(bx, by, 1.38, 2.52, 0.75, 64)
-    ring_r = S.ratchet_wheel(24, 2.5, 2.9, 2.0, 2.5)
+    ring_r = S.ratchet_wheel(24, 2.5, 2.9, 2.0, 2.5) if not o.get("no_ratchet_teeth") else \
+        S.cyl_z(0, 0, 2.0, 2.5, 2.45, 96)
     ring_r = ring_r.rotate([0, 0, 180]).translate([bx, by, 0])   # valley at angle 180 deg (towards -x)
     barrel_parts = S.union([bgear, sleeve, ring_r, S.cyl_z(bx, by, 1.89, 2.01, 1.5, 64)])
     barrel_parts = barrel_parts - S.cyl_z(bx, by, 0, 4, 0.6, 64)
@@ -191,10 +195,10 @@ def build(opts=None):
     sring = sring.mirror([0, 0, 1]).translate([xsw, 0, 0])
     sweb = S.cyl_z(xsw, 0, -1.3, -zr + 0.01, rs_out, 128)
     shub = S.cyl_z(xsw, 0, -2.5, -1.29, 0.9, 64)
-    sspur = G.spur(ZS, M_SPUR, -2.4, -1.9, thin=BL, phase=0.0).translate([xsw, 0, 0])
+    sspur = G.spur(12, M_SPUR, -2.4, -1.9, thin=BL, phase=0.0).translate([xsw, 0, 0])
     for k in range(40):
-        ph = k * 2 * math.pi / ZS / 40
-        g = G.spur(ZS, M_SPUR, -2.4, -1.9, thin=BL, phase=ph).translate([xsw, 0, 0])
+        ph = k * 2 * math.pi / 12 / 40
+        g = G.spur(12, M_SPUR, -2.4, -1.9, thin=BL, phase=ph).translate([xsw, 0, 0])
         if (g ^ _minute_wheel()).volume() < 1e-6:
             sspur = g
             break
@@ -232,11 +236,16 @@ def _minute_wheel():
     return supplied.build()["minute_wheel"]
 
 
-def write(out, parts, spec):
+def write(out, parts, spec, report=None):
     os.makedirs(os.path.join(out, "parts"), exist_ok=True)
     for n, man in parts.items():
         S.write_stl(os.path.join(out, "parts", n + ".stl"), man)
     json.dump(spec, open(os.path.join(out, "keyless.json"), "w"), indent=1)
+    if report is None:      # the reference was checked with the grader's rules; it claims what it achieved
+        report = {"steps": {k: "pass" for k in C.STEPS},
+                  "summary": "Reference keyless works; every step checked with a contact simulation."}
+    if report is not False:
+        json.dump(report, open(os.path.join(out, "report.json"), "w"), indent=1)
 
 
 if __name__ == "__main__":

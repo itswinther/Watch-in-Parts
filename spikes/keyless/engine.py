@@ -40,6 +40,9 @@ TOL = 2e-4          # mm^3 of overlap allowed between two bodies
 K = 2.0             # friction-cone factor: ramps flatter than atan(2) = 63 deg slip
 SWEEPS = 14
 RELAX_MAX = 0.25    # mm of surface travel a spring may return per step
+SCAN_ARC = 0.002    # mm of surface travel between samples when searching for the clearing position
+MAX_STEP_TRAVEL = 0.06  # mm: a step in which any body's surface travels further is split in halves (up to 4 times),
+                        # so the friction-cone rule always sees small steps compared with the features
 
 
 def rot_matrix(point, direction, angle):
@@ -144,8 +147,28 @@ class World:
             return False
         return True
 
+    def children(self, b):
+        return [o for o in self.bodies.values() if o.carrier == b.name]
+
     def pen(self, b, q=None, only=None):
-        """Largest overlap of body b (at coordinate q) with any other body (each pair has its own TOL)."""
+        """Largest overlap of body b (at coordinate q) with any other body (each pair has its own TOL).
+        A carrier that is free to turn (a released crown) also answers for the bodies riding on it."""
+        if b.kind not in ("driven", "fixed") and b.dof == "stem":
+            kids = self.children(b)
+            if kids:
+                old = b.q
+                if q is not None:
+                    b.q = q
+                try:
+                    v = self._pen1(b, None, only)
+                    for k in kids:
+                        v = max(v, self._pen1(k, None, None if only is None else (set(only) - {b.name})))
+                    return v
+                finally:
+                    b.q = old
+        return self._pen1(b, q, only)
+
+    def _pen1(self, b, q=None, only=None):
         mb, A, kb = self.posed(b, q, with_key=True)
         if mb.is_empty():
             return 0.0
@@ -194,15 +217,19 @@ class World:
         if dmax <= 0:
             return False
         best = None
+        # scan fine enough not to jump over a narrow clearing window (gear backlash is a few microns)
+        h = min(dmax / 8.0, b.coord_from_arc(SCAN_ARC))
         for sgn in (1.0, -1.0):
-            n = 8
-            prev = 0.0
-            for i in range(1, n + 1):
-                d = sgn * dmax * i / n
+            prev, lowest, rising = 0.0, p0, 0
+            i = 0
+            while True:
+                i += 1
+                d = sgn * min(dmax, h * i)
                 q = b.q + d
                 if q < b.lo or q > b.hi:
                     break
-                if pen(q) <= tgt:
+                v = pen(q)
+                if v <= tgt:
                     lo_, hi_ = prev, d          # bisect the first clearing distance
                     for _ in range(8):
                         mid = 0.5 * (lo_ + hi_)
@@ -213,7 +240,17 @@ class World:
                     if best is None or abs(hi_) < abs(best):
                         best = hi_
                     break
+                if v < lowest:
+                    lowest, rising = v, 0
+                else:
+                    rising += 1
+                    if rising >= 4 and lowest < p0:     # passed the bottom of the valley: give up this side
+                        break
+                    if rising >= 6 and lowest >= p0:    # only getting worse this way
+                        break
                 prev = d
+                if abs(d) >= dmax:
+                    break
         if best is None:
             return False
         b.q += best
@@ -223,7 +260,7 @@ class World:
     # ----- per-step motion bookkeeping (for the friction cone at the contact point) -----
     def _add_dq(self, b, d):
         r, s_ = self.dqs.get(b.name, (0.0, 0.0))
-        if b.dof in ("rot",):
+        if b.dof in ("rot", "stem"):
             r += abs(d)
         else:
             s_ += abs(d)
@@ -249,12 +286,11 @@ class World:
     def budget(self, b, among):
         """Largest move of b (own coordinate) the friction cone allows, given the bodies in `among`
         that overlap it now."""
-        mb = self.posed(b)
         best = 0.0
-        for o in among:
-            if o is b:
-                continue
-            v = mb ^ self.posed(o)
+        fam = [b] + (self.children(b) if b.dof == "stem" else [])
+        pairs = [(m, o) for m in fam for o in among if o is not b and o not in fam]
+        for m, o in pairs:
+            v = self.posed(m) ^ self.posed(o)
             if v.volume() <= 0.5 * TOL:
                 continue
             comps = v.decompose()
@@ -351,31 +387,47 @@ class World:
             self.bodies[n].q, self.bodies[n].p = q, p
 
     # ----- one input step -----
-    def step(self, driver, dq=0.0, dp=0.0, main_try_arc=0.06):
-        """Move the driven body by dq (rotation) and dp (pull). Returns (ok, jammed)."""
+    def _max_travel(self):
+        m = 0.0
+        for n, (r, s_) in self.dqs.items():
+            b = self.bodies[n]
+            m = max(m, r * b.radius + s_)
+            if b.carrier:
+                m = max(m, self.dqs.get(b.carrier, (0.0, 0.0))[0] * b.radius + s_)
+        for b in self.bodies.values():          # carried bodies move with their carrier
+            if b.carrier and b.carrier in self.dqs:
+                m = max(m, self.dqs[b.carrier][0] * b.radius)
+        return m
+
+    def step(self, driver, dq=0.0, dp=0.0, main_try_arc=0.02, _depth=0):
+        """Move the driven body by dq (rotation) and dp (pull). Returns True, or False if blocked."""
         snap = self.snapshot()
         d = self.bodies[driver]
         d.q += dq
         d.p += dp
         self.dqs = {driver: (abs(dq), abs(dp))}
         ok = self.resolve()
+        if ok and _depth < 4 and self._max_travel() > MAX_STEP_TRAVEL:
+            self.restore(snap)
+            return (self.step(driver, dq / 2, dp / 2, main_try_arc / 2, _depth + 1)
+                    and self.step(driver, dq / 2, dp / 2, main_try_arc / 2, _depth + 1))
         if not ok:
             self.restore(snap)
             return False
         # springs return
         for b in self.order_spring:
             self.relax(b)
-        # mainspring: try to turn back, pushing
+        # mainspring: try to turn back, pushing (in small enough pieces)
         for b in self.order_main:
             if b.rest is None:
                 continue
             sgn = 1.0 if b.rest > b.q else -1.0
-            for frac in (1.0, 0.25):
+            for frac in (1.0, 0.5, 0.25, 0.125):
                 s2 = self.snapshot()
                 dqm = sgn * b.coord_from_arc(main_try_arc * frac)
                 b.q += dqm
                 self.dqs = {b.name: (abs(dqm), 0.0)}
-                if self.resolve():
+                if self.resolve() and self._max_travel() <= MAX_STEP_TRAVEL:
                     for sb in self.order_spring:
                         self.relax(sb)
                     break
