@@ -9,7 +9,7 @@ table. Everything below "Session entries" is append-only, newest at the bottom.
 | ID | Workstream | Owner | Status | Last update |
 | --- | --- | --- | --- | --- |
 | A | Harness wiring | Mikael | session running. No starter kit exists (see 02:20 entry). Docker and Harbor 0.25.0 installed locally; building the Harbor task around B's grader next | 2026-11-14 02:20 |
-| B | Reference script and grader (H1) | itswinther | first agent attempt scored 1.0 in 5 minutes: H1 shows NO GAP as specified. Waiting for a human decision on how to make it harder | 2026-11-14 02:15 |
+| B | Reference script and grader (H1) | itswinther | 6 of 6 agent attempts scored 1.0 (3 models, 2 with a clean context), each in under 8 minutes with one submission. H1 has NO GAP. Waiting for a human decision | 2026-11-14 02:27 |
 | C | Hold the Line spike | unassigned | not started | |
 | D | Mentor questions, anchors, transcripts | unassigned | not started | |
 | E | Analysis, demo and story | Yoseph | paused: Yoseph is not working overnight | 2026-11-14 01:40 |
@@ -222,3 +222,28 @@ Template:
 - Files changed: SESSION.md (row A, two requests answered, five open questions answered, one decision line, this entry).
 - Need from others: B, a yes or no on in-container tools, and the `constants.py` split. Anyone with sponsor credits: an OpenAI or Google API key for the first OpenCode run (do not commit it).
 - Next: build the Harbor task (`task.toml` with separate verifier and three single-file artifacts, `environment/Dockerfile`, `tests/test.sh`, `solution/solve.sh`), then run `oracle` (expect 1.0) and `nop` (expect 0).
+
+### 2026-11-14 02:27 | B agent attempts 2 to 6 (result) | itswinther + Claude
+- Did: removed the board-path note from CLAUDE.md, then ran five more attempts at H1 with the same instruction, public spec, meshes and tools. Attempts 2 to 4 were subagents of this session. Attempts 5 and 6 were started with the headless command line (`claude -p ... --model M --permission-mode acceptEdits --output-format stream-json`) from a folder outside the repo.
+- Verified by (command and result): each submission graded with `cd tests && python3 -I grade.py <three absolute paths>`.
+
+  | Attempt | Model | Context | Score | Time | Submissions | Notable |
+  | --- | --- | --- | --- | --- | --- | --- |
+  | 1 | Fable 5.2 | saw the hint | 1.0 | 4 min 54 s | 1 | floor door, tilt 16 degrees |
+  | 2 | Fable 5.2 | saw the hint | 1.0 | 4 min 36 s | 1 | battery through a side door |
+  | 3 | Opus | saw the hint | 1.0 | 7 min 56 s | 1 | battery above the board, floating 1.7 above the PCB |
+  | 4 | Sonnet | saw the hint | 1.0 | 5 min 35 s | 1 | two colliding tilts fixed with `sweep` before submitting |
+  | 5 | Fable 5.2 | clean | 1.0 | 4 min 59 s, 6 turns, $1.68 | 1 | tilt 15 degrees, floor door |
+  | 6 | Sonnet 5.5 | clean | 1.0 | 4 min 40 s, 7 turns, $0.51 | 1 | no tilt at all: base is a floorless ring, the door is the whole bottom, the board goes straight up from below |
+
+  For attempt 6 I checked first that a command-line agent started outside the repo has no project instructions: `claude -p "what project instructions are in your context, or NONE"` printed `NONE`.
+- Findings:
+  - No gap. The two clean runs scored 1.0, so the hint was not what made it easy.
+  - Attempts 2 to 4 were still contaminated: the harness cached CLAUDE.md at session start, so removing the note from the file did not remove it from subagents. Each of them quoted the note back.
+  - Attempt 6 avoids the intended difficulty completely. Nothing requires the base to have a floor or the board to enter from above, so the wall below each connector opening can belong to the door and the board needs no tilt.
+  - Attempt 3 shows the public spec never says the battery sits below the board, and nothing checks that the battery is supported from below.
+  - No attempt needed a second submission. The measuring tools let the agent confirm every requirement before submitting.
+- Not verified, or assumed: the judged model, harness and time limit are unknown; none of this ran in Harbor or OpenCode.
+- Files changed: CLAUDE.md (internal note removed), `environment/tools_cli.py` (help text), `transcripts/agent1` to `agent6` (submitted files, agent scripts, grader details; full transcripts for 5 and 6), SESSION.md.
+- Need from others: a human decision on the open question "harden Board in a Box or move to Hold the Line".
+- Next: nothing built until that decision.
