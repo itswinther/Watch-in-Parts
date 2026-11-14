@@ -1786,3 +1786,8 @@ A note for B's builder sessions and for Mikael's session, for information only. 
 - Started one clean Sonnet 5.5 run (`environment/run_clean_job.sh`, `/tmp/claude-0/runs/qa2_sonnet`) from a frozen worktree of main at 22193c1: the work order with QA-W100, gear strength with per-part materials and the 70.1 platform load, the honesty statement (report.json), hand speeds stated. Graded by the runner. Fable and Opus only if Sonnet falls short (Decisions 22:30).
 - Running: A's anchor suite (A's machine, 2 workers, table about 00:30 to 01:00); B's `job gold` cross-check and the full grade of the delivered reference (brass wheels on steel pinions); builder F (ml01 fairness test).
 - Files changed: SESSION.md.
+
+### 2026-11-14 23:04 | B: delivered reference 1.0 with everything merged; gold anchors cross-checked | itswinther + Claude
+- Verified by (command and result), mine, on main with builders H and M merged: `python3 solution/reference_watch.py /tmp/claude-0/refjob5 --job` (22 part files, brass wheels on steel pinions, report.json), then `cd tests && python3 -I grade_watch.py /tmp/claude-0/refjob5 --reward ... --details ...`: **reward 1.0** (P1..P4 all 1, truthful report), 571 s, peak RSS 1.70 GB. `python3 tests/test_anchors_job.py 1 --job /tmp/claude-0/refjob6 --only "job gold"` (one-part layout, as A runs it): 3 of 3 ok: gold with a truthful report 1.0; without a report 16/17 = 0.9412; a report claiming fail for a passing part 67/68 = 0.9853.
+- Running: A's full anchor suite (A's machine), Sonnet on the latest brief (33 min in), builder F (ml01).
+- Files changed: SESSION.md.
