@@ -49,7 +49,7 @@ For the finger torque available on each crown diameter, see VM-AN-501. Finger to
 |---|---|---|---|
 | Thread | S 0.90 (Ø 0.90 mm) | [^sel] | Ø 1.455 mm |
 | Length, normal | 15.50 mm | [^sel] | 25.07 mm |
-| Travel from position 1 (winding) to the setting position (0.30 to the date position, then 0.50) | 0.80 mm | [^sel] | **1.29 mm** |
+| Travel from position 1 (winding) to the setting position (0.30 to the date position, then 0.50) | 0.80 mm | [^sel] | **1.294 mm** |
 | Gap from crown to case middle | at most 0.1 mm | [^sel] | at most 0.16 mm |
 
 - **Positions:** a no-date calibre has two positions, winding and setting. Date calibres add a quick-set
