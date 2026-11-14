@@ -6,12 +6,14 @@ for the AfterQuery challenge at Junction 2026. Final submission is Sunday 15 Nov
 other teammates at the same time; who is active is in the Current state table in
 `SESSION.md`. The files below are how you stay in step with them.
 
-## Current focus (updated 14 Nov, 10:25)
+## Current focus (updated 14 Nov, 23:30)
 
 The task named in this file, Board in a Box, is retired: clean agents scored 1.0
-on it. The current task is the staged mechanical watch gear train; its state is in
-`SESSION.md` (latest entries) and `README.md`. The rules in this file still apply
-to every session.
+on it. The current task is the one-job mechanical watch (`SPEC.md` version 0.7):
+one brief, one delivery folder, graded part by part in one call. The staged
+watch (0.6) is kept only to regrade old runs. Its state is in `SESSION.md`
+(latest entries) and `README.md`. The rules in this file still apply to every
+session.
 
 **The goal is a real gap on frontier models.** That means the strongest models we
 can run (Fable, Opus and GPT class) consistently scoring below the reference, for
