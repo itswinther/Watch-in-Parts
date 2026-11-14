@@ -19,10 +19,32 @@ springs, a strong mainspring, and crown steps. The grader implements that as fol
   The sliding value 0.44 is stated in the brief, but the static value decides lock or slip, because a
   pawl or tooth starts each push at rest. So K = 1.96, and a face inclined more steeply than about 63°
   to the pushed body's motion locks.
+- **One threshold.** Touching is overlap ≤ 2e-4 mm³ everywhere. A push aims for half of that (a margin)
+  but accepts the nearest position ≤ 2e-4 when that is all it can reach, so a part resting on a face
+  (coplanar faces give about 1e-4 after tessellation) can still be pushed along it.
+- **Fits.** At load, every empty bore coaxial with a turning mobile's declared axis (rot mobiles, the
+  stem, the barrel arbor), in that mobile's parts and in every part it turns in, is widened by
+  `FIT_CLEARANCE` = 0.005 mm radially, in 12 slabs along the axis. CAD fits are drawn line to line and
+  overlap by the chord sag once tessellated; real pivots run 5 to 15 µm.
 - **Springs.** Spring bodies yield first, if they can clear everything they touch within the friction
-  rule. If they cannot, a pushed spring body passes the push on like a rigid link: it clears the bodies
-  that pushed it, and what it runs into is resolved next. Between steps, springs return towards rest
-  until contact, at most 0.25 mm of surface travel per step; their springs never push.
+  rule, and only in the direction the contact pushes them (the sign that lowers the overlap, i.e. the
+  sign of the contact's moment about a rot body's axis). A click whose reaction pulls it in goes deeper
+  and seats; it cannot hop out the other way. If they cannot, a pushed spring body passes the push on like a rigid link: it clears the bodies
+  that pushed it, and what it runs into is resolved next. Between steps, springs return towards rest, at
+  most 0.25 mm of surface travel per step. After contact they push on, 0.01 mm at a time, any free or
+  spring body in their way, with the others resolving as in a step. They never push a fixed body, the
+  driven stem or the mainspring arbor, nor another spring away from its own rest side. This is what lets
+  a yoke spring return the sliding pinion through the yoke.
+- **Carriers.** A mobile may ride on the stem (`on_stem`, slide) or on another rot mobile (`carrier`: a
+  wheel on a swinging lever). Its pose is the carrier's rotation composed with its own coordinate. A
+  pushed carrier answers for its riders' contacts. A carrier's slide (the stem's pull) does not move its
+  riders, so on a pure pull step they are not counted as moved.
+- **Rest and start.** Before AT-0's rest check and at the start of every phase, the rig clears each
+  mobile's overlaps within 0.3 mm of surface travel. It turns still-overlapping wheels as drivers with
+  the train resolving, so wheels drawn tooth through tooth are phased. Then it lets the springs return
+  until nothing moves (up to 40 rounds).
+- **Position 2.** The design may declare `pull` from 0.4 to 1.0 mm (Sellita SW200 0.80, Marco Lang
+  ml01 about 0.49); default 0.9.
 - **Taps (AT-2).** Every 5 steps while the crown is let go, every free (contact) body moves up to 0.05 mm
   of surface travel in the direction it can move furthest without overlap. Sprung parts return; free
   parts stay where the tap left them.

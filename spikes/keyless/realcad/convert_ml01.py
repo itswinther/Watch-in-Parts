@@ -27,6 +27,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(HERE))
 import grade as G  # noqa: E402
 
+LEGACY = "--legacy" in sys.argv     # reproduce the first run's hand adjustments (pre-fix engine)
 DZ = 1.9
 LIN_TOL, ANG_TOL = 0.003, 0.15
 BORE_CLEAR = 0.004   # radial clearance cut into a mobile's own pivot bore (CAD fits are line-to-line;
@@ -36,11 +37,10 @@ BORE_CLEAR = 0.004   # radial clearance cut into a mobile's own pivot bore (CAD 
 MOBILES = {
     # name: (kind, ids, extra)
     "stem": ("stem", [67], {}),
-    # The real sliding pinion is pushed into the winding pinion by the yoke spring, through the yoke.
-    # The rig's springs never push other parts, so a spring acting through a link cannot be declared;
-    # the closest the format allows is to declare both the yoke and the sliding pinion as sprung
-    # towards winding (they then follow each other back, step by step). Limitation, see REAL_CAD.md.
-    "sliding_pinion": ("spring", [68], {"dof": "slide", "direction": [1, 0, 0], "on_stem": True}),
+    # The real sliding pinion is pushed into the winding pinion by the yoke spring, through the yoke: a
+    # free part (the fixed engine's springs push free parts on their rest side). With --legacy (the
+    # engine before the fixes, whose springs could not push) it had to be declared sprung itself.
+    "sliding_pinion": ("spring" if LEGACY else "free", [68], {"dof": "slide", "direction": [1, 0, 0], "on_stem": True}),
     "winding_pinion": ("free", [12], {"dof": "rot", "point": [0, 0, 0], "direction": [1, 0, 0]}),
     "crown_wheel": ("free", [212], {"dof": "rot", "point": [10.92, 0.0, 0], "direction": [0, 0, 1]}),
     "click": ("spring", [220], {"dof": "rot", "point": [13.737, -3.70, 0], "direction": [0, 0, 1]}),
@@ -58,7 +58,8 @@ MOBILES = {
 # a tessellated overlap of about 1.3e-4 mm^3, inside the rig's touching tolerance of 2e-4 but above the
 # 1e-4 target a pushed body must reach, so the pinion could never be pushed). Real endshake is about
 # 0.01 to 0.02 mm; 0.005 mm is applied.
-ENDSHAKE = {"winding_pinion": [-0.005, 0.0, 0.0]}
+ENDSHAKE = {"winding_pinion": [-0.005, 0.0, 0.0]} if LEGACY else {}
+ML01_PULL = 0.49     # ml01's own position 2: the setting lever's second jumper notch (about 14 deg of lever)
 # spring sides (sign of the mobile's own coordinate its spring urges it to), from the geometry:
 #   yoke: pivot (10, -11), fork at the sliding pinion: + turns the fork towards -x (setting); its spring
 #         (an arm of the Winkelhebelfeder) holds it towards winding, so -1;
@@ -239,11 +240,11 @@ def main():
             d["point"] = [hx, hy, 0.0]
         if kind == "spring":
             d["rest"] = REST[mn]
-        if d.get("dof") == "rot":
+        if LEGACY and d.get("dof") == "rot":
             man, info = clear_bore(man, d["point"], "z" if d["direction"] == [0, 0, 1] else "x")
             log.setdefault("bores", {})[mn] = info
             write_stl(os.path.join(out, "sub", "parts", pn + ".stl"), man_tris(man))
-        if mn == "setting_wheel_lever":     # the bore the setting wheel's arbor turns in
+        if LEGACY and mn == "setting_wheel_lever":     # the bore the setting wheel arbor turns in
             sw = MOBILES["setting_wheel"][2]["point"]
             man, info = clear_bore(man, sw)
             log.setdefault("bores", {})["setting_wheel_lever@wheel"] = info
@@ -258,6 +259,8 @@ def main():
         fixed.append(pn)
         log["fixed"][pn] = rows[i]["name"]
     spec = {"mobiles": mobiles, "fixed": fixed}
+    if not LEGACY:
+        spec["pull"] = ML01_PULL
     json.dump(spec, open(os.path.join(out, "sub", "keyless.json"), "w"), indent=1)
     json.dump({"steps": {k: "not_tested" for k in ("assemble", "wind", "hold", "run", "backward", "set", "return")},
                "summary": "Marco Lang ml01 keyless works, converted from the published STEP; claims not made."},

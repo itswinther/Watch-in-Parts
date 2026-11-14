@@ -45,6 +45,9 @@ K = 1.0 / MU        # friction-cone factor: a face inclined more steeply than at
 SWEEPS = 14
 RELAX_MAX = 0.25    # mm of surface travel a spring may return per step
 SCAN_ARC = 0.002    # mm of surface travel between samples when searching for the clearing position
+FORCE_EPS = 1e-7    # mm^3: overlap difference below which a contact is taken to push neither way
+SPRING_PUSH_ARC = 0.01  # mm of surface travel per increment when a returning spring pushes free parts
+SETTLE_RELAX_ROUNDS = 40  # at the start, springs return (pushing what they may) until nothing moves
 MAX_STEP_TRAVEL = 0.06  # mm: a step in which any body's surface travels further is split in halves (up to 4 times),
                         # so the friction-cone rule always sees small steps compared with the features
 
@@ -114,6 +117,7 @@ class World:
         self.evals = 0
         self.pair_cache = {}
         self.dqs = {}
+        self.spring_push = True         # a returning spring pushes free parts on its rest side (relax)
 
     # ----- poses -----
     def matrix(self, b, q=None):
@@ -156,8 +160,9 @@ class World:
 
     def pen(self, b, q=None, only=None):
         """Largest overlap of body b (at coordinate q) with any other body (each pair has its own TOL).
-        A carrier that is free to turn (a released crown) also answers for the bodies riding on it."""
-        if b.kind not in ("driven", "fixed") and b.dof == "stem":
+        A carrier that is free to move (a released crown, a lever carrying a wheel) also answers for the
+        bodies riding on it."""
+        if b.kind not in ("driven", "fixed"):
             kids = self.children(b)
             if kids:
                 old = b.q
@@ -210,9 +215,26 @@ class World:
         return out
 
     # ----- elementary moves -----
-    def push(self, b, dmax, only=None):
+    def force_signs(self, b, only=None):
+        """The direction(s) a contact pushes body b along its own coordinate: the sign that lowers the
+        overlap (the contact's generalized force, i.e. its moment about b's axis for a rot body).
+        Both signs when the overlap does not tell."""
+        h = b.coord_from_arc(SCAN_ARC)
+        up, down = self.pen(b, b.q + h, only), self.pen(b, b.q - h, only)
+        if up < down - FORCE_EPS:
+            return (1.0,)
+        if down < up - FORCE_EPS:
+            return (-1.0,)
+        return (1.0, -1.0)
+
+    def push(self, b, dmax, only=None, signs=(1.0, -1.0)):
         """Move b the least distance (at most dmax in its own coordinate) that clears its overlap
-        with `only` (all bodies when None). True if cleared."""
+        with `only` (all bodies when None). True if cleared.
+
+        Cleared means touching, overlap <= TOL, the one threshold the rig uses everywhere. The search
+        aims for TOL/2 (a margin, so the next step does not start on the boundary), but accepts the
+        nearest position <= TOL when no position <= TOL/2 exists in reach, e.g. when b also rests
+        against a body that does not move (a face flat on a shoulder)."""
         pen = lambda q=None: self.pen(b, q, only)  # noqa: E731
         p0 = pen()
         if p0 <= TOL:
@@ -221,10 +243,22 @@ class World:
         if dmax <= 0:
             return False
         best = None
+        fallback = None
         # scan fine enough not to jump over a narrow clearing window (gear backlash is a few microns)
         h = min(dmax / 8.0, b.coord_from_arc(SCAN_ARC))
-        for sgn in (1.0, -1.0):
+
+        def bisect(lo_, hi_, thr):
+            for _ in range(8):
+                mid = 0.5 * (lo_ + hi_)
+                if pen(b.q + mid) <= thr:
+                    hi_ = mid
+                else:
+                    lo_ = mid
+            return hi_
+
+        for sgn in signs:
             prev, lowest, rising = 0.0, p0, 0
+            first_ok = None                       # first sample <= TOL on this side (for the fallback)
             i = 0
             while True:
                 i += 1
@@ -233,14 +267,10 @@ class World:
                 if q < b.lo or q > b.hi:
                     break
                 v = pen(q)
+                if v <= TOL and first_ok is None:
+                    first_ok = (prev, d)
                 if v <= tgt:
-                    lo_, hi_ = prev, d          # bisect the first clearing distance
-                    for _ in range(8):
-                        mid = 0.5 * (lo_ + hi_)
-                        if pen(b.q + mid) <= tgt:
-                            hi_ = mid
-                        else:
-                            lo_ = mid
+                    hi_ = bisect(prev, d, tgt)      # bisect the first clearing distance
                     if best is None or abs(hi_) < abs(best):
                         best = hi_
                     break
@@ -255,6 +285,12 @@ class World:
                 prev = d
                 if abs(d) >= dmax:
                     break
+            if first_ok is not None:
+                f = bisect(first_ok[0], first_ok[1], TOL)
+                if fallback is None or abs(f) < abs(fallback):
+                    fallback = f
+        if best is None:
+            best = fallback
         if best is None:
             return False
         b.q += best
@@ -291,7 +327,7 @@ class World:
         """Largest move of b (own coordinate) the friction cone allows, given the bodies in `among`
         that overlap it now."""
         best = 0.0
-        fam = [b] + (self.children(b) if b.dof == "stem" else [])
+        fam = [b] + self.children(b)
         pairs = [(m, o) for m in fam for o in among if o is not b and o not in fam]
         for m, o in pairs:
             v = self.posed(m) ^ self.posed(o)
@@ -316,9 +352,13 @@ class World:
         return best
 
     def relax(self, b):
-        """Spring: return towards rest until contact (no pushing)."""
+        """Spring: return towards rest (at most RELAX_MAX of surface travel per call). It moves freely
+        until contact; then it pushes on, in small increments, any free or spring-loaded part in its way
+        (a yoke spring returning the sliding pinion through the yoke), but never a fixed part, the
+        driven stem, the mainspring barrel, or another spring away from that spring's own rest side.
+        Returns the distance moved (own coordinate)."""
         if b.rest is None:
-            return
+            return 0.0
         target = b.rest
         if math.isinf(target):
             dist_arc = RELAX_MAX
@@ -326,30 +366,91 @@ class World:
         else:
             dq = target - b.q
             if abs(dq) < 1e-12:
-                return
+                return 0.0
             sgn = 1.0 if dq > 0 else -1.0
             dist_arc = min(RELAX_MAX, b.arc(dq))
         dmax = b.coord_from_arc(dist_arc)
+        # it may not end deeper in contact than it starts, nor deeper than TOL/2 (one threshold: touching)
+        thr = min(TOL, max(0.5 * TOL, self.pen(b)))
         n = 10
         last_ok = 0.0
+        stopped = False
         for i in range(1, n + 1):
             d = sgn * dmax * i / n
             q = b.q + d
             if q < b.lo or q > b.hi:
+                stopped = True
                 break
-            if self.pen(b, q) <= 0.5 * TOL:
+            if self.pen(b, q) <= thr:
                 last_ok = d
             else:
                 lo_, hi_ = last_ok, d
                 for _ in range(6):
                     mid = 0.5 * (lo_ + hi_)
-                    if self.pen(b, b.q + mid) <= 0.5 * TOL:
+                    if self.pen(b, b.q + mid) <= thr:
                         lo_ = mid
                     else:
                         hi_ = mid
                 last_ok = lo_
+                stopped = True
                 break
         b.q += last_ok
+        moved = abs(last_ok)
+        if stopped and moved < dmax and self.spring_push:
+            moved += self._spring_push(b, sgn, dmax - moved)
+        return moved
+
+    def _spring_push(self, b, sgn, remaining):
+        """A returning spring pushes free and spring-loaded parts on its rest side (see relax)."""
+        inc = b.coord_from_arc(SPRING_PUSH_ARC)
+        done = 0.0
+        while done < remaining - 1e-12:
+            d = sgn * min(inc, remaining - done)
+            q1 = b.q + d
+            if q1 < b.lo or q1 > b.hi:
+                break
+            hits = [o for o in self.bodies.values() if o is not b and self.pairs_ok(b, o)
+                    and self._pen1(b, q1, {o.name}) > 0.5 * TOL]
+            if not hits:
+                b.q = q1
+                done += abs(d)
+                continue
+            if any(o.kind not in ("contact", "spring") or o.carrier == b.name for o in hits):
+                break
+            snap = self.snapshot()
+            saved_dqs = self.dqs
+            movers = self.movers
+            frozen = [o for o in self.bodies.values() if o.kind == "main"]
+            self.movers = [o for o in movers if o is not b and o.kind != "main"]
+            try:
+                b.q = q1
+                self.dqs = {b.name: (abs(d), 0.0) if b.dof in ("rot", "stem") else (0.0, abs(d))}
+                ok = self.resolve() and self._max_travel() <= MAX_STEP_TRAVEL
+                ok = ok and self.pen(b) <= TOL and all(self.pen(o) <= TOL for o in frozen)
+                if ok:      # it may not drive another spring away from that spring's own rest side
+                    for o in self.order_spring:
+                        if o is b or o.rest is None:
+                            continue
+                        dqo = o.q - snap[o.name][0]
+                        rs = (1.0 if o.rest > snap[o.name][0] else -1.0) if not math.isinf(o.rest) else math.copysign(1.0, o.rest)
+                        if dqo * rs < -1e-12:
+                            ok = False
+                            break
+            finally:
+                self.movers = movers
+                self.dqs = saved_dqs
+            if not ok:
+                self.restore(snap)
+                break
+            done += abs(d)
+        return done
+
+    def moved_now(self, b=None):
+        """Bodies (other than b) that moved in this step. A body riding on a carrier moved only if the
+        carrier turned: a carrier's slide (the stem's pull) does not carry it, since matrix() composes
+        only the carrier's rotation."""
+        return [o for o in self.bodies.values() if o is not b and (
+            any(self.dqs.get(o.name, (0.0, 0.0))) or (o.carrier and self.dqs.get(o.carrier, (0.0, 0.0))[0] > 0))]
 
     def resolve(self):
         """Sweeps of pushes. Light springs yield first, then free bodies, then the mainspring arbor."""
@@ -360,17 +461,21 @@ class World:
             for b in self.movers:
                 if self.pen(b) <= TOL:
                     continue
-                movers_now = [o for o in self.bodies.values() if o is not b and (
-                    any(self.dqs.get(o.name, (0.0, 0.0))) or (o.carrier and any(self.dqs.get(o.carrier, (0.0, 0.0)))))]
+                movers_now = self.moved_now(b)
                 if b.kind == "spring":
+                    # a pushed spring part moves only the way the contact pushes it (the sign of the
+                    # contact's moment, or force, on its own coordinate): a click whose reaction pulls it
+                    # in goes deeper until it seats and then holds; it cannot hop out the other way
+                    signs = self.force_signs(b)
                     # light: first it yields to anything it touches, if it can within the friction cone
                     touching = [o for o in self.bodies.values() if o is not b and self.pairs_ok(b, o)]
-                    if self.push(b, self.budget(b, touching)):
+                    if self.push(b, self.budget(b, touching), signs=signs):
                         continue
                     # if it cannot simply give way, a pushed spring part passes the push on like a rigid
                     # link (it never drives anything by its own spring, only when something pushes it)
                     pushers = {o.name for o in movers_now} | fixed_names
-                    if self.pen(b, only=pushers) > TOL and self.push(b, self.budget(b, movers_now), only=pushers):
+                    if self.pen(b, only=pushers) > TOL and self.push(b, self.budget(b, movers_now), only=pushers,
+                                                                     signs=self.force_signs(b, pushers)):
                         continue
                     bad = True
                     continue
@@ -386,8 +491,27 @@ class World:
                 if all(self.pen(b) <= TOL for b in self.movers):
                     return True
             elif all(abs(b.q - before[b.name]) < 1e-12 for b in self.movers):
-                return False            # no progress: blocked
+                # last resort: a part carried (by its carrier's rotation) into a part that cannot move
+                # gives way along its own freedom, if the contact and the friction rule let it (Breguet
+                # teeth slipping back: the sliding pinion is pushed off the winding pinion); what it then
+                # runs into is resolved next
+                if not self._riders_give_way(fixed_names):
+                    return False        # no progress: blocked
         return all(self.pen(b) <= TOL for b in self.movers)
+
+    def _riders_give_way(self, fixed_names):
+        moved = False
+        for b in self.movers:
+            if b.kind != "contact" or not b.carrier or self.dqs.get(b.carrier, (0.0, 0.0))[0] <= 0:
+                continue
+            if self.pen(b) <= TOL:
+                continue
+            blockers = {o.name for o in self.bodies.values() if o is not b and self.pairs_ok(b, o)
+                        and self._pen1(b, None, {o.name}) > TOL} | fixed_names
+            touching = [o for o in self.bodies.values() if o is not b and o.name in blockers]
+            if self.push(b, self.budget(b, touching), only=blockers, signs=self.force_signs(b, blockers)):
+                moved = True
+        return moved
 
     def snapshot(self):
         return {n: (b.q, b.p) for n, b in self.bodies.items()}
@@ -450,9 +574,54 @@ class World:
         for _ in range(3):
             for b in self.movers:
                 self.push(b, b.coord_from_arc(budget))
-        for _ in range(3):
+        # then the springs bring their parts home, pushing free parts on their way, until nothing moves
+        for _ in range(SETTLE_RELAX_ROUNDS):
+            moved = 0.0
             for b in self.order_spring:
-                self.relax(b)
+                moved += self.relax(b)
+            if moved < 1e-9:
+                break
+        self.dqs = {}
+
+    def phase(self, budget=0.3):
+        """Settle, then clear what is still overlapping by turning each overlapping mobile together with
+        the free mobiles it touches (meshing wheels drawn tooth through tooth are turned into their
+        gaps, as an assembler would). Each mobile moves at most `budget` mm of surface travel."""
+        self.settle(budget)
+        for _ in range(3):
+            bad = [b for b in self.movers if self.pen(b) > TOL]
+            if not bad:
+                return True
+            for b in bad:
+                if self.pen(b) <= TOL:
+                    continue
+                if self.push(b, b.coord_from_arc(budget)):
+                    continue
+                # turn it in small steps as a driver and let the others resolve (a gear chain)
+                movers = self.movers
+                before = {o.name: self.pen(o) for o in movers}
+                best = None
+                h = b.coord_from_arc(SCAN_ARC * 5)
+                n = int(b.coord_from_arc(budget) / h) + 1
+                for sgn in (1.0, -1.0):
+                    snap = self.snapshot()
+                    self.movers = [o for o in movers if o is not b]
+                    try:
+                        for i in range(1, n + 1):
+                            b.q = snap[b.name][0] + sgn * h * i
+                            self.dqs = {b.name: (h, 0.0) if b.dof in ("rot", "stem") else (0.0, h)}
+                            self.resolve()
+                            if self.pen(b) <= TOL and all(self.pen(o) <= max(TOL, before[o.name]) for o in movers):
+                                if best is None or i < best[0]:
+                                    best = (i, self.snapshot())
+                                break
+                    finally:
+                        self.movers = movers
+                    self.restore(snap)
+                if best is not None:
+                    self.restore(best[1])
+            self.dqs = {}
+        return self.max_pen() <= TOL
 
     def max_pen(self):
         return max([self.pen(b) for b in self.bodies.values() if b.kind != "fixed"] + [0.0])

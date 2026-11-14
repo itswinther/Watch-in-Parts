@@ -38,7 +38,8 @@ stated direction.
 
 - **Stem axis:** the x axis (y = 0, z = 0). The crown end is at +x, outside the case.
 - **Stem positions:** position 1 (pushed in) is the stem as you submit it. Position 2 (pulled out) is
-  the stem moved $PULL towards +x.
+  the stem moved towards +x by the `pull` you declare in `keyless.json` ($PULL_LO to $PULL_HI), or by
+  $PULL if you declare none.
 - **Directions:** forward is turning the crown clockwise as seen from outside the case looking in
   (from +x towards -x), that is a negative rotation about +x. Backward is the opposite.
 - **Case:** a cylinder of radius $CASE_RADIUS about the vertical line through x = $CASE_CX,
@@ -80,7 +81,13 @@ stated direction.
     it towards.
   - `on_stem` (optional, `slide` along the x axis only): `true` if the mobile also turns with the stem;
     its own coordinate is then its slide.
+  - `carrier` (optional, `free` and `spring` only, not with `on_stem`): the name of another `free` or
+    `spring` mobile with `dof` `"rot"` that has no carrier itself. The mobile then also moves with the
+    carrier's rotation: its own `point` and `direction` are given as submitted (at rest) and are carried
+    along when the carrier turns.
 - `fixed`: a list of part names that never move.
+- `pull` (optional): a number from $PULL_LO to $PULL_HI, the stem's travel from position 1 to
+  position 2. Default $PULL.
 
 Example of the format only (one wheel turning on a bracket; not a keyless design):
 
@@ -129,15 +136,24 @@ The acceptance test is run on a simulated test rig:
   Parts are moved only by contact. A part pushed by another moves the least distance along its degree
   of freedom that the contact forces (with that friction) allow; if friction prevents it from giving
   way, it does not.
+- **Fits.** The rig gives every bore around a turning mobile's declared axis (a `rot` mobile, the
+  stem, the barrel arbor) $FIT_CLEARANCE mm of radial play, in that mobile's own parts and in any part
+  it turns in. Parts may therefore be drawn line to line at a pivot. Nothing else is changed.
 - **Spring-loaded parts** (kind `spring`) are urged towards their stated rest side by springs much
-  lighter than the mainspring. They give way first when pushed; if they cannot give way, they are pushed
-  along like any part. They return towards rest until they touch something, and their springs never
-  drive other parts.
+  lighter than the mainspring. They give way first when pushed, and only in the direction the contact
+  pushes them; if they cannot give way, they are pushed along like any part. Between steps they return
+  towards rest. On the way they push along any `free` or `spring` part in their path, but never a fixed
+  part, the stem, the barrel arbor, or another spring away from that spring's own rest side; where they
+  cannot push, they stop.
+- **Carried mobiles** move with their carrier's rotation (see `carrier`). A carrier that is pushed also
+  answers for the mobiles it carries.
 - **The mainspring** always urges the barrel arbor against winding. It is much stronger than any
   spring, and pushes whatever is in its way.
 - **The crown** is turned in steps of $STEP_DEG degrees and pulled or pushed in steps of $PULL_STEP. A
   step that cannot proceed is blocked, and nothing moves.
-- **At the start**, parts may overlap by up to 0.3 (surface travel) and settle before the test begins.
+- **At the start**, parts may overlap by up to 0.3 (surface travel). The rig first lets the movement
+  come to rest: each mobile clears its overlaps within that travel, meshing wheels are turned into their
+  gaps, and the springs return their parts. This is the starting state of every step.
 
 ## The acceptance test
 
@@ -159,7 +175,8 @@ only if every step passes.
 ### AT-0 Assemble
 
 - **Files:** everything loads as described above.
-- **Rest:** at rest, as submitted, no two bodies overlap by more than $TOL mm³.
+- **Rest:** once the rig has let the movement come to rest (see "At the start"), no two bodies overlap
+  by more than $TOL mm³.
 - **Held:** every `free` and `spring` mobile, moved $HOLD_SHIFT across its axis in either of two
   perpendicular directions, overlaps some other body by more than $TOL mm³. For `rot` mobiles this
   also applies along the axis, either way.

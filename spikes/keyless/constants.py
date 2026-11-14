@@ -5,7 +5,13 @@ The brief is generated from these values, and the grader imports them.
 # frame: z up (towards the main plate), the stem along x through y = 0, z = 0, the crown at +x
 STEM_POINT = (0.0, 0.0, 0.0)
 STEM_DIR = (1.0, 0.0, 0.0)
-PULL = 0.9                       # position 2: the stem pulled this far towards +x
+PULL = 0.9                       # position 2: the stem pulled this far towards +x, unless the design declares
+PULL_RANGE = (0.4, 1.0)          # ... its own `pull` within this range (real calibres: Sellita SW200 0.80,
+                                 # Marco Lang ml01 about 0.49)
+FIT_CLEARANCE = 0.005            # the rig's fit rule: radial play given to every bore around a turning
+                                 # mobile's declared axis (CAD fits are drawn line to line; real pivots run
+                                 # 5 to 15 um). Only empty coaxial bores are widened.
+FIT_SLICES = 12                  # bores are found and widened in this many slabs along the axis
 FORWARD = -1.0                   # forward winding: the stem turns clockwise seen from outside (+x looking -x),
                                  # i.e. negative rotation about +x
 

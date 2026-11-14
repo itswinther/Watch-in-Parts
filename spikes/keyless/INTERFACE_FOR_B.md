@@ -51,6 +51,26 @@ parts:
 The adapter's output is `parts` (`name -> Manifold`), `sup` (B's plates and arbor as Manifolds) and
 `defs`. These are exactly what `grade.make_world` takes.
 
+**In-process, serial (branch a/keyless-engine-fixes): never forks or spawns.**
+
+```python
+import grade as G
+# from files:
+product, gates, conds, steps, det = G.grade(sub_dir, data_dir, jobs=1)     # jobs=1: no ProcessPoolExecutor
+# from objects already in memory (B's adapter output); defs may carry "carrier" (another rot mobile)
+G.relieve_fits(parts, sup, defs)            # the rig's fit rule (load() does this for files)
+loaded = {"spec": spec, "parts": parts, "sup": sup}       # spec: the keyless.json dict (for "pull")
+ph, out, err = G.worker(("wind", loaded, defs, None))     # AT-1
+ph, first, err = G.worker(("first", loaded, defs, None))  # AT-2 + AT-3; first["state"] = start for the rest
+for phase in ("backward", "set", "return"):               # AT-4, AT-5, AT-6
+    ph, out, err = G.worker((phase, loaded, defs, first["state"]))
+```
+
+Each `worker` call builds its own world, phases it (`World.phase()`: settle, turn meshing wheels into
+their gaps, springs home) and runs one scenario in the calling process. Peak memory is one world:
+about 1 GB on the keyless reference. On Marco Lang's ml01 (crown wheel 193k triangles), the measured
+peak was 1.2 GB.
+
 ## 2. Fixed interface in B's frame
 
 Proposed below; B to confirm. Units are mm, in B's frame.

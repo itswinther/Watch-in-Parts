@@ -94,7 +94,8 @@ def values():
     g = lambda x: "%g" % x  # noqa: E731
     return {
         "AGENT_MINUTES": AGENT_MINUTES, "STOP_MINUTES": STOP_MINUTES,
-        "PULL": g(C.PULL), "CASE_RADIUS": g(C.CASE_RADIUS), "CASE_CX": g(C.CASE_CENTRE[0]),
+        "PULL": g(C.PULL), "PULL_LO": g(C.PULL_RANGE[0]), "PULL_HI": g(C.PULL_RANGE[1]),
+        "FIT_CLEARANCE": g(C.FIT_CLEARANCE), "CASE_RADIUS": g(C.CASE_RADIUS), "CASE_CX": g(C.CASE_CENTRE[0]),
         "CASE_CY": g(C.CASE_CENTRE[1]), "CASE_Z0": g(C.CASE_Z[0]), "CASE_Z1": g(C.CASE_Z[1]),
         "BARREL_X": g(C.BARREL_AXIS[0]), "BARREL_Y": g(C.BARREL_AXIS[1]),
         "MINUTE_X": g(C.MINUTE_AXIS[0]), "MINUTE_Y": g(C.MINUTE_AXIS[1]),

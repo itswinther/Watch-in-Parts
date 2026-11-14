@@ -154,6 +154,15 @@ def load(sub, data):
             dn = d / np.linalg.norm(d)
             if dof != "slide" or abs(abs(dn[0]) - 1) > 1e-6:
                 raise FormatError("mobile %s: only a slide along the stem axis can ride on the stem" % mn)
+        carrier = "stem" if on_stem else None
+        if mob.get("carrier") is not None:
+            cn = mob["carrier"]
+            cm = mobiles.get(cn) if isinstance(cn, str) else None
+            if (on_stem or cm is None or cn in (mn, "stem", "barrel") or cm.get("kind") not in ("free", "spring")
+                    or cm.get("dof") != "rot" or cm.get("carrier") is not None or cm.get("on_stem")):
+                raise FormatError("mobile %s: carrier must name another free or spring rot mobile that is not "
+                                  "itself carried" % mn)
+            carrier = cn
         rest = None
         if kind == "spring":
             r = mob.get("rest")
@@ -162,11 +171,110 @@ def load(sub, data):
             rest = r * math.inf
         defs.append(dict(name=mn, parts=mob["parts"], kind="spring" if kind == "spring" else "contact",
                          dof=dof, point=pt, direction=tuple(float(v) for v in d), rest=rest,
-                         carrier="stem" if on_stem else None))
+                         carrier=carrier))
+    pull_of(spec)                         # validates the optional declared pull
     defs.append(dict(name="minute_wheel", parts=["@minute_wheel"], kind="contact", dof="rot",
                      point=(C.MINUTE_AXIS[0], C.MINUTE_AXIS[1], 0.0), direction=(0, 0, 1)))
     defs.append(dict(name="fixed", parts=fixed + ["@main_plate", "@dial_plate", "@minute_post"], kind="fixed"))
+    relieve_fits(parts, sup, defs)
     return spec, parts, sup, defs
+
+
+def pull_of(spec):
+    """Position 2: the stem's pull declared by the design (`pull`, within C.PULL_RANGE), else C.PULL."""
+    p = spec.get("pull")
+    if p is None:
+        return C.PULL
+    if isinstance(p, bool) or not isinstance(p, (int, float)) or not math.isfinite(p) \
+            or not (C.PULL_RANGE[0] <= p <= C.PULL_RANGE[1]):
+        raise FormatError("pull must be a number from %g to %g" % C.PULL_RANGE)
+    return float(p)
+
+
+def _frame(point, direction):
+    """3x4 affine maps: to a frame with the axis on z through the origin, and back."""
+    u = np.asarray(direction, float)
+    u = u / np.linalg.norm(u)
+    a = np.array([1.0, 0, 0]) if abs(u[0]) < 0.9 else np.array([0, 1.0, 0])
+    e1 = np.cross(a, u)
+    e1 /= np.linalg.norm(e1)
+    e2 = np.cross(u, e1)
+    R = np.vstack([e1, e2, u])
+    p = np.asarray(point, float)
+    to = np.hstack([R, (-R @ p)[:, None]])
+    back = np.hstack([R.T, p[:, None]])
+    return to.tolist(), back.tolist()
+
+
+def _coaxial_holes(man, z, tol=0.02):
+    """Radii of the inner loops of man's section at height z that are centred on the z axis."""
+    out = []
+    for poly in man.slice(z).to_polygons():
+        p = np.asarray(poly, float)
+        if len(p) < 6:
+            continue
+        a = 0.5 * np.sum(p[:, 0] * np.roll(p[:, 1], -1) - np.roll(p[:, 0], -1) * p[:, 1])
+        c = p.mean(axis=0)
+        if a < 0 and np.hypot(*c) < tol:
+            out.append(float(np.linalg.norm(p - c, axis=1).mean()))
+    return out
+
+
+def relieve_fits(parts, sup, defs):
+    """The rig's fit rule: every turning mobile (each rot mobile, the stem and the barrel) gets
+    C.FIT_CLEARANCE of radial play in the bores around its declared axis, in its own parts and in every
+    other part it turns in. CAD fits are drawn line to line; tessellated, a line-to-line fit overlaps by
+    the chord sag and could never turn. Only empty bores coaxial with the axis are widened, slab by slab,
+    so no other material changes. Modifies `parts` and `sup` in place; returns {part: n slabs widened}."""
+    c = C.FIT_CLEARANCE
+    if c <= 0:
+        return {}
+    n_sl = C.FIT_SLICES
+    log = {}
+    names = [(parts, k) for k in parts] + [(sup, k) for k in sup]
+    seen = set()
+    for d in defs:
+        if d.get("dof") not in ("rot", "stem"):
+            continue
+        u = np.asarray(d["direction"], float)
+        u = u / np.linalg.norm(u)
+        p = np.asarray(d["point"], float)
+        line = tuple(np.round(np.r_[u * np.sign(u[np.argmax(np.abs(u))]), p - (p @ u) * u], 3))
+        if line in seen:
+            continue                        # two mobiles on one axis (pinion on the stem): widen once
+        seen.add(line)
+        to, back = _frame(d["point"], d["direction"])
+        own = union([sup[p[1:]] if p.startswith("@") else parts[p] for p in d["parts"]]).transform(to)
+        if own.is_empty():
+            continue
+        ob = own.bounding_box()
+        for store, k in names:
+            m = store[k].transform(to)
+            if m.is_empty():
+                continue
+            bb = m.bounding_box()
+            if not (bb[0] < 0 < bb[3] and bb[1] < 0 < bb[4]):
+                continue                    # the axis does not pass through this part
+            lo, hi = max(bb[2], ob[2]), min(bb[5], ob[5])
+            if hi - lo < 1e-4:
+                continue
+            dz = (hi - lo) / n_sl
+            cuts = []
+            for i in range(n_sl):
+                z0, z1 = lo + i * dz, lo + (i + 1) * dz
+                rs = _coaxial_holes(m, 0.5 * (z0 + z1))
+                if not rs:
+                    continue
+                r = min(rs)
+                slab = m3.Manifold.cylinder(z1 - z0, max(r - 0.01, 1e-3), circular_segments=128).translate([0, 0, z0])
+                if (m ^ slab).volume() > 1e-9:
+                    continue                # material inside the bore in this slab: not an empty bore
+                cuts.append(m3.Manifold.cylinder(z1 - z0 + 1e-4, r + c, circular_segments=256)
+                            .translate([0, 0, z0 - 5e-5]))
+            if cuts:
+                store[k] = (m - union(cuts)).transform(back)
+                log[k] = log.get(k, 0) + len(cuts)
+    return log
 
 
 def make_world(parts, sup, defs, shift=None):
@@ -288,12 +396,16 @@ def worker(args):
     """Phase 'first' runs steps 1 to 3 in order and returns the state after step 2 (the crown let go).
     Phases 'backward', 'set' and 'return' each start from that state."""
     phase, paths, defs, start = args
-    sub, data = paths
     t0 = time.time()
     try:
-        spec, parts, sup, _ = load(sub, data)
+        if isinstance(paths, dict):          # in-process: already loaded (spec, parts, sup)
+            spec, parts, sup = paths["spec"], paths["parts"], paths["sup"]
+        else:
+            sub, data = paths
+            spec, parts, sup, _ = load(sub, data)
+        PULL = pull_of(spec)
         w = make_world(parts, sup, defs)
-        w.settle()
+        w.phase()
         fw = C.FORWARD
         out = {}
         if phase == "wind":
@@ -310,7 +422,7 @@ def worker(args):
         elif phase == "first":
             # AT-2 HOLD, independent of AT-1: a fresh movement whose arbor the rig winds itself
             w = make_world(parts, sup, defs)
-            w.settle()
+            w.phase()
             _set_kind(w, "barrel", "driven")
             n = int(round(C.PREWIND_DEG / C.FREE_RUN_STEP))
             pw_bl = sum(0 if w.step("barrel", dq=C.WIND_SENSE * math.radians(C.FREE_RUN_STEP)) else 1 for _ in range(n))
@@ -368,7 +480,7 @@ def worker(args):
             w.restore(start)
             samples, pb = [], 0
             for i in range(C.SWEEP_SAMPLES):
-                pb += _pull(w, C.PULL * i / (C.SWEEP_SAMPLES - 1))
+                pb += _pull(w, PULL * i / (C.SWEEP_SAMPLES - 1))
                 if pb:
                     break
                 samples.append(_test_turns(w))
@@ -389,12 +501,12 @@ def worker(args):
             out["ok"] = ok
         elif phase == "return":
             w.restore(start)
-            pb = _pull(w, C.PULL)
+            pb = _pull(w, PULL)
             samples = []
             for i in reversed(range(C.SWEEP_SAMPLES)):
                 if pb:
                     break
-                pb += _pull(w, C.PULL * i / (C.SWEEP_SAMPLES - 1))
+                pb += _pull(w, PULL * i / (C.SWEEP_SAMPLES - 1))
                 if not pb:
                     samples.append(_test_turns(w))
             out = {"pull_blocked": pb, "samples": samples}
@@ -517,7 +629,12 @@ def grade(sub, data, jobs=4):
         det["files"] = "%s: %s" % (type(e).__name__, e)
         return 0.0, gates, conds, steps, det
     try:
+        # the rig first lets the movement come to rest as assembled: meshing wheels turned into their gaps,
+        # springs home (each mobile at most 0.3 mm of surface travel), then checks for overlap
         w = make_world(parts, sup, defs)
+        det["rest_overlap_as_submitted"] = {n: round(w.pen(b), 6) for n, b in w.bodies.items() if b.kind != "fixed"}
+        w.phase()
+        det["rest_settle_moves"] = {n: round(b.q, 6) for n, b in w.bodies.items() if b.kind != "fixed" and abs(b.q) > 1e-9}
         pens = {n: round(w.pen(b), 6) for n, b in w.bodies.items() if b.kind != "fixed"}
         det["rest_overlap"] = pens
         gates["rest"] = all(v <= E.TOL for v in pens.values())
@@ -536,7 +653,23 @@ def grade(sub, data, jobs=4):
         det["held"] = "%s: %s" % (type(e).__name__, e)
     steps["assemble"] = gates["files"] and gates["rest"] and conds["held"] and conds["bounds"]
     seq = {}
-    if gates["rest"]:
+    if gates["rest"] and jobs <= 1:
+        # serial, in this process: never forks or spawns (for callers that import the grader in-process)
+        loaded = {"spec": spec, "parts": parts, "sup": sup}
+        try:
+            ph, out, err = worker(("wind", loaded, defs, None))
+            seq["wind"] = out if err is None else {"error": err, "ok": False}
+            _, first, err = worker(("first", loaded, defs, None))
+            if err:
+                raise RuntimeError(err)
+            state = first.pop("state")
+            seq.update({k: first[k] for k in ("hold", "run")})
+            for phn in ("backward", "set", "return"):
+                ph, out, err = worker((phn, loaded, defs, state))
+                seq[phn] = out if err is None else {"error": err, "ok": False}
+        except Exception as e:  # noqa: BLE001
+            det["sequence_error"] = "%s: %s" % (type(e).__name__, e)
+    elif gates["rest"]:
         try:
             with ProcessPoolExecutor(max_workers=max(1, min(jobs, 3))) as ex:
                 fw_ = ex.submit(worker, ("wind", (sub, data), defs, None))      # AT-1 alongside AT-2/AT-3
