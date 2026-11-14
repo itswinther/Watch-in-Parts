@@ -1,17 +1,15 @@
 # SPEC.md
 
-Version: 0.2 (2026-11-14).
+Version: 0.3 (2026-11-14).
 
-**The judged instance is now H2 ("Pack in a Box").** Its full specification,
-exactly as the agent sees it, is `environment/public/SPEC_H2.md`; that file is the
-source of truth for H2's bodies, rules, checks and score. Grader-only values
-(weights, gate list) are in `geometry/h2_checks.py`; public numbers are in
-`geometry/h2_public.py`. Reference: `solution/reference_h2.py`, bounding box
-81,343.2 mm3, score 1.0.
+**The instance under test is Moving Day, flat-1.** Its specification, exactly as
+the agent sees it, is `environment/public/SPEC_MD.md` with the instance tables
+that `environment/make_bundle_md.py` generates from `geometry/md.py`. That pair is
+the source of truth: rules, limits, weights and score are all public. The only
+secret is the reference plan (`solution/reference_md.py`).
 
-Everything below this line is instance H1 (spec 0.1). H1 is retired as the judged
-instance because six agent attempts all scored 1.0; its grader, reference and
-anchors are kept as regression tests.
+Board in a Box (H1 below, and H2 in `environment/public/SPEC_H2.md`) is scrapped
+as the challenge: clean agents scored 1.0 on both. The code stays as history.
 
 ---
 
