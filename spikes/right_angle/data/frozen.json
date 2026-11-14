@@ -1,0 +1,24 @@
+{
+ "frozen_parts": [
+  "barrel_cock",
+  "bridge",
+  "cannon",
+  "centre",
+  "dial",
+  "fourth",
+  "hour_hand",
+  "hour_wheel",
+  "main_plate",
+  "minute_hand",
+  "minute_wheel",
+  "seconds",
+  "seconds_hand",
+  "third",
+  "barrel"
+ ],
+ "source": "B reference_watch.py stage 1, main plate bored at the barrel axis",
+ "case_centre": [
+  4.0391,
+  -9.6417
+ ]
+}

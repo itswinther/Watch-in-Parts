@@ -1,0 +1,343 @@
+{
+ "reward": 1.0,
+ "p": 1.0,
+ "gates": {
+  "files": true,
+  "assembled": true
+ },
+ "checks": {
+  "spin": true,
+  "held": true,
+  "train": true,
+  "clear": true,
+  "minute": true,
+  "hour": true,
+  "seconds": true,
+  "coaxial": true,
+  "hands": true,
+  "size": true,
+  "printable": true
+ },
+ "details": {
+  "files": {},
+  "assembled": {
+   "worst_volume": 0.0,
+   "pair": null,
+   "fixed_parts_worst": 1.8351604076974858e-16,
+   "fixed_pair": "seconds_cock_pillar/seconds_cock"
+  },
+  "spin": {
+   "barrel": {
+    "worst_volume": 0.0,
+    "step": 0,
+    "steps": 72
+   },
+   "transfer": {
+    "worst_volume": 0.0,
+    "step": 0,
+    "steps": 72
+   },
+   "hour": {
+    "worst_volume": 0.0,
+    "step": 0,
+    "steps": 72
+   },
+   "minute": {
+    "worst_volume": 0.0,
+    "step": 0,
+    "steps": 72
+   },
+   "seconds_transfer": {
+    "worst_volume": 0.0,
+    "step": 0,
+    "steps": 72
+   },
+   "seconds": {
+    "worst_volume": 0.0,
+    "step": 0,
+    "steps": 72
+   }
+  },
+  "held": {
+   "barrel": {
+    "+x": 0.5641840793824979,
+    "-x": 0.17132672507075378,
+    "+y": 0.39728913050015485,
+    "-y": 0.3972891305001548,
+    "+z": 2.65604632008216,
+    "-z": 0.156631409010333
+   },
+   "transfer": {
+    "+x": 0.13779393207450827,
+    "-x": 0.832927822341226,
+    "+y": 0.4918842807338742,
+    "-y": 0.49188428073387436,
+    "+z": 0.4585019859427841,
+    "-z": 0.15870471221266444
+   },
+   "hour": {
+    "+x": 0.7640129074992674,
+    "-x": 0.6100911284173628,
+    "+y": 0.7284194777450909,
+    "-y": 0.7283963055096345,
+    "+z": 1.5560893878518558,
+    "-z": 1.862255083332798
+   },
+   "minute": {
+    "+x": 1.2744934154209986,
+    "-x": 1.1261388170323114,
+    "+y": 1.2307967482627038,
+    "-y": 1.1103961733566756,
+    "+z": 3.2531352998674437,
+    "-z": 0.75833355430085
+   },
+   "seconds_transfer": {
+    "+x": 0.10219884014926625,
+    "-x": 0.10219887823616546,
+    "+y": 0.04306008803004272,
+    "-y": 0.2884237570517233,
+    "+z": 0.34924867146838423,
+    "-z": 1.2754444680956678
+   },
+   "seconds": {
+    "+x": 0.2806598973463647,
+    "-x": 0.28065973522328697,
+    "+y": 0.3720438990565046,
+    "-y": 0.24710397400427586,
+    "+z": 0.5025013516074633,
+    "-z": 0.07973063115109986
+   }
+  },
+  "train": {
+   "conflicts": [],
+   "meshes": [
+    {
+     "worst_volume": 0.0,
+     "step": 0,
+     "steps": 768,
+     "largest_gap": 0.025027865414098745,
+     "smallest_drive_overlap": 0.12144903756665316,
+     "pair": "barrel/transfer",
+     "passes": true
+    },
+    {
+     "worst_volume": 0.0,
+     "step": 0,
+     "steps": 768,
+     "largest_gap": 0.02271370549959079,
+     "smallest_drive_overlap": 0.01617479507055576,
+     "pair": "transfer/minute",
+     "passes": true
+    },
+    {
+     "worst_volume": 0.0,
+     "step": 0,
+     "steps": 384,
+     "largest_gap": 0.023172744381285706,
+     "smallest_drive_overlap": 0.06373331053222536,
+     "pair": "transfer/hour",
+     "passes": true
+    },
+    {
+     "worst_volume": 0.0,
+     "step": 0,
+     "steps": 640,
+     "largest_gap": 0.022767523260513088,
+     "smallest_drive_overlap": 0.018628519815703442,
+     "pair": "minute/seconds_transfer",
+     "passes": true
+    },
+    {
+     "worst_volume": 0.0,
+     "step": 0,
+     "steps": 600,
+     "largest_gap": 0.022785267264295885,
+     "smallest_drive_overlap": 0.02132158032201727,
+     "pair": "seconds_transfer/seconds",
+     "passes": true
+    }
+   ]
+  },
+  "clear": {
+   "worst_volume": 0.0,
+   "pair": null
+  },
+  "minute": {
+   "clockwise_turns_per_hour_through_working_meshes": "1"
+  },
+  "hour": {
+   "clockwise_turns_per_hour_through_working_meshes": "1/12"
+  },
+  "seconds": {
+   "clockwise_turns_per_hour_through_working_meshes": "60"
+  },
+  "coaxial": {
+   "distance": 0.0
+  },
+  "hands": {
+   "hour": 5.315072906815895,
+   "minute": 5.608030148223444,
+   "seconds": 6.303173803822332
+  },
+  "size": {
+   "radius": 19.000000907680963,
+   "z_min": -1.7000000476837158,
+   "z_max": 10.350000381469727
+  },
+  "printable": {
+   "main_plate": {
+    "pieces": 1,
+    "max_deviation": 0.07071067811865477
+   },
+   "barrel_cock_pillar": {
+    "pieces": 1,
+    "max_deviation": 0.07071067811865477
+   },
+   "barrel_cock": {
+    "pieces": 1,
+    "max_deviation": 0.07071067811865477
+   },
+   "seconds_lower_stop_pillar": {
+    "pieces": 1,
+    "max_deviation": 0.07071067811865477
+   },
+   "seconds_lower_stop": {
+    "pieces": 1,
+    "max_deviation": 0.08660254037844387
+   },
+   "minute_lower_stop_pillar": {
+    "pieces": 1,
+    "max_deviation": 0.07071067811865477
+   },
+   "minute_lower_stop": {
+    "pieces": 1,
+    "max_deviation": 0.08660254037844387
+   },
+   "hour_lower_stop_pillar": {
+    "pieces": 1,
+    "max_deviation": 0.07071067811865477
+   },
+   "hour_lower_stop": {
+    "pieces": 1,
+    "max_deviation": 0.08660254037844387
+   },
+   "hour_upper_stop_pillar": {
+    "pieces": 1,
+    "max_deviation": 0.07071067811865477
+   },
+   "hour_upper_stop": {
+    "pieces": 1,
+    "max_deviation": 0.07071067811865477
+   },
+   "transfer_cock_pillar": {
+    "pieces": 1,
+    "max_deviation": 0.07071067811865477
+   },
+   "transfer_cock": {
+    "pieces": 1,
+    "max_deviation": 0.1118033988749895
+   },
+   "seconds_transfer_lower_pillar": {
+    "pieces": 1,
+    "max_deviation": 0.07071067811865477
+   },
+   "seconds_transfer_lower": {
+    "pieces": 1,
+    "max_deviation": 0.07071067811865477
+   },
+   "seconds_transfer_cock_pillar": {
+    "pieces": 1,
+    "max_deviation": 0.07071067811865477
+   },
+   "seconds_transfer_cock": {
+    "pieces": 1,
+    "max_deviation": 0.08660254037844387
+   },
+   "minute_upper_stop_pillar": {
+    "pieces": 1,
+    "max_deviation": 0.07071067811865477
+   },
+   "minute_upper_stop": {
+    "pieces": 1,
+    "max_deviation": 0.08660254037844387
+   },
+   "seconds_cock_pillar": {
+    "pieces": 1,
+    "max_deviation": 0.07071067811865477
+   },
+   "seconds_cock": {
+    "pieces": 1,
+    "max_deviation": 0.08660254037844387
+   },
+   "transfer_shaft": {
+    "pieces": 1,
+    "max_deviation": 0.07071067811865477
+   },
+   "barrel_pinion48": {
+    "pieces": 1,
+    "max_deviation": 0.08660254037844387
+   },
+   "minute_driver96": {
+    "pieces": 1,
+    "max_deviation": 0.1224744871391589
+   },
+   "hour_driver16": {
+    "pieces": 1,
+    "max_deviation": 0.08660254037844387
+   },
+   "hour_wheel48": {
+    "pieces": 1,
+    "max_deviation": 0.08660254037844387
+   },
+   "hour_sleeve": {
+    "pieces": 1,
+    "max_deviation": 0.07071067811865477
+   },
+   "hour_hand": {
+    "pieces": 1,
+    "max_deviation": 0.07071067811865477
+   },
+   "minute_wheel24": {
+    "pieces": 1,
+    "max_deviation": 0.1224744871391589
+   },
+   "minute_sleeve": {
+    "pieces": 1,
+    "max_deviation": 0.07071067811865477
+   },
+   "seconds_driver80": {
+    "pieces": 1,
+    "max_deviation": 0.1224744871391589
+   },
+   "minute_hand": {
+    "pieces": 1,
+    "max_deviation": 0.07071067811865477
+   },
+   "seconds_transfer_shaft": {
+    "pieces": 1,
+    "max_deviation": 0.07071067811865477
+   },
+   "seconds_pinion10": {
+    "pieces": 1,
+    "max_deviation": 0.1224744871391589
+   },
+   "seconds_driver75": {
+    "pieces": 1,
+    "max_deviation": 0.1224744871391589
+   },
+   "seconds_shaft": {
+    "pieces": 1,
+    "max_deviation": 0.07071067811865477
+   },
+   "seconds_wheel10": {
+    "pieces": 1,
+    "max_deviation": 0.1118033988749895
+   },
+   "seconds_hand": {
+    "pieces": 1,
+    "max_deviation": 0.07071067811865477
+   }
+  }
+ },
+ "skipped": []
+}

@@ -1,0 +1,64 @@
+frozen verified
+assembled checked
+free transfer PASS
+free hour PASS
+free minute PASS
+free seconds_transfer PASS
+free seconds PASS
+free day PASS
+free barrel PASS
+held checked
+size mobile transfer 15.28000093975878
+size mobile hour 7.825000372023051
+size mobile minute 7.940000377572158
+size mobile seconds_transfer 12.380139680942884
+size mobile seconds 8.503173803822332
+size mobile day 20.075233217032398
+size mobile barrel 14.800000385404612
+total z -1.7000000476837158 11.699999809265137
+mesh progress barrel transfer 0 0.0
+mesh progress barrel transfer 128 0.2
+mesh progress barrel transfer 256 0.3
+mesh progress barrel transfer 384 0.5
+mesh progress barrel transfer 512 0.7
+mesh progress barrel transfer 640 0.8
+MESH barrel transfer jams [] 0 gaps [] 0 no drive [] 0
+mesh progress transfer minute 0 0.0
+mesh progress transfer minute 128 0.2
+mesh progress transfer minute 256 0.4
+mesh progress transfer minute 384 0.6
+mesh progress transfer minute 512 0.8
+mesh progress transfer minute 640 1.0
+MESH transfer minute jams [] 0 gaps [] 0 no drive [] 0
+mesh progress transfer hour 0 0.0
+mesh progress transfer hour 128 0.1
+mesh progress transfer hour 256 0.3
+MESH transfer hour jams [] 0 gaps [] 0 no drive [] 0
+mesh progress minute seconds_transfer 0 0.0
+mesh progress minute seconds_transfer 128 0.1
+mesh progress minute seconds_transfer 256 0.3
+mesh progress minute seconds_transfer 384 0.4
+mesh progress minute seconds_transfer 512 0.5
+MESH minute seconds_transfer jams [] 0 gaps [] 0 no drive [] 0
+mesh progress seconds_transfer seconds 0 0.0
+mesh progress seconds_transfer seconds 128 0.1
+mesh progress seconds_transfer seconds 256 0.2
+mesh progress seconds_transfer seconds 384 0.3
+mesh progress seconds_transfer seconds 512 0.4
+MESH seconds_transfer seconds jams [] 0 gaps [] 0 no drive [] 0
+mesh progress transfer day 0 0.0
+mesh progress transfer day 128 0.2
+mesh progress transfer day 256 0.4
+mesh progress transfer day 384 0.6
+mesh progress transfer day 512 0.8
+mesh progress transfer day 640 0.9
+MESH transfer day jams [] 0 gaps [] 0 no drive [] 0
+speeds revolutions/hour {'barrel': Fraction(-1, 8), 'transfer': Fraction(1, 4), 'minute': Fraction(-1, 1), 'hour': Fraction(-1, 12), 'seconds_transfer': Fraction(8, 1), 'seconds': Fraction(-60, 1), 'day': Fraction(-1, 24)}
+nonmesh transfer seconds_transfer PASS
+nonmesh transfer seconds PASS
+nonmesh hour minute PASS
+nonmesh hour seconds_transfer PASS
+nonmesh hour seconds PASS
+nonmesh minute seconds PASS
+nonmesh seconds_transfer barrel PASS
+nonmesh seconds barrel PASS
