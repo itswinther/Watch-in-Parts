@@ -8,7 +8,11 @@ environment/public/job/datasheets/QA-W100_inspection.md, the part weights of SES
 (B), gear strength and the honesty term of Decisions 17:56) and asserted to 1e-4, together with each part's score
 s, the names of the gates and checks that fail, the parts reward R, and the honesty claims, truths and factor
 (from the details file).
---job reuses a reference job folder; without it one is built into a temporary folder (about 60 s).
+--job reuses a reference job folder; without it one is built into a temporary folder (about 60 s), with
+`reference_watch.py --job --one-part-mobiles`: the anchors are written against that layout (one part per gear,
+one material per mobile; B, 22:20, after builder M split the delivered reference into steel pinions and brass
+wheels). Pass --job only with a folder built that way. The delivered reference (without the flag) is graded
+on its own (SESSION.md).
 --only runs the anchors whose name contains one of the given texts (an exact name match wins).
 --timeout is per anchor (build plus grading), default 7800 s (the grader's own whole-run limit is 7200 s). --keep DIR keeps each anchor's details file as DIR/NN_details.json.
 A gate or check that ran out of time is reported as TIMED OUT: that says the machine was too slow, not the design.
@@ -894,7 +898,7 @@ def main(argv):
     if job is None:
         tmp = tempfile.mkdtemp(prefix="job_anchors_ref_")
         job = os.path.join(tmp, "ref")
-        subprocess.run([sys.executable, os.path.join(ROOT, "solution", "reference_watch.py"), job, "--job"],
+        subprocess.run([sys.executable, os.path.join(ROOT, "solution", "reference_watch.py"), job, "--job", "--one-part-mobiles"],
                        check=True, stdout=subprocess.DEVNULL, stdin=subprocess.DEVNULL)
     job = os.path.abspath(job)
     print("reference job folder %s, %d anchors, %d workers, timeout %g s" % (job, len(pick), workers, timeout), flush=True)
