@@ -326,6 +326,15 @@ def case_keyless_switch(job, tmp):
 
 
 def case_reward_formula(job, tmp):
+    from geometry import keyless_job as KJ
+    if KJ.KEYLESS_IN_JOB:
+        # five parts, weights 0.25 + 0.10 + 0.15 + 0.25 + 0.25 = 1: parts reward 0.5 x (1 - 0.15) = 17/40; the report
+        # claims P3 `pass` while it fails: points 1, 1, -2, 1, 1, mean 2/5, factor (0.75 + 0.10 x 2/5) / 0.85 = 79/85;
+        # reward 17/40 x 79/85 = 79/200
+        assert without("P3") == float(Fraction(79, 200)), without("P3")
+        # 0.5 x (1 - 0.25) = 3/8, the same factor: 237/680
+        assert without("P4") == float(Fraction(237, 680)), without("P4")
+        return "five parts: without P3 %r, without P4 %r" % (without("P3"), without("P4"))
     # parts reward 0.5 x (1 - 0.15/0.75) = 2/5; the report claims P3 `pass` while it fails: points 1, 1, -2, 1,
     # mean 1/4, factor (0.75 + 0.10/4) / 0.85 = 31/34; reward 2/5 x 31/34 = 31/85
     assert without("P3") == float(Fraction(31, 85)), without("P3")
