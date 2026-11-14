@@ -255,6 +255,24 @@ def stem_protrudes_at_crown_end():
     return ok_crown and not ok_wrong
 
 
+def early_stop_bound():
+    """grade._cannot_exceed (anchor early stop): unrun steps count as passed, whole-build 0 after a failure."""
+    import constants as C
+    import grade as GR
+    W = C.STEP_WEIGHTS
+    b = 0.5 * (W["assemble"] + W["hold"])
+    cases = [({"assemble": True}, b, False),                                  # nothing failed yet
+             ({"assemble": True, "wind": False}, b, False),                   # 0.4 still possible
+             ({"assemble": True, "wind": False, "hold": True, "run": False, "backward": False, "set": False}, b, False),
+             ({"assemble": True, "wind": False, "hold": True, "run": False, "backward": False, "set": False,
+               "return": False}, b, True),
+             ({"assemble": False}, 0.5 * (1 - W["assemble"]), True),
+             ({"assemble": True}, 0.99, False)]
+    got = [GR._cannot_exceed(k, bound) == want for k, bound, want in cases]
+    print("early stop bound cases: %s" % got)
+    return all(got)
+
+
 if __name__ == "__main__":
 
     t = time.time()
@@ -263,6 +281,7 @@ if __name__ == "__main__":
            "rider_gives_way": rider_gives_way(), "rider_drives_steep_face": rider_drives_steep_face(),
            "touching_can_be_pushed": touching_can_be_pushed(), "fit_clearance": fit_clearance(),
            "phase_gears": phase_gears(), "carried_wheel": carried_wheel(), "force_direction": force_direction(),
-           "stem_protrudes_at_crown_end": stem_protrudes_at_crown_end()}
+           "stem_protrudes_at_crown_end": stem_protrudes_at_crown_end(),
+           "early_stop_bound": early_stop_bound()}
     print(res, "%.1f s" % (time.time() - t))
     sys.exit(0 if all(res.values()) else 1)

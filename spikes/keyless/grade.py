@@ -632,9 +632,22 @@ def _constants_hash():
     return h.hexdigest()[:16]
 
 
-def grade(sub, data, jobs=4):
+def _cannot_exceed(known, bound):
+    """True when the product can no longer be above `bound`: steps not yet run count as passed, the
+    whole-build term as 0 once any step has failed."""
+    best = sum(C.STEP_WEIGHTS[k] for k in C.STEPS if known.get(k, True))
+    whole = 0.0 if any(v is False for v in known.values()) else 1.0
+    return (1.0 - C.W_WHOLE) * best + C.W_WHOLE * whole <= bound + 1e-9
+
+
+def grade(sub, data, jobs=4, stop_le=None):
     """Returns (product, gates, conds, steps, det). Every step is evaluated (for the honesty check);
-    the product counts only the steps passed in order from AT-0."""
+    the product counts only the steps passed in order from AT-0.
+
+    stop_le (anchor runs only, never the verifier): stop as soon as the product cannot be above it; the
+    steps not run count as failed and det["early_stop"] names them. Implies the serial path."""
+    if stop_le is not None:
+        jobs = 1
     det = {"grader_version": C.GRADER_VERSION, "constants_hash": _constants_hash(), "at_ids": C.AT_IDS}
     gates = {"files": False, "rest": False}
     conds = {"held": False, "bounds": False}
@@ -673,17 +686,33 @@ def grade(sub, data, jobs=4):
     if gates["rest"] and jobs <= 1:
         # serial, in this process: never forks or spawns (for callers that import the grader in-process)
         loaded = {"spec": spec, "parts": parts, "sup": sup}
+        order = ["wind", "first", "backward", "set", "return"]
+
+        def stop_here(done):
+            if stop_le is None:
+                return False
+            known = {"assemble": bool(steps["assemble"])}
+            known.update({k: bool(v.get("ok")) for k, v in seq.items()})
+            if _cannot_exceed(known, stop_le):
+                det["early_stop"] = {"bound": stop_le, "not_run": order[done:]}
+                return True
+            return False
+
         try:
-            ph, out, err = worker(("wind", loaded, defs, None))
-            seq["wind"] = out if err is None else {"error": err, "ok": False}
-            _, first, err = worker(("first", loaded, defs, None))
-            if err:
-                raise RuntimeError(err)
-            state = first.pop("state")
-            seq.update({k: first[k] for k in ("hold", "run")})
-            for phn in ("backward", "set", "return"):
-                ph, out, err = worker((phn, loaded, defs, state))
-                seq[phn] = out if err is None else {"error": err, "ok": False}
+            if not stop_here(0):
+                ph, out, err = worker(("wind", loaded, defs, None))
+                seq["wind"] = out if err is None else {"error": err, "ok": False}
+                if not stop_here(1):
+                    _, first, err = worker(("first", loaded, defs, None))
+                    if err:
+                        raise RuntimeError(err)
+                    state = first.pop("state")
+                    seq.update({k: first[k] for k in ("hold", "run")})
+                    for i, phn in enumerate(("backward", "set", "return")):
+                        if stop_here(2 + i):
+                            break
+                        ph, out, err = worker((phn, loaded, defs, state))
+                        seq[phn] = out if err is None else {"error": err, "ok": False}
         except Exception as e:  # noqa: BLE001
             det["sequence_error"] = "%s: %s" % (type(e).__name__, e)
     elif gates["rest"]:
@@ -727,12 +756,14 @@ def main():
     ap.add_argument("--reward", required=True)
     ap.add_argument("--details")
     ap.add_argument("--jobs", type=int, default=3)
+    ap.add_argument("--stop-at-or-below", type=float, default=None,
+                    help="anchor runs only: stop once the product cannot be above this (implies --jobs 1)")
     a = ap.parse_args()
     with open(a.reward, "w") as f:
         f.write("0\n")
     t = time.time()
     sub = os.path.abspath(a.sub)
-    product, gates, conds, steps, det = grade(sub, os.path.abspath(a.data), a.jobs)
+    product, gates, conds, steps, det = grade(sub, os.path.abspath(a.data), a.jobs, a.stop_at_or_below)
     try:
         hon, hdet = honesty(sub, steps)
     except Exception as e:  # noqa: BLE001

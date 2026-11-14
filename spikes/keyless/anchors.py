@@ -1,7 +1,13 @@
 """Anchors and the exploit hunt: the reference, deliberate faults, and attempts to beat the grader
 without real work. Each has the reward it must get.
 
-    python anchors.py WORK_DIR [PARALLEL] [ONLY_PREFIX]
+    python anchors.py WORK_DIR [PARALLEL] [ONLY_PREFIX] [--quick] [--early-stop]
+
+--quick: the reference once plus the faster anchors (skips the reference repeats and the honesty anchors
+that re-grade the reference). For iterating only; validate a merge with the full run.
+--early-stop: a "<=" anchor stops grading once its bound can no longer be exceeded (reported as ok with
+early-stop). Never applied to "=" anchors. For iterating only; never for validating a merge.
+Lines are printed as anchors finish, then a summary line.
 
 Builds each variant (reference.build() options, then optional edits to the written submission),
 grades it with `python -I grade.py`, and prints one line per anchor with ok or FAIL. Exit 0 when all ok.
@@ -14,7 +20,7 @@ import shutil
 import struct
 import subprocess
 import sys
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
@@ -219,9 +225,17 @@ ANCHORS = [
 ]
 
 
+EARLY_STOP = False
+
+
+def quick_skip(name):
+    return name.startswith("reference, repeat") or name.startswith("H reference")
+
+
 def run(i):
     name, opts, post, want, how = ANCHORS[i][:5]
     field = ANCHORS[i][5] if len(ANCHORS[i]) > 5 else "product"
+    early = EARLY_STOP and how == "le" and field == "product"
     d = os.path.join(WORK, "a%02d" % i)
     if os.path.exists(d):
         shutil.rmtree(d)
@@ -234,7 +248,8 @@ def run(i):
     rw = os.path.join(d, "reward.txt")
     dt = os.path.join(d, "details.json")
     p = subprocess.run([sys.executable, "-I", os.path.join(HERE, "grade.py"), d, os.path.join(HERE, "data"),
-                        "--reward", rw, "--details", dt, "--jobs", os.environ.get("ANCHOR_JOBS", "3")], capture_output=True, text=True)
+                        "--reward", rw, "--details", dt, "--jobs", os.environ.get("ANCHOR_JOBS", "3")]
+                       + (["--stop-at-or-below", repr(want)] if early else []), capture_output=True, text=True)
     failed, secs, got = [], "-", float(open(rw).read())
     if os.path.exists(dt):
         j = json.load(open(dt))
@@ -246,21 +261,41 @@ def run(i):
         failed = [k for k, v in {**j["gates"], **j.get("conditions", {}), **j.get("steps", j.get("counted", {}))}.items()
                   if not v]
         secs = j.get("seconds")
+        es = j.get("details", {}).get("early_stop")
+        if es:
+            secs = "%s, early-stop: not run %s" % (secs, ",".join(es["not_run"]))
     return ok, "%-4s %-100s %s=%.4f want %s %.4f failed: %s (%ss)" % (
         "ok" if ok else "FAIL", name, field, got, "=" if how == "eq" else "<=", want, ",".join(failed) or "-", secs)
 
 
 if __name__ == "__main__":
-    WORK = os.path.abspath(sys.argv[1])
-    par = int(sys.argv[2]) if len(sys.argv) > 2 else 2
-    only = sys.argv[3] if len(sys.argv) > 3 else None
+    flags = {a for a in sys.argv[1:] if a.startswith("--")}
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    unknown = flags - {"--quick", "--early-stop"}
+    if unknown:
+        sys.exit("unknown option(s): %s" % ", ".join(sorted(unknown)))
+    EARLY_STOP = "--early-stop" in flags
+    WORK = os.path.abspath(args[0])
+    par = int(args[1]) if len(args) > 1 else 2
+    only = args[2] if len(args) > 2 else None
     idx = [i for i, a in enumerate(ANCHORS) if only is None or a[0].startswith(only)]
+    if "--quick" in flags:
+        idx = [i for i in idx if not quick_skip(ANCHORS[i][0])]
     shard = os.environ.get("SHARD")              # "i/n": run every n-th anchor starting at i
     if shard:
         si, sn = (int(x) for x in shard.split("/"))
         idx = [i for k, i in enumerate(idx) if k % sn == si]
+    print("# anchors: %d of %d%s%s, %d at a time" % (len(idx), len(ANCHORS), " (quick)" if "--quick" in flags else "",
+          " (early-stop)" if EARLY_STOP else "", par), flush=True)
+    res = []
     with ThreadPoolExecutor(par) as ex:
-        res = list(ex.map(run, idx))
-    for ok, line in res:
-        print(line, flush=True)
-    sys.exit(0 if all(ok for ok, _ in res) else 1)
+        futs = {ex.submit(run, i): i for i in idx}
+        for f in as_completed(futs):
+            try:
+                ok, line = f.result()
+            except Exception as e:  # noqa: BLE001
+                ok, line = False, "ERROR %s: %r" % (ANCHORS[futs[f]][0], e)
+            res.append(ok)
+            print(line, flush=True)
+    print("# %d of %d ok" % (sum(res), len(res)), flush=True)
+    sys.exit(0 if all(res) else 1)
