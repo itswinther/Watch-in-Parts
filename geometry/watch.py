@@ -48,8 +48,7 @@ THIN_VOXEL = 0.05
 THIN_ERODE_VOX = 1.5        # ball radius 0.1 on the 0.05 grid, less half a voxel of margin
 THIN_DILATE_VOX = 1.0
 THIN_DEV = 0.2              # no point of a part may be further than this from what survives the opening
-# mass budget, mm3. PLACEHOLDERS: 50 % of the current reference's fixed volume (4233.68, stage 1) and 60 % of its
-# mobile volume (853.19, stage 2); builder REF replaces them with the reworked reference's values plus 10 %.
+# mass budget, the same at every stage
 FIXED_VOLUME_MAX = 346.0    # mm3, the volume of the union of the fixed parts
 MOBILE_VOLUME_MAX = 278.0   # mm3, the sum of the volumes of every part of every mobile, the supplied barrel not counted
 MAX_PARTS = 60

@@ -264,6 +264,35 @@ def fat_seconds_pinion(d, base):
     core.write_step(part_file(d, "seconds"), ref.hand_arbor(S, lo, hi, p4))
 
 
+def thin_seconds_pinion(d, base):
+    """Stage 1: the seconds pinion (12 teeth, module 0.2) remade with teeth thinned by a backlash allowance of
+    0.15 on the pitch circle instead of 0.03. Measured on the reference: drawn, the fourth wheel pushed a quarter
+    pitch overlaps it by only 0.0066 (more than 0.01 needed), so the pair does not drive; moved 0.03 away, 0.0034.
+    (A 24-tooth pinion does not give a valid solid at this allowance; the 12-tooth one does.)"""
+    from geometry import watch_gears_cad as GC
+    from geometry import core
+    P = ref.place()
+    T, S = P["fourth"], P["seconds"]
+    lo, hi = ref.PLATE[1] + 0.1, ref.BRIDGE[0] - 0.1
+    _, ph = ref.gear_at(S, 12, ref.M_D, ref.Z["D"], ref.ang(S, T), (96, math.degrees(ref.ang(T, S))))
+    p4 = GC.gear(12, ref.M_D, ref.Z["D"][0], ref.Z["D"][1], phase_deg=ph, x=S[0], y=S[1], backlash=0.15)
+    core.write_step(part_file(d, "seconds"), ref.hand_arbor(S, lo, hi, p4))
+
+
+def coarse_third_pinion(d, base):
+    """Stage 1: the third pinion (24 teeth, driven by the supplied 96-tooth barrel, module 0.2) cut at module
+    0.206 (3 percent too coarse), same tooth count, same axis and phase, same third wheel and arbor."""
+    from geometry import watch_gears_cad as GC
+    from geometry import core
+    P = ref.place()
+    B, I, C = P["barrel"], P["third"], P["centre"]
+    lo, hi = ref.PLATE[1] + 0.1, ref.BRIDGE[0] - 0.1
+    _, ph = ref.gear_at(I, 24, ref.M_A, ref.Z["A"], ref.ang(I, B), (96, 0.0))
+    p1 = GC.gear(24, ref.M_A * 1.03, ref.Z["A"][0], ref.Z["A"][1], phase_deg=ph, x=I[0], y=I[1])
+    w1, _ = ref.wheel_at(I, 60, ref.M_B, ref.Z["B"], ref.ang(I, C))
+    core.write_step(part_file(d, "third"), ref.union([ref.arbor(I, lo, hi), p1, w1]))
+
+
 ANCHORS = [
     ("s1 gold", 1, lambda d, b: None, 1.0),
     ("s1 do nothing", 1, lambda d, b: nothing(d), 0.0),
@@ -276,6 +305,9 @@ ANCHORS = [
     # mass budget: these pass as "light and size fail" only once the reference itself meets the budget
     ("s1 one extra solid block added as a fixed part", 1, heavy_fixed_block, fails(1, "light", "size")),
     ("s1 one extra heavy mobile in a fixed cage", 1, heavy_mobile, fails(1, "light", "size")),
+    # tooth exactness: the thinned pinion does not drive, so the seconds hand downstream stands still
+    ("s1 a pinion with teeth thinned until they no longer drive", 1, thin_seconds_pinion, fails(1, "train", "tolerant", "seconds")),
+    ("s1 a pinion cut 3 percent too coarse", 1, coarse_third_pinion, fails(1, "tolerant")),
     ("s2 gold", 2, lambda d, b: None, 1.0),
     ("s2 stage-1 design handed back unchanged", 2, use_stage(1), 0.0),          # no day hand declared: hard requirement
     ("s2 seconds hand declared as the 24-hour hand", 2,
