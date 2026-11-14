@@ -1191,3 +1191,13 @@ What it means:
   - two DTIC reports refuse scripted downloads: AD0276037 and AD0609922 (https://apps.dtic.mil/sti/citations/AD0276037, https://apps.dtic.mil/sti/citations/AD0609922);
   - a full Google Patents search was blocked by the permission system (https://patents.google.com/?q=(keyless+works)+(crown+wheel)+(ratchet+wheel)+teeth);
   - MIL-W-46374F is a scan that needs OCR (everyspec link in DATASHEET_GAPS_2.md).
+
+### 2026-11-14 15:50 | A: DATASHEET_GAPS_2 addendum (crown torque and force, 6R15, ST36) | Mikael + Claude
+- Added `DATASHEET_GAPS_2_ADDENDUM.md` from the sub-search that reported late:
+  - crown no-damage torque **42 mN·m** (MIL-W-46374F §3.3.7, GG-W-113A §3.9.3, public domain; Omega patent 10 to 50 mN·m);
+  - crown pull **22.2 N** (MIL-W-46374F §3.3.6);
+  - side force **5 N** (ISO 6425, link only);
+  - cannon-pinion friction about **2.0 mN·m** (Rolex US11256216);
+  - Seiko 6R15 technical guide (crown positions, 50 h vs a 41 h duration test; the full-wind turns are not published);
+  - Seagull ST36: secondary only.
+- Not found anywhere: a measured comfortable winding torque.
