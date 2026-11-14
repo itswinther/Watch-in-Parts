@@ -1,6 +1,6 @@
 # SPEC.md
 
-Version: 0.4 (2026-11-14).
+Version: 0.5 (2026-11-14).
 
 **The task under test is the staged mechanical watch gear train.** Its
 specification, exactly as the agent sees it, is `environment/public/SPEC_WATCH.md`
@@ -13,6 +13,12 @@ grader uses is a constant in `geometry/watch.py` and is stated in that spec. The
 only things not stated are what the hands of a watch do (in `tests/grade_watch.py`)
 and the reference (`solution/reference_watch.py`). The chain score is the product
 of the four stage scores (`tests/grade_chain.py`).
+
+Version 0.5 adds three requirements to stages 1 to 3 (totals 23, 27 and 27): a
+volume budget for fixed and for mobile parts, parts of one mobile that do not
+overlap, form one piece and are each seated, and the mesh test repeated with the
+driven arbor 0.03 out of place. Stage 4 now tests every pair of parts, parts of
+the same mobile included.
 
 Moving Day (version 0.3, `environment/public/SPEC_MD.md`) is a fallback, not the
 task under test.
