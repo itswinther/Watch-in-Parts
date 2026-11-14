@@ -1,0 +1,27 @@
+  1/1 Mean: 0.950 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 0:26:09 0:00:00
+adhoc • opencode • claude-sonnet-5-5
+┏━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━┓
+┃ Trials ┃ Exceptions ┃  Mean ┃
+┡━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━┩
+│      1 │          0 │ 0.950 │
+└────────┴────────────┴───────┘
+
+┏━━━━━━━━━┳━━━━━━━┓
+┃ Reward  ┃ Count ┃
+┡━━━━━━━━━╇━━━━━━━┩
+│ 0.94958 │     1 │
+└─────────┴───────┘
+
+Job Info
+Total runtime: 26m 9s
+Results written to 
+/private/tmp/claude-501/-Users-mikbs-Desktop-dev-Junction/824d3067-e8b7-4116-993
+4-5c800c5f6483/scratchpad/kl/runs/prelim_sonnet/jobs/2026-11-14__17-59-40/result
+.json
+Inspect results by running `harbor view 
+/private/tmp/claude-501/-Users-mikbs-Desktop-dev-Junction/824d3067-e8b7-4116-993
+4-5c800c5f6483/scratchpad/kl/runs/prelim_sonnet/jobs`
+Share results by running `harbor upload 
+/private/tmp/claude-501/-Users-mikbs-Desktop-dev-Junction/824d3067-e8b7-4116-993
+4-5c800c5f6483/scratchpad/kl/runs/prelim_sonnet/jobs/2026-11-14__17-59-40`
+

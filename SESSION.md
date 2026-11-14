@@ -1533,3 +1533,34 @@ A note for B's builder sessions and for Mikael's session, for information only. 
 - Verified by (command and result): `python3 tests/test_job_grader.py --only a,deadline,reward_formula`: 3 of 3 passed with the new limits. `make_brief_job.py --check`: up to date; QA-W100 states 1800 s and 7200 s.
 - Not verified: the 27 anchors on the full grader. They run after builder S (gear strength, which changes P1 and P3 totals and therefore N's expected values) is merged, with fewer jobs on the machine.
 - Files changed: tests/grade_watch.py (two limits), tests/test_anchors_job.py (new, from N), environment/public/job/* (regenerated), SESSION.md.
+
+### 2026-11-14 18:50 | A: PRELIMINARY SMOKE TEST: not a result; environment not final (keyless, GPT-6.1-sol via Codex and Sonnet 5.5 via OpenCode, 1 trial each) | Mikael + Claude
+- **Did:** ran one trial each on the keyless task, through Harbor 0.26 in Docker, with the separate
+  no-network verifier and allowlists set to the model endpoint.
+  - **Preconditions met first:** `harbor lint` clean; the agent image's `/app` holds only BRIEF.md and
+    the 5 supplied STLs; oracle 1.0; nop 0.0; reference 1.0 three times in the anchor batch.
+- **GPT-6.1-sol (Codex):**
+  - reward 0.024, product 0.025: AT-0 passes, AT-1 to AT-6 fail;
+  - honesty 0.571: it claimed only AT-0, the rest `not_tested`;
+  - 29 min of the 60 min timeout.
+  - **Cause, checked in Docker by turning its crown both ways:** the mechanism is a mirror image. Its
+    clutch drives on the brief's backward turn, and its train then turns the barrel against winding. A
+    handedness error against the brief's explicit signs, not one of the engine's known limits.
+- **Sonnet 5.5 (OpenCode):**
+  - reward 0.950, product 1.0 (every step passes);
+  - honesty 0.571: it claimed only AT-0, the rest `not_tested`;
+  - 19 min, $1.55.
+  - **Harness:** the 64000 output cap was in effect (one step used 54,551 tokens); no empty turns;
+    trajectory.json present; all of `/app` collected.
+- **Audit:** no network or credential access in either transcript; both end with "Outside access:
+  none"; the secret scan is clean.
+- **Not final:**
+  - the engine fixes on `a/keyless-engine-fixes`; design scores are not trustworthy until they land;
+  - the brake anchor's geometry;
+  - no datasheets (v1);
+  - one run each, so no statistics, no gap and no pass rate claimed.
+- **Agent timeout:** 60 min is less than 3× the slowest run (29 min). It should be raised to about 90
+  min before real runs.
+- **Files:** `spikes/keyless/runs/INDEX.md`, `runs/prelim_gpt/`, `runs/prelim_sonnet/` (READMEs, trials,
+  replay pages, stills). engine.py and grade.py are not pushed (the trace option waits for the engine
+  merge).

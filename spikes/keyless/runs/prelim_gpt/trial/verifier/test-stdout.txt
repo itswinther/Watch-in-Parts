@@ -1,0 +1,2 @@
+{"reward": 0.02373949579831933, "product": 0.025, "honesty": 0.5714285714285714, "gates": {"files": true, "rest": true}, "conditions": {"held": true, "bounds": true}, "steps": {"assemble": true, "wind": false, "hold": false, "run": false, "backward": false, "set": false, "return": false}, "seconds": 191.4}
+grader exit 0

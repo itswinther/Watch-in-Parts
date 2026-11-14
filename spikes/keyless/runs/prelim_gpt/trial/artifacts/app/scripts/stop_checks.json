@@ -1,0 +1,77 @@
+{
+  "stops": [
+    {
+      "pull": 0,
+      "crown": -24,
+      "setting_transfer": 0,
+      "minute": 0,
+      "wind_clutch_overlap_when_disengaged": 0
+    },
+    {
+      "pull": 0,
+      "crown": 24,
+      "setting_transfer": 0,
+      "minute": 0,
+      "wind_clutch_overlap_when_disengaged": 0
+    },
+    {
+      "pull": 0.225,
+      "crown": -24,
+      "setting_transfer": 0,
+      "minute": 0,
+      "wind_clutch_overlap_when_disengaged": 0
+    },
+    {
+      "pull": 0.225,
+      "crown": 24,
+      "setting_transfer": 0,
+      "minute": 0,
+      "wind_clutch_overlap_when_disengaged": 0
+    },
+    {
+      "pull": 0.45,
+      "crown": -24,
+      "setting_transfer": 0,
+      "minute": 0,
+      "wind_clutch_overlap_when_disengaged": 0
+    },
+    {
+      "pull": 0.45,
+      "crown": 24,
+      "setting_transfer": 0,
+      "minute": 0,
+      "wind_clutch_overlap_when_disengaged": 0
+    },
+    {
+      "pull": 0.675,
+      "crown": -24,
+      "setting_transfer": 17.826446533203125,
+      "minute": -3.8330932617187496,
+      "wind_clutch_overlap_when_disengaged": 0
+    },
+    {
+      "pull": 0.675,
+      "crown": 24,
+      "setting_transfer": -17.837127685546875,
+      "minute": 3.8799072265624996,
+      "wind_clutch_overlap_when_disengaged": 0
+    },
+    {
+      "pull": 0.9,
+      "crown": -24,
+      "setting_transfer": 19.211639404296875,
+      "minute": -4.140869140625,
+      "wind_clutch_overlap_when_disengaged": 0
+    },
+    {
+      "pull": 0.9,
+      "crown": 24,
+      "setting_transfer": -19.218536376953125,
+      "minute": 4.180432128906251,
+      "wind_clutch_overlap_when_disengaged": 0
+    }
+  ],
+  "aligned_pull_max_overlap": 1.6708777247526583e-06,
+  "winding_clutch_release_pull_bound": 0.056,
+  "setting_contact_pull_lower_bound": 0.62
+}
