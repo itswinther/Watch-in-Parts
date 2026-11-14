@@ -283,7 +283,7 @@ Harbor 0.26 in Docker, separate offline verifier:**
 |---|---|---|---|
 | before A's fixes | GPT-6.1-sol, Codex | 0.024 (first smoke run, mirror-image mechanism) | 18:50, `spikes/keyless/runs/INDEX.md` |
 | before A's fixes | GPT-6.1-sol, Codex | 0.024, 0.022, 0.066 (all jam on the first forward crown step) | 21:40, same |
-| after A's fixes | GPT-6.1-sol, Codex | 0.421, 0.119, 0.110 (mean 0.217; the same three repeats regraded on the fixed engine; the first smoke run stays 0.024, a real mirror-image fault): the designs wind, then jam when the rig pre-winds the barrel for the hold test (one clutch that cannot slip, a design fault; the other two jams traced by A at 00:40 to a simulator artifact, the engine's per-patch push floor, so those two are not the agent's mistake until the engine is fixed and they are regraded) | A's 00:05 entry (b3a8179) |
+| after A's fixes (engine c44b69b) | GPT-6.1-sol, Codex | imWnpTP **0.992** (every step passes, honesty 0.929; earlier 0.022 and 0.421 were engine bugs); b7qdG8X and QZeuFhk: real design faults (stem hits its own clutch on pull; clutch will not slip backward), regrades stopped; the first smoke run 0.024 (mirror image, a real fault). GPT can solve crown winding. | A's 01:50 entry (1af8d42) |
 | before A's fixes | Sonnet 5.5, OpenCode | 0.950 (every step passes; honesty 0.571) | 18:50 |
 
 A labels every one of these "not a result; environment not final".

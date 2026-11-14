@@ -72,7 +72,7 @@ Parts 1 to 4. Runs of A's task, in Harbor:
 | Model, harness | Engine | Rewards |
 | --- | --- | --- |
 | GPT-6.1-sol, Codex | first | 0.024, 0.022, 0.066 (plus a first smoke run at 0.024) |
-| GPT-6.1-sol, Codex | fixed (the same three designs regraded) | 0.421, 0.119, 0.110 (mean 0.217) |
+| GPT-6.1-sol, Codex | fixed engine (c44b69b, the same designs regraded) | **0.992** for imWnpTP (every step passes; it was failed twice by engine bugs); b7qdG8X and QZeuFhk have real design faults (a stem that hits its own clutch on pull; a clutch that will not slip backward), regrades stopped. GPT can solve crown winding. |
 | Sonnet 5.5, OpenCode | first | 0.95, every step passing |
 
 The rows used different engines, and Sonnet was graded on the first one only. On the fixed engine GPT's
