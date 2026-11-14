@@ -168,8 +168,8 @@ def _keyless_folder(job, tmp, name, keyless=True, friction=True):
     def edit(doc):
         if friction:
             cen = doc["mobiles"]["centre"]
-            doc["mobiles"]["centre"] = {"axis": cen["axis"], "parts": [p for p in cen["parts"] if p not in ("cannon", "minute_hand")]}
-            doc["mobiles"]["cannon"] = {"axis": cen["axis"], "parts": ["cannon", "minute_hand"], "friction_on": "centre"}
+            doc["mobiles"]["centre"] = dict(cen, parts=[p for p in cen["parts"] if p not in ("cannon", "minute_hand")])
+            doc["mobiles"]["cannon"] = dict(cen, parts=["cannon", "minute_hand"], friction_on="centre")   # material kept
             for e in doc["meshes"]:
                 if e["driver"] == "centre" and e["driven"] == "minute_wheel":
                     e["driver"] = "cannon"

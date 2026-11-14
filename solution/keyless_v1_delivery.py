@@ -98,8 +98,8 @@ def build(ref, out, layout="under", diag=False):
     doc["keyless"]["stem"]["direction"][2] = 0.0
     # friction_on: the cannon pinion and the minute hand become their own mobile on the centre wheel
     cen = doc["mobiles"]["centre"]
-    doc["mobiles"]["centre"] = {"axis": cen["axis"], "parts": ["centre"]}
-    doc["mobiles"]["cannon"] = {"axis": cen["axis"], "parts": ["cannon", "minute_hand"], "friction_on": "centre"}
+    doc["mobiles"]["centre"] = dict(cen, parts=["centre"])
+    doc["mobiles"]["cannon"] = dict(cen, parts=["cannon", "minute_hand"], friction_on="centre")   # material kept
     for e in doc["meshes"]:
         if e["driver"] == "centre" and e["driven"] == "minute_wheel":
             e["driver"] = "cannon"
