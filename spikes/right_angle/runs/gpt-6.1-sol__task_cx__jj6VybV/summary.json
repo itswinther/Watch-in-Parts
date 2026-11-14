@@ -1,0 +1,22 @@
+{
+ "label": "gpt-6.1-sol",
+ "trial": "task_cx__jj6VybV",
+ "reward": "1.000000",
+ "agent_started": "2026-11-14T08:55:13.853738Z",
+ "agent_finished": "2026-11-14T09:04:59.268252Z",
+ "usage": {
+  "input_tokens": 722202,
+  "cached_input_tokens": 670848,
+  "cache_write_input_tokens": 0,
+  "output_tokens": 11745,
+  "reasoning_output_tokens": 5203
+ },
+ "parts_bytes": {
+  "ratchet.stl": 1275284,
+  "stem.stl": 267884,
+  "stem_bridge.stl": 28084,
+  "transfer.stl": 12949884,
+  "transfer_bridge.stl": 84084
+ },
+ "commands": 23
+}

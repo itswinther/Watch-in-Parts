@@ -1,0 +1,103 @@
+loaded bottom_plate
+loaded lower_bridge
+loaded upper_bridge
+loaded middle_bridge
+loaded minute_lower_stop
+loaded seconds_cock
+loaded transfer_pinion
+loaded transfer_minute
+loaded transfer_hour
+loaded minute_input
+loaded minute_output
+loaded minute_hand
+loaded seconds_transfer_input
+loaded seconds_transfer_output
+loaded seconds_pinion
+loaded seconds_hand
+loaded hour_wheel
+loaded hour_hand
+ASSEMBLED
+HELD
+held barrel [-0.3, 0, 0] 0.06582
+held barrel [0.3, 0, 0] 0.3549
+held barrel [0, -0.3, 0] 0.23834
+held barrel [0, 0.3, 0] 0.23834
+held barrel [0, 0, -0.3] 0.15663
+held barrel [0, 0, 0.3] 57.33125
+held transfer [-0.3, 0, 0] 0.71865
+held transfer [0.3, 0, 0] 0.42957
+held transfer [0, -0.3, 0] 0.34961
+held transfer [0, 0.3, 0] 0.68322
+held transfer [0, 0, -0.3] 1.14963
+held transfer [0, 0, 0.3] 39.295
+held minute [-0.3, 0, 0] 2.31213
+held minute [0.3, 0, 0] 2.17276
+held minute [0, -0.3, 0] 2.29004
+held minute [0, 0.3, 0] 2.10434
+held minute [0, 0, -0.3] 2.7481
+held minute [0, 0, 0.3] 7.8503
+held fast_transfer [-0.3, 0, 0] 0.07969
+held fast_transfer [0.3, 0, 0] 0.33585
+held fast_transfer [0, -0.3, 0] 0.21009
+held fast_transfer [0, 0.3, 0] 0.21009
+held fast_transfer [0, 0, -0.3] 52.2979
+held fast_transfer [0, 0, 0.3] 0.79478
+held seconds [-0.3, 0, 0] 1.17952
+held seconds [0.3, 0, 0] 1.06272
+held seconds [0, -0.3, 0] 1.09678
+held seconds [0, 0.3, 0] 1.09678
+held seconds [0, 0, -0.3] 0.28603
+held seconds [0, 0, 0.3] 0.27222
+held hour [-0.3, 0, 0] 1.17147
+held hour [0.3, 0, 0] 1.17147
+held hour [0, -0.3, 0] 1.23163
+held hour [0, 0.3, 0] 1.08372
+held hour [0, 0, -0.3] 28.41689
+held hour [0, 0, 0.3] 55.71375
+FREE TO TURN
+free barrel 0.0
+free transfer 0.0
+free minute 0.0
+free fast_transfer 0.0
+free seconds 0.0
+free hour 0.0
+SPEED {'barrel': Fraction(1, 1), 'transfer': Fraction(-4, 1), 'minute': Fraction(8, 1), 'hour': Fraction(2, 3), 'fast_transfer': Fraction(-48, 1), 'seconds': Fraction(480, 1)}
+OTHER COLLISIONS
+pair barrel minute 0
+pair barrel fast_transfer 0
+pair barrel seconds 0
+pair barrel hour 0
+pair transfer fast_transfer 0
+pair transfer seconds 0
+pair minute seconds 0
+pair minute hour 0
+pair fast_transfer hour 0
+pair seconds hour 0
+SIZE
+barrel radial bound 17.939410683454465
+transfer radial bound 15.91718898805475
+minute radial bound 17.15586956982297
+fast_transfer radial bound 16.32610059376004
+seconds radial bound 17.781426875360193
+hour radial bound 18.07586972804863
+height 11.500000238418579
+PRINTABLE
+printable bottom_plate 1 0.07071067811865477
+printable lower_bridge 1 0.07071067811865477
+printable upper_bridge 1 0.07071067811865477
+printable middle_bridge 1 0.07071067811865477
+printable minute_lower_stop 1 0.07071067811865477
+printable seconds_cock 1 0.07071067811865477
+printable transfer_pinion 1 0.07071067811865477
+printable transfer_minute 1 0.08660254037844387
+printable transfer_hour 1 0.08660254037844387
+printable minute_input 1 0.08660254037844387
+printable minute_output 1 0.08660254037844387
+printable minute_hand 1 0.07071067811865477
+printable seconds_transfer_input 1 0.07071067811865477
+printable seconds_transfer_output 1 0.1224744871391589
+printable seconds_pinion 1 0.1224744871391589
+printable seconds_hand 1 0.07071067811865477
+printable hour_wheel 1 0.08660254037844387
+printable hour_hand 1 0.07071067811865477
+DONE

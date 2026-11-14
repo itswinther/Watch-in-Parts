@@ -1,0 +1,351 @@
+/bin/bash -lc 'cat BRIEF.md'
+
+---
+
+/bin/bash -lc 'ls -la'
+
+---
+
+/bin/bash -lc 'cat frozen.json; ls submission; ls frozen'
+
+---
+
+/bin/bash -lc "python - <<'PY'
+import trimesh, pathlib
+for p in pathlib.Path('frozen').glob('*.stl'):
+ m=trimesh.load(p); print(p.name, m.bounds.tolist(), m.volume)
+PY"
+
+---
+
+/bin/bash -lc "mkdir -p scripts submission/parts
+python - <<'PY'
+import manifold3d as m
+print([x for x in dir(m.Manifold) if not x.startswith('_')]);print(m.CrossSection.__doc__);print(m.Manifold.batch_boolean.__doc__)
+PY"
+
+---
+
+/bin/bash -lc "cat > scripts/build.py <<'PY'
+import numpy as np, manifold3d as M, trimesh, json, time
+from pathlib import Path
+OUT=Path('submission/parts'); OUT.mkdir(exist_ok=True,parents=True)
+N=12; Z=108; R=.8; C=7.2
+
+def union(xs): return M.Manifold.batch_boolean(xs,M.OpType.Add)
+def box(lo,hi): return M.Manifold.cube(np.array(hi)-lo).translate(lo)
+def cyl(r,z0,z1,n=128): return M.Manifold.cylinder(z1-z0,r,r,n).translate((0,0,z0))
+def export(s,name):
+ mesh=s.to_mesh(); t=trimesh.Trimesh(np.array(mesh.vert_properties)[:,:3],np.array(mesh.tri_verts),process=False); t.export(OUT/(name+'.stl')); print(name,'vol',s.volume(),'tri',len(t.faces),'shells',len(s.decompose()),flush=True)
+def pinion_profile():
+ pitch=2*np.pi/N; rp=R; rb=rp*np.cos(np.deg2rad(20)); rr=rp-1.25*(2*rp/N); ra=rp+2*rp/N
+ inv=lambda t: np.tan(t)-t
+ ip=inv(np.deg2rad(20)); half=np.pi/(2*N)
+ pts=[]
+ for k in range(N):
+  center=k*pitch
+  def pt(r,a): pts.append([r*np.cos(a+center),r*np.sin(a+center)])
+  ab=half+ip
+  pt(rr,-pitch/2);pt(rr,-ab)
+  for r in np.linspace(rb,ra,24):
+   a=half+ip-inv(np.arccos(rb/r));pt(r,-a)
+  at=half+ip-inv(np.arccos(rb/ra))
+  for a in np.linspace(-at,at,9)[1:]:pt(ra,a)
+  for r in np.linspace(ra,rb,24)[1:]:
+   a=half+ip-inv(np.arccos(rb/r));pt(r,a)
+  pt(rr,ab);pt(rr,pitch/2)
+ return M.CrossSection([pts])
+prof=pinion_profile()
+# Profile local xy becomes yz, extrusion local z becomes positive x.
+def alongx(s): return s.rotate((0,90,0))
+pinion=alongx(prof.extrude(1.3)).translate((C-.65,0,-3.9))
+export(pinion,'pinion_test')
+# Crown tooth periodic sector. Generate its conjugate by cutting every position
+# of a slightly enlarged pinion, expressed in the crown's frame.
+a=np.pi/Z
+angles=np.linspace(-a,a,12)
+pts=[[0,0]]+[[8.0*np.cos(t),8.0*np.sin(t)] for t in angles]
+wedge=M.CrossSection([pts]).extrude(1.5).translate((0,0,-3.5))
+blank=(cyl(7.75,-3.5,-2.05,432)-cyl(6.65,-3.6,-1.9,432)) "'^ wedge
+cutter=alongx(prof.offset(.0005).extrude(1.40)).translate((C-.70,0,-3.9))
+print('"'start cutting',flush=True); start=time.time()
+# 0.4 degree sampling: chord error less than 0.00001 mm.
+cuts=[cutter.rotate((0,0,0))]
+for phi in np.arange(-100,100.0001,.4):
+ # rotate about the stem axis, then about the arbor in the stationary crown frame
+ cut=cutter.translate((0,0,3.9)).rotate((phi,0,0)).translate((0,0,-3.9)).rotate((0,0,phi/9))
+ cuts.append(cut)
+tooth=M.Manifold.batch_boolean([blank]+cuts,M.OpType.Subtract)
+print('tooth',time.time()-start,tooth.volume(),tooth.num_tri(),flush=True)
+ring=union([tooth.rotate((0,0,k*360/Z)) for k in range(Z)])
+# Broad web and square seat sit above the arbor flange.
+web=cyl(6.8,-2.48,-2.05,432)
+seat=box([-.302,-.302,-2.6],[.302,.302,-1.8])
+wheel=(ring+web)-seat
+export(wheel,'ratchet')
+# Stem and retaining shoulders; pinion is one solid with the shaft.
+shaft=alongx(cyl(.28,0,28.4)).translate((-17.3,0,-3.9))
+shoulders=[]
+for x in [-11.54,-10.46,9.76,10.84]:
+ shoulders.append(alongx(cyl(.52,0,.20)).translate((x,0,-3.9)))
+grip=alongx(cyl(.83,0,1.5)).translate((-17.3,0,-3.9))
+stem=union([shaft,pinion,grip]+shoulders)
+export(stem,'winding_stem')
+# Two individually anchored bearing blocks. Their .03 radial and .04 axial gaps
+# permit rotation while stopping all six tested translations.
+for name,x in [('outer_bearing',-11.0),('inner_bearing',10.3)]:
+ block=box([x-.30,-.75,-4.65],[x+.30,.75,-1.72])
+ hole=alongx(cyl(.31,0,1)).translate((x-.5,0,-3.9))
+ export(block-hole,name)
+(OUT/'pinion_test.stl').unlink()
+data={'mobiles':{'stem':{'point':[0,0,-3.9],'direction':[1,0,0],'parts':['winding_stem']},'arbor':{'parts':['ratchet']}},'fixed':['outer_bearing','inner_bearing'],'meshes':[{'driver':'stem','driver_teeth':12,'driven':'arbor','driven_teeth':108,'sense':'opposite'}]}
+Path('submission/winding.json').write_text(json.dumps(data,indent=2))
+PY
+OPENBLAS_NUM_THREADS=1 python scripts/build.py"
+
+---
+
+/bin/bash -lc "python - <<'PY'
+import manifold3d as M
+print(M.CrossSection.offset.__doc__)
+PY"
+
+---
+
+/bin/bash -lc 'ls -lh submission/parts'
+
+---
+
+/bin/bash -lc "python - <<'PY'
+import manifold3d as M
+print(M.Manifold.simplify.__doc__)
+PY"
+
+---
+
+/bin/bash -lc "python - <<'PY'
+p='scripts/build.py'
+s=open(p).read().replace(\"ring=union([tooth.rotate\", \"tooth=tooth.simplify(.00012)\\nprint('simplified tooth',tooth.num_tri(),flush=True)\\nmesh=tooth.to_mesh(); trimesh.Trimesh(np.array(mesh.vert_properties)[:,:3],np.array(mesh.tri_verts),process=False).export('scripts/tooth.stl')\\nring=union([tooth.rotate\")
+s=s.replace('web=cyl(6.8,-2.48,-2.05,432)','web=cyl(6.8,-2.48,-1.92,432)')
+open(p,'w').write(s)
+PY
+OPENBLAS_NUM_THREADS=1 python scripts/build.py"
+
+---
+
+/bin/bash -lc "cat > scripts/check.py <<'PY'
+import numpy as np, manifold3d as M, trimesh, json, time
+from pathlib import Path
+
+def load(p):
+ t=trimesh.load(p,process=True)
+ m=M.Manifold(M.Mesh(np.array(t.vertices,dtype=np.float32),np.array(t.faces,dtype=np.uint32)))
+ return t,m
+parts={p.stem:load(p) for p in Path('submission/parts').glob('*.stl')}
+frozen={p.stem:load(p)[1] for p in Path('frozen').glob('*.stl')}
+arbor=load('arbor_square.stl')[1]
+res={}
+for n,(t,m) in parts.items():
+ print(n, 'watertight',t.is_watertight,'volume',m.volume(),'shells',len(m.decompose()),'tri',len(t.faces),'bounds',t.bounds.tolist(),flush=True)
+ assert t.is_watertight and m.volume()>0 and len(m.decompose())==1 and len(t.faces)<=400000
+ # Check all supplied movement parts exactly at rest.
+ for f,fm in frozen.items():
+  v=(m"'^fm).volume()
+  if v>1e-8: print('"'frozen overlap',n,f,v,flush=True)
+  assert v<=.002
+res['files_and_rest_clear']=True
+stem=parts['winding_stem'][1]; wheel=parts['ratchet'][1]+arbor
+fixed=[parts[n][1] for n in ['outer_bearing','inner_bearing']]
+def sx(m,d): return m.translate((0,0,3.9)).rotate((d,0,0)).translate((0,0,-3.9))
+# One tooth period covers the whole conjugate mesh by rotational symmetry.
+angles=np.linspace(0,30,61)
+normal=[];push=[]
+for j,a in enumerate(angles):
+ s=sx(stem,a); w=wheel.rotate((0,0,-a/9))
+ normal.append((s"'^w).volume())
+ push.append((s''^wheel.rotate((0,0,-a/9+.03*360/108))).volume())
+ if j%5==0: print('"'mesh',a,normal[-1],push[-1],flush=True)
+res['drive']={'max_overlap':max(normal),'min_push':min(push),'sample_count':len(angles),'stem_range_degrees':[0,30]}
+print('DRIVE',res['drive'],flush=True)
+for name,m,fun in [('stem',stem,sx),('arbor',wheel,lambda m,a:m.rotate((0,0,a)))]:
+ maxv=0
+ for a in np.arange(36)*10:
+  q=fun(m,a)
+  for f in fixed: maxv=max(maxv,(q"'^f).volume())
+ print('"'mobile_fixed',name,maxv,flush=True);res[name+'_fixed_clearance']=maxv
+# Six holding translations.
+held=[]
+for vec in [(x,y,z) for x,y,z in [(.3,0,0),(-.3,0,0),(0,.3,0),(0,-.3,0),(0,0,.3),(0,0,-.3)]]:
+ v=sum((stem.translate(vec)"'^f).volume() for f in fixed)
+ held.append(v);print('"'held',vec,v,flush=True)
+res['held']=held
+# Square seating shell is the .04 offset shell outside the square.
+square=M.Manifold.cube((.6,.6,.6)).translate((-.3,-.3,-2.5))
+outer=M.CrossSection.square((.6,.6),center=True).offset(.04).extrude(.6).translate((0,0,-2.5))
+shell=outer-square
+res['seat_fraction']=(parts['ratchet'][1]"'^shell).volume()/shell.volume()
+res['"'square_intrusion']=(parts['ratchet'][1]"'^square).volume()
+print('"'SEAT',res['seat_fraction'],res['square_intrusion'],flush=True)
+anchors={}
+for n in ['outer_bearing','inner_bearing']:
+ anchors[n]=(parts[n][1].translate((0,0,.05))"'^frozen['"'main_plate']).volume()
+print('anchors',anchors,flush=True);res['anchors']=anchors
+res['fixed_overlap']=(fixed[0]"'^fixed[1]).volume()
+# Bounds are guaranteed for rotation by cylinder bounds (also check rest vertices).
+for n,(t,m) in parts.items():
+ r=np.linalg.norm(t.vertices[:,:2]-[4.0391,-9.6417],axis=1)
+ res[n+'"'_bounds']={'rmax':float(max(r)),'zmin':float(t.bounds[0,2]),'zmax':float(t.bounds[1,2])}
+print(json.dumps(res,indent=2),flush=True)
+Path('submission/checks.json').write_text(json.dumps(res,indent=2))
+PY"
+
+---
+
+/bin/bash -lc "python - <<'PY'
+import trimesh, manifold3d as M, numpy as np
+m=trimesh.load('scripts/tooth.stl');q=M.Manifold(M.Mesh(np.array(m.vertices,dtype=np.float32),np.array(m.faces,dtype=np.uint32)))
+print(q.num_tri(),flush=True)
+for t in [.0003,.0006,.001,.002,.004,.008]:
+ s=q.simplify(t); print(t,s.num_tri(),s.volume(),flush=True)
+PY"
+
+---
+
+/bin/bash -lc "python - <<'PY'
+s=open('scripts/build.py').read(); a=s.index(\"print('start cutting'\"); b=s.index('ring=union')
+s=s[:a]+'''t=trimesh.load('scripts/tooth.stl',process=True)
+tooth=M.Manifold(M.Mesh(np.array(t.vertices,dtype=np.float32),np.array(t.faces,dtype=np.uint32))).simplify(.0006)
+print('loaded and simplified tooth',tooth.num_tri(),flush=True)
+'''+s[b:]
+open('scripts/assemble.py','w').write(s)
+PY
+OPENBLAS_NUM_THREADS=1 python scripts/assemble.py"
+
+---
+
+/bin/bash -lc 'OPENBLAS_NUM_THREADS=1 python scripts/check.py'
+
+---
+
+/bin/bash -lc "python - <<'PY'
+import trimesh,numpy as np,manifold3d as M
+p='submission/parts/ratchet.stl'; t=trimesh.load(p,process=True)
+print('euler',t.euler_number,'degenerate',sum(~t.nondegenerate_faces()),'unique',sum(~t.unique_faces()),'components',len(t.split(only_watertight=False)))
+for digs in [6,5,4]:
+ q=t.copy();q.vertices=np.round(q.vertices,digs);q.merge_vertices();q.update_faces(q.nondegenerate_faces());q.update_faces(q.unique_faces());q.remove_unreferenced_vertices()
+ print(digs,'watertight',q.is_watertight,'euler',q.euler_number,'deg',sum(~q.nondegenerate_faces()),'components',len(q.split(only_watertight=False)),len(q.faces))
+ if q.is_watertight:q.export(p)
+PY"
+
+---
+
+/bin/bash -lc "python - <<'PY'
+import trimesh,numpy as np,manifold3d as M
+p='submission/parts/ratchet.stl'; t=trimesh.load(p,process=True)
+print('euler',t.euler_number,'degenerate',sum(~t.nondegenerate_faces()),'unique',sum(~t.unique_faces()))
+for digs in [7,6,5,4]:
+ q=t.copy();q.vertices=np.round(q.vertices,digs);q.merge_vertices();q.update_faces(q.nondegenerate_faces());q.update_faces(q.unique_faces());q.remove_unreferenced_vertices()
+ print(digs,'watertight',q.is_watertight,'euler',q.euler_number,'deg',sum(~q.nondegenerate_faces()),len(q.faces))
+ if q.is_watertight:q.export(p);break
+PY"
+
+---
+
+/bin/bash -lc "python - <<'PY'
+p='scripts/assemble.py';s=open(p).read().replace(\"mesh=s.to_mesh();\", \"s=s.simplify(.0001)\\n mesh=s.to_mesh();\")
+open(p,'w').write(s)
+PY
+OPENBLAS_NUM_THREADS=1 python scripts/assemble.py
+OPENBLAS_NUM_THREADS=1 python scripts/check.py"
+
+---
+
+/bin/bash -lc "python - <<'PY'
+p='scripts/assemble.py';s=open(p).read().replace(\"print('loaded and simplified tooth'\", \"def spread(v):\\n r=np.hypot(v[0],v[1]); a=np.arctan2(v[1],v[0])*1.015\\n return (r*np.cos(a),r*np.sin(a),v[2])\\ntooth=tooth.warp(spread)\\nprint('loaded and simplified tooth'\")
+open(p,'w').write(s)
+PY
+OPENBLAS_NUM_THREADS=1 python scripts/assemble.py
+OPENBLAS_NUM_THREADS=1 python scripts/check.py"
+
+---
+
+/bin/bash -lc "python - <<'PY'
+p='scripts/build.py';s=open(p).read();a=s.index('tooth=tooth.simplify(.00012)');b=s.index('ring=union')
+assembly=open('scripts/assemble.py').read();c=assembly.index(\"t=trimesh.load('scripts/tooth.stl'\");d=assembly.index('ring=union')
+s=s[:a]+s[a:b].split('ring=union')[0]+assembly[c:d]+s[b:]
+s=s.replace('mesh=s.to_mesh();','s=s.simplify(.0001)\\n mesh=s.to_mesh();')
+# The raw tooth cache is deliberately retained for inspection/rebuild.
+open(p,'w').write(s)
+PY
+cat scripts/build.py"
+
+---
+
+/bin/bash -lc "python - <<'PY'
+p='scripts/check.py';s=open(p).read().replace('# One tooth period covers the whole conjugate mesh by rotational symmetry.\\nangles=np.linspace(0,30,61)', '# Full arbor revolution: nine stem revolutions, six samples per pinion tooth.\\nangles=np.arange(0,3240.0001,5)')
+s=s.replace('if j%5==0:', 'if j%72==0:').replace(\"'stem_range_degrees':[0,30]\", \"'stem_range_degrees':[0,3240]\")
+s=s.replace(\" maxv=0\\n for a\", \" maxv=0\\n frozen_max=0\\n for a\").replace(\"  for f in fixed: maxv=max(maxv,(q"'^f).volume())", "  for f in fixed: maxv=max(maxv,(q''^f).volume())'"\\n  for f in frozen.values(): frozen_max=max(frozen_max,(q"'^f).volume())")
+s=s.replace("res[name+'"'_fixed_clearance']=maxv\", \"res[name+'_fixed_clearance']=maxv\\n res[name+'_frozen_clearance']=frozen_max\")
+s=s.replace(\"Path('submission/checks.json')\", \"Path('scripts/checks.json')\")
+s=s.replace(\"print(json.dumps(res,indent=2),flush=True)\", \"\"\"data=json.loads(Path('submission/winding.json').read_text())
+res['ratio_stem_per_arbor']=data['meshes'][0]['driven_teeth']/data['meshes'][0]['driver_teeth']
+res['direction']='opposite: +x stem drives -z arbor'
+assert res['drive']['max_overlap']<=.002
+assert res['drive']['min_push']>=.0002
+assert min(held)>.002 and min(anchors.values())>0
+assert res['seat_fraction']>=.5 and res['square_intrusion']<=.002
+assert res['fixed_overlap']<=.002
+assert 8<=res['ratio_stem_per_arbor']<=12
+for name in ['stem','arbor']:
+ assert res[name+'_fixed_clearance']<=.002 and res[name+'_frozen_clearance']<=.002
+for n in parts:
+ b=res[n+'_bounds']
+ assert b['zmin']>=-5 and b['zmax']<=11.4
+ if n"'!='"'winding_stem':assert b['rmax']<=20.7
+assert res['winding_stem_bounds']['rmax']>=21.2
+print(json.dumps(res,indent=2),flush=True)\"\"\")
+open(p,'w').write(s)
+PY
+OPENBLAS_NUM_THREADS=1 python scripts/check.py"
+
+---
+
+/bin/bash -lc "date -u '+%H:%M:%S'; ls -lh submission/parts"
+
+---
+
+/bin/bash -lc 'OPENBLAS_NUM_THREADS=1 python scripts/build.py'
+
+---
+
+/bin/bash -lc "python - <<'PY'
+from pathlib import Path
+for p in ['scripts/assemble.py','submission/checks.json']:
+ Path(p).unlink(missing_ok=True)
+p=Path('scripts/build.py');s=p.read_text().replace('# Two individually anchored bearing blocks. Their .03 radial and .04 axial gaps\\n# permit rotation while stopping all six tested translations.','# Two individually anchored bearing blocks. Their .03 radial clearance and\\n# .04/.24 axial gaps allow rotation and stop all six tested translations.')
+s=s.replace('def spread(v):', '# A small overlap between repeated sectors avoids coincident STL seams.\\n# The resulting tooth surfaces are checked against the actual pinion.\\ndef spread(v):')
+p.write_text(s)
+p=Path('scripts/check.py');s=p.read_text().replace('assert t.is_watertight and m.volume()>0', 'assert t.is_watertight and t.is_volume and m.volume()>0');p.write_text(s)
+PY"
+
+---
+
+/bin/bash -lc 'OPENBLAS_NUM_THREADS=1 python scripts/check.py'
+
+---
+
+/bin/bash -lc "python - <<'PY'
+from pathlib import Path
+import json,re,struct
+root=Path('submission');d=json.loads((root/'winding.json').read_text());names=d['fixed']+[p for mobile in d['mobiles'].values() for p in mobile['parts']]
+assert len(names)==len(set(names))
+assert {p.stem for p in (root/'parts').glob('*.stl')}==set(names)
+for n in names:
+ assert re.fullmatch('[A-Za-z0-9_-]{1,40}',n) and n"'!='"'arbor_square'
+ b=(root/'parts'/f'{n}.stl').read_bytes();tri=struct.unpack('<I',b[80:84])[0]
+ assert len(b)==84+50*tri and tri<=400000
+ print(n,tri,'binary STL triangles')
+assert set(d['mobiles'])=={'stem','arbor'}
+assert d['mobiles']['stem']['point']==[0,0,-3.9] and d['mobiles']['stem']['direction']==[1,0,0]
+print('Manifest and binary STL checks passed.')
+PY"

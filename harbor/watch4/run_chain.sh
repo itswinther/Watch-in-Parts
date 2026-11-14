@@ -8,6 +8,7 @@
 #   0.25 always reinstalls OpenCode at run time and the allowlist blocks that. The key comes from
 #   ~/.harbor-secrets/anthropic.env, loaded into one subshell only, never printed or written. The chain stops
 #   after a stage once its cost (OpenCode step_finish events) passes MAX_COST dollars (default 3).
+#   OPENCODE_AK adds agent options, e.g. "--ak reasoning_effort=low" (OpenCode --variant).
 # Stage N+1 is built from the submission Harbor collected from stage N's trial
 # (<trial>/artifacts/app/submission); the verifier gets that same snapshot as /tests/prev.
 # Leaves WORK_DIR/CHAIN/sN (task), WORK_DIR/CHAIN/jobs (Harbor jobs), WORK_DIR/CHAIN/chain.log.
@@ -27,7 +28,7 @@ for st in 1 2 3 4; do
   echo "stage $st start $(date +%H:%M:%S)" >> $D/chain.log
   if [ "$AGENT" = "opencode" ]; then
     ( set -a; . $HOME/.harbor-secrets/anthropic.env; set +a
-      cd ${HARBOR_SRC:-/Users/mikbs/Desktop/dev/harbor} && uv run --quiet harbor run -p $D/s$st -a opencode -m $MODEL -y -o $D/jobs ) > $D/s$st.harbor.log 2>&1
+      cd ${HARBOR_SRC:-/Users/mikbs/Desktop/dev/harbor} && uv run --quiet harbor run -p $D/s$st -a opencode -m $MODEL ${OPENCODE_AK:-} -y -o $D/jobs ) > $D/s$st.harbor.log 2>&1
   elif [ "$AGENT" = "codex" ]; then
     harbor run -p $D/s$st -a codex -m $MODEL --ak web_search=disabled -y -o $D/jobs > $D/s$st.harbor.log 2>&1
   else

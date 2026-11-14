@@ -1,0 +1,12 @@
+transfer_pinion jitter 0 pieces 1 max_distance 0.08660254037844387 pass True
+transfer_pinion jitter 0.017 pieces 1 max_distance 0.08660254037844387 pass True
+transfer_pinion jitter 0.033 pieces 1 max_distance 0.08660254037844387 pass True
+reduction_input jitter 0 pieces 1 max_distance 0.08660254037844387 pass True
+reduction_input jitter 0.017 pieces 1 max_distance 0.1224744871391589 pass True
+reduction_input jitter 0.033 pieces 1 max_distance 0.08660254037844387 pass True
+reduction_idler jitter 0 pieces 1 max_distance 0.08660254037844387 pass True
+reduction_idler jitter 0.017 pieces 1 max_distance 0.07071067811865477 pass True
+reduction_idler jitter 0.033 pieces 1 max_distance 0.08660254037844387 pass True
+lower_bridge jitter 0 pieces 1 max_distance 0.07071067811865477 pass True
+lower_bridge jitter 0.017 pieces 1 max_distance 0.07071067811865477 pass True
+lower_bridge jitter 0.033 pieces 1 max_distance 0.07071067811865477 pass True

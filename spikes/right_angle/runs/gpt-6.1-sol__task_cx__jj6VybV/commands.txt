@@ -1,0 +1,315 @@
+/bin/bash -lc 'cat BRIEF.md'
+
+---
+
+/bin/bash -lc 'ls -la; ls frozen'
+
+---
+
+/bin/bash -lc "mkdir -p scripts; cat frozen.json; ls submission; python - <<'PY'
+import trimesh,glob
+for f in glob.glob('frozen/*.stl')+['arbor_square.stl']:
+ m=trimesh.load(f);print(f,m.bounds.tolist(),m.volume)
+PY"
+
+---
+
+/bin/bash -lc "python - <<'PY'
+import manifold3d as m
+print([x for x in dir(m.Manifold) if not x.startswith('_')]); print(m.Manifold.cylinder.__doc__); print(m.CrossSection.extrude.__doc__)
+PY"
+
+---
+
+/bin/bash -lc "cat > scripts/build.py <<'PY'
+import numpy as np, trimesh, manifold3d as md, math, json, os, time
+from pathlib import Path
+OUT=Path('submission/parts');OUT.mkdir(parents=True,exist_ok=True)
+def cyl(r,z,h,x=0,y=0,n=128):return md.Manifold.cylinder(h,r,circular_segments=n).translate((x,y,z))
+def box(d,p):return md.Manifold.cube(d).translate(p)
+def union(xs):return md.Manifold.batch_boolean(xs,md.OpType.Add)
+def save(name,s):
+ m=s.to_mesh();tm=trimesh.Trimesh(np.array(m.vert_properties)[:,:3],np.array(m.tri_verts),process=False);tm.export(OUT/(name+'.stl'));print(name,s.volume(),s.num_tri(),len(s.decompose()),flush=True)
+def load(name):
+ t=trimesh.load(OUT/(name+'.stl'));return md.Manifold(md.Mesh(np.float32(t.vertices),np.uint32(t.faces)))
+def gear(n,r,h,back=0):
+ # involute flanks, with circular root and tip
+ mod=2*r/n; rb=r*math.cos(math.radians(20)); ra=r+mod; rf=r-1.25*mod
+ inv=lambda rr: math.sqrt(max(0,(rr/rb)**2-1))-math.acos(min(1,rb/rr))
+ half=math.pi/(2*n)+inv(r)-back/r
+ p=[]
+ for i in range(n):
+  c=2*math.pi*i/n
+  p.append((rf*math.cos(c-math.pi/n),rf*math.sin(c-math.pi/n)))
+  for rr in np.linspace(max(rb,rf),ra,16):
+   a=c-half+inv(rr);p.append((rr*math.cos(a),rr*math.sin(a)))
+  for a in np.linspace(c-half+inv(ra),c+half-inv(ra),6)[1:]:p.append((ra*math.cos(a),ra*math.sin(a)))
+  for rr in np.linspace(ra,max(rb,rf),16)[1:]:
+   a=c+half-inv(rr);p.append((rr*math.cos(a),rr*math.sin(a)))
+  p.append((rf*math.cos(c+half),rf*math.sin(c+half)))
+ return md.CrossSection([p]).extrude(h)
+def rz(s,a,c=(-3.6,0,0)):return s.translate(tuple(-v for v in c)).rotate((0,0,a)).translate(c)
+def rx(s,a):return s.translate((0,0,3.9)).rotate((a,0,0)).translate((0,0,-3.9))
+def carve(blank,driver,ratio,sense,n,phase_step,turn,center):
+ cuts=[]
+ for a in np.linspace(0,360/(n/ratio),round((360/(n/ratio))/phase_step)+1):
+  d=turn(driver,a);d=rz(d,-sense*a/ratio,center)
+  cut=blank"'^d
+  if not cut.is_empty():cuts.append(cut)
+ print('"'union envelope',len(cuts),flush=True)
+ env=union(cuts)
+ print('repeat envelope',env.num_tri(),flush=True)
+ env=union([rz(env,i*360/n,center) for i in range(n)])
+ result=blank-env
+ print('carved',result.num_tri(),len(result.decompose()),flush=True)
+ return result
+if __name__=='__main__':
+ # stem gear along x, tooth zero originally +x transformed to -z
+ pin=gear(10,.75,.8).rotate((0,90,0)).translate((-6.25,0,-3.9))
+ stem=pin+cyl(.25,0,1) if False else pin
+ shaft=cyl(.23,0,12).rotate((0,90,0)).translate((-17,0,-3.9))
+ # axial collars provide thrust restraint at two bearing blocks
+ collars=union([cyl(.43,0,.18).rotate((0,90,0)).translate((x,0,-3.9)) for x in [-11.48,-10.52]])
+ grip=cyl(.65,0,.9).rotate((0,90,0)).translate((-17,0,-3.9))
+ stem=pin+shaft+collars+grip
+ save('stem',stem)
+ blank=cyl(2.52,-3.85,1.01,-3.6)-cyl(1.65,-3.86,.72,-3.6)
+ # cut with slight expanded tooth thickness for running clearance
+ cutter=gear(10,.75,.804,back=-.0003).rotate((0,90,0)).translate((-6.252,0,-3.9))
+ crown=carve(blank,cutter,3,1,30,.15,rx,(-3.6,0,0))
+ crown=crown+cyl(.4,-3.15,1.32,-3.6)
+ spur=gear(12,.9,.48).translate((-3.6,0,-2.43))
+ crown=crown+spur
+ save('transfer',crown)
+ # conjugate arbor wheel cut from round disk by rotating spur
+ arb_blank=cyl(2.85,-2.44,.48)
+ cutter=gear(12,.9,.484,back=-.0003).translate((-3.6,0,-2.442))
+ arb=carve(arb_blank,cutter,3,-1,36,.12,lambda s,a:rz(s,a), (0,0,0))
+ arb=arb-box((.602,.602,.7),(-.301,-.301,-2.55))
+ save('ratchet',arb)
+PY
+OPENBLAS_NUM_THREADS=1 python scripts/build.py"
+
+---
+
+/bin/bash -lc "python - <<'PY'
+p='scripts/build.py'
+s=open(p).read();start=s.index(' cuts=[]');end=s.index(\"if __name__\",start)
+s=s[:start]+''' pitch=360/n
+ lo,hi=(180-pitch,180) if sense==1 else (180,180+pitch)
+ aa=np.radians(np.linspace(lo-.00001,hi+.00001,20))
+ wedge=md.CrossSection([[(0,0)]+[(30*math.cos(a),30*math.sin(a)) for a in aa]]).extrude(10).translate((center[0],center[1],-6))
+ section=blank"'^wedge
+ for k,a in enumerate(np.linspace(-.01,360/(n/ratio)+.01,round((360/(n/ratio))/phase_step)+1)):
+  d=turn(driver,a);d=rz(d,-sense*a/ratio,center)
+  section=section-d
+  if k%60==0:print('"'carve',k,section.num_tri(),flush=True)
+ print('repeat sector',section.num_tri(),flush=True)
+ result=union([rz(section,i*pitch,center) for i in range(n)])
+ print('carved',result.num_tri(),len(result.decompose()),flush=True)
+ return result
+''' + s[end:];open(p,'w').write(s)
+PY
+OPENBLAS_NUM_THREADS=1 python scripts/build.py"
+
+---
+
+/bin/bash -lc "python - <<'PY'
+import manifold3d as m
+print(m.Manifold.simplify.__doc__)
+PY"
+
+---
+
+/bin/bash -lc "date -u; python - <<'PY'
+import sys;sys.path.insert(0,'scripts');from build import *
+for n in ['transfer','ratchet']:
+ s=load(n).simplify(.00005);save(n,s)
+PY"
+
+---
+
+/bin/bash -lc "cat > scripts/fixtures.py <<'PY'
+from build import *
+# Stem bearing, with two vertical attachment webs.
+bearing=box((.74,1.25,1.2),(-11.28,-.625,-4.5))
+bore=cyl(.255,0,1).rotate((0,90,0)).translate((-11.4,0,-3.9))
+bearing=bearing-bore
+bearing=bearing+box((.74,.22,1.6),(-11.28,.405,-3.31))+box((.74,.22,1.6),(-11.28,-.625,-3.31))
+save('stem_bridge',bearing)
+# Transfer bearing between the crown disk and upper pinion.
+b=cyl(.67,-2.77,.26,-3.6)-cyl(.425,-2.8,.4,-3.6)
+b=b+box((.4,1.1,.2),(-3.8,-1.5,-2.74))+cyl(.23,-2.74,1.03,-3.6,-1.4)
+save('transfer_bridge',b)
+data={'mobiles':{'stem':{'point':[0,0,-3.9],'direction':[1,0,0],'parts':['stem']},'transfer':{'point':[-3.6,0,0],'direction':[0,0,1],'parts':['transfer']},'arbor':{'parts':['ratchet']}},'fixed':['stem_bridge','transfer_bridge'],'meshes':[{'driver':'stem','driver_teeth':10,'driven':'transfer','driven_teeth':30,'sense':'same'},{'driver':'transfer','driver_teeth':12,'driven':'arbor','driven_teeth':36,'sense':'opposite'}]}
+Path('submission/winding.json').write_text(json.dumps(data,indent=2))
+PY
+python scripts/fixtures.py"
+
+---
+
+/bin/bash -lc "cat > scripts/check.py <<'PY'
+from build import *
+import argparse
+p=argparse.ArgumentParser();p.add_argument('--drive',action='store_true');p.add_argument('--static',action='store_true');p.add_argument('--quick',action='store_true');args=p.parse_args()
+def fromfile(p):
+ t=trimesh.load(p);return md.Manifold(md.Mesh(np.float32(t.vertices),np.uint32(t.faces)))
+s={n:load(n) for n in ['stem','transfer','ratchet','stem_bridge','transfer_bridge']}
+arbor=fromfile('arbor_square.stl');s['arbor']=s['ratchet']+arbor
+frozen={p.stem:fromfile(p) for p in Path('frozen').glob('*.stl')}
+fixed=union([s['stem_bridge'],s['transfer_bridge']]);fr=union(list(frozen.values()))
+def vol(a,b):return (a"'^b).volume()
+def turn(n,a):return rx(s[n],a) if n=='"'stem' else rz(s[n],a,(-3.6,0,0) if n=='transfer' else (0,0,0))
+if args.static:
+ for n in s:
+  if n=='arbor':continue
+  t=trimesh.load(OUT/(n+'.stl'));print('file',n,'closed',t.is_watertight,'shells',len(t.split()),'tris',len(t.faces),'volume',t.volume,flush=True)
+  print('frozen rest',n,vol(s[n],fr),flush=True)
+ for n in ['stem','transfer','arbor']:
+  worst=(0,None)
+  for a in np.linspace(0,360,36,endpoint=False):
+   v=vol(turn(n,a),fixed+fr)
+   if v>worst[0]:worst=v,a
+  print('moving clearance',n,worst,flush=True)
+ for n in ['stem','transfer']:
+  for d in np.eye(3):
+   for sign in [-1,1]:print('held',n,list(d*sign),vol(s[n].translate(d*.3*sign),fixed+fr),flush=True)
+ print('fixed pair',vol(s['stem_bridge'],s['transfer_bridge']),flush=True)
+ for n in ['stem_bridge','transfer_bridge']:
+  print('anchor',n,max(vol(s[n].translate(d*.05*sig),fr) for d in np.eye(3) for sig in [-1,1]),flush=True)
+ shell=box((.68,.68,.6),(-.34,-.34,-2.5))-box((.6,.6,.6),(-.3,-.3,-2.5))
+ print('seated fraction',vol(s['ratchet'],shell)/shell.volume(),'square collision',vol(s['ratchet'],arbor),flush=True)
+ for n in s:
+  if n=='arbor':continue
+  t=trimesh.load(OUT/(n+'.stl'));v=t.vertices
+  print('bounds',n,'z',v[:,2].min(),v[:,2].max(),'radmax',np.linalg.norm(v[:,:2]-[4.0391,-9.6417],axis=1).max(),flush=True)
+ worst=0
+ for a in np.linspace(0,1080,48,endpoint=False):worst=max(worst,vol(turn('stem',a),turn('arbor',-a/9)))
+ print('nonmesh collision',worst,flush=True)
+if args.drive:
+ for d,e,nt,ne,sgn in [('stem','transfer',10,30,1),('transfer','arbor',12,36,-1)]:
+  count=18 if args.quick else nt*6*3
+  overlaps=[];backs=[]
+  for i,a in enumerate(np.linspace(0,1080,count,endpoint=False)):
+   driver=turn(d,a);driven=turn(e,sgn*a/3)
+   v=vol(driver,driven); b=vol(driver,turn(e,sgn*(a/3-.03*360/ne)))
+   overlaps.append(v);backs.append(b)
+   if i%12==0:print('drive sample',d,i,'overlap',v,'back',b,flush=True)
+  print('DRIVE RESULT',d,'samples',count,'max overlap',max(overlaps),'min back',min(backs),'fails',sum(v>.002 for v in overlaps),sum(v<.0002 for v in backs),flush=True)
+PY
+OPENBLAS_NUM_THREADS=1 python scripts/check.py --drive --quick"
+
+---
+
+/bin/bash -lc "python - <<'PY'
+import sys;sys.path.insert(0,'scripts');from build import *
+a=load('stem')"'^load('"'transfer');print(a.volume(),a.bounding_box());print([(s.volume(),s.bounding_box()) for s in a.decompose()]);save('collision_debug',a)
+PY"
+
+---
+
+/bin/bash -lc "python - <<'PY'
+p='scripts/build.py';s=open(p).read().replace(\"np.linspace(-.01,360/(n/ratio)+.01,round((360/(n/ratio))/phase_step)+1)\",\"np.linspace(-75,360/(n/ratio)+75,round((360/(n/ratio)+150)/phase_step)+1)\").replace(\"print('repeat sector',section.num_tri(),flush=True)\",\"section=section.simplify(.000025)\\n print('repeat sector',section.num_tri(),flush=True)\").replace(\"cyl(1.65,-3.86,.72,-3.6)\",\"cyl(2.0,-3.86,.72,-3.6)\").replace(\"30,.15,rx\",\"30,.4,rx\").replace(\"36,.12,lambda\",\"36,.4,lambda\").replace(\"m=s.to_mesh();tm=\", \"s=s.simplify(.000025)\\n m=s.to_mesh();tm=\")
+open(p,'w').write(s)
+PY
+OPENBLAS_NUM_THREADS=1 python scripts/build.py"
+
+---
+
+/bin/bash -lc "python - <<'PY'
+import sys;sys.path.insert(0,'scripts');from build import *
+s=load('transfer');print([(x.volume(),x.num_tri()) for x in s.decompose()]);s=max(s.decompose(),key=lambda x:x.volume()).simplify(.0001);save('transfer',s)
+PY
+OPENBLAS_NUM_THREADS=1 python scripts/check.py --drive --quick"
+
+---
+
+/bin/bash -lc 'OPENBLAS_NUM_THREADS=1 python scripts/check.py --static > submission/static_checks.txt'
+
+---
+
+/bin/bash -lc "python - <<'PY'
+import sys;sys.path.insert(0,'scripts');from build import *
+from scipy.sparse import coo_matrix, csgraph
+for p in OUT.glob('*.stl'):
+ t=trimesh.load(p);print(p.name,len(t.faces),t.is_watertight, t.is_winding_consistent,len(t.vertices),'degenerate',sum(~t.nondegenerate_faces()),'bodycount',t.body_count)
+ e=t.edges_sorted;u,c=np.unique(e,axis=0,return_counts=True);bad=u[c"'!=2];print('"'bad',len(bad),'edge counts',np.unique(c,return_counts=True),'example',t.vertices[bad[:3]] if len(bad) else '')
+PY"
+
+---
+
+/bin/bash -lc "python - <<'PY'
+import sys;sys.path.insert(0,'scripts');from build import *
+s=load('ratchet');print(s.status());s=s.simplify(.00015);save('ratchet',s)
+t=trimesh.load(OUT/'ratchet.stl');print(t.is_watertight,len(t.faces),sum(~t.nondegenerate_faces()))
+PY"
+
+---
+
+/bin/bash -lc "rm submission/parts/collision_debug.stl
+sed -i 's/len(t.split())/t.body_count/' scripts/check.py
+OPENBLAS_NUM_THREADS=1 python scripts/check.py --static > submission/static_checks.txt"
+
+---
+
+/bin/bash -lc 'OPENBLAS_NUM_THREADS=1 python scripts/check.py --drive > submission/drive_checks.txt'
+
+---
+
+/bin/bash -lc 'cat submission/static_checks.txt; tail -5 submission/drive_checks.txt'
+
+---
+
+/bin/bash -lc 'tail -8 submission/drive_checks.txt; date -u'
+
+---
+
+/bin/bash -lc 'cat submission/drive_checks.txt | tail -25; ls -l submission/parts'
+
+---
+
+/bin/bash -lc "python - <<'PY'
+p='scripts/build.py';s=open(p).read().replace(\"stem=pin+cyl(.25,0,1) if False else pin\",\"stem=pin\")
+s+='''\\n # Clean sub-resolution envelope slivers after STL float32 quantization.\\n for name,tol in [('transfer',.0001),('ratchet',.00015)]:\\n  solid=load(name)\\n  solid=max(solid.decompose(),key=lambda x:x.volume()).simplify(tol)\\n  save(name,solid)\\n'''
+open(p,'w').write(s)
+PY
+cat > scripts/audit.py <<'PY'
+import json,struct
+from pathlib import Path
+import trimesh
+root=Path('submission');data=json.loads((root/'winding.json').read_text())
+names=[n for m in data['mobiles'].values() for n in m['parts']]+data['fixed']
+assert len(names)==len(set(names))==5
+for n in names:
+ p=root/'parts'/f'{n}.stl';raw=p.read_bytes();count=struct.unpack('<I',raw[80:84])[0]
+ assert len(raw)==84+50*count and count<=400000
+ t=trimesh.load(p)
+ assert t.is_watertight and t.is_winding_consistent and t.body_count==1 and t.volume>0
+ print(n,count,'triangles; binary, watertight, one shell, positive volume')
+assert set(p.stem for p in (root/'parts').glob('*.stl'))==set(names)
+rate=1
+for m in data['meshes']:rate*=m['driver_teeth']/m['driven_teeth']*(1 if m['sense']=='same' else -1)
+assert abs(rate+1/9)<1e-12
+print('arbor rate about +z / stem rate about +x =',rate)
+PY
+python scripts/audit.py > submission/file_audit.txt"
+
+---
+
+/bin/bash -lc "cat > submission/REPORT.md <<'EOF'
+Submitted "'`winding.json` and five binary STLs in `parts/`: stem, transfer wheel, square-bore ratchet, and two bearing bridges. The 10:30 face-gear stage and 12:36 spur stage give nine stem turns per arbor turn, with the required winding direction.
+
+Checks on the final exported files:
+- All five parts are watertight, consistently oriented, single-shell solids with positive volume and fewer than 400,000 triangles.
+- No submitted part overlaps the frozen movement at rest. The 36-position rotating-clearance checks and 48-position nonmeshing-mobile check passed.
+- Mesh sweeps used 180 and 216 samples, respectively, covering three driver turns. Maximum running overlap was below 0.0000001 mm3; minimum back-off overlap was 0.000612 mm3, exceeding the required 0.0002 mm3.
+- Both mobile bearings passed all six 0.3 mm retention displacements. Both bridges passed the 0.05 mm anchoring test, with no mutual overlap.
+- The ratchet fills 78.1% of the square seating shell without entering the arbor. Case bounds and external stem reach passed.
+
+Difficulties, in order: a large cutter-envelope union exhausted memory, so generation switched to repeating carved sectors; initial crown geometry interfered with the stem shaft and needed underside relief and a wider cutter phase range; sub-resolution STL edges needed simplification to preserve watertight topology.
+
+No material ambiguity remained. The slower-wheel sweep was interpreted as three driver turns, sampled six times per driver tooth. Detailed results are in `static_checks.txt`, `drive_checks.txt`, and `file_audit.txt`; scripts are in `/app/scripts`.
+
+Outside access: none.
+EOF
+cat submission/file_audit.txt'

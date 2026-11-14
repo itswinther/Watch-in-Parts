@@ -1,0 +1,61 @@
+read {"filePath": "/app/BRIEF.md"}
+
+---
+
+bash {"command": "cd /app && ls -la . frozen submission scripts 2>&1 | head -50"}
+
+---
+
+bash {"command": "cd /app && cat frozen.json; ls submission/parts; python3 -c \"\nimport trimesh,glob\nfor f in sorted(glob.glob('frozen/*.stl'))+['arbor_square.stl']:\n    m=trimesh.load(f); print(f,m.bounds.round(2).tolist(),m.is_watertight,round(m.volume,2))\n\""}
+
+---
+
+bash {"command": "cd /app && mkdir -p scripts && python3 -c \"\nimport trimesh,numpy as np\nm=trimesh.load('frozen/main_plate.stl')\n# ray cast upward at plate underside for sample points\npts=[(x,y) for x in (-12,-11,0,5,9,10,11,12) for y in (-1.5,0,1.5)]\nfor x,y in pts:\n    h,_,_=m.ray.intersects_location([[x,y,-4]],[[0,0,1]])\n    print(x,y,sorted(h[:,2].round(3).tolist())[:2])\n\""}
+
+---
+
+bash {"command": "cd /app && cat > scripts/lib.py <<'EOF'\nimport numpy as np, trimesh, glob, os\nfrom manifold3d import Manifold, CrossSection, Mesh, OpType\n\ndef load(path):\n    m = trimesh.load(path)\n    return Manifold(Mesh(vert_properties=np.array(m.vertices, dtype=np.float32),\n                         tri_verts=np.array(m.faces, dtype=np.uint32)))\n\ndef save(man, path):\n    mm = man.to_mesh()\n    t = trimesh.Trimesh(np.array(mm.vert_properties)[:, :3], np.array(mm.tri_verts), process=False)\n    t.export(path)\n\ndef inter_vol(a, b):\n    return (a ^ b).volume() if False else Manifold.intersect(a, b).volume() if hasattr(Manifold,'intersect') else (a & b).volume()\n\ndef rx(m, deg, c=(0,0,0)):\n    return m.translate([-v for v in c]).rotate([deg,0,0]).translate(list(c))\ndef rz(m, deg, c=(0,0,0)):\n    return m.translate([-v for v in c]).rotate([0,0,deg]).translate(list(c))\ndef frozen():\n    return {os.path.basename(f)[:-4]: load(f) for f in sorted(glob.glob('/app/frozen/*.stl'))}\n\ndef gear2d(N, m, pa_deg=20, ha=1.0, hd=1.25, nflank=8):\n    rp = N*m/2; rb = rp*np.cos(np.radians(pa_deg)); rt = rp+ha*m; rr = rp-hd*m\n    inv = lambda a: np.tan(a)-a\n    ap = np.radians(pa_deg)\n    def h(r):\n        r = max(r, rb)\n        return np.pi/(2*N) + inv(ap) - inv(np.arccos(rb/r))\n    pts = []\n    for i in range(N):\n        c = 2*np.pi*i/N\n        rs = np.concatenate([[rr], np.linspace(rb, rt, nflank)])\n        for r in rs:  # left flank root->tip\n            a = c - h(r); pts.append((r*np.cos(a), r*np.sin(a)))\n        ht = h(rt)\n        for f in np.linspace(-1, 1, 3)[1:-1]:\n            a = c + f*ht; pts.append((rt*np.cos(a), rt*np.sin(a)))\n        for r in rs[::-1]:\n            a = c + h(r); pts.append((r*np.cos(a), r*np.sin(a)))\n        # root arc\n        a0 = c + h(rb); a1 = 2*np.pi*(i+1)/N - h(rb)\n        for a in np.linspace(a0, a1, 4)[1:-1]:\n            pts.append((rr*np.cos(a), rr*np.sin(a)))\n    return np.array(pts), rp, rr, rt\nEOF\npyth
+
+---
+
+bash {"command": "cd /app && python3 - <<'EOF'\nfrom manifold3d import Manifold\na=Manifold.cube([1,1,1]); b=a.translate([.5,0,0])\nprint((a^b).volume(), hasattr(Manifold,'intersect'), (a&b).volume() if hasattr(a,'__and__') else None)\nEOF"}
+
+---
+
+bash {"command": "cd /app && python3 - <<'EOF'\nimport re\ns=open('scripts/lib.py').read()\ns=re.sub(r\"def inter_vol.*?\\n    return.*?\\n\",\"def inter_vol(a, b):\\n    return (a ^ b).volume()\\n\",s,flags=re.S)\nopen('scripts/lib.py','w').write(s)\nEOF\ncat > scripts/build.py <<'EOF'\nimport sys, json, time; sys.path.insert(0,'/app/scripts')\nfrom lib import *\nNP, NC, M = 8, 80, 0.22\nZS = -3.9\nXP = 8.8          # pinion location on +x\nFW = 1.2          # pinion face width\nSTEPS = int(sys.argv[1]) if len(sys.argv)>1 else 24\npts, rp, rr, rt = gear2d(NP, M)\n# pinion about x axis, centred at x=XP, axis through origin (y=z=0)\ng = Manifold.extrude(CrossSection([pts.tolist()]), FW).translate([0,0,-FW/2])\npin0 = g.rotate([0,90,0]).translate([XP,0,0])   # z->x\nrod_r = 0.5\n# ---- stem\nrod = Manifold.cylinder(10.6-(-13.05), rod_r, rod_r, 64).rotate([0,90,0]).translate([-13.05,0,0])\ncollA = Manifold.cylinder(0.5, 0.9, 0.9, 64).rotate([0,90,0]).translate([-13.05,0,0])\ncollB = Manifold.cylinder(0.5, 0.9, 0.9, 64).rotate([0,90,0]).translate([-11.45,0,0])\nknob = Manifold.cylinder(1.15, 1.0, 1.0, 64).rotate([0,90,0]).translate([-16.0,0,0])\nstem0 = rod + collA + collB + knob + pin0\nstem = stem0.translate([0,0,ZS])\n# ---- crown (arbor)\nzp = ZS + rp\nztip = zp - 1.0*M\nRIN, ROUT = XP-FW/2-0.05, XP+FW/2+0.05\nztop = -1.9\nring = Manifold.cylinder(ztop-ztip, ROUT, ROUT, 360).translate([0,0,ztip]) - Manifold.cylinder(ztop-ztip, RIN, RIN, 360).translate([0,0,ztip])\nweb = Manifold.cylinder(0.6, ROUT, ROUT, 360).translate([0,0,-2.5])\nhole = 0.61\nsq = Manifold.cube([hole,hole,2.0], True).translate([0,0,-2.2])\nblank = (ring + web) - sq\nt0=time.time()\nsw = []\nfor k in range(STEPS):\n    a = 45.0*k/STEPS\n    p = rx(pin0, a)\n    p = p.translate([0,0,ZS])\n    p = rz(p, a/10.0)\n    sw.append(p)\nS = Manifold.batch_boolean(sw, OpType.Add)\nprint('sweep', time.time()-t0, S.num_tri())\ncuts = [rz(S, 4.5*k) for k in range(NC)]\nU = Manifold.batch_boolean(cuts, OpType.Add)\np
+
+---
+
+bash {"command": "cd /app && python3 scripts/build.py 24 && cat > scripts/meshtest.py <<'EOF'\nimport sys; sys.path.insert(0,'/app/scripts')\nfrom lib import *\nimport numpy as np\nstem=load('/app/scripts/stem_raw.stl'); crown=load('/app/scripts/crown_raw.stl')\nZS=-3.9\nrng=np.random.default_rng(1)\nmaxo=0; minb=1e9; bad=0\nphases=np.concatenate([np.arange(0,45,45/48), rng.uniform(0,90,40)])\nfor a in phases:\n    s=rx(stem,a,(0,0,ZS)); c=rz(crown,-a/10)\n    o=inter_vol(s,c)\n    cb=rz(crown,-a/10 + 0.03*360/80)   # turned back against motion (motion is -), so + direction\n    b=inter_vol(s,cb)\n    maxo=max(maxo,o); minb=min(minb,b)\n    if o>0.002 or b<0.0002: bad+=1; print('bad',round(a,3),o,b)\nprint('max overlap',maxo,'min back-overlap',minb,'bad',bad)\nEOF\npython3 scripts/meshtest.py"}
+
+---
+
+bash {"command": "cd /app && for n in 12 16; do python3 scripts/build.py $n | tail -3; python3 scripts/meshtest.py; done"}
+
+---
+
+bash {"command": "cd /app && python3 scripts/build.py 12 >/dev/null && cat > scripts/finalize.py <<'EOF'\nimport sys, json, os, shutil; sys.path.insert(0,'/app/scripts')\nfrom lib import *\nZS=-3.9\ndef block(x0,x1,blind=None):\n    b = Manifold.cube([x1-x0, 2.6, -1.71-(-4.7)]).translate([x0,-1.3,-4.7])\n    if blind is None:\n        bore = Manifold.cylinder(x1-x0+2, 0.55, 0.55, 64).rotate([0,90,0]).translate([x0-1,0,ZS])\n    else:\n        bore = Manifold.cylinder(blind-x0, 0.55, 0.55, 64).rotate([0,90,0]).translate([x0-0.5+0.5-0.5+0.5,0,ZS]) \n    return b - bore\npa = block(-12.5,-11.5)\npb = block(10.0,11.2,blind=10.8)\nos.makedirs('/app/submission/parts',exist_ok=True)\nsave(pa,'/app/submission/parts/post_a.stl'); save(pb,'/app/submission/parts/post_b.stl')\nshutil.copy('/app/scripts/stem_raw.stl','/app/submission/parts/stem.stl')\nshutil.copy('/app/scripts/crown_raw.stl','/app/submission/parts/ratchet.stl')\njson.dump({\"mobiles\":{\"stem\":{\"point\":[0,0.0,-3.9],\"direction\":[1,0,0],\"parts\":[\"stem\"]},\n \"arbor\":{\"parts\":[\"ratchet\"]}},\n \"fixed\":[\"post_a\",\"post_b\"],\n \"meshes\":[{\"driver\":\"stem\",\"driver_teeth\":8,\"driven\":\"arbor\",\"driven_teeth\":80,\"sense\":\"opposite\"}]},\n open('/app/submission/winding.json','w'),indent=1)\nEOF\npython3 scripts/finalize.py && ls -la submission submission/parts"}
+
+---
+
+bash {"command": "cd /app && cat > scripts/check.py <<'EOF'\nimport sys, json; sys.path.insert(0,'/app/scripts')\nfrom lib import *\nimport numpy as np, trimesh\nS='/app/submission/parts/'\nP={n:load(S+n+'.stl') for n in ['stem','ratchet','post_a','post_b']}\nfor n in P:\n    t=trimesh.load(S+n+'.stl'); print(n,len(t.faces),'watertight',t.is_watertight,'vol',round(t.volume,3),'shells',len(P[n].decompose()))\nF=frozen(); sq=load('/app/arbor_square.stl')\nFall=Manifold.batch_boolean(list(F.values()),OpType.Add)\nmx=lambda a,b: inter_vol(a,b)\nprint('rest overlaps with frozen:',{n:round(mx(p,Fall),6) for n,p in P.items()})\nprint('ratchet vs square',mx(P['ratchet'],sq),'ratchet vs stem',mx(P['ratchet'],P['stem']))\nfixed=Manifold.batch_boolean([P['post_a'],P['post_b']],OpType.Add)\nprint('fixed-fixed',mx(P['post_a'],P['post_b']))\nZS=-3.9\n# clear alone\nworst=0\nfor i in range(36):\n    a=10*i\n    s=rx(P['stem'],a,(0,0,ZS)); c=rz(P['ratchet'],a)\n    worst=max(worst,mx(s,fixed),mx(s,Fall),mx(c,fixed),mx(c,Fall),mx(c,sq)*0)\nprint('clear alone worst',worst)\n# held\nst=P['stem']; res=[]\nfor d in [(.3,0,0),(-.3,0,0),(0,.3,0),(0,-.3,0),(0,0,.3),(0,0,-.3)]:\n    m=st.translate(list(d)); res.append(round(mx(m,fixed)+mx(m,Fall),5))\nprint('held (>0.002 each):',res)\n# seated: shell fill\nsqo=Manifold.cube([0.68,0.68,0.6],True).translate([0,0,-2.2]); sqi=Manifold.cube([0.6,0.6,0.6],True).translate([0,0,-2.2])\nshell=sqo-sqi\nprint('seated fill',mx(P['ratchet'],shell)/shell.volume())\n# anchored: shift 0.05\nfor n in ['post_a','post_b']:\n    ok=[ (d,round(mx(P[n].translate(list(d)),Fall),4)) for d in [(0,0,.05)]]\n    print('anchored',n,ok)\n# bounds\ncx,cy=4.0391,-9.6417\nfor n,t in [(n,trimesh.load(S+n+'.stl')) for n in P]:\n    v=t.vertices; r=np.hypot(v[:,0]-cx,v[:,1]-cy)\n    print(n,'max r from case centre',r.max().round(3),'z',v[:,2].min().round(3),v[:,2].max().round(3))\nEOF\npython3 scripts/check.py"}
+
+---
+
+bash {"command": "cd /app && sed -i 's/^NP, NC, M = 8, 80, 0.22/NP, NC, M = 8, 80, 0.2/; s/^XP = 8.8 .*/XP = 8.0/; s/10.6-(-13.05), rod_r, rod_r, 64).rotate(\\[0,90,0\\]).translate(\\[-13.05,0,0\\])/10.6-(-15.5), rod_r, rod_r, 64).rotate([0,90,0]).translate([-15.5,0,0])/' scripts/build.py && grep -n \"rod =\\|^NP\\|^XP\" scripts/build.py && python3 scripts/build.py 12 && python3 - <<'EOF'\nimport trimesh\nt=trimesh.load('/app/scripts/crown_raw.stl')\nprint(t.is_watertight, t.is_winding_consistent, len(t.vertices), t.volume)\nimport numpy as np\ne=t.edges_sorted; u,c=np.unique(e,axis=0,return_counts=True); print((c!=2).sum(), np.bincount(c))\nprint(t.area_faces.min(), (t.area_faces<1e-12).sum())\nEOF"}
+
+---
+
+bash {"command": "cd /app && python3 - <<'EOF'\nimport sys; sys.path.insert(0,'/app/scripts')\nfrom lib import *\nimport trimesh, numpy as np\nc=load('/app/scripts/crown_raw.stl')  # float32 roundtrip already merged? check\nprint(c.status(), c.num_tri())\nEOF\ngrep -n \"crown = blank\" scripts/build.py"}
+
+---
+
+bash {"command": "cd /app && python3 - <<'EOF'\nimport sys; sys.path.insert(0,'/app/scripts')\nfrom lib import *\nimport trimesh, numpy as np\nc=load('/app/scripts/crown_raw.stl')\nfor tol in [0, 1e-4, 5e-4]:\n    d=c.simplify(tol) if tol else c\n    save(d,'/tmp/opencode/t.stl') if False else save(d,'/app/scripts/t.stl')\n    t=trimesh.load('/app/scripts/t.stl')\n    print(tol,d.num_tri(),t.is_watertight,t.is_volume,len(t.faces),(t.area_faces<1e-12).sum(),t.volume)\nEOF"}
+
+---
+
+bash {"command": "cd /app && python3 - <<'EOF'\ns=open('/app/scripts/build.py').read()\ns=s.replace(\"save(stem, '/app/scripts/stem_raw.stl')\\nsave(crown, '/app/scripts/crown_raw.stl')\",\n\"\"\"save(stem, '/app/scripts/stem_raw.stl')\nsave(crown, '/app/scripts/crown_raw.stl')\n# clean roundtrip (float32 merge), simplify\nfor n in ('stem','crown'):\n    m = load('/app/scripts/%s_raw.stl' % n)\n    m = m.simplify(5e-4)\n    save(m, '/app/scripts/%s_raw.stl' % n)\n    print(n, m.num_tri(), len(m.decompose()))\"\"\")\nopen('/app/scripts/build.py','w').write(s)\nEOF\npython3 scripts/build.py 16 | tail -3 && python3 scripts/meshtest.py && python3 scripts/finalize.py && python3 scripts/check.py"}
+
+---
+
+bash {"command": "cd /app && cat > scripts/meshtest2.py <<'EOF'\nimport sys; sys.path.insert(0,'/app/scripts')\nfrom lib import *\nimport numpy as np\nS='/app/submission/parts/'\nstem=load(S+'stem.stl'); crown=load(S+'ratchet.stl'); ZS=-3.9\nbad=0; mo=0; mb=1e9\nfor a in np.arange(0,90,0.5)+0.13:\n    s=rx(stem,a,(0,0,ZS))\n    o=inter_vol(s,rz(crown,-a/10)); b=inter_vol(s,rz(crown,-a/10+0.03*4.5))\n    mo=max(mo,o); mb=min(mb,b)\n    if o>0.002 or b<0.0002: bad+=1\nprint('dense: max overlap',mo,'min push',mb,'bad',bad)\na=20.0\nprint('wrong sense overlap', inter_vol(rx(stem,a,(0,0,ZS)), rz(crown,+a/10)))\nEOF\npython3 scripts/meshtest2.py"}

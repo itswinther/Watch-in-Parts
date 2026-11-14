@@ -1,0 +1,39 @@
+load bottom_plate
+load lower_bridge
+load upper_bridge
+load middle_bridge
+load minute_lower_stop
+load seconds_cock
+load day_cock
+load transfer_pinion
+load transfer_minute
+load transfer_hour
+load day_pinion
+load minute_input
+load minute_output
+load minute_hand
+load seconds_transfer_input
+load seconds_transfer_output
+load seconds_pinion
+load seconds_hand
+load hour_wheel
+load hour_hand
+load day_wheel
+load day_hand
+load reduction_input
+load reduction_idler
+ASSEMBLED
+FIXED BODY COLLISION reduction_input 0.1807680128452256
+FIXED BODY COLLISION reduction_idler 0.18076794829970294
+BODY COLLISION reduction_input barrel 0.1776231319496405
+HELD
+FREE
+FREE transfer []
+FREE reduction_input [(0, 0.1807680128452256), (5, 0.18076818091306207), (10, 0.18076817026958047), (15, 0.18076817714943977), (20, 0.18076801525812636), (25, 0.18076818403358708), (30, 0.18076817416139393), (35, 0.1807681815065875)]
+FREE reduction_idler [(0, 0.18076794829970294), (5, 0.18076811835481263), (10, 0.18076811147976551), (15, 0.18076811544191645), (20, 0.18076794808189328), (25, 0.18076811655871183), (30, 0.1807681051732635), (35, 0.1807681108780226)]
+MESH barrel reduction_input
+RESULT barrel reduction_input jams/gaps/nodrive 768 0 0 maxjam 0.1803798732407925 mindrive 0.03782602450245004 [('jam', 0, 0.1776231319496404), ('jam', 1, 0.1795697724475932), ('jam', 2, 0.18037976434181802), ('jam', 3, 0.18011908602319976), ('jam', 4, 0.17872590577556924), ('jam', 5, 0.17635864165519793), ('jam', 6, 0.17552555742257667), ('jam', 7, 0.17574022863436908), ('jam', 8, 0.17762314187018116), ('jam', 9, 0.17956978015976904)]
+MESH reduction_input reduction_idler
+RESULT reduction_input reduction_idler jams/gaps/nodrive 0 0 0 maxjam 0 mindrive 0.05988115891054429 []
+MESH reduction_idler transfer
+RESULT reduction_idler transfer jams/gaps/nodrive 0 0 0 maxjam 0 mindrive 0.05958055184975141 []

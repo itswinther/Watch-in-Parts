@@ -1,0 +1,71 @@
+{
+ "reward": 1.0,
+ "p": 1.0,
+ "gates": {
+  "files": true,
+  "rest_frozen": true
+ },
+ "checks": {
+  "drive": true,
+  "direction": true,
+  "ratio": true,
+  "clear": true,
+  "held": true,
+  "seated": true,
+  "anchored": true,
+  "bounds": true
+ },
+ "details": {
+  "rest_frozen": {
+   "worst_volume": 0.0,
+   "part": "stem"
+  },
+  "meshes": [
+   {
+    "pair": "stem/arbor",
+    "passes": true,
+    "samples": 480,
+    "worst_overlap": 2.9932822069576556e-05,
+    "at": 293,
+    "least_contact": 0.0030108297285543406,
+    "contact_at": 371
+   }
+  ],
+  "rates": {
+   "stem": 1.0,
+   "arbor": -0.1
+  },
+  "drive": {
+   "arbor_reached": true,
+   "all_declared_meshes_work": true
+  },
+  "ratio": 10.0,
+  "clear": {
+   "worst_volume": 8.353747216036208e-17,
+   "where": "arbor spin 16"
+  },
+  "held": {
+   "stem": {
+    "+axis": true,
+    "-axis": true,
+    "+u": true,
+    "-u": true,
+    "+v": true,
+    "-v": true
+   }
+  },
+  "seated": {
+   "shell_fill": 0.8818357670679665,
+   "inside_square": 0.0
+  },
+  "anchored": {
+   "floating": []
+  },
+  "bounds": {
+   "outside_radius": 0.0,
+   "outside_height": 0.0,
+   "stem_beyond_case": 1.9894536668470728
+  }
+ },
+ "seconds": 31.9
+}

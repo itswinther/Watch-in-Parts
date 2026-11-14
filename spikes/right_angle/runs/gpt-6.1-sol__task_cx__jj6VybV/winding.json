@@ -1,0 +1,59 @@
+{
+  "mobiles": {
+    "stem": {
+      "point": [
+        0,
+        0,
+        -3.9
+      ],
+      "direction": [
+        1,
+        0,
+        0
+      ],
+      "parts": [
+        "stem"
+      ]
+    },
+    "transfer": {
+      "point": [
+        -3.6,
+        0,
+        0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "parts": [
+        "transfer"
+      ]
+    },
+    "arbor": {
+      "parts": [
+        "ratchet"
+      ]
+    }
+  },
+  "fixed": [
+    "stem_bridge",
+    "transfer_bridge"
+  ],
+  "meshes": [
+    {
+      "driver": "stem",
+      "driver_teeth": 10,
+      "driven": "transfer",
+      "driven_teeth": 30,
+      "sense": "same"
+    },
+    {
+      "driver": "transfer",
+      "driver_teeth": 12,
+      "driven": "arbor",
+      "driven_teeth": 36,
+      "sense": "opposite"
+    }
+  ]
+}

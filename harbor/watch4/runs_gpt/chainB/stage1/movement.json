@@ -1,0 +1,114 @@
+{
+  "case_centre": [
+    6,
+    5.5
+  ],
+  "fixed": [
+    "bottom_plate",
+    "lower_bridge",
+    "upper_bridge",
+    "middle_bridge",
+    "minute_lower_stop",
+    "seconds_cock"
+  ],
+  "mobiles": {
+    "transfer": {
+      "axis": [
+        12,
+        0
+      ],
+      "parts": [
+        "transfer_pinion",
+        "transfer_minute",
+        "transfer_hour"
+      ]
+    },
+    "minute": {
+      "axis": [
+        12,
+        11.2
+      ],
+      "parts": [
+        "minute_input",
+        "minute_output",
+        "minute_hand"
+      ]
+    },
+    "fast_transfer": {
+      "axis": [
+        1.92,
+        11.2
+      ],
+      "parts": [
+        "seconds_transfer_input",
+        "seconds_transfer_output"
+      ]
+    },
+    "seconds": {
+      "axis": [
+        12,
+        11.2
+      ],
+      "parts": [
+        "seconds_pinion",
+        "seconds_hand"
+      ]
+    },
+    "hour": {
+      "axis": [
+        12,
+        11.2
+      ],
+      "parts": [
+        "hour_wheel",
+        "hour_hand"
+      ]
+    }
+  },
+  "meshes": [
+    {
+      "driver": "barrel",
+      "driver_teeth": 96,
+      "driven": "transfer",
+      "driven_teeth": 24
+    },
+    {
+      "driver": "transfer",
+      "driver_teeth": 48,
+      "driven": "minute",
+      "driven_teeth": 24
+    },
+    {
+      "driver": "transfer",
+      "driver_teeth": 16,
+      "driven": "hour",
+      "driven_teeth": 96
+    },
+    {
+      "driver": "minute",
+      "driver_teeth": 72,
+      "driven": "fast_transfer",
+      "driven_teeth": 12
+    },
+    {
+      "driver": "fast_transfer",
+      "driver_teeth": 120,
+      "driven": "seconds",
+      "driven_teeth": 12
+    }
+  ],
+  "hands": {
+    "hour": {
+      "mobile": "hour",
+      "part": "hour_hand"
+    },
+    "minute": {
+      "mobile": "minute",
+      "part": "minute_hand"
+    },
+    "seconds": {
+      "mobile": "seconds",
+      "part": "seconds_hand"
+    }
+  }
+}
