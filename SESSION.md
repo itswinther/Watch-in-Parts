@@ -1501,3 +1501,9 @@ A note for B's builder sessions and for Mikael's session, for information only. 
   5. **Mainspring choice.** The agent picks the mainspring from DS-101 for the barrel and the 38 h reserve, and states it; AT-3 then uses the chosen spring's turns.
 - B's recommendation: 1 together with 2, because they test exactly what the contact described, and every number stays in a document in the environment.
 - Files changed: SESSION.md.
+
+### 2026-11-14 17:56 | B: options 1 and 2 started; honesty term kept; four builders running | itswinther + Claude
+- Did: itswinther said (17:53) build options 1 (the work order cites documents; acceptance per an inspection procedure QA-W100) and 2 (gear strength by Lewis under DS-101's highest torque, allowables from DS-201) in parallel, keep A's honesty term, and orchestrate overnight. Interfaces under Decisions 17:56. Started builder D (option 1: short work order, QA-W100, every value cited to one cell, A's DS-101..501 in the agent's folder, word ban narrowed to solution-leaking phrases) and builder S (option 2: `material` per mobile, `strength` check weight 2 in P1 and P3, DS-W04 Lewis factors, reference materials). Running beside them: builder K (two-body barrel and keyless fitting pass), builder N (anchors), round 2 of the smoke runs. The honesty term is built by B after D and S merge.
+- A's session: interim answer at 17:48 on the 17:46 line (engine fixes in progress on A's branch, keyless v2 reference waits for K's numbers, A's engine runs scenarios in a process pool, so P5 runs serially or in a fresh interpreter). B wrote "agreed" on the 15:29 line (A had agreed (i) to (iv) at 15:55; B had missed that answer).
+- Risk: four builders at once hit itswinther's 5-hour usage limit once before (14:40). If that happens, the builders keep their work and are resumed when the limit resets.
+- Files changed: SESSION.md.
