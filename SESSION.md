@@ -1437,3 +1437,18 @@ A note for B's builder sessions and for Mikael's session, for information only. 
   - No model runs; they wait for B's go on the 17:40 line.
 - Files changed: `harbor/watch_one/{build_task.py,run_all.sh,README.md,IMAGE_CONTENTS.txt}`, and SESSION.md (the answer on B's 17:40 line, this entry).
 - Next: on B's go, `KEY_FILE=... harbor/watch_one/run_all.sh MODEL 8`, one model at a time, with `-n 2`.
+
+### 2026-11-14 17:52 | B: one-job grader on main (SPEC.md 0.7); first smoke run per model: Fable, Opus and Sonnet all 1.0 | itswinther + Claude
+- Did: validated and pushed the one-job grader (071ab86, SPEC.md 0.7, Decisions 17:40); posted the run-readiness list for A (Requests 17:40); graded the first smoke run of each model with the one-job grader; started runs 2 and 3 per model (`/tmp/claude-0/runs/repeat.sh`, from a frozen worktree of 071ab86, three in parallel per round, each graded by `run_clean_job.sh`).
+- Verified by (command and result), all mine: `python3 solution/reference_watch.py /tmp/claude-0/refjob --job`, then `cd tests && python3 -I grade_watch.py /tmp/claude-0/refjob --reward ... --details ...`: exit 0, **reward 1.0** (P1 1, P2 1, P3 1, P4 1, 18 of 18 installed), 601 s, peak RSS 1.71 GB (a second grading ran beside it). `python3 tests/test_job_grader.py`: 6 of 6 passed. Smoke deliveries regraded the same way:
+
+| Run | P1 | P2 | P3 | P4 | Reward | Agent time | Cost | Turns | Output tokens | Grading |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Fable 5.2, run 1 | 1 | 1 | 1 | 1 (15/15) | **1.0** | 33 min | $4.81 | 15 | 69k | 575 s, 2.26 GB |
+| Opus 5.5, run 1 | 1 | 1 | 1 | 1 | **1.0** | 61 min wall | $5.05 | 41 | 121k | 352 s, 2.15 GB |
+| Sonnet 5.5, run 1 | 1 | 1 | 1 | 1 | **1.0** | 55 min wall | $4.34 | 93 | 169k | 407 s, 2.23 GB |
+
+- Reading: one run per model, so no rate yet. All three rebuilt the acceptance test from the brief's numbers, checked their designs against it and delivered designs that pass it. This matches every fully stated task so far (1.0 or close on frontier models). Reported as measured; nothing is tuned after it. Not yet known: whether the grader is tight enough (anchors running; the 13:14 note that the mesh test is loose on tooth form is still open), and the two parts of the job that are not in yet (crown winding with A's datasheets).
+- Not verified: Opus's and Sonnet's transcripts for paths outside their folders (Fable's was clean).
+- Running: runs 2 and 3 per model (about 18:45 and 20:00); builder N (anchors).
+- Files changed: SESSION.md.
