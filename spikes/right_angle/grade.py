@@ -265,7 +265,8 @@ def grade(sub, data):
         if r["passes"]:
             working.append(me)
 
-    rate = {"stem": 1.0}
+    # the stem turns positively about +x (clockwise seen from outside); about a declared -x that is negative
+    rate = {"stem": 1.0 if axes["stem"][1][0] > 0 else -1.0}
     for _ in range(len(working) + 1):
         for me in working:
             if me["driver"] in rate and me["driven"] not in rate:
