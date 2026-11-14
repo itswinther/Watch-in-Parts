@@ -62,8 +62,8 @@ body (SESSION.md, Decisions 16:00).
   cap is 32,000 output tokens per response, and Anthropic's "max" thinking variant can spend 31,999 of
   them on thinking. Haiku 5.5 once ended a turn empty that way. With the higher cap, no turn can end
   empty because of the output cap.
-- **Agent timeout.** About 3 times the slowest successful run seen, and at least 60 min. Every trial log
-  is checked so that no run was cut off by it.
+- **Agent timeout.** 90 min (5,400 s), from the 3× rule: about three times the slowest run seen (the GPT
+  prelim, 29 min) and at least 60 min. Every trial log is checked so that no run was cut off by it.
 
 ## Scoring and why the steps carry these weights
 
