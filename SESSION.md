@@ -1911,3 +1911,17 @@ Mikael asks B (and itswinther) to answer these here, so both machines work to on
 - Sonnet 5.5, local clean run on main at 22193c1 (work order with QA-W100, gear strength with per-part materials and the 70.1 platform load, the honesty statement, hand speeds stated): **1.0** (P1..P4 all 1, honesty 1: it wrote a truthful report). B's four-part runs: 10 of 10 at 1.0.
 - Applied A's 00:05 correction to README.md and solution/SOLUTION_WATCH.md: GPT crown winding on the fixed engine 0.421, 0.119, 0.110 (mean 0.217), "the designs wind, then jam when the rig pre-winds the barrel for the hold test (one clutch that cannot slip; two jams still being traced)".
 - Files changed: README.md, solution/SOLUTION_WATCH.md, SESSION.md.
+
+### 2026-11-15 00:40 | A: the two "unclear" AT-2 pre-wind jams (imWnpTP, b7qdG8X) are an engine artifact, not GPT's mistake | Mikael + Claude
+- **Verdict:** for both designs the AT-2 failure is **not a design fault**. It is a simulator artifact of the fixed engine (fde5cf9), exposed by the rig's arbor pre-wind. AT-2 is therefore unfair to these two designs and must not be presented as the agent's mistake.
+- **The named pair is not the cause.** Barrel against face wheel (imWnpTP) and barrel against transfer wheel (b7qdG8X):
+  - rest clearance is 0.0073 mm and 0.0009 mm;
+  - at the stall (barrel at 35° and at 16.5°) the overlap clears by turning the wheel 0.5° or 3.5°, and the engine's push of the wheel succeeds;
+  - crown-driven winding takes the barrel through the same angles without a block (101.9° and 59.8°).
+- **The stall is at the sliding clutch.** The pre-wind back-drives the winding pinion, so the clutch must slip along its own axis.
+  - Geometrically it can: the overlap with the pinion is 0.00024 and 0.00025 mm³ (TOL 0.0002), and a +0.005 to +0.02 mm slide clears it with nothing else above TOL.
+  - But the engine's push budget (`World.budget`) is 0. It skips every contact patch under 0.05·TOL (1e-5 mm³), and this contact is split into 336 and 32 patches of at most 1e-6 and 8e-6 mm³. So a clutch touching lightly on many teeth gets no friction-cone allowance at all.
+  - Removing only the clutch-to-pinion contact makes the full 45° pre-wind pass, blocked 0 of 90, for both designs.
+- **Knock-on:** b7qdG8X's AT-3 and AT-4 start from this partial AT-2 state, so they are suspect too (unclear). Its AT-5/AT-6 pull collision (stem against its own clutch) is separate and still looks like a design fault.
+- **Suggested engine fix (not made):** in `budget()`, judge patches by the pair's total overlap, or lower the per-patch floor, then rerun anchors and these designs.
+- **Files:** probes and logs in spikes/keyless/runs/gpt_repeats/fixed_engine/ (pw_trace.py, pw_clutch.py, */prewind_*.log). Docker only, one 3 GB container at a time; no model runs; no real-CAD files.
