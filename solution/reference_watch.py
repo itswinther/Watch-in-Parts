@@ -377,14 +377,32 @@ def main(out):
     print("stage1 parts", len(parts1), "stage2 parts", len(parts2), "axes", {k: [round(v, 2) for v in a] for k, a in P.items() if k != "case"}, "case", P["case"])
 
 
+# One-job mode only: the material of each mobile, an ordering code of DS-201 with a bending allowable
+# (geometry/watch.py MATERIAL_ALLOWABLE_MPA). As a watchmaker does: a mobile that is an arbor with a pinion cut on
+# it is hardened steel; a wheel on a pipe or on a plain arbor (hour wheel, day wheel) is brass. The strength check
+# rates the going train only (barrel to the seconds mobile); there the third pinion needs steel (in brass its
+# margin is -0.12), and every other going-train gear would pass in brass too. The stage folders do not carry the
+# field (the stage grader does not read it).
+MATERIALS = {"third": "AD-C100-HT", "centre": "AD-C100-HT", "fourth": "AD-C100-HT", "seconds": "AD-C100-HT",
+             "minute_wheel": "AD-C100-HT", "day_idler": "AD-C100-HT", "hour_wheel": "AD-CW614N", "day": "AD-CW614N"}
+
+
+def with_materials(doc):
+    doc = json.loads(json.dumps(doc))
+    for name, mob in doc["mobiles"].items():
+        mob["material"] = MATERIALS[name]
+    return doc
+
+
 def main_job(out):
     """One delivery folder: the 8-hour movement with its 24-hour hand, the 6-hour variant on the same frame,
     the assembly plan for the 8-hour movement, and one parts/ folder. A part name used by both movements is
-    one solid and one file; a part that differs between them has its own name."""
+    one solid and one file; a part that differs between them has its own name. Every mobile declares its material."""
     out = os.path.abspath(out)
     doc1, parts1, P, phase = build_stage1()
     doc2, parts2 = build_stage2(doc1, parts1, P, phase)
     doc3, parts3 = build_stage3(doc2, parts2, P)
+    doc2, doc3 = with_materials(doc2), with_materials(doc3)
     names = lambda d: list(d["fixed"]) + [p for mm in d["mobiles"].values() for p in mm["parts"]]
     shared = set(names(doc2)) & set(names(doc3))
     for n in shared:

@@ -115,19 +115,21 @@ def format_material_text():
 def qa_strength_section(title="Gear strength", mesh_test="the mesh test"):
     """The strength check as an inspection step (markdown, no number: the generator places and numbers it).
     mesh_test: how the procedure names the mesh test whose steps, H and m this step reuses."""
-    return """**{title}.** Every gear that carries the mainspring's torque is strong enough in tooth bending.
+    return """**{title}.** The gears of the going train are strong enough in tooth bending.
 
 *Load case.* The barrel delivers the highest torque the mainspring sheet states for this calibre class:
 T_barrel = the upper end of the bridle slipping torque, DS-101, Table 2a, row "Slipping torque of the bridle",
-column for this series (N·mm). The train is stalled downstream of every mesh, so each mesh carries the full
+column for this series (N·mm). The going train is stalled at its end, so each of its meshes carries the full
 torque that reaches it.
 
-*Meshes rated.* Every declared mesh whose `driver` mobile D is driven from the barrel through declared meshes
-that pass {mt} (the same speeds as the hand checks). For such a mesh, with z_D and z_N the declared tooth counts
-of D and of the `driven` mobile N:
+*Meshes rated.* The going train: the declared meshes on the path from the barrel to the mobile that carries the
+seconds hand, through declared meshes that pass {mt}. The motion work and any other mesh off that path are not
+rated. If the seconds hand's mobile is not reached from the barrel that way, this check fails. For each rated
+mesh, with D the mobile the declaration names as `driver`, N the one it names as `driven`, and z_D and z_N their
+declared tooth counts:
 
 - torque at D: T_D = T_barrel x |n_barrel / n_D| (N·mm), with n the turns per hour that the declared tooth counts
-  give through passing meshes;
+  give through meshes that pass {mt} (the same speeds as the hand checks);
 - module: m = 2 x (distance between the two axes in the assembled positions) / (z_D + z_N) (mm), as in {mt};
 - tooth load: F = T_D / (m x z_D / 2) (N), on the pitch circle of D;
 - face width: b = the smallest H over the drive steps of {mt} for this mesh (mm): H is the height in z of the
@@ -143,8 +145,6 @@ does not, and a code without a bending allowable in section 8 cannot be declared
 
 *Pass.* sigma <= the allowable for both gears of every mesh rated. The supplied barrel's own teeth are not rated
 here (the barrel is a supplied part, rated by its maker); in a mesh with the barrel only the other gear is rated.
-A mesh rated that fails the "teeth drive" condition of {mt} has no measured face width and fails this check.
-With no mesh rated, the check fails.
 """.format(title=title, mt=mesh_test)
 
 

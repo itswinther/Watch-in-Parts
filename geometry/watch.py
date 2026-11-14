@@ -853,21 +853,51 @@ def check_strength_sheets(folder=None):
     return bad
 
 
+def going_train(m, runs):
+    """The going train: the declared meshes on the path from the barrel to the mobile that carries the seconds
+    hand, through declared meshes that pass the mesh test (the shortest such path; among equals, the one found
+    first in declaration order). Returns (list of indices into m.meshes, None) or (None, reason)."""
+    sec = m.hands["seconds"][0]
+    prev = {"barrel": None}
+    queue = ["barrel"]
+    while queue:
+        cur = queue.pop(0)
+        for i, ((a, _, b, _), x) in enumerate(zip(m.meshes, runs)):
+            if not Movement.mesh_passes(x):
+                continue
+            for src, dst in ((a, b), (b, a)):
+                if src == cur and dst not in prev:
+                    prev[dst] = (cur, i)
+                    queue.append(dst)
+    if sec not in prev:
+        return None, "the seconds hand's mobile '%s' is not driven from the barrel through meshes that pass the mesh test" % sec
+    path, cur = [], sec
+    while prev[cur] is not None:
+        cur, i = prev[cur]
+        path.append(i)
+    return path[::-1], None
+
+
 def strength_run(m, runs, driven):
     """The strength check of movement m: tooth bending by Lewis under the load case. runs: m.mesh_run of every
     declared mesh, in m.meshes order (None if the mesh test did not run); driven: m.speeds(passing meshes)[0].
-    For each declared mesh whose driver is driven from the barrel through passing meshes: T at the driver =
-    BARREL_TORQUE_MAX_NMM x |barrel speed / driver speed| (N·mm), F = T / (m z_D / 2) (N) with m = 2 x axis
-    distance / (z_D + z_N) (mm), b = the smallest height in z of the drive test's new overlap over its steps (mm),
-    sigma = F / (b m Y(z)) (MPa) for each gear with its own z and its mobile's material, the supplied barrel's gear
-    not rated. A mesh whose drive test fails has no b, and fails. Returns (passed, details)."""
+    Rated: the going train (going_train: barrel to the seconds hand's mobile through passing meshes; the motion
+    work and other branches are not rated, as a watchmaker rates a train: the cannon pinion slips; Decisions,
+    orchestrator's answer (B) to builder S). For each rated mesh: T at the driver = BARREL_TORQUE_MAX_NMM x
+    |barrel speed / driver speed| (N·mm), F = T / (m z_D / 2) (N) with m = 2 x axis distance / (z_D + z_N) (mm),
+    b = the smallest height in z of the drive test's new overlap over its steps (mm), sigma = F / (b m Y(z)) (MPa)
+    for each gear with its own z and its mobile's material, the supplied barrel's gear not rated. A rated mesh
+    whose drive test fails has no b, and fails (cannot happen on the path, which passes the mesh test).
+    Returns (passed, details); details "margin" = allowable / sigma - 1 (passes when >= 0)."""
     if runs is None:
         return False, {"error": "the mesh test did not run to the end"}
+    path, why = going_train(m, runs)
+    if path is None:
+        return False, {"error": why, "meshes": []}
     out, ok = [], True
     wb = abs(driven.get("barrel", m.barrel_speed))
-    for (a, ta, b, tb), x in zip(m.meshes, runs):
-        if a not in driven:
-            continue
+    for i in path:
+        (a, ta, b, tb), x = m.meshes[i], runs[i]
         T = BARREL_TORQUE_MAX_NMM * float(wb / abs(driven[a]))
         mod = x["module"]
         F = T / (mod * ta / 2.0)
@@ -893,5 +923,5 @@ def strength_run(m, runs, driven):
             ok = ok and sig <= allow
     margins = [g["margin"] for e in out for g in e.get("gears", {}).values() if "margin" in g]
     return ok and bool(out), {"meshes": out, "smallest_margin": min(margins) if margins else None,
-                              "barrel_torque_nmm": BARREL_TORQUE_MAX_NMM}
+                              "barrel_torque_nmm": BARREL_TORQUE_MAX_NMM, "going_train": [out_["pair"] for out_ in out]}
 
