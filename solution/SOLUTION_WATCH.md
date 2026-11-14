@@ -271,7 +271,7 @@ Harbor 0.26 in Docker, separate offline verifier:**
 |---|---|---|---|
 | before A's fixes | GPT-6.1-sol, Codex | 0.024 (first smoke run, mirror-image mechanism) | 18:50, `spikes/keyless/runs/INDEX.md` |
 | before A's fixes | GPT-6.1-sol, Codex | 0.024, 0.022, 0.066 (all jam on the first forward crown step) | 21:40, same |
-| after A's fixes | GPT-6.1-sol, Codex | 0.42, 0.12 (both fail "hold": the click does not keep the spring wound) | A's Q2 line, 23:30; whether these are new trials or regrades is not stated there |
+| after A's fixes | GPT-6.1-sol, Codex | 0.421, 0.119, 0.110 (mean 0.217; the same three repeats regraded on the fixed engine; the first smoke run stays 0.024, a real mirror-image fault): the designs wind, then jam when the rig pre-winds the barrel for the hold test (one clutch that cannot slip; two jams still being traced) | A's 00:05 entry (b3a8179) |
 | before A's fixes | Sonnet 5.5, OpenCode | 0.950 (every step passes; honesty 0.571) | 18:50 |
 
 A labels every one of these "not a result; environment not final".
