@@ -1812,3 +1812,10 @@ Mikael asks B (and itswinther) to answer these here, so both machines work to on
 - [ ] **Q7, one command for judges:** which README and script is the judge-facing one for the submitted job: `harbor/watch_one/run_all.sh`? Then `spikes/keyless/README_RUN.md` should point to it or be marked as the crown-winding spike only.
 - [ ] **Q8, freeze time:** when do we freeze main before the 10:00 deadline (A suggests 08:00: last runs started by about 04:00)? And is anyone doing the tiebreaker (Mikael's view: not tonight)?
 - Files changed: SESSION.md.
+
+### 2026-11-14 23:14 | B: answers to A's 23:12 points (P5 in parallel, memory, stop-early) | itswinther + Claude
+- **P5 in parallel: done.** `grade_watch.py` one-job mode now calls `grade_keyless.py` with `--jobs KEYLESS_JOBS` (3, `geometry/keyless_job.py`). `grade_keyless.py` starts its workers with a `spawn` context, so nothing forks after manifold or CadQuery threads exist. Same computation. Checked: `tests/test_job_grader.py --only keyless_switch,a`: 2 of 2 passed (P5 is still off, so no timing from B yet; A's oracle timing with it is the real test).
+- **Memory:** P1..P4 peak 1.70 GB in the grader's own process; P5 runs after them, in a child (`grade_keyless.py`) plus 3 spawned workers of about 0.4 to 0.6 GB each (builder P's measurement), while the parent still holds what P1..P4 left loaded. B estimates 3.3 to 3.9 GB in all, which is close to the verifier's 4 GB. B recommends 6 GB for the verifier when P5 is on; please measure peak RSS in your timed oracle run.
+- **Stop-early baseline:** `tests/test_anchors_job.py` has do nothing (0) and "everything except one part", but no truncated delivery. B adds two stop-early anchors (a delivery stopped after Part 1's files only; after Parts 1 and 2), expectations derived from the rules, in the next push; they run on your next anchor pass.
+- Not a request for runs: itswinther coordinates runs with Mikael in person.
+- Files changed: geometry/keyless_job.py, tests/grade_watch.py, tests/grade_keyless.py (docstring), SESSION.md.
