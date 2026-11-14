@@ -722,3 +722,13 @@ This is information, not a request. It is everything about itswinther's side tha
 - Files changed: SESSION.md.
 - Need from others: nothing.
 - Next: nothing running here.
+
+### 2026-11-14 10:30 | Where the grading time goes (profile of stage 1) | itswinther + Claude (first B session)
+- Did: timed every gate and check of the grader on the reference's stage 1, on an idle 4-core machine with 15 GB, by wrapping `_run` in `tests/grade_watch.py` from a throwaway script. No file in the repo was changed.
+- Verified by (command and result): `python3 -I` script calling `grade_watch.grade(OUT/stage1, 1, None)`: reward 1.0, total 274.6 s. Split: `printable` 156.8 s (57 percent), the mesh runs over all gear pairs 91.1 s (33 percent), reading and tessellating the STEP files 20.1 s (7 percent), `clear` 4.1 s, `spin` 1.1 s, `held` 1.1 s, everything else under 0.1 s.
+- Finding: 90 percent of the time is two loops that run one item after another on one core: the thickness test per part (the three large plates dominate) and the mesh test per gear pair. Both are independent per item, so worker processes should cut a design stage from about 4.5 minutes to roughly 1.5 on four cores without changing any number. This matters more once `tolerant` lands, because it runs the mesh test three times per pair (about 270 s serial on this reference).
+- For whoever packages the task in Harbor: a full chain is about 14 minutes of verifier time today (233 + 289 + 305 + 28 s). The judges rerun a reference, three agent runs, do-nothing and stop-early; do-nothing grades in under a second.
+- Not verified, or assumed: the speed-up estimate is arithmetic, not a measurement. I did not change the grader, because the orchestrator's builders are editing `tests/grade_watch.py` and `geometry/watch.py` now (builder TOLERANT is already asked for a faster `mesh_run`).
+- Files changed: SESSION.md.
+- Need from others: nothing; the orchestrator session may want to give the two loops worker processes when it integrates.
+- Next: nothing running here.
