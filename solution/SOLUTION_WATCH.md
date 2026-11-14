@@ -44,7 +44,37 @@ Tolerances and limits of every check, with their constants, are in `SPEC.md` sec
 Its smallest margins, measured by builder W on 14 Nov with the grader's own functions on a fresh build
 (`strength_run` through `_job_movement`, and a full grading; details in section 2.1):
 
-REF_MARGINS_TABLE
+| Check | Limit | Reference, smallest margin | Where |
+|---|---|---|---|
+| C2 assembled | at most 0.01 mm3 | 0.0 between mobiles and frame; 2.5e-17 inside a mobile | seconds / seconds_hand |
+| 1 free to turn | at most 0.01 mm3 | 0.0 for every mobile | |
+| 2 held | more than 0.01 mm3 against the frame | 0.0956 mm3 | day idler, +y |
+| 3 seated | more than 0.01 mm3 | 0.0507 sideways; 0.0989 along z | day wheel +y; cannon |
+| 4 train: no jam | at most 0.01 mm3 | 0.0 | every mesh |
+| 4 train: engaged | gap at most 0.1 mm | 0.0275 mm | hour wheel / day idler |
+| 4 train: drive | V at least 0.001 mm3, V / H over 0.5 m² | V 0.0317 mm3; V / H / m² = 1.238 (needs over 0.5) | day idler / day |
+| 5 tolerant (0.03 mm shift) | same | V / H / m² = 0.917 moved away (needs over 0.5); gap 0.0403 | day idler / day |
+| 6 nothing else collides | at most 0.01 mm3 | 0.0 | |
+| 10 coaxial | at most 0.01 mm | 0.0 | |
+| 11 hands, reach | at least 5.0 mm | seconds 5.009, hour 6.007, minute 9.005 | seconds hand |
+| 11 hands, centre of volume | at least 0.5 mm | 1.539 | seconds hand |
+| 12 case radius | at most 20.7 | 20.354 | |
+| 12 case height | at most 13.4 | 13.1 (z -1.7 to 11.4) | |
+| 13 printable | deviation at most 0.2 mm | 0.122 mm | |
+| 14 strength | sigma at most the allowable | margin 1.392 (8 h), 1.117 (6 h) | brass third wheel |
+| P2 day hand reach | at least 3.0 mm | 3.214 | |
+| P2 day axis offset | at least 6.0 mm | 9.619 | |
+| P2 day hand centre of volume | at least 0.5 mm | 0.779 | |
+| P4 | every part installed | 21 of 21 | |
+
+The drive figure is the grader's `smallest_drive_ratio`, V / H / m², passed when over 0.5
+(`Movement.drive_passes`). The thinnest mesh is the 24-hour pair, 10 / 40 at module 0.16, which is not rated
+for strength. A design that keeps the train honest has room: the closest margin is 0.917 against 0.5.
+
+Full grading by builder W, same session: `cd tests && python3 -I grade_watch.py REF --reward R --details D`
+printed reward 1.0, every gate and check true for P1 to P4, P4 "21 of 21 installed", honesty factor 1,
+`elapsed_s` 707.9 on a 4-CPU machine at load about 11 to 15. The P3 margins are the same as P1's, apart from
+strength.
 
 Gear strength, all rated gears (8-hour build; T at the driver, F on its pitch circle, b the measured face):
 
