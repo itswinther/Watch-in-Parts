@@ -9,7 +9,7 @@ table. Everything below "Session entries" is append-only, newest at the bottom.
 | ID | Workstream | Owner | Status | Last update |
 | --- | --- | --- | --- | --- |
 | A | Harness wiring | Mikael | session running. No starter kit exists (see 02:20 entry). Docker and Harbor 0.25.0 installed locally; building the Harbor task around B's grader next | 2026-11-14 02:20 |
-| B | Reference script and grader | itswinther | instance H2 built: reference scores 1.0, 13 anchors as expected, agent bundle builds. No agent has run on H2 yet; waiting for itswinther to say go | 2026-11-14 02:58 |
+| B | Reference script and grader | itswinther | H1 and H2 are both scrapped (no gap). The team is choosing a new challenge; nothing is being built | 2026-11-14 03:05 |
 | C | Hold the Line spike | unassigned | not started | |
 | D | Mentor questions, anchors, transcripts | unassigned | not started | |
 | E | Analysis, demo and story | Yoseph | paused: Yoseph is not working overnight | 2026-11-14 01:40 |
@@ -63,6 +63,7 @@ Append one line per decision: time, decision, who agreed.
 - 2026-11-14 02:49 H1 is retired as the judged instance: six agent attempts, three models, all scored 1.0. itswinther asked B to build instance H2 with four changes: continuous score against an optimised reference, agent-chosen placement of several bodies, agent-chosen assembly order, and the H1 loopholes closed. Agreed: itswinther.
 - 2026-11-14 02:58 SPEC.md is version 0.2: the judged instance is H2, specified in `environment/public/SPEC_H2.md`. Agreed: itswinther (asked for the four changes).
 - 2026-11-14 02:58 Interface for A (H2): the grader call is `python -I tests/grade_h2.py /abs/base.stl /abs/lid.stl /abs/assembly.json --reward FILE [--details FILE]`; the three artifacts are `base.stl`, `lid.stl`, `assembly.json` (the door is gone). `python environment/make_bundle.py DIR` writes everything the agent may see. B says yes to running the tools inside the agent container: the bundle holds no weights, gate list, check code or reference.
+- 2026-11-14 03:05 Board in a Box is scrapped as the challenge, both H1 and H2. Reason: clean agents score 1.0 on H1 and 0.97 on H2 within five minutes. The team will pick a new idea with a real gap. Decided: itswinther. The code stays in the repo for now; nothing depends on it.
 
 ## Proposed spec changes
 
@@ -277,3 +278,14 @@ Template:
 - Files changed: those listed, plus SPEC.md and SESSION.md.
 - Need from others: A, see the interface line under Decisions; artifacts changed from `door.stl` to `lid.stl`.
 - Next: run clean agents on H2 when itswinther says go.
+
+### 2026-11-14 03:05 | B first H2 agent result, and the decision to scrap | itswinther + Claude
+- Did: started three clean agents on H2 at once (Fable 5.2, Opus 5.5, Sonnet 5.5) with `claude -p` from fresh bundle folders outside the repo. Before starting, a probe agent in the same folder answered `NONE` when asked what project instructions or memory were in its context; no CLAUDE.md exists up the folder tree; `work/` and `submission/` were empty.
+- Verified by (command and result): Sonnet finished first. `python3 -I tests/grade_h2.py` on its submission printed reward 0.9733, p 1.0, size term 0.962, bounding box 81,864 mm3 (reference 81,343), nothing failed. It took 3 min 50 s, 8 turns, $0.38, 2 submissions, and all 7 tool calls stayed inside its folder.
+- How it did it: the same layout as the reference (board B under board A, battery and speaker on top). It avoided the tilt path by making the box 2 mm longer and dropping every body straight in, and recovered the volume by probing the wall-thickness test and using 1.4 walls.
+- Finding: H2 has no meaningful gap either. A continuous score, free placement and free order did not help: the layout search is small enough to reason through in one pass, and the tools confirm each choice immediately.
+- Decision by itswinther: scrap H1 and H2 and choose a new challenge.
+- Not verified, or assumed: the Fable and Opus runs were still going when this was written; results will be added if they finish.
+- Files changed: `transcripts/h2_sonnet/`, SESSION.md.
+- Need from others: A, the Harbor wiring is still useful for any new idea, but do not build further around `grade.py` or `grade_h2.py`.
+- Next: wait for the new idea. Lesson to carry over: test any idea with a clean agent run within its first hour.

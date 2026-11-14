@@ -1,0 +1,118 @@
+{
+ "reward": 0.973300438571777,
+ "p": 1.0,
+ "size_term": 0.9618577693882527,
+ "bbox_volume": 81864.19700079545,
+ "strict": false,
+ "gates": {
+  "files": true,
+  "final_pose": true,
+  "contract": true,
+  "enclosed": true
+ },
+ "checks": {
+  "path_A": true,
+  "path_B": true,
+  "path_battery": true,
+  "path_speaker": true,
+  "path_lid": true,
+  "supported_A": true,
+  "supported_B": true,
+  "supported_battery": true,
+  "supported_speaker": true,
+  "located_A": true,
+  "keepout_J1": true,
+  "keepout_J2": true,
+  "keepout_J3": true,
+  "battery_swell": true,
+  "battery_lead": true,
+  "wall": true,
+  "lid_seated": true
+ },
+ "details": {
+  "files": {
+   "bbox_volume": 81864.19700079545
+  },
+  "final_pose": {
+   "worst_volume": 0.0,
+   "pair": null
+  },
+  "contract": {
+   "messages": []
+  },
+  "enclosed": {
+   "deepest_outside_ball": 0.0
+  },
+  "path_A": {
+   "worst_volume": 0.0,
+   "pose_index": -1,
+   "with": null
+  },
+  "path_B": {
+   "worst_volume": 0.0,
+   "pose_index": -1,
+   "with": null
+  },
+  "path_battery": {
+   "worst_volume": 0.0,
+   "pose_index": -1,
+   "with": null
+  },
+  "path_speaker": {
+   "worst_volume": 6.83481049534862e-16,
+   "pose_index": 64,
+   "with": "A"
+  },
+  "path_lid": {
+   "worst_volume": 0.0,
+   "pose_index": -1,
+   "with": null
+  },
+  "supported_A": {
+   "volume": 112.19999999999999
+  },
+  "supported_B": {
+   "volume": 10.799993133544916
+  },
+  "supported_battery": {
+   "volume": 432.00000000000006
+  },
+  "supported_speaker": {
+   "volume": 75.62027766963082
+  },
+  "located_A": {
+   "volumes": {
+    "+X": 6.657466997638705,
+    "-X": 6.657467358057085,
+    "+Y": 73.85746688386769,
+    "-Y": 73.8574672442861,
+    "-Z": 224.39999999999998
+   }
+  },
+  "keepout_J1": {
+   "volume": 0.0,
+   "far_end_outside_box": true
+  },
+  "keepout_J2": {
+   "volume": 0.0,
+   "far_end_outside_box": true
+  },
+  "keepout_J3": {
+   "volume": 0.0,
+   "far_end_outside_box": true
+  },
+  "battery_swell": {
+   "volume_in_swell_space": 0.0
+  },
+  "battery_lead": {
+   "distance": 21.731543893612344
+  },
+  "wall": {
+   "pieces": 1,
+   "max_deviation": 0.4898979485566356
+  },
+  "lid_seated": {
+   "volume": 68.20803857040428
+  }
+ }
+}
