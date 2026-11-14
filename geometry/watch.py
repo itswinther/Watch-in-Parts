@@ -55,6 +55,10 @@ MESH_SHIFT = 0.03           # mm: tolerant test, the driven mobile moved this fa
 MESH_CUT_MARGIN = 1.05      # mm, private speed-up of mesh_run: material further than this from the other mobile's reach
                             # is cut away before stepping (must exceed the 1.0 search length of min_gap in mesh_run)
 MESH_GAP_SEARCH = 0.15      # mm, private speed-up of mesh_run: gaps are searched this far first, then to 1.0 if none found
+TEETH_MIN_DEPTH = 0.1       # mm: mesh test, a section whose outline's largest and smallest distance from the axis differ
+                            # by less than this has no teeth (a round, faceted disc is not a gear)
+TEETH_RAYS = 7200           # private: the outline of a section is measured along this many equally spaced directions
+                            # (0.05 degrees apart; a tooth of the finest printable pitch spans dozens of them)
 CLEAR_STEPS = 144
 HAND_REACH = 5.0
 COAX_TOL = 0.01
@@ -520,7 +524,9 @@ class Movement:
         x module squared), and the smallest of those heights in z over the steps (smallest_drive_height: the face
         width of the strength check; 0 if a step creates no new overlap).
         shift: the driven mobile (and its axis) is first moved this far straight away from the driver's
-        axis (negative: towards it); same steps and angles. cut=False skips the speed-up (same results)."""
+        axis (negative: towards it); same steps and angles. cut=False skips the speed-up (same results).
+        Also the tooth-count condition (tooth_counts: its keys are added to the result)."""
+        teeth = self.tooth_counts(a, ta, b, tb)
         A, ax_a = self.mobiles[a]["solid"], self.mobiles[a]["axis"]
         B, ax_b = self.mobiles[b]["solid"], self.mobiles[b]["axis"]
         module = 2.0 * math.hypot(ax_b[0] - ax_a[0], ax_b[1] - ax_a[1]) / (ta + tb)   # drawn position
@@ -570,7 +576,7 @@ class Movement:
                 height = min(height, hz if extra > 0.0 else 0.0)
         return {"worst_volume": worst[0], "step": worst[1], "steps": n, "largest_gap": gap,
                 "smallest_drive_overlap": drive, "smallest_drive_ratio": ratio, "module": module,
-                "smallest_drive_height": height}
+                "smallest_drive_height": height, **teeth}
 
     def drive_parts(self, a, ta, b, tb):
         """For the strength check: the drive test of mesh_run (drawn position, no shift; the same steps, angles
@@ -627,8 +633,8 @@ class Movement:
 
     @staticmethod
     def mesh_passes(x):
-        """The three conditions of the mesh test on a mesh_run result: no jam, engaged, the teeth drive."""
-        return x["worst_volume"] <= VOL_TOL and x["largest_gap"] <= ENGAGE_GAP \
+        """The conditions of the mesh test on a mesh_run result: teeth as declared, no jam, engaged, the teeth drive."""
+        return x["teeth_match"] and x["worst_volume"] <= VOL_TOL and x["largest_gap"] <= ENGAGE_GAP \
             and x["smallest_drive_overlap"] >= DRIVE_MIN_VOLUME and x["smallest_drive_ratio"] > DRIVE_AREA_RATIO
 
     def clear_run(self, a, b, wa, wb):
@@ -690,6 +696,100 @@ class Movement:
         V = core.verts(self.mobiles[mob]["parts"][part])
         ax = self.mobiles[mob]["axis"]
         return float(np.hypot(V[:, 0] - ax[0], V[:, 1] - ax[1]).max())
+
+    def tooth_counts(self, a, ta, b, tb):
+        """The mesh test's tooth-count condition (SESSION.md Decisions 2026-11-15 01:19, A3): each declared count
+        is the number of teeth of that gear, counted (count_teeth) on its whole mobile's section at the height
+        where the two mobiles meet (meet_height). The supplied barrel's count is BARREL_TEETH, not measured.
+        Measured on the mobiles as drawn (the tolerant test's shift does not change it); cached per mesh.
+        Returns {"teeth_match": bool, "declared_teeth": {a: ta, b: tb}, "measured_teeth": {a: n, b: n},
+        "teeth_height": z or None}; a count is None when the two mobiles never meet in height."""
+        cache = self.__dict__.setdefault("_teeth_cache", {})
+        key = (a, b)
+        if key not in cache:
+            A, ax_a = self.mobiles[a]["solid"], self.mobiles[a]["axis"]
+            B, ax_b = self.mobiles[b]["solid"], self.mobiles[b]["axis"]
+            z = meet_height(A, ax_a, B, ax_b)
+            got = {}
+            for name, S, ax in ((a, A, ax_a), (b, B, ax_b)):
+                if name == "barrel":
+                    got[name] = BARREL_TEETH
+                else:
+                    got[name] = None if z is None else count_teeth(S, ax, z)
+            cache[key] = (z, got)
+        z, got = cache[key]
+        measured = {a: got[a], b: got[b]}
+        return {"teeth_match": measured[a] == ta and measured[b] == tb, "declared_teeth": {a: ta, b: tb},
+                "measured_teeth": measured, "teeth_height": z}
+
+
+def section_outline(solid, axis, z, rays=TEETH_RAYS):
+    """The outline of solid's section at height z as seen from the vertical line through axis: for each of `rays`
+    equally spaced directions (direction k at 360 k / rays degrees), the largest distance from the axis at which
+    that half-line meets the section (0 where it meets none). Exact on the section's polygons."""
+    out = np.zeros(rays)
+    step = 2.0 * math.pi / rays
+    for P in solid.slice(z).to_polygons():
+        P = np.asarray(P, dtype=np.float64) - np.asarray(axis, dtype=np.float64)
+        if len(P) < 3:
+            continue
+        Q = np.roll(P, -1, axis=0)
+        a0 = np.arctan2(P[:, 1], P[:, 0])
+        da = (np.arctan2(Q[:, 1], Q[:, 0]) - a0 + math.pi) % (2.0 * math.pi) - math.pi
+        lo, hi = np.minimum(a0, a0 + da), np.maximum(a0, a0 + da)
+        k0, k1 = np.ceil(lo / step).astype(np.int64), np.floor(hi / step).astype(np.int64)
+        cnt = np.maximum(k1 - k0 + 1, 0)
+        if cnt.sum() == 0:
+            continue
+        edge = np.repeat(np.arange(len(P)), cnt)
+        k = k0[edge] + (np.arange(cnt.sum()) - np.repeat(np.cumsum(cnt) - cnt, cnt))
+        th = k * step
+        ux, uy = np.cos(th), np.sin(th)
+        ex, ey = (Q - P)[edge, 0], (Q - P)[edge, 1]
+        den = ux * ey - uy * ex
+        ok = np.abs(den) > 1e-15
+        s = np.where(ok, (P[edge, 0] * ey - P[edge, 1] * ex) / np.where(ok, den, 1.0), 0.0)
+        np.maximum.at(out, k % rays, np.where(ok & (s > 0.0), s, 0.0))
+    return out
+
+
+def count_teeth(solid, axis, z):
+    """Number of teeth of solid's section at height z about the vertical line through axis: going once round, the
+    number of times the outline (section_outline) rises from at most to above the radius halfway between its
+    smallest and largest value. 0 when those two differ by less than TEETH_MIN_DEPTH."""
+    r = section_outline(solid, axis, z)
+    lo, hi = float(r.min()), float(r.max())
+    if hi - lo < TEETH_MIN_DEPTH:
+        return 0
+    up = r > (lo + hi) / 2.0
+    return int(np.count_nonzero(up & ~np.roll(up, 1)))
+
+
+def meet_height(A, ax_a, B, ax_b):
+    """The height where two mobiles meet: the heights at which either solid has a vertex, within the z range both
+    cover, cut that range into layers; the thickest layer whose middle section has largest distances from the
+    two axes (of A's section from ax_a, of B's from ax_b) adding up to more than the distance between the axes
+    (ties: the lowest). Returns the middle of that layer, or None if no layer qualifies."""
+    VA, VB = core.verts(A), core.verts(B)
+    z0, z1 = max(VA[:, 2].min(), VB[:, 2].min()), min(VA[:, 2].max(), VB[:, 2].max())
+    if not z1 > z0:
+        return None
+    zs = np.unique(np.round(np.concatenate([VA[:, 2], VB[:, 2]]), 7))
+    zs = np.unique(np.concatenate([[z0], zs[(zs > z0) & (zs < z1)], [z1]]))
+    d = math.hypot(ax_b[0] - ax_a[0], ax_b[1] - ax_a[1])
+
+    def reach(S, ax, z):
+        best = 0.0
+        for P in S.slice(z).to_polygons():
+            P = np.asarray(P, dtype=np.float64)
+            if len(P):
+                best = max(best, float(np.hypot(P[:, 0] - ax[0], P[:, 1] - ax[1]).max()))
+        return best
+    for i in sorted(range(len(zs) - 1), key=lambda i: (-(zs[i + 1] - zs[i]), zs[i])):
+        z = float(zs[i] + zs[i + 1]) / 2.0
+        if reach(A, ax_a, z) + reach(B, ax_b, z) > d:
+            return z
+    return None
 
 
 def _near_cut(S, ax, O, ax_o):
