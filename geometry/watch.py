@@ -102,7 +102,7 @@ DS201_ALLOWABLE_ROWS = (
     ("Brass CW614N", "AD-CW614N", 110.0, "tensile"),
     ("Steel AD-C100-HT, < 1.000 mm", "AD-C100-HT", 750.0, "tensile"),
     ("Steel AD-C100-HT, 1.000 to < 1.575 mm", "AD-C100-HT", 725.0, "tensile"),
-    ("Corundum, compressive", "AD-AL2O3", 900.0, "compressive"),
+    ("Corundum, compressive", "AD-AL2O3", 450.0, "compressive"),
 )
 # The material a mobile may declare and the allowable its teeth are rated at (orchestrator's answers to
 # builder S, 2026-11-14, logged under Decisions by B): only a designation with a tensile (yield-based) allowable
@@ -858,7 +858,7 @@ def check_strength_sheets(folder=None):
     bad = []
     with open(os.path.join(folder, STRENGTH_SHEETS["DS-101"]), encoding="utf-8") as f:
         ds101 = f.read()
-    row = re.search(r"^\|\s*Slipping torque of the bridle\s*\|[^|\n]*\|\s*\*\*([0-9.]+) to ([0-9.]+)\*\*\s*\|\s*$", ds101, re.M)
+    row = re.search(r"^\|\s*Slipping torque of the bridle[^|\n]*\|[^|\n]*\|\s*\*\*([0-9.]+) to ([0-9.]+)\*\*\s*\|\s*$", ds101, re.M)
     if not row:
         bad.append("DS-101 Table 2a: row 'Slipping torque of the bridle' with a bold 'a to b' cell not found")
     elif float(row.group(2)) != BARREL_TORQUE_MAX_NMM:

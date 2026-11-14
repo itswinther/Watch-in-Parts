@@ -179,7 +179,7 @@ def _cell(constant, value, file, section, row=None, column=None, tokens=(), pick
 def trace_rows():
     """Home cells of every graded number of the strength check (agent-folder paths; make_brief_job checks them)."""
     rows = [_cell("BARREL_TORQUE_MAX_NMM (strength load case; the upper end of the cell)", W.BARREL_TORQUE_MAX_NMM,
-                  DS101_FILE, "4a. Reference measurement", "Slipping torque of the bridle", "This series",
+                  DS101_FILE, "4a. Reference specification of a real 11½‴ calibre (Table 2a, maker's limits)", "Slipping torque of the bridle (min. to max.)", "This series",
                   [_num(W.BARREL_TORQUE_MAX_NMM)], pick="max")]
     for i, (cell, code, mpa, kind) in enumerate(W.DS201_ALLOWABLE_ROWS):
         if kind != "tensile":

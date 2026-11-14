@@ -71,11 +71,11 @@ hand speeds and directions, and the weights of the checks.
 | MAX_STEP_BYTES, STEP_MAX_TRIANGLE_FACES, STEP_TIMEOUT_S, STEP_MEMORY_MB, STEP_LINEAR_DEFLECTION, STEP_ANGULAR_DEFLECTION, MAX_TRIANGLES, SELF_UNION_TOL (as a percentage) | (16777216, 500, 120, 4096, 0.001, 0.1, 200000, 0.005) | `FORMAT.md` | Part files (STEP) | (whole section) | statement |
 | MAX_JSON_BYTES, MAX_PARTS, MIN_TEETH, MAX_TEETH | (1048576, 60, 3, 1000) | `FORMAT.md` | `movement.json` and | (whole section) | statement |
 | MAX_ASSEMBLY_BYTES | 67108864 | `FORMAT.md` | `assembly.json` | (whole section) | statement |
-| BARREL_TORQUE_MAX_NMM (strength load case; the upper end of the cell) | 70.1 | `datasheets/DS-101_mainspring_barrel.md` | 4a. Reference measurement | Slipping torque of the bridle | This series |
+| BARREL_TORQUE_MAX_NMM (strength load case; the upper end of the cell) | 70.1 | `datasheets/DS-101_mainspring_barrel.md` | 4a. Reference specification of a real 11½‴ calibre (Table 2a, maker's limits) | Slipping torque of the bridle (min. to max.) | This series |
 | MATERIAL_ALLOWABLE_MPA[AD-CW614N] (the lowest row of its code) | 110.0 | `datasheets/DS-201_materials.md` | 8. Safety factors | Brass CW614N | Allowable |
 | DS201_ALLOWABLE_ROWS[1] (AD-C100-HT: not the lowest row of its code, not used) | 750.0 | `datasheets/DS-201_materials.md` | 8. Safety factors | Steel AD-C100-HT, < 1.000 mm | Allowable |
 | MATERIAL_ALLOWABLE_MPA[AD-C100-HT] (the lowest row of its code) | 725.0 | `datasheets/DS-201_materials.md` | 8. Safety factors | Steel AD-C100-HT, 1.000 to < 1.575 mm | Allowable |
-| DS201_ALLOWABLE_ROWS[3] (AD-AL2O3: compressive, not accepted for a mobile) | 900.0 | `datasheets/DS-201_materials.md` | 8. Safety factors | Corundum, compressive | Allowable |
+| DS201_ALLOWABLE_ROWS[3] (AD-AL2O3: compressive, not accepted for a mobile) | 450.0 | `datasheets/DS-201_materials.md` | 8. Safety factors | Corundum, compressive | Allowable |
 | MATERIAL_DESIGNATIONS: AD-C100-HT (ordering code) | AD-C100-HT | `datasheets/DS-201_materials.md` | 2. Ordering codes | AD-C100-HT | Code |
 | MATERIAL_DESIGNATIONS: AD-CW614N (ordering code) | AD-CW614N | `datasheets/DS-201_materials.md` | 2. Ordering codes | AD-CW614N | Code |
 | PRESSURE_ANGLE (tooth form of the Lewis form factors) | 25.0 | `datasheets/DS-W04_gear_rating.md` | 2. Tooth form | Pressure angle | Value |
