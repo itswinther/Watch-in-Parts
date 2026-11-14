@@ -26,6 +26,10 @@ already support. Say what you think would work best and what it takes. The
 deadline (Sunday 15 Nov, 10:00 Helsinki) is a fact to state when asked; what to
 cut, if anything, is the humans' decision.
 
+**There is no timeline.** Work from "To do, in priority order" at the top of
+`SESSION.md`. The aim is to excel on all four judging criteria, whatever work
+that takes. When things change, reorder that list; do not write schedules.
+
 - `README.md`  what the project is
 - `SPEC.md`    the task, the checks and the score. Single source of truth.
 - `SESSION.md` who owns what, what is done, what is decided, what is open

@@ -16,16 +16,41 @@ table. Everything below "Session entries" is append-only, newest at the bottom.
 
 Spec version in use: 0.4 (staged watch, four stages; `environment/public/SPEC_WATCH.md`)
 
-## Deadlines (Helsinki time)
+## To do, in priority order
 
-- Sat 03:00 harness wired end to end
-- Sat 07:00 both spikes done
-- Sat 09:00 decision between the two ideas
-- Sat 16:00 latest switch
-- Sat 22:00 build-out done, anchor suite passing
-- Sun 03:00 full runs and failure analysis
-- Sun 09:00 README and demo ready
-- Sun 10:00 final submission
+There is no timeline. The aim is to excel on every judging criterion, whatever
+work that takes. Work from the top; when the situation changes, reorder this
+list instead of dropping items. The one fixed date is the submission: Sunday
+15 Nov, 10:00 Helsinki.
+
+**1. The gap (30 points): frontier models must consistently score below the reference.**
+- Find a mechanism that makes Fable, Opus and GPT-class models fall short, not only Sonnet. Today no frontier model does.
+- Finish and test the three checks being built (`light`, `seated`, `tolerant`).
+- Build and test the remaining proposals from the 09:44 entry: a winding stem at right angles (bevel or crown teeth), an intermittent date ring, a change request that edits geometry with "kept" measured by volume.
+- Keep looking beyond that list; nothing is ruled out because it is large.
+- Test every candidate with clean chains, at least three per model, including GPT in the Harbor sandbox. Keep what bites on the strongest models.
+
+**2. Meaningful difficulty (30 points): every shortfall explained and fair.**
+- For each failed check, trace it to a decision the agent made, in the transcript and in the submitted files.
+- Confirm each failure against the grader, so a grader fault is never reported as an agent failure.
+- Confirm the agent had the information and tools to do better, and that no failure comes from a time limit, trick wording or a broken tool.
+- Write the failure analysis, with pictures from `tools/viewer/`.
+
+**3. Reward integrity (25 points): no exploit beats real work.**
+- Anchors for every stage and every check, including each new one; all asserted by one script.
+- A deliberate exploit hunt against the grader and the STEP loader; every attempt logged with its score, every hit turned into an anchor.
+- Do-nothing and stop-early baselines defined, run and in the results table.
+- Fix the kept-parts score, which counts files and can be padded.
+- Close the open review notes (hard links, project name in file headers, the reference's thin drive margin).
+
+**4. Craft (15 points): it makes sense and anyone can reproduce it.**
+- One Harbor task for all stages; reference 1.0 and do-nothing 0.0 in the sandbox; one command in the README.
+- A dry run from a clean clone by someone who did not write the README.
+- Repeat runs, so every reported number is shown to repeat.
+- README in a human voice; demo script and video.
+
+**5. Tiebreaker: a smaller model that improves after training on our environment.**
+- This was cut from scope on day one. The organisers name it as the tiebreaker and as something they look for, so it is back on the list; a human should confirm.
 
 ## Requests
 
@@ -109,6 +134,7 @@ Append one line per decision: time, decision, who agreed.
 - 2026-11-14 09:55 (orchestrator, B) Rules fixed before the builders started, so four builders can work in parallel. (1) `light`, weight 2, stages 1 to 3: the fixed parts together at most `FIXED_VOLUME_MAX`, all mobile parts together (barrel not counted) at most `MOBILE_VOLUME_MAX`; both set from the reworked reference at its largest stage plus 10 percent, target at most 50 and 60 percent of today's reference; pass or fail, in line with the earlier decision that material is a check and not a multiplier. A rule on rounding concave corners is only adopted if builder LIGHT shows a threshold that is robust to how the voxel grid lines up. (2) Parts of one mobile may no longer overlap (added to the Assembled hard requirement, tolerance 0.01 mm3); `seated`, weight 2, stages 1 to 3: every part of a multi-part mobile, moved 0.3 along each of +x, -x, +y, -y, must intersect the rest of its mobile, and along +z or -z at least once; stage 4 tests a path against every part placed before it, parts of the same mobile included. (3) `tolerant`, weight 2, stages 1 to 3: every declared mesh passes the mesh test also with the driven mobile moved `MESH_SHIFT` = 0.03 away from and towards the driver's axis (0.02 if 0.03 cannot be met against the supplied barrel). Totals become 23 at stage 1 and 27 at stages 2 and 3 (24 and 28 with a corner rule).
 - 2026-11-14 09:55 (orchestrator, B) Builder split: LIGHT, SEATED and TOLERANT each write one check (grader, engine, spec text, anchors, fixture tests) and do not touch the reference; REF alone reworks `solution/reference_watch.py` for all three rules and then merges the three check branches, sets the two volume limits and the totals, and adds the anchors that depend on the new reference. Reason: last night two builders in the same files merged cleanly only because their regions were apart; the reference would not be.
 - 2026-11-14 10:12 Two directions from itswinther, now in `CLAUDE.md` under "Current focus" and binding on every session. (1) The goal is a real gap on frontier models (Fable, Opus, GPT class); a shortfall only on a mid-tier model is not the result. (2) No session limits its scope or thinking by the time left: no dropping or shrinking ideas because of the deadline, no proposals to freeze the task for safety, no settling for the claim we can already support. What to cut is the humans' call. This withdraws the parts of the 10:15 entry that proposed freezing the task at Sat 16:00 and presenting a mid-tier gap; the old "latest switch Saturday 16:00" line in `CLAUDE.md` is marked superseded.
+- 2026-11-14 10:15 There is no timeline any more. The "Deadlines" section is replaced by "To do, in priority order", ordered by the four judging criteria, with the aim of excelling on every one whatever work it takes. The small-model training tiebreaker, cut on day one, is back on the list pending a human yes. Decided: itswinther.
 
 ## Proposed spec changes
 
@@ -626,12 +652,7 @@ Template:
 - Did: rewrote `README.md` for the four-stage watch task: what the agent does, why it should be hard, how it is scored, the results table, how to run it, layout, what was tried before, open work. It had described Board in a Box with a status dated 00:50. README.md is workstream E's file; I changed it on itswinther's instruction and hand it back to E. Added `cadquery==2.8.0` to `requirements.txt` (the STEP path needs it and it was missing). Added three requests, one per teammate, under Requests. Did not touch row B, which the orchestrator session owns.
 - Verified by (command and result): in this session's container, `pip install manifold3d==3.5.5 scipy==1.18.1 numpy==2.5.3 cadquery==2.8.0` then `python3 -c "import cadquery, manifold3d, scipy"` printed `imports ok 2.8.0`; `python3 solution/reference_watch.py OUT` wrote the four stage folders in 37 s. The grader commands in the README are the ones the orchestrator ran and logged at 06:07 and 07:28; my own fresh-install run of them was still grading when this was written and its result follows in the next entry.
 - Not verified, or assumed: the README's results table is copied from the orchestrator's 09:14 entry, not rerun. The anchor count (27) is from the 07:28 entry. The README does not describe the three checks being built since 09:55 (`light`, `seated`, `tolerant`); it says they exist and are not on main.
-- Plan to submission, proposed (Helsinki time; a human should confirm or change it):
-  - Sat 13:00: Harbor task for the four-stage watch shows oracle 1.0 and nop 0.0 in the sandbox (A).
-  - Sat 16:00: task frozen. The three new checks are merged with the reference at 1.0 and anchors passing, or left out. No new mechanics after this (B, itswinther decides).
-  - Sat 20:00: results final: at least three chains per model on Claude models headless and three on GPT in Harbor, with the stop-early and do-nothing baselines (A, B, Abhishek). Demo draft exists (E).
-  - Sun 08:00: dry run of the judges' sequence from a clean clone using only the README (anyone who did not write the README).
-  - Sun 10:00: submit.
+- (A proposed timeline stood here. It was removed on itswinther's instruction; see "To do, in priority order" at the top of this file.)
 - Decisions that only a human can take, in order of urgency: (1) which watch task is the submission: this four-stage one, or A's five-step spike (I recommend this one: it has the only shortfall, the STEP output, the anchors and the review rounds); (2) how to present a gap that shows for Sonnet and not for Fable, Opus or GPT, and which model the README names as the benchmark; (3) confirm or reverse the three scoring rules the orchestrator added after review round 1; (4) the kept-parts score counts files and can be padded.
 - Files changed: `README.md`, `requirements.txt`, SESSION.md (three requests, this entry).
 - Need from others: see the three requests dated 10:15.
@@ -644,4 +665,12 @@ Template:
 - Not verified, or assumed: other sessions pick this up only when they next sync and re-read `CLAUDE.md`.
 - Files changed: `CLAUDE.md`, `README.md`, SESSION.md.
 - Need from others: every session, re-read "Current focus" in `CLAUDE.md` after your next fetch.
+- Next: nothing running here.
+
+### 2026-11-14 10:15 | Timeline removed, prioritised to-do list added | itswinther + Claude (first B session)
+- Did: on itswinther's instruction, replaced the "Deadlines" section of this file with "To do, in priority order" (the gap, meaningful difficulty, reward integrity, craft, tiebreaker), removed the proposed timeline from my 10:15 entry, and added one sentence to "Current focus" in `CLAUDE.md` pointing sessions at the list.
+- Verified by (command and result): `grep -n -i "timeline" README.md CLAUDE.md` finds no timeline in either file.
+- Not verified, or assumed: `HANDOFF_OVERNIGHT.md` and `HANDOFF_PROMPT.md` still contain last night's time boxes; they describe a finished run and I left them as history.
+- Files changed: SESSION.md, `CLAUDE.md`.
+- Need from others: a human yes or no on putting the training tiebreaker back in scope.
 - Next: nothing running here.
