@@ -12,8 +12,13 @@ subagents disabled. One instance each, so treat every number as a first look.
 | Watch gear train | Exact rates, centre distances fixed by tooth counts, layered packing in a round plate | All three valid. Fable and Opus scored 1.0, Sonnet 0.917 (one extra layer) | `gear_train/` |
 | Five-step watch movement (Harbor, sandboxed) | Going train, motion work, larger balance, date wheel, automatic winding with a torque band; later steps depend on earlier positions | GPT-6.1-sol via Codex: 1.0, 1.0, 1.0 over all five steps, under 6 minutes each, and beat the planted reference on layers | `gear_task/` |
 | Regulating a watch (Harbor, physics in a sealed sidecar) | Hidden physics measured with noise under a time budget; mass removal is irreversible | GPT-6.1-sol: 1.0, 1.0, 1.0 in about 2 minutes. True error 18.1 s/day against the scripted watchmaker's 45.2 and the untouched 116.3: it fitted the stated formula by least squares | `regulate/` |
+| Regulating a watch, 100-minute budget (6 watches x 2 runs) | Same, with timing time scarce and every watch fixable within range | GPT mean 0.974; beat the scripted watchmaker on 7 of 12 runs; error about 20% lower on average. No gap | `regulate/runs_gpt_100min/` |
 
 ## What the spikes show
+
+- **Letting the agent revise earlier work removes the long-horizon pressure.** The five-step
+  movement let every step change earlier parts, and GPT simply re-solved each time. The team's
+  only shortfall tonight (Sonnet 0.44 on the staged watch) came from freezing earlier stages.
 
 - **Hidden numbers behind noisy, costly measurement are not enough either** (regulation task):
   when the formula's structure is stated, GPT measured every condition once, fitted the

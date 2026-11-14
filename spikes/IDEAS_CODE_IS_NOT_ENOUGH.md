@@ -44,3 +44,8 @@ What this suggests: the hidden-measurement pattern only bites if the agent must 
 model's structure, or if measurements are scarce enough that the order of experiments
 matters. Both move toward "less information", which the brief for these ideas ruled out, so
 that trade-off needs a team decision.
+- Idea 1 with a 100-minute budget (6 hidden watches, 2 runs each): mean 0.974, GPT beat the
+  scripted watchmaker on 7 of 12 runs. Scarce measurement was not enough either.
+- The five-step movement allowed changing earlier parts at every step. B's staged watch
+  freezes earlier stages, and that produced the only shortfall seen tonight, so freezing is the
+  lever worth pursuing; a frozen version of the five-step movement would be a quick test.

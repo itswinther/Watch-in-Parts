@@ -8,7 +8,7 @@ table. Everything below "Session entries" is append-only, newest at the bottom.
 
 | ID | Workstream | Owner | Status | Last update |
 | --- | --- | --- | --- | --- |
-| A | Harness wiring | Mikael | Harbor + Codex sandbox works (see 05:10). Five-step watch: GPT 1.0 x3. Watch regulation with hidden physics: GPT 1.0 x3, beat the reference. No gap found in either; waiting for Mikael | 2026-11-14 05:30 |
+| A | Harness wiring | Mikael | Harbor + Codex sandbox works. GPT-6.1-sol, sandboxed: five-step watch 1.0 x3; regulation 1.0 x3; regulation with a 100-minute budget mean 0.974 over 12 runs. No gap. See 06:00 entry | 2026-11-14 06:00 |
 | B | Reference script and grader | itswinther | Staged watch task: reference 1.0 at all three stages with the thickness check. Handoff written for an overnight orchestrator session (`HANDOFF_OVERNIGHT.md`, `HANDOFF_PROMPT.md`); that session takes over row B | 2026-11-14 04:47 |
 | C | Hold the Line spike | unassigned | not started | |
 | D | Mentor questions, anchors, transcripts | unassigned | not started | |
@@ -453,3 +453,11 @@ Template:
 - Files changed: `HANDOFF_OVERNIGHT.md`, `HANDOFF_PROMPT.md`, `CLAUDE.md` (Current focus note only), SESSION.md.
 - Need from others: A, the overnight session will put what Harbor needs (grader call, artifact list, image packages incl. cadquery) under Requests once the STEP path works; sandboxed runs stay with A.
 - Next: the overnight session.
+
+### 2026-11-14 06:00 | A regulation, scarce budget | Mikael + Claude
+- Did: added a 100-minute variant of the regulation task (watches always fixable within the adjustment range; a scripted reference for the short budget: 4 vertical positions x 18 min, one dial-up check, poise by removal, then regulate). Ran GPT-6.1-sol via Codex twice on each of 6 hidden watches (seeds 101 to 106), sandboxed as before.
+- Verified by (command and result): over 60 seeds the scarce reference cuts mean error from 85.1 to 14.7 s/day. Harbor oracle 1.0 and nop 0.0 on seed 101. GPT scores 1.0, 1.0, 0.976, 0.934, 0.870, 0.959, 1.0, 0.947, 1.0, 1.0, 1.0, 1.0 (mean 0.974); GPT's error was below the reference's on 7 of 12 runs; reference/agent error ratio averaged 1.19.
+- Findings: no gap. GPT spreads short measurements over all 12 conditions and fits the full stated model; the reference concentrates on vertical positions; neither dominates. Large run-to-run variance on one watch (s103: 17.9 vs 11.7 s/day).
+- For B's overnight build: my five-step movement allowed revising earlier parts and showed no gap; this supports B's finding that freezing earlier stages is the lever.
+- Sandbox: zero network commands across all 12 runs.
+- Files changed: `spikes/regulate/` (budget variant, harbor_tasks_100min, runs_gpt_100min), `spikes/README.md`, ideas file, SESSION.md.
