@@ -98,13 +98,13 @@ centre (cannon) 12 → minute wheel 36; minute wheel 10 → hour wheel 40.
 - barrel I (drum and cover, plus its arbor as a separate part);
 - arbor II;
 - the two series ratchets;
-- 15 screws;
+- 14 screws;
 - the dial washer, and a dial that is not in the CAD.
 
 **Left out:** escape wheel, balance, pallets, keyless works, springs, mainsprings, the second dial's motion work and
 bridge, the shock indicator, the case clamps.
 
-Every mobile is declared `AD-C100-HT` (steel). 47 parts in all; the limit is 60.
+Every mobile is declared `AD-C100-HT` (steel). 49 parts in all: 33 fixed and 16 in mobiles; the limit is 60.
 
 ## 2. Part 1 results
 
@@ -150,7 +150,7 @@ Each adjustment is a finding about the grader or the format, except where it say
      - train-bridge chatons: 0.0276, 0.0276;
      - pins: 0.0148 (×4), 0.0107 (×2);
      - barrel-bridge jewels: 0.0175 (×2).
-   - **The part limit.** Kept separate, the fittings make about 80 parts, over MAX_PARTS 60.
+   - **The part limit.** Kept separate, the fittings make about 79 parts, over MAX_PARTS 60.
    - **Finding:** a real frame can be delivered only fused.
 4. **The plate assembly is cut into pieces.**
    - Fused, the plate with its 12 fittings has **391,259 triangles** at the grader's tessellation (0.001 mm,
@@ -163,7 +163,7 @@ Each adjustment is a finding about the grader or the format, except where it say
 5. **Screw threads trimmed.** Screws are drawn at the thread's major diameter inside tapped holes drawn at the minor
    diameter. As drawn at ×1.2, the screws overlap the plate, the pallet bridge and the barrel arbors by 0.014 to
    0.323 mm³, which would fail C2.
-   - Each of the 13 frame screws is trimmed by the part it is screwed into (CUTS in the script).
+   - Each of the 13 screws that screw into a frame part is trimmed by the part it is screwed into (CUTS in the script).
    - The intermediate's shoulder screw (0.294 mm³ in the wheel's arbor) is fused into the wheel.
    - **Finding:** the format has no thread, so real CAD always needs this step.
 6. **Internal cavity filled.** Fusing the train bridge enclosed two cavities (0.0011 mm³ in all) under screw tips in
@@ -174,9 +174,9 @@ Each adjustment is a finding about the grader or the format, except where it say
    is a modelling step of ours; it has nothing to do with the grader.
 8. **Driven wheels phased** (`phase`). Each driven mobile was turned to the middle of the widest range of angles at
    which it clears its driver at 8 poses over one driver pitch. As drawn, the rest overlaps were over 0.01 mm³ on
-   five pairs.
+   six pairs.
    - Overlaps as drawn: barrel/intermediate 0.062, intermediate/centre 0.018, centre/third 0.017,
-     cannon/minute wheel 0.015, minute wheel/hour wheel 0.027.
+     third/seconds 0.0102, cannon/minute wheel 0.015, minute wheel/hour wheel 0.027.
    - Phases (run 1): intermediate 6.49°, centre 26.25°, third 28.13°, seconds 29.06°, minute wheel 3.13°,
      hour wheel 5.44°.
    - Backlash, as the clear range over the driven pitch: barrel/intermediate 17 %, **intermediate/centre pinion 31 %**,
