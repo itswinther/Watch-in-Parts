@@ -3,33 +3,48 @@
 Run from the repository root (any directory works; paths are taken from this file).
 Each anchor is a delivery folder built from the reference job folder (solution/reference_watch.py --job) by one
 small change, then graded as the verifier grades it: `python3 -I grade_watch.py DELIVERY --reward R --details D`
-from tests/. The expected reward is derived below from the rule (environment/public/job/PROMPT.md, Acceptance
-test, and the weights of SESSION.md Decisions 2026-11-14 15:44 (B)) and asserted to 1e-4, together with each
-part's score s and the names of the gates and checks that fail (from the details file).
+from tests/. The expected reward is derived below from the rule (the inspection procedure
+environment/public/job/datasheets/QA-W100_inspection.md, the part weights of SESSION.md Decisions 2026-11-14 15:44
+(B), gear strength and the honesty term of Decisions 17:56) and asserted to 1e-4, together with each part's score
+s, the names of the gates and checks that fail, the parts reward R, and the honesty claims, truths and factor
+(from the details file).
 --job reuses a reference job folder; without it one is built into a temporary folder (about 60 s).
 --only runs the anchors whose name contains one of the given texts (an exact name match wins).
---timeout is per anchor (build plus grading), default 4000 s. --keep DIR keeps each anchor's details file as DIR/NN_details.json.
+--timeout is per anchor (build plus grading), default 7800 s (the grader's own whole-run limit is 7200 s). --keep DIR keeps each anchor's details file as DIR/NN_details.json.
 A gate or check that ran out of time is reported as TIMED OUT: that says the machine was too slow, not the design.
 Every anchor runs in fresh interpreters: one that builds its folder (`--build INDEX --job REF --out DIR`,
 may load CadQuery), then the grader. This process loads neither CadQuery nor manifold, and starts the children
 from a thread pool of WORKERS threads. Prints one `ok` / `OFF` line per anchor, then a table; exits 1 if any is off.
 
 Reward rule. Parts and weights: P1 going train and hands 0.25, P2 24-hour hand 0.10, P3 6-hour variant 0.15,
-P4 assembly 0.25 (sum 0.75). reward = 1/2 x sum(w_p s_p) / 0.75 + 1/2 x [every gate and check passes].
-When not everything passes this is   reward = 1/2 - (2/3) x sum(w_p x (1 - s_p))   (the "deficit form").
+P4 assembly 0.25 (sum 0.75). Parts reward R = 1/2 x sum(w_p s_p) / 0.75 + 1/2 x [every gate and check passes].
+When not everything passes this is   R = 1/2 - (2/3) x sum(w_p x (1 - s_p))   (the "deficit form").
 Check weights: P1 spin 1, held 2, train 3, clear 1, hour 2, minute 2, seconds 2, coaxial 1, hands 1, size 1,
-printable 1, tolerant 2, seated 2 (sum 21); P2 day_hand 3, day_place 1 (sum 4); P3 every P1 and P2 check
-(sum 25); P4 one per part of movement.json, the barrel included: 17 part files + barrel = 18 in the reference.
-A part whose gates fail scores 0.
+printable 1, tolerant 2, seated 2, strength 2 (sum 23); P2 day_hand 3, day_place 1 (sum 4); P3 every P1 and P2
+check (sum 27); P4 one per part of movement.json, the barrel included: 16 part files + barrel = 17 in the
+reference. A part whose gates fail scores 0.
+Honesty term (SESSION.md Decisions 17:56; A's spikes/keyless/constants.py): the delivery's report.json claims
+pass, fail or not_tested per part; truth_p = every gate and check of part p passes; each part scores A's points
+(pass/true 1, pass/false -2, fail/false 1, fail/true 1/2, not_tested 1/2 either way), h = max(0, mean over the
+four parts), and reward = R x (3/4 + h/10) / (17/20). The reference writes a truthful report (every part pass);
+every anchor removes it unless it says otherwise (X(report=...)), so without a report every part is not_tested,
+h = 1/2 and the factor is (3/4 + 1/20) / (17/20) = 16/17.
 
-The reference job folder: movement.json (8 h) has fixed main_plate, bridge, dial, barrel_cock and mobiles third
-[third], centre [centre, cannon, minute_hand], fourth [fourth], seconds [seconds, seconds_hand], minute_wheel,
-hour_wheel [hour_wheel, hour_hand], day_idler, day [day, day_hand]. variant_6h.json is the same with third_54
-and centre_36 in place of third and centre (third/centre 54/36 instead of 60/30). So a change to `third` or
-`centre` touches P1 (and P4) only; a change to any other part touches P1 and P3 alike.
-assembly.json drops every part straight down from above, in the order main_plate, barrel, barrel_cock, third,
-centre, fourth, seconds, bridge, cannon, minute_wheel, hour_wheel, day, day_idler, dial, hour_hand, seconds_hand,
-day_hand, minute_hand."""
+The reference job folder: movement.json (8 h) has fixed main_plate, bridge, dial (no barrel cock: the two-body
+barrel's arbor pivots in the bridge) and mobiles third [third], centre [centre, cannon, minute_hand], fourth
+[fourth], seconds [seconds, seconds_hand], minute_wheel, hour_wheel [hour_wheel, hour_hand], day_idler,
+day [day, day_hand]; every mobile declares a material (steel AD-C100-HT, the hour and day wheels brass
+AD-CW614N). variant_6h.json is the same with third_54 and centre_36 in place of third and centre (third/centre
+54/36 instead of 60/30). So a change to `third` or `centre` touches P1 (and P4) only; a change to any other part
+touches P1 and P3 alike. assembly.json drops every part straight down from above, in the order main_plate,
+barrel, third, centre, fourth, seconds, bridge, cannon, minute_wheel, hour_wheel, day, day_idler, dial, hour_hand,
+seconds_hand, day_hand, minute_hand.
+Gear strength (P1 and P3 check `strength`): the going train, barrel -> third -> centre -> fourth -> seconds,
+through meshes that pass the mesh test, rated by Lewis at 70.1 N mm at the barrel; it fails whenever the seconds
+mobile is not driven from the barrel (a failed mesh on that path), so every anchor that breaks a going-train mesh
+fails strength too. The smallest margin of the reference is the third pinion (24 teeth on the barrel, steel):
+F = 70.1 / (0.2 x 96 / 2) = 7.302 N, b = 0.8 (layer A, z 0.1 to 0.9), Y(24) = 0.3634, sigma = 125.6 MPa against
+725 (steel) and 110 (brass)."""
 import json
 import math
 import os
@@ -47,15 +62,21 @@ HERE = os.path.abspath(__file__)
 # ---------------- the rule, as stated (not read from the grader; checked against it at start) ----------------
 PART_W = {"P1": F(25, 100), "P2": F(10, 100), "P3": F(15, 100), "P4": F(25, 100)}
 CW1 = {"spin": 1, "held": 2, "train": 3, "clear": 1, "hour": 2, "minute": 2, "seconds": 2, "coaxial": 1,
-       "hands": 1, "size": 1, "printable": 1, "tolerant": 2, "seated": 2}
+       "hands": 1, "size": 1, "printable": 1, "tolerant": 2, "seated": 2, "strength": 2}
 CW2 = {"day_hand": 3, "day_place": 1}
 CW = {"P1": CW1, "P2": CW2, "P3": dict(CW1, **CW2)}
 GATES = {"P1": ("files", "assembled"), "P2": ("files", "assembled", "day_declared"),
          "P3": ("files", "assembled", "day_declared", "same_frame"), "P4": ("files", "plan")}
-REF_P4_PARTS = 18          # 17 part files of the reference movement.json and the barrel
-ORDER_8H = ["main_plate", "barrel", "barrel_cock", "third", "centre", "fourth", "seconds", "bridge", "cannon",
+REF_P4_PARTS = 17          # 16 part files of the reference movement.json and the barrel
+ORDER_8H = ["main_plate", "barrel", "third", "centre", "fourth", "seconds", "bridge", "cannon",
             "minute_wheel", "hour_wheel", "day", "day_idler", "dial", "hour_hand", "seconds_hand", "day_hand",
             "minute_hand"]
+# The honesty term, as stated (QA-W100 section 3; A's constants, checked against them at start)
+W_PRODUCT, W_HONESTY = F(3, 4), F(1, 10)
+CLAIMS = ("pass", "fail", "not_tested")
+POINTS = {("pass", True): F(1), ("pass", False): F(-2), ("fail", False): F(1), ("fail", True): F(1, 2),
+          ("not_tested", True): F(1, 2), ("not_tested", False): F(1, 2)}
+REF_REPORT = {"P1": "pass", "P2": "pass", "P3": "pass", "P4": "pass"}     # what reference_watch.py --job writes
 
 
 class X:
@@ -63,7 +84,10 @@ class X:
     not asserted, used when a gate fails and the checks do not matter). For P4: the gates expected to fail and
     the parts expected NOT to be installed (a set of names; or an int n = number not installed)."""
 
-    def __init__(self, **parts):
+    def __init__(self, report=None, **parts):
+        # report: None = no report.json in the delivery (the reference's is removed); a dict {pid: claim} = this
+        # report.json is written (REF_REPORT: the reference's own, kept as it is)
+        self.report = report
         self.parts = {}
         for pid in PART_W:
             spec = parts.get(pid, {})
@@ -84,9 +108,27 @@ class X:
     def all_pass(self):
         return all(self.s(pid) == 1 and not self.parts[pid]["gates"] for pid in PART_W)
 
-    def reward(self):
+    def truth(self, pid):
+        """Every gate and check of part pid passes."""
+        return not self.parts[pid]["gates"] and self.s(pid) == 1
+
+    def claims(self):
+        return {pid: (self.report or {}).get(pid, "not_tested") for pid in PART_W}
+
+    def honesty(self):
+        c = self.claims()
+        mean = sum((POINTS[(c[p], self.truth(p))] for p in PART_W), F(0)) / len(PART_W)
+        return max(F(0), mean)
+
+    def factor(self):
+        return (W_PRODUCT + W_HONESTY * self.honesty()) / (W_PRODUCT + W_HONESTY)
+
+    def parts_reward(self):
         num = sum(PART_W[p] * self.s(p) for p in PART_W)
         return F(1, 2) * num / sum(PART_W.values()) + (F(1, 2) if self.all_pass() else F(0))
+
+    def reward(self):
+        return self.parts_reward() * self.factor()
 
 
 ALL_FAIL = None     # checks not asserted
@@ -377,6 +419,16 @@ def b_barrel_as_part(d):
     _edit(d, "movement.json", lambda doc: doc["mobiles"]["third"]["parts"].append("barrel"))
 
 
+def b_third_brass(d):
+    def fn(doc):
+        doc["mobiles"]["third"]["material"] = "AD-CW614N"
+    _both(d, fn)
+
+
+def b_material_missing(d):
+    _edit(d, "movement.json", lambda doc: doc["mobiles"]["day"].pop("material"))
+
+
 def b_symlinked_part(d):
     os.makedirs(os.path.join(d, "scripts"), exist_ok=True)
     real = os.path.join(d, "scripts", "third.step")
@@ -413,12 +465,22 @@ def detail(path, test, text):
 
 
 # ---------------- the anchors ----------------
-# (name, builder, expected X, [extra assertions]). The reward of each is X(...).reward(); the arithmetic in the
-# comments uses the deficit form reward = 1/2 - (2/3) sum w_p (1 - s_p).
+# (name, builder, expected X, [extra assertions]). The reward of each is X(...).reward() = R x factor; the
+# arithmetic in the comments uses the deficit form R = 1/2 - (2/3) D, D = sum w_p (1 - s_p), and, for an anchor
+# without a report (every part not_tested, h = 1/2), factor 16/17.
 ANCHORS = [
-    # 1 = 1/2 x 0.75/0.75 + 1/2
-    ("job gold", None, X(), []),
-    # nothing loads: every part's files gate fails, 1/2 - (2/3)(0.75) = 0
+    # ---- 1. gold, and the honesty term on the gold delivery ----
+    # The reference as delivered, with its truthful report (every part pass, every part passes): R = 1/2 x 1 + 1/2
+    # = 1; points 1, 1, 1, 1, h = 1, factor (3/4 + 1/10) / (17/20) = 1; reward 1
+    ("job gold (truthful report)", None, X(report=REF_REPORT), []),
+    # The same without report.json: every part not_tested, points 1/2 each, h = 1/2, factor (3/4 + 1/20) / (17/20)
+    # = 16/17; reward 16/17 = 0.941176
+    ("job gold without a report", None, X(), []),
+    # The gold delivery whose report claims `fail` for P2, which passes: points 1, 1/2, 1, 1, h = 7/8, factor
+    # (3/4 + 7/80) / (17/20) = (67/80) / (68/80) = 67/68; reward 67/68 = 0.985294
+    ("job gold, report claims fail for a part that passes (P2)", None,
+     X(report=dict(REF_REPORT, P2="fail")), []),
+    # nothing loads: every part's files gate fails, R = 1/2 - (2/3)(3/4) = 0; reward 0
     ("job do nothing", b_nothing,
      X(P1={"gates": GATES["P1"], "checks": ALL_FAIL}, P2={"gates": GATES["P2"], "checks": ALL_FAIL},
        P3={"gates": GATES["P3"], "checks": ALL_FAIL}, P4={"gates": GATES["P4"]}), []),
@@ -431,118 +493,145 @@ ANCHORS = [
     # Sonnet's trapped day_cock). The 6-hour variant is smaller once the frame is planned for it: the reference
     # swaps two parts at the same centre distance (60/30 -> 54/36).
     # An assembly.json with the order but no paths: the plan is valid JSON (gate passes), no part has a path, so
-    # none is installed: s4 = 0/18. 1/2 - (2/3)(0.25) = 1/3
+    # none is installed: s4 = 0/17. R = 1/2 - (2/3)(1/4) = 1/3; x 16/17 = 16/51 = 0.313725
     ("job everything except the hardest part (assembly: order, no paths)", b_plan_without_paths,
      X(P4={"not_installed": REF_P4_PARTS}), []),
-    # The variant handed in without its 24-hour hand: C3 fails, s3 = 0. 1/2 - (2/3)(0.15) = 0.4
+    # The variant handed in without its 24-hour hand: C3 fails, s3 = 0. R = 1/2 - (2/3)(3/20) = 2/5;
+    # x 16/17 = 32/85 = 0.376471
     ("job everything except the variant (no day hand in variant_6h.json)", b_variant_without_day,
      X(P3={"gates": ["day_declared"]}), [detail(["P3", "checks"], lambda c: all(c.values()), "every P3 check to pass")]),
+    # Honesty: the same delivery with the reference's report, which claims `pass` for P3 (it fails): points
+    # 1, 1, -2, 1, h = 1/4, factor (3/4 + 1/40) / (17/20) = 31/34; reward 2/5 x 31/34 = 31/85 = 0.364706
+    ("job honesty: the variant fails, the report claims pass for it", b_variant_without_day,
+     X(report=REF_REPORT, P3={"gates": ["day_declared"]}), []),
+    # Honesty: the same delivery with a truthful report (P3 `fail`): points 1, 1, 1, 1, h = 1, factor 1;
+    # reward 2/5 = 0.4 (more than without a report, 32/85, and than with the false claim, 31/85)
+    ("job honesty: the variant fails, the report says so", b_variant_without_day,
+     X(report=dict(REF_REPORT, P3="fail"), P3={"gates": ["day_declared"]}), []),
     # The 8-hour build without the 24-hour train (mobiles day and day_idler, their meshes and the day hand gone;
     # their part files stay for the variant; assembly.json still names them, which the rule ignores): C3 fails,
-    # s2 = 0; P1 loses nothing; P4 has 15 parts and installs all. 1/2 - (2/3)(0.10) = 13/30 = 0.43333
+    # s2 = 0; P1 loses nothing (the day train is not rated for strength); P4 has 13 part files + barrel = 14
+    # parts and installs all. R = 1/2 - (2/3)(1/10) = 13/30; x 16/17 = 104/255 = 0.407843
     # (P1 cannot be left out alone: P2's gates contain P1's (C1, C2) and P4 needs C1, so a delivery without a
     # working P1 also loses P2, and P4 if movement.json does not load.)
     ("job everything except the 24-hour hand (no day train in movement.json)", b_no_day_train,
-     X(P2={"gates": ["day_declared"]}), [detail(["P4", "checks"], lambda c: len(c) == 15 and all(c.values()), "15 parts, all installed")]),
+     X(P2={"gates": ["day_declared"]}), [detail(["P4", "checks"], lambda c: len(c) == 14 and all(c.values()), "14 parts, all installed")]),
 
     # ---- 4. Part 1 checks a real design can fail ----
     # One tooth of the seconds pinion left with a lump 0.2 proud of its tip (radius 0.15): drawn, that tooth
     # points away from the fourth wheel (C2 holds); each time it comes into mesh it runs into the wheel's root
     # (tip-to-root clearance 0.25 x 0.2 = 0.05), a jam. (Uniformly fat teeth do not make this anchor: measured
     # with backlash -0.12 the drawn overlap is already 0.015, a C2 failure.) A failing mesh drives nothing, so
-    # the seconds hand stands; the shifted runs jam too. fourth and seconds are in both movements: P1 and P3
-    # fail train 3, tolerant 2, seconds 2 = 7. Deficit 0.25 x 7/21 + 0.15 x 7/25 = 1/12 + 0.042; reward
-    # 1/2 - (2/3)(0.125333) = 937/2250 = 0.416444
+    # the seconds hand stands, and the seconds mobile is not driven from the barrel, so strength fails too (its
+    # going train ends at the seconds mobile); the shifted runs jam too. fourth and seconds are in both
+    # movements: P1 and P3 fail train 3, tolerant 2, seconds 2, strength 2 = 9. D = (1/4)(9/23) + (3/20)(9/27)
+    # = 9/92 + 1/20 = 17/115; R = 1/2 - 34/345 = 277/690; x 16/17 = 2216/5865 = 0.377835
     ("job a mesh that jams (a lump on one seconds-pinion tooth)", b_jam,
-     X(P1={"checks": ["train", "tolerant", "seconds"]}, P3={"checks": ["train", "tolerant", "seconds"]}),
+     X(P1={"checks": ["train", "tolerant", "seconds", "strength"]}, P3={"checks": ["train", "tolerant", "seconds", "strength"]}),
      [mesh_fact("P1", "fourth/seconds", "worst_volume", lambda v: v > 0.01, "> 0.01 (a jam)")]),
     # The seconds pinion cut 0.8 too high on its arbor (z 4.6-4.9; the fourth wheel is at 3.8-4.4): the teeth
     # miss each other, smallest distance 0.2 > 0.1 (not engaged) and the drive test finds nothing. No jam. Same
-    # failing checks as above: 937/2250 = 0.416444
+    # failing checks as above (strength: the seconds mobile is not driven): 2216/5865 = 0.377835
     ("job a mesh whose teeth do not engage (seconds pinion 0.8 too high)", b_no_engage,
-     X(P1={"checks": ["train", "tolerant", "seconds"]}, P3={"checks": ["train", "tolerant", "seconds"]}),
+     X(P1={"checks": ["train", "tolerant", "seconds", "strength"]}, P3={"checks": ["train", "tolerant", "seconds", "strength"]}),
      [mesh_fact("P1", "fourth/seconds", "largest_gap", lambda v: v > 0.1, "> 0.1 (not engaged)"),
       mesh_fact("P1", "fourth/seconds", "worst_volume", lambda v: v <= 0.01, "<= 0.01 (no jam)")]),
     # The fourth wheel and seconds pinion cut and declared 95/13 instead of 96/12 (same centre distance, module
-    # 0.2, sum 108): the train runs, the seconds hand turns 7.5 x 95/13 = 54.8 per hour, not 60. Both movements:
-    # P1 and P3 fail seconds (2). Deficit 0.25 x 2/21 + 0.15 x 2/25 = 1/42 + 3/250 = 94/2625; reward
-    # 1/2 - (2/3)(94/2625) = 7499/15750 = 0.476127
+    # 0.2, sum 108): the train runs, the seconds hand turns 7.5 x 95/13 = 54.8 per hour, not 60. Strength holds:
+    # the fourth turns 4 x 2 x 7.5 = 60 times the barrel, T = 70.1/60 = 1.17 N mm, F = 1.17 / (0.2 x 95/2) = 0.12 N,
+    # far below the third pinion's 7.3 N. Both movements: P1 and P3 fail seconds (2). D = (1/4)(2/23) +
+    # (3/20)(2/27) = 1/46 + 1/90 = 34/1035; R = 1/2 - 68/3105 = 2969/6210; x 16/17 = 23752/52785 = 0.449976
     ("job a hand at the wrong speed (seconds pair 95/13)", b_wrong_speed,
      X(P1={"checks": ["seconds"]}, P3={"checks": ["seconds"]}),
      [detail(["P1", "details", "seconds", "clockwise_turns_per_hour_through_working_meshes"], lambda v: v == "1425/26", "1425/26 (7.5 x 95/13)")]),
     # The 8-hour third arbor with nothing to stop it rising: no top shoulder (0.3 pivot from the wheel up into
     # the bridge's 0.4 hole) and the pivot ending 0.35 short of the hole's blind end (the reference's ends 0.1
     # short, so it is held by the end too). Moved +z it touches nothing. (Measured: removing the shoulder alone
-    # leaves it held by the pivot's end.) third is in movement.json only: P1 fails held (2). Deficit
-    # 0.25 x 2/21 = 1/42; reward 1/2 - 1/63 = 61/126 = 0.484127
+    # leaves it held by the pivot's end.) third is in movement.json only: P1 fails held (2). D = (1/4)(2/23) =
+    # 1/46; R = 1/2 - 1/69 = 67/138; x 16/17 = 536/1173 = 0.456948
     ("job a mobile not held (third arbor without its top shoulder)", b_not_held,
      X(P1={"checks": ["held"]}),
      [detail(["P1", "details", "held", "not_held"], lambda v: v == ["third +z"], "['third +z']")]),
     # The 8-hour centre arbor turned down to 0.2 under the cannon (z 6.4-7.3; the cannon's bore is 0.505): the
     # cannon still rests on the 0.6 shoulder (one piece, -z seated) but moved 0.3 sideways it touches nothing.
-    # P1 fails seated (2): 61/126 = 0.484127
+    # P1 fails seated (2): 536/1173 = 0.456948
     ("job a part not seated (cannon loose on a turned-down arbor)", b_not_seated,
      X(P1={"checks": ["seated"]}),
      [detail(["P1", "details", "seated", "not_seated"], lambda v: v == ["cannon"], "['cannon']")]),
     # The 8-hour third wheel cut 0.1 thick (z 1.4-1.5): at most two voxel centres across it, none survives, so
-    # the wheel is not in the printable body (deviation far over 0.2). P1 fails printable (1). Deficit
-    # 0.25 x 1/21 = 1/84; reward 1/2 - 1/126 = 31/63 = 0.492063
+    # the wheel is not in the printable body (deviation far over 0.2). Strength holds: the third turns 96/24 = 4
+    # times the barrel, T = 70.1/4 = 17.5 N mm, F = 17.5 / (0.25 x 60/2) = 2.34 N, b <= 0.1: wheel 60 (Y 0.4516)
+    # 2.34 / (0.1 x 0.25 x 0.4516) = 207 MPa, centre pinion 30 (Y 0.3902) 240 MPa, both steel (725) as long as
+    # the measured face width is at least 0.033. P1 fails printable (1). D = (1/4)(1/23) = 1/92;
+    # R = 1/2 - 1/138 = 34/69; x 16/17 = 32/69 = 0.463768
     ("job a part too thin to print (third wheel 0.1 thick)", b_too_thin,
      X(P1={"checks": ["printable"]}),
      [detail(["P1", "details", "printable", "third", "max_deviation"], lambda v: v > 0.2, "> 0.2")]),
     # The 8-hour centre arbor's top tip 0.4 longer (to 11.8): the movement is 11.8 - (-1.7) = 13.5 tall > 13.4.
     # The assembly paths start 0.5 above the old box top + 5, so still 0.1 above the new one. P1 fails size (1):
-    # 31/63 = 0.492063
+    # 32/69 = 0.463768
     ("job the movement taller than the case (centre tip +0.4)", b_too_tall,
      X(P1={"checks": ["size"]}),
      [detail(["P1", "details", "size"], lambda e: abs(e["z_max"] - e["z_min"] - 13.5) < 1e-3, "13.5 tall")]),
     # The hour hand 9.0 long (was 6.0): the 24-hour hand's hub (r 0.9, same z 9.9-10.2) is 9.62 from the hour
     # axis, so in each turn the hour hand runs into it; drawn, both hands point +x and do not touch. hour_hand is
-    # in both movements: P1 and P3 fail clear (1). Deficit 0.25/21 + 0.15/25 = 47/2625; reward
-    # 1/2 - (2/3)(47/2625) = 7687/15750 = 0.488063
+    # in both movements: P1 and P3 fail clear (1). D = (1/4)(1/23) + (3/20)(1/27) = 1/92 + 1/180 = 17/1035;
+    # R = 1/2 - 34/3105 = 3037/6210; x 16/17 = 24296/52785 = 0.460282
     ("job two non-meshing mobiles collide (hour hand into the 24-hour hub)", b_hands_collide,
      X(P1={"checks": ["clear"]}, P3={"checks": ["clear"]}),
      [detail(["P1", "details", "clear", "pair"], lambda v: v in ("hour_wheel/day", "day/hour_wheel"), "hour_wheel/day")]),
     # A counterweight arm on the seconds arbor (z 1.05-1.35, reach 5.2, 0.6 wide) drawn pointing away from the
     # nearest pillar (5.556 from the seconds axis, radius 0.75): in its turn it sweeps through that pillar.
-    # Nothing else is at that height within reach. Both movements: P1 and P3 fail spin (1): 7687/15750 = 0.488063
+    # Nothing else is at that height within reach. Both movements: P1 and P3 fail spin (1): 24296/52785 = 0.460282
     ("job a mobile rubs the frame when turned (seconds arm into a pillar)", b_rubs_frame,
      X(P1={"checks": ["spin"]}, P3={"checks": ["spin"]}),
      [detail(["P1", "details", "spin", "seconds", "worst_volume"], lambda v: v > 0.01, "> 0.01")]),
+    # The third mobile declared brass (AD-CW614N, allowable 110 MPa, DS-201 section 8) in both movements, the
+    # parts unchanged: its 24-tooth pinion on the barrel carries F = 70.1 / (0.2 x 96/2) = 7.302 N at b = 0.8
+    # (layer A), sigma = 7.302 / (0.8 x 0.2 x 0.3634) = 125.6 MPa > 110 (in steel, 725, it passes); the variant's
+    # third_54 has the same pinion on the same barrel. Only strength changes: P1 and P3 fail strength (2).
+    # D = (1/4)(2/23) + (3/20)(2/27) = 34/1035; R = 2969/6210; x 16/17 = 23752/52785 = 0.449976
+    ("job gear strength: the third pinion made brass", b_third_brass,
+     X(P1={"checks": ["strength"]}, P3={"checks": ["strength"]}),
+     [detail(["P1", "details", "strength", "meshes", 0, "gears", "third", "material"], lambda v: v == "AD-CW614N", "AD-CW614N"),
+      detail(["P1", "details", "strength", "meshes", 0, "gears", "third", "margin"], lambda v: -0.2 < v < 0, "about -0.12")]),
 
     # ---- 5. Part 2 ----
-    # hands.day names the hour hand's mobile and part: C3 fails, s2 = 0. 1/2 - (2/3)(0.10) = 13/30 = 0.433333
+    # hands.day names the hour hand's mobile and part: C3 fails, s2 = 0. R = 13/30; x 16/17 = 104/255 = 0.407843
     ("job 24-hour hand on the hour hand's part", b_day_on_hour_part,
      X(P2={"gates": ["day_declared"]}), []),
     # The day pair cut and declared 15/35 instead of 10/40 (same module 0.16 and centre distance 4.0): the
-    # 24-hour hand turns 1/12 x 48/24 x 15/35 = 1/14 per hour, not 1/24. Shared parts: P2 and P3 fail day_hand
-    # (3). Deficit 0.10 x 3/4 + 0.15 x 3/25 = 0.075 + 0.018 = 0.093; reward 1/2 - 0.062 = 0.438
+    # 24-hour hand turns 1/12 x 48/24 x 15/35 = 1/14 per hour, not 1/24 (the day train is not rated for
+    # strength). Shared parts: P2 and P3 fail day_hand (3). D = (1/10)(3/4) + (3/20)(3/27) = 3/40 + 1/60 = 11/120;
+    # R = 1/2 - 11/180 = 79/180; x 16/17 = 316/765 = 0.413072
     ("job 24-hour hand at the wrong rate (day pair 15/35)", b_day_wrong_rate,
      X(P2={"checks": ["day_hand"]}, P3={"checks": ["day_hand"]}),
      [detail(["P2", "details", "day_hand", "clockwise_turns_per_hour_through_working_meshes"], lambda v: v == "1/14", "1/14")]),
     # The reference rebuilt with the day axis 5.961 from the hour axis (< 6.0), the hour hand shortened to 5.0,
     # the day hand lifted to clear it, and the day put in before the hour wheel (see b_day_too_close). The
     # frame changes for both movements alike:
-    # P2 and P3 fail day_place (1). Deficit 0.10/4 + 0.15/25 = 0.031; reward 1/2 - 0.0206667 = 0.479333
+    # P2 and P3 fail day_place (1). D = (1/10)(1/4) + (3/20)(1/27) = 1/40 + 1/180 = 11/360; R = 1/2 - 11/540 =
+    # 259/540; x 16/17 = 1036/2295 = 0.451416
     ("job 24-hour hand axis too close to the hour axis (5.96 mm)", b_day_too_close,
      X(P2={"checks": ["day_place"]}, P3={"checks": ["day_place"]}),
      [detail(["P2", "details", "day_place", "axis_distance"], lambda v: 5.9 < v < 6.0, "5.96")]),
 
     # ---- 6. Part 3 ----
     # movement.json copied as the variant: gates pass (same frame), the barrel at 1/6 turns every hand 4/3 too
-    # fast: hour 2, minute 2, seconds 2, day_hand 3 = 9 of 25. Deficit 0.15 x 9/25 = 0.054; reward
-    # 1/2 - 0.036 = 0.464
+    # fast: hour 2, minute 2, seconds 2, day_hand 3 = 9 of 27 (strength depends on speed ratios only, so it
+    # holds). D = (3/20)(9/27) = 1/20; R = 1/2 - 1/30 = 7/15; x 16/17 = 112/255 = 0.439216
     ("job variant = the 8-hour movement unchanged", b_variant_is_movement,
      X(P3={"checks": ["hour", "minute", "seconds", "day_hand"]}),
      [detail(["P3", "details", "minute", "clockwise_turns_per_hour_through_working_meshes"], lambda v: v == "4/3", "4/3")]),
     # The variant declares third/centre 54/36 but names the 8-hour parts third and centre (cut 60/30): turned
-    # at 54/36 the teeth jam, the mesh drives nothing, so every hand stands: train 3, tolerant 2, hour 2,
-    # minute 2, seconds 2, day_hand 3 = 14 of 25. Deficit 0.15 x 14/25 = 0.084; reward 1/2 - 0.056 = 0.444
+    # at 54/36 the teeth jam, the mesh drives nothing, so every hand stands and the seconds mobile is not driven
+    # from the barrel: train 3, tolerant 2, hour 2, minute 2, seconds 2, day_hand 3, strength 2 = 16 of 27.
+    # D = (3/20)(16/27) = 4/45; R = 1/2 - 8/135 = 119/270; x 16/17 = 56/135 = 0.414815
     ("job variant with 6-hour tooth counts on the 8-hour parts", b_variant_paper_counts,
-     X(P3={"checks": ["train", "tolerant", "hour", "minute", "seconds", "day_hand"]}),
+     X(P3={"checks": ["train", "tolerant", "hour", "minute", "seconds", "day_hand", "strength"]}),
      [mesh_fact("P3", "third/centre", "passes", lambda v: v is False, "False")]),
     # The variant's main_plate renamed plate_6h (a byte copy): C4 fails, s3 = 0; every P3 check still passes.
-    # 1/2 - (2/3)(0.15) = 0.4
+    # R = 2/5; x 16/17 = 32/85 = 0.376471
     ("job variant with one fixed part renamed", b_variant_plate_renamed,
      X(P3={"gates": ["same_frame"]}),
      [detail(["P3", "checks"], lambda c: all(c.values()), "every P3 check to pass")]),
@@ -553,48 +642,55 @@ ANCHORS = [
     # under the minute hand) are installed; every other part has something already placed above it: hour_hand
     # under the minute hand's bar, dial under the seconds and day hand hubs, day_idler, day, hour_wheel and
     # minute_wheel under dial bosses, cannon under the hour wheel's tube, bridge under the minute wheel, seconds
-    # under its hand's bore, fourth, centre, third and barrel_cock under bridge bosses, barrel under the barrel
-    # cock, main_plate under everything. 3 of 18: deficit 0.25 x 15/18; reward 1/2 - (2/3)(0.208333) = 13/36
+    # under its hand's bore, fourth, centre and third under bridge bosses, barrel under the bridge (its arbor
+    # pivots in a hole of the bridge, so the bridge covers its axis), main_plate under everything. 3 of 17:
+    # D = (1/4)(14/17) = 7/34; R = 1/2 - 7/51 = 37/102; x 16/17 = 296/867 = 0.341407
     ("job assembly order reversed", b_order_reversed,
      X(P4={"not_installed": set(ORDER_8H) - {"minute_hand", "day_hand", "seconds_hand"}}), []),
     # The dial's path with every other pose dropped: vertices move about 0.38 > 0.2 between poses, the dial is not
-    # installed but stands in place; the parts after it (hands) are above it. 17 of 18: deficit 0.25/18;
-    # reward 1/2 - 1/108 = 53/108 = 0.490741
+    # installed but stands in place; the parts after it (hands) are above it. 16 of 17: D = (1/4)(1/17) = 1/68;
+    # R = 1/2 - 1/102 = 25/51; x 16/17 = 400/867 = 0.461361
     ("job one path teleports (dial path every other pose)", b_coarse_path,
      X(P4={"not_installed": {"dial"}}), []),
     # The minute hand left out of the order: it stands at z 10.7-11.0 from the start (hub r 1.0 bore 0.355 on the
     # centre axis, a 9.0 x 0.6 bar along +x). Blocked on the way down: centre (arbor 0.5 through the 0.355 bore),
     # cannon, hour_wheel, hour_hand (all under the hub or bar), minute_wheel (its rim 3.3-3.9 under the bar),
     # dial, bridge, main_plate (bosses round the centre axis under the hub). Clear: barrel (9.96 > 9.8 from the
-    # hub), barrel_cock, third (9.04 from the bar > 7.75), fourth (hub 9.8 from its axis, its tips 9.8: no
-    # volume), seconds, day, day_idler, seconds_hand, day_hand. minute_hand itself is not installed. 9 of 18:
-    # deficit 0.125; reward 1/2 - 1/12 = 5/12 = 0.416667
+    # hub; the two-body barrel has the drum's footprint), third (9.04 from the bar > 7.75), fourth (hub 9.8 from
+    # its axis, its tips 9.8: no volume), seconds, day, day_idler, seconds_hand, day_hand. minute_hand itself is
+    # not installed. 8 of 17: D = (1/4)(9/17) = 9/68; R = 1/2 - 3/34 = 7/17; x 16/17 = 112/289 = 0.387543
     ("job one part left out of the order (minute hand)", b_minute_hand_left_out,
      X(P4={"not_installed": {"minute_hand", "centre", "cannon", "hour_wheel", "hour_hand", "minute_wheel",
                              "dial", "bridge", "main_plate"}}), []),
 
-    # ---- 8. exploit-style ----
+    # ---- 8. exploit-style and format ----
     # The minute hand replaced by a disc r 18 (0.3 thick) on the centre axis, over the whole dial: it reaches
     # and lies above the frame but its centre of volume is on the axis (< 0.5): Hands fails in P1 and P3 (1).
-    # 7687/15750 = 0.488063
+    # 24296/52785 = 0.460282
     ("x minute hand is a disc over the whole dial (centred)", b_disc_centred,
      X(P1={"checks": ["hands"]}, P3={"checks": ["hands"]}),
      [detail(["P1", "details", "hands", "minute", "centre_from_axis"], lambda v: v < 0.5, "< 0.5")]),
     # The same disc 0.6 off-centre: reach 18.6 (+1.72 to the case centre = 20.32 <= 20.7), above the frame,
-    # centre of volume 0.6 from the axis: every stated rule holds, so the rule gives 1.0. FINDING if it scores
-    # 1.0: a hand may be a disc that hides the seconds and 24-hour hands; no stated rule stops it.
+    # centre of volume 0.6 from the axis: every stated rule holds, so the rule gives R = 1; x 16/17 = 0.941176.
+    # FINDING (reported 18:39): a hand may be a disc that hides the seconds and 24-hour hands; no stated rule stops it.
     ("x minute hand is a disc over the whole dial, 0.6 off-centre (FINDING)", b_disc_off_centre, X(), []),
     # movement.json lists 'barrel' as a part of the third mobile: a format error (C1), so P1, P2 and P4 score 0;
     # the variant still passes (C4 reads movement.json's fixed list and case centre only).
-    # 1/2 - (2/3)(0.6) = 0.1
+    # R = 1/2 - (2/3)(3/5) = 1/10; x 16/17 = 8/85 = 0.094118
     ("x movement.json names the barrel as a part", b_barrel_as_part,
      X(P1={"gates": GATES["P1"], "checks": ALL_FAIL}, P2={"gates": GATES["P2"], "checks": ALL_FAIL}, P4={"gates": GATES["P4"]}),
      [detail(["P1", "details", "files", "error"], lambda v: "reserved" in v, "the 'barrel' reserved-name error")]),
     # parts/third.step is a symbolic link to a real copy inside the delivery (scripts/third.step): refused (C1)
-    # for movement.json; the variant does not use third. 0.1
+    # for movement.json; the variant does not use third. 8/85 = 0.094118
     ("x symlinked part file", b_symlinked_part,
      X(P1={"gates": GATES["P1"], "checks": ALL_FAIL}, P2={"gates": GATES["P2"], "checks": ALL_FAIL}, P4={"gates": GATES["P4"]}),
      [detail(["P1", "details", "files", "error"], lambda v: "symbolic link" in v, "a symbolic-link error")]),
+    # movement.json's day mobile without "material" (FORMAT.md: a mobile without material makes the file not
+    # valid): C1 fails for movement.json, so P1, P2 and P4 score 0; variant_6h.json keeps its material and passes
+    # (C4 reads movement.json's JSON only). 8/85 = 0.094118
+    ("x a mobile without a material (C1)", b_material_missing,
+     X(P1={"gates": GATES["P1"], "checks": ALL_FAIL}, P2={"gates": GATES["P2"], "checks": ALL_FAIL}, P4={"gates": GATES["P4"]}),
+     [detail(["P1", "details", "files", "error"], lambda v: "material" in v, "a material error")]),
 ]
 
 
@@ -625,6 +721,17 @@ def compare(x, d, extra):
             bad = {k for k, v in p["checks"].items() if not v}
             if bad != spec["checks"]:
                 out.append("%s failing checks %s expected %s" % (pid, sorted(bad), sorted(spec["checks"])))
+    hon = d.get("honesty") or {}
+    if hon.get("claims") != x.claims():
+        out.append("honesty claims %s expected %s" % (hon.get("claims"), x.claims()))
+    if hon.get("truths") != {p: x.truth(p) for p in PART_W}:
+        out.append("honesty truths %s expected %s" % (hon.get("truths"), {p: x.truth(p) for p in PART_W}))
+    if hon.get("factor_exact") != str(x.factor()):
+        out.append("honesty factor %s expected %s" % (hon.get("factor_exact"), x.factor()))
+    if hon.get("report") != ("absent" if x.report is None else "valid"):
+        out.append("report.json read as %r (%s)" % (hon.get("report"), hon.get("error", "")))
+    if d.get("parts_reward_exact") != str(x.parts_reward()):
+        out.append("parts reward %s expected %s" % (d.get("parts_reward_exact"), x.parts_reward()))
     for fn in extra:
         try:
             e = fn(d)
@@ -653,19 +760,36 @@ def check_rule_matches_grader():
             out.append("%s check weights %s in the grader, %s here" % (pid, cw, CW[pid]))
     if {p[0] for p in G.JOB_PARTS} != set(PART_W):
         out.append("grader parts %s" % [p[0] for p in G.JOB_PARTS])
+    # the honesty term's constants: A's module, as the grader imports it
+    C = G._a_constants()
+    if (F(repr(C.W_PRODUCT)), F(repr(C.W_HONESTY))) != (W_PRODUCT, W_HONESTY):
+        out.append("W_PRODUCT, W_HONESTY %s, %s in A's constants, %s, %s here" % (C.W_PRODUCT, C.W_HONESTY, W_PRODUCT, W_HONESTY))
+    if tuple(C.CLAIMS) != CLAIMS:
+        out.append("CLAIMS %s in A's constants, %s here" % (C.CLAIMS, CLAIMS))
+    pts = {k: F(repr(float(v))) for k, v in C.HONESTY_POINTS.items()}
+    if pts != POINTS:
+        out.append("HONESTY_POINTS %s in A's constants, %s here" % (C.HONESTY_POINTS, POINTS))
     return out
 
 
 # ---------------- runner ----------------
 def build(index, ref_job, out):
     """--build child: copy the reference job folder to out and apply the anchor's change."""
-    name, change, _, _ = ANCHORS[index]
+    name, change, x, _ = ANCHORS[index]
     if os.path.exists(out):
         shutil.rmtree(out)
     shutil.copytree(ref_job, out, symlinks=True)
+    rep = os.path.join(out, "report.json")
+    with open(rep) as f:
+        if json.load(f) != {"parts": REF_REPORT}:
+            raise SystemExit("the reference job folder's report.json is not REF_REPORT")
+    os.remove(rep)
     if change is not None:
         sys.path.insert(0, ROOT)
         change(out)
+    if x.report is not None and os.path.isdir(out):
+        with open(rep, "w") as f:
+            json.dump({"parts": x.report}, f)
 
 
 def timed_out(d):
@@ -685,7 +809,8 @@ def run_anchor(i, ref_job, timeout, keep=None):
     tmp = tempfile.mkdtemp(prefix="job_anchor_", dir=keep)
     d = os.path.join(tmp, "delivery")
     reward, details = os.path.join(tmp, "reward.txt"), os.path.join(tmp, "details.json")
-    row = {"name": name, "expected": float(x.reward()), "exact": str(x.reward()), "got": None, "s": {}, "ok": False, "msg": ""}
+    row = {"name": name, "expected": float(x.reward()), "exact": str(x.reward()), "got": None, "s": {}, "h": "-",
+           "ok": False, "msg": ""}
     try:
         try:
             b = subprocess.run([sys.executable, HERE, "--build", str(i), "--job", ref_job, "--out", d], cwd=ROOT,
@@ -713,6 +838,7 @@ def run_anchor(i, ref_job, timeout, keep=None):
         row["got"] = dd["reward"]
         row["s"] = {pid: p["s_exact"] for pid, p in dd["parts"].items()}
         row["grade_s"] = dd.get("elapsed_s")
+        row["h"] = (dd.get("honesty") or {}).get("honesty_exact", "-")
         diffs = compare(x, dd, extra)
         if abs(float(text) - dd["reward"]) > 1e-6:
             diffs.append("reward file %r, details %r" % (text, dd["reward"]))
@@ -732,8 +858,8 @@ def run_anchor(i, ref_job, timeout, keep=None):
 def line(row):
     s = " ".join("%s=%s" % (k, v) for k, v in sorted(row["s"].items()))
     got = "%.4f" % row["got"] if row["got"] is not None else "-"
-    return "%-4s %-72s reward %s expected %.4f  %s  %4.0f s%s" % (
-        "ok" if row["ok"] else "OFF", row["name"], got, row["expected"], s, row["time"],
+    return "%-4s %-72s reward %s expected %.4f  %s h=%s  %4.0f s%s" % (
+        "ok" if row["ok"] else "OFF", row["name"], got, row["expected"], s, row["h"], row["time"],
         ("  | " + row["msg"]) if row["msg"] else "")
 
 
@@ -745,7 +871,7 @@ def main(argv):
     from concurrent.futures import ThreadPoolExecutor, as_completed
     pos = [a for i, a in enumerate(argv) if not a.startswith("--") and (i == 0 or argv[i - 1] not in ("--only", "--job", "--timeout", "--keep"))]
     workers = int(pos[0]) if pos else 2
-    timeout = float(opt("--timeout") or 4000)
+    timeout = float(opt("--timeout") or 7800)
     pick = list(range(len(ANCHORS)))
     if opt("--only"):
         want = [w.strip() for w in opt("--only").split(",") if w.strip()]
@@ -782,13 +908,13 @@ def main(argv):
         if tmp:
             shutil.rmtree(tmp, ignore_errors=True)
     rows = [rows[i] for i in pick if i in rows]
-    print("\n| anchor | expected | got | P1 | P2 | P3 | P4 | time s | |")
-    print("|---|---|---|---|---|---|---|---|---|")
+    print("\n| anchor | expected | got | P1 | P2 | P3 | P4 | h | time s | |")
+    print("|---|---|---|---|---|---|---|---|---|---|")
     for r in rows:
         got = "%.4f" % r["got"] if r["got"] is not None else "-"
-        print("| %s | %.4f (%s) | %s | %s | %s | %s | %s | %.0f | %s |" % (
+        print("| %s | %.4f (%s) | %s | %s | %s | %s | %s | %s | %.0f | %s |" % (
             r["name"], r["expected"], r["exact"], got, *(r["s"].get(p, "-") for p in ("P1", "P2", "P3", "P4")),
-            r["time"], "ok" if r["ok"] else "OFF: " + r["msg"]))
+            r["h"], r["time"], "ok" if r["ok"] else "OFF: " + r["msg"]))
     print("%d of %d anchors ok" % (len(rows) - sum(not r["ok"] for r in rows), len(rows)))
     return 1 if bad else 0
 
