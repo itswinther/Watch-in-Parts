@@ -46,6 +46,10 @@ MESH_OFFGRID = (Fraction(1, 3), Fraction(1, 5))   # extra no-jam poses after eve
 DRIVE_MIN_VOLUME = 0.001    # mm3: and that extra overlap is at least this (meshing noise is far below it)
 DRIVE_AREA_RATIO = 0.5      # drive test: overlap / (its height in z) must exceed this x the mesh's module squared
                             # (module = 2 x axis distance / (driver teeth + driven teeth))
+DRIVE_CONTACT_SCAN = 32     # drive test: before each push, the driver is turned in the push's sense to its first contact
+                            # with the held driven mobile, searched over one driver pitch in this many equal steps;
+DRIVE_CONTACT_HALVINGS = 7  # the first step that makes contact is then halved this many times, so the contact is found
+                            # within 1 / (32 x 2^7) = 1/4096 of the driver's pitch (halving it moves V by < 0.1 percent)
 FRAME_JOIN = 0.01           # mm: two fixed parts this close are joined; the fixed parts must form one frame
 HAND_CENTRE_MIN = 0.5       # mm: a hand part's centre of volume is at least this far from its axis
 THIN_SLAB = 32              # layers per slab of the thickness test (memory only; the result does not depend on it)
@@ -163,6 +167,33 @@ def barrel_stage():
 # ---------------- movement ----------------
 def rot_about(man, axis_xy, deg):
     return man.translate([-axis_xy[0], -axis_xy[1], 0]).rotate([0, 0, deg]).translate([axis_xy[0], axis_xy[1], 0])
+
+
+def drive_contact(pa, B, base, pitch, v0=None):
+    """The drive test's contact search: the smallest turn c (degrees, 0 <= c <= pitch, in the sense of the push)
+    after which pa(base + c) and B intersect by more than 0 mm3, with B held. pa(deg): the driver turned to deg.
+    Searched in DRIVE_CONTACT_SCAN equal steps of pitch; the first step that makes contact is halved
+    DRIVE_CONTACT_HALVINGS times and c is the end of the last interval at which they intersect (within
+    pitch / (DRIVE_CONTACT_SCAN x 2^DRIVE_CONTACT_HALVINGS) of the first contact). 0 if they already intersect at
+    base (v0: that intersection, if already measured); None if no turn up to one pitch makes contact."""
+    if (ivol(pa(base), B) if v0 is None else v0) > 0.0:
+        return 0.0
+    step = pitch / DRIVE_CONTACT_SCAN
+    lo = hi = 0.0
+    for k in range(1, DRIVE_CONTACT_SCAN + 1):
+        hi = pitch if k == DRIVE_CONTACT_SCAN else k * step
+        if ivol(pa(base + hi), B) > 0.0:
+            break
+        lo = hi
+    else:
+        return None
+    for _ in range(DRIVE_CONTACT_HALVINGS):
+        mid = 0.5 * (lo + hi)
+        if ivol(pa(base + mid), B) > 0.0:
+            hi = mid
+        else:
+            lo = mid
+    return hi
 
 
 class Movement:
@@ -514,11 +545,17 @@ class Movement:
     def mesh_run(self, a, ta, b, tb, speeds=None, shift=0.0, cut=True):
         """Turn a declared mesh through max(ta, tb) tooth pitches of the driver. Reports the largest
         overlap (grid steps, plus MESH_OFFGRID poses after every eighth step), the largest gap, and the
-        drive test: pushing the driver DRIVE_FRACTION of a tooth pitch further with the driven gear held,
-        the intersection that the push creates (the part of the pushed driver's intersection with the driven
-        mobile that the driver did not already occupy before the push), alone and divided by (its height in z
-        x module squared), and the smallest of those heights in z over the steps (smallest_drive_height: the face
-        width of the strength check; 0 if a step creates no new overlap).
+        drive test: at every eighth step, with the driven gear held, the driver is first turned in the push's
+        sense to its first contact with the driven mobile (drive_contact: the smallest turn, up to one pitch,
+        after which they intersect by more than 0), then pushed DRIVE_FRACTION of a tooth pitch further from
+        there; the intersection that the push creates (the part of the pushed driver's intersection with the
+        driven mobile that the driver did not already occupy at the contact position), alone and divided by
+        (its height in z x module squared), and the smallest of those heights in z over the steps
+        (smallest_drive_height: the face width of the strength check; 0 if a step creates no new overlap).
+        A step with no contact within one pitch creates no overlap (V 0: the drive test fails).
+        largest_drive_contact: the largest contact turn over the steps, as a fraction of the driver's pitch;
+        drive_steps_without_contact: how many steps found none. So the drive test does not depend on where in
+        its backlash the driven mobile is delivered.
         shift: the driven mobile (and its axis) is first moved this far straight away from the driver's
         axis (negative: towards it); same steps and angles. cut=False skips the speed-up (same results)."""
         A, ax_a = self.mobiles[a]["solid"], self.mobiles[a]["axis"]
@@ -541,7 +578,9 @@ class Movement:
         db = -da * ta / tb
         worst, gap, drive, ratio = (0.0, 0), 0.0, float("inf"), float("inf")
         height = float("inf")         # smallest height in z of the push's new overlap (0 at a step that has none)
-        push = DRIVE_FRACTION * 360.0 / ta
+        pitch = 360.0 / ta
+        push = DRIVE_FRACTION * pitch
+        contact, missing = 0.0, 0     # largest contact turn (fraction of the pitch); steps with no contact
         for i in range(n):
             Ai, Bi = pa(da * i), pb(db * i)
             v = ivol(Ai, Bi)
@@ -555,10 +594,16 @@ class Movement:
                     vf = ivol(pa(da * (i + float(f))), pb(db * (i + float(f))))
                     if vf > worst[0]:
                         worst = (vf, i + float(f))
-                P = pa(da * i + push)
+                c = drive_contact(pa, Bi, da * i, pitch, v0=v)   # first contact in the push's sense, N held
                 extra, r, hz = 0.0, 0.0, 0.0
-                if core.bbox_overlap(P, Bi):
-                    N = (P ^ Bi) - Ai              # intersection the push creates: not already there before it
+                if c is None:
+                    missing += 1
+                else:
+                    contact = max(contact, c / pitch)
+                    Ac = Ai if c == 0.0 else pa(da * i + c)
+                    P = pa(da * i + c + push)
+                if c is not None and core.bbox_overlap(P, Bi):
+                    N = (P ^ Bi) - Ac              # intersection the push creates: not already there at the contact
                     extra = float(N.volume()) if not N.is_empty() else 0.0
                     if not math.isfinite(extra):
                         raise ArithmeticError("non-finite volume")
@@ -570,11 +615,12 @@ class Movement:
                 height = min(height, hz if extra > 0.0 else 0.0)
         return {"worst_volume": worst[0], "step": worst[1], "steps": n, "largest_gap": gap,
                 "smallest_drive_overlap": drive, "smallest_drive_ratio": ratio, "module": module,
-                "smallest_drive_height": height}
+                "smallest_drive_height": height, "largest_drive_contact": contact,
+                "drive_steps_without_contact": missing}
 
     def drive_parts(self, a, ta, b, tb):
-        """For the strength check: the drive test of mesh_run (drawn position, no shift; the same steps, angles
-        and push), with the new overlap the push creates at each step split by part: for each of a and b, the
+        """For the strength check: the drive test of mesh_run (drawn position, no shift; the same steps, angles,
+        contact search and push), with the new overlap the push creates at each step split by part: for each of a and b, the
         volume of that overlap inside each of its parts (the driver's parts pushed, the driven mobile's parts
         held), summed over the drive-test steps. Returns {mobile: {part: mm3}}; the supplied barrel (no parts)
         and a one-part mobile are left out (nothing to split)."""
@@ -595,16 +641,22 @@ class Movement:
         n = SAMPLES_PER_TOOTH * max(ta, tb)
         da = 360.0 / (SAMPLES_PER_TOOTH * ta)
         db = -da * ta / tb
-        push = DRIVE_FRACTION * 360.0 / ta
+        pitch = 360.0 / ta
+        push = DRIVE_FRACTION * pitch
         rot = lambda S, ax, deg: S if deg == 0.0 else rot_about(S, ax, deg)
+        pa = lambda deg: rot(A0, ax_a, deg)
         for i in range(0, n, 8):
-            Ai, Bi, P = rot(A0, ax_a, da * i), rot(B0, ax_b, db * i), rot(A0, ax_a, da * i + push)
+            Bi = rot(B0, ax_b, db * i)
+            c = drive_contact(pa, Bi, da * i, pitch)
+            if c is None:
+                continue
+            Ac, P = pa(da * i + c), pa(da * i + c + push)
             if not core.bbox_overlap(P, Bi):
                 continue
-            N = (P ^ Bi) - Ai
+            N = (P ^ Bi) - Ac
             if N.is_empty():
                 continue
-            for name, deg in ((a, da * i + push), (b, db * i)):
+            for name, deg in ((a, da * i + c + push), (b, db * i)):
                 if name not in side:
                     continue
                 ax, qs = side[name]
