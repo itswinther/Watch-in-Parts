@@ -1,4 +1,5 @@
 """Mesh loading, rigid transforms, intersection volume, voxels. No spec numbers here."""
+import math
 import os
 import struct
 import sys
@@ -389,6 +390,104 @@ def opening_test(solid, erode_vox, dilate_vox):
     from scipy import ndimage
     _, n = ndimage.label(opened, structure=np.ones((3, 3, 3)))
     dev = edt(~opened)[pad].max()
+    return int(n), float(dev)
+
+
+def voxelize_layers(man, origin, shape, h, k0, k1):
+    """Layers k0 <= k < k1 of voxelize(man, origin, shape, h), as a [nx, ny, k1 - k0] grid; the same
+    voxel centres, computed the same way, so the result equals voxelize(...)[:, :, k0:k1]."""
+    nx, ny, nz = shape
+    k0, k1 = max(0, k0), min(nz, k1)
+    out = np.zeros((nx, ny, max(0, k1 - k0)), dtype=bool)
+    if man.is_empty() or k1 <= k0:
+        return out
+    ox, oy, oz = origin
+    yc = oy + (np.arange(ny) + 0.5) * h
+    bb = man.bounding_box()
+    for k in range(k0, k1):
+        z = oz + (k + 0.5) * h
+        if z <= bb[2] or z >= bb[5]:
+            continue
+        polys = man.slice(z).to_polygons()
+        if not polys:
+            continue
+        p1 = np.concatenate([np.asarray(p, float) for p in polys])
+        p2 = np.concatenate([np.roll(np.asarray(p, float), -1, axis=0) for p in polys])
+        y1, y2 = p1[:, 1][:, None], p2[:, 1][:, None]
+        cross = ((y1 <= yc) & (yc < y2)) | ((y2 <= yc) & (yc < y1))
+        e, j = np.nonzero(cross)
+        if len(e) == 0:
+            continue
+        x = p1[e, 0] + (yc[j] - p1[e, 1]) * (p2[e, 0] - p1[e, 0]) / (p2[e, 1] - p1[e, 1])
+        col = np.ceil((x - ox) / h - 0.5).astype(np.int64)
+        col = np.clip(col, 0, nx)
+        d = np.zeros((nx + 1, ny), dtype=np.int32)
+        np.add.at(d, (col, j), 1)
+        out[:, :, k - k0] = (np.cumsum(d, axis=0)[:nx] % 2).astype(bool)
+    return out
+
+
+def opening_test_slabs(man, origin, shape, h, erode_vox, dilate_vox, dev_cap_vox, slab=32):
+    """opening_test(voxelize(man, origin, shape, h), erode_vox, dilate_vox), computed in slabs along z so
+    that memory does not grow with the part's height. Same number of pieces; the same deviation whenever
+    it is at most dev_cap_vox voxels, and a value above dev_cap_vox whenever the true one is (callers
+    compare it with a limit below dev_cap_vox, so pass and fail are unchanged).
+    Why it is exact: a voxel's core value depends only on voxels closer than erode_vox, its opened value
+    only on core voxels within dilate_vox, so a slab grown by a halo of ceil(erode) + floor(dilate) + cap + 1
+    layers holds everything that decides it. Pieces are labelled per slab and joined across the one layer
+    that two neighbouring slabs share (a 26-connected path cannot jump a layer)."""
+    from scipy import ndimage
+    nx, ny, nz = shape
+    he, hd = int(math.ceil(erode_vox)), int(math.floor(dilate_vox))
+    cap = int(math.ceil(dev_cap_vox)) + 1
+    halo = he + hd + cap
+    parent = []
+
+    def find(a):
+        while parent[a] != a:
+            parent[a] = parent[parent[a]]
+            a = parent[a]
+        return a
+    any_core, dev, prev_top = False, 0.0, None
+    for z0 in range(0, nz, slab):
+        z1 = min(nz, z0 + slab)
+        w0, w1 = z0 - halo, z1 + 1 + halo                 # window of layers, clipped to the grid below
+        sol = voxelize_layers(man, origin, shape, h, w0, w1)
+        c0 = max(0, w0)                                   # grid layer of sol[:, :, 0]
+        lo_pad, hi_pad = (1 if w0 <= 0 else 0), (1 if w1 >= nz else 0)
+        pad = np.pad(sol, ((1, 1), (1, 1), (lo_pad, hi_pad)))   # False outside the grid, as in opening_test
+        base = c0 - lo_pad                                # grid layer of pad[:, :, 0]
+        del sol
+        core_ = edt(pad) >= erode_vox
+        opened = (edt(~core_) <= dilate_vox) & pad if core_.any() else np.zeros_like(pad)
+        # layers of this slab (plus the shared top layer) in pad coordinates
+        a, b = z0 - base, min(z1 + 1, nz) - base
+        any_core = any_core or bool(core_[:, :, a:min(z1, nz) - base].any())
+        del core_
+        lab, n = ndimage.label(opened[:, :, a:b], structure=np.ones((3, 3, 3)))
+        off = len(parent)
+        parent.extend(range(off, off + n))
+        if prev_top is not None:                          # join across the layer shared with the slab below
+            here = lab[:, :, 0]
+            m = (here > 0) & (prev_top >= 0)
+            for p, q in set(zip(prev_top[m].tolist(), (here[m] + off - 1).tolist())):
+                ra, rb = find(p), find(q)
+                if ra != rb:
+                    parent[ra] = rb
+        top = lab[:, :, -1] if z1 < nz else None
+        prev_top = None if top is None else np.where(top > 0, top + off - 1, -1)
+        # deviation of this slab's solid voxels: distance to the nearest opened voxel in the window
+        sl = pad[:, :, a:min(z1, nz) - base]
+        if sl.any():
+            if opened.any():
+                d = edt(~opened)[:, :, a:min(z1, nz) - base][sl].max()
+            else:
+                d = float("inf")
+            dev = max(dev, float(d))
+        del opened, pad, lab
+    if not any_core:
+        return 0, float("inf")
+    n = len({find(i) for i in range(len(parent))})
     return int(n), float(dev)
 
 
