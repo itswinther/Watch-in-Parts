@@ -517,8 +517,9 @@ ANCHORS = [
     # parts and installs all. R = 1/2 - (2/3)(1/10) = 13/30; x 16/17 = 104/255 = 0.407843
     # (P1 cannot be left out alone: P2's gates contain P1's (C1, C2) and P4 needs C1, so a delivery without a
     # working P1 also loses P2, and P4 if movement.json does not load.)
+    # P2's two checks still run and fail: no 24-hour hand to test (corrected by H, as for the variant above).
     ("job everything except the 24-hour hand (no day train in movement.json)", b_no_day_train,
-     X(P2={"gates": ["day_declared"]}), [detail(["P4", "checks"], lambda c: len(c) == 14 and all(c.values()), "14 parts, all installed")]),
+     X(P2={"gates": ["day_declared"], "checks": ["day_hand", "day_place"]}), [detail(["P4", "checks"], lambda c: len(c) == 14 and all(c.values()), "14 parts, all installed")]),
 
     # ---- 4. Part 1 checks a real design can fail ----
     # One tooth of the seconds pinion left with a lump 0.2 proud of its tip (radius 0.15): drawn, that tooth
@@ -600,9 +601,11 @@ ANCHORS = [
       detail(["P1", "details", "strength", "meshes", 0, "gears", "third", "margin"], lambda v: -0.2 < v < 0, "about -0.12")]),
 
     # ---- 5. Part 2 ----
-    # hands.day names the hour hand's mobile and part: C3 fails, s2 = 0. R = 13/30; x 16/17 = 104/255 = 0.407843
+    # hands.day names the hour hand's mobile and part: C3 fails, s2 = 0. P2's checks still run and both fail:
+    # day_hand (the "24-hour hand" turns with the hour wheel, 1/12 per hour, not 1/24) and day_place (its axis is
+    # the hour axis, 0 < 6.0 away). R = 13/30; x 16/17 = 104/255 = 0.407843
     ("job 24-hour hand on the hour hand's part", b_day_on_hour_part,
-     X(P2={"gates": ["day_declared"]}), []),
+     X(P2={"gates": ["day_declared"], "checks": ["day_hand", "day_place"]}), []),
     # The day pair cut and declared 15/35 instead of 10/40 (same module 0.16 and centre distance 4.0): the
     # 24-hour hand turns 1/12 x 48/24 x 15/35 = 1/14 per hour, not 1/24 (the day train is not rated for
     # strength). Shared parts: P2 and P3 fail day_hand (3). D = (1/10)(3/4) + (3/20)(3/27) = 3/40 + 1/60 = 11/120;
