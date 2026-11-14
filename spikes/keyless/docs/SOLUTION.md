@@ -38,7 +38,11 @@ springs, a strong mainspring, and crown steps. The grader implements that as fol
 - **Carriers.** A mobile may ride on the stem (`on_stem`, slide) or on another rot mobile (`carrier`: a
   wheel on a swinging lever). Its pose is the carrier's rotation composed with its own coordinate. A
   pushed carrier answers for its riders' contacts. A carrier's slide (the stem's pull) does not move its
-  riders, so on a pure pull step they are not counted as moved.
+  riders, so on a pure pull step they are not counted as moved. A free rider of a carrier that turned in
+  this step yields first, like a spring (a sliding pinion riding up symmetric or Breguet ramps). If the
+  step then cannot be resolved, the step is re-resolved with riders treated as ordinary pushed parts: a
+  rider whose chain behind it is held (ml01's sliding pinion, backed by the yoke, the yoke by the
+  setting lever in position 2) drives instead of giving way.
 - **Rest and start.** Before AT-0's rest check and at the start of every phase, the rig clears each
   mobile's overlaps within 0.3 mm of surface travel. It turns still-overlapping wheels as drivers with
   the train resolving, so wheels drawn tooth through tooth are phased. Then it lets the springs return
@@ -142,8 +146,8 @@ this on a real design.
 | 1 Wind | 1 forward turn: never blocked; arbor ≥ 2°; minute ≤ 1° | 39.7° per turn (old run) |
 | 2 Hold | 40 steps let go: run-back ≤ 20° | TBD (new run) |
 | 3 Run | stored turns × 8 h ≥ 0.75 h (capacity 6 turns); arbor turned forward 20° alone never blocked | about 0.88 h |
-| 4 Backward | 360° backward: never blocked; arbor between -4° and +1°; minute ≤ 1° | -0.3° (old slip test) |
-| 5 Set | 5 stops during the pull, ±15° test turns: never blocked, never both trains; ends in the right mode; then ±90°: minute ≥ 5° each way, arbor loses ≤ 4° | minute ±19.2° per 180° (old) |
+| 4 Backward | 360° backward: never blocked; arbor between -4° and +1°; minute ≤ 1°; then 90° forward winds > 1° | -0.3° (old slip test) |
+| 5 Set | 5 stops during the pull, ±15° test turns: never blocked, never both trains; ends in the right mode; then ±90°: minute ≥ 2° each way, arbor loses ≤ 4° | minute ±19.2° per 180° (old) |
 | 6 Return | the same stops, pushing back; then 90° forward winds > 1° | TBD |
 
 Implied design range:

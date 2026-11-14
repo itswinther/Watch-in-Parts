@@ -37,7 +37,9 @@ STEP_WEIGHTS = {"assemble": 0.05, "wind": 0.20, "hold": 0.15, "run": 0.20, "back
                 "return": 0.10}          # importance to the owner; each step scored on its own (no gating)
 W_WHOLE = 0.50                   # whole-build term: 1 only if every step passes (B's formula, SESSION 14:45)
 PREWIND_DEG = 45.0               # AT-2 and later start from an arbor the rig has wound this far itself
-COUPLED_TURN = 30.0              # AT-3 and AT-4 end with a forward crown turn that must wind > STILL_TOL
+COUPLED_TURN = 90.0              # AT-3 and AT-4 end with a forward crown turn that must wind > STILL_TOL. A quarter
+                                 # turn: Marco Lang's ml01 takes up about 24 deg of slack after the let-go and up to
+                                 # one Breguet pitch (30 deg, 12 teeth) more after a backward turn (realcad/REAL_CAD.md)
 WIND_TURNS = 1.0                 # AT-1: crown turned forward this many turns in position 1
 WIND_BAND = (3.0, 12.0)          # ... crown turns per barrel-arbor turn, inclusive (STANDARDS.md)
 BARREL_HOURS_PER_TURN = 8.0      # AT-3: the barrel turns once per 8 hours while the watch runs
@@ -57,7 +59,8 @@ CLICK_RUNBACK = 30.0             # ... the arbor may run back at most this much 
 HOLD_TOL = 4.0                   # AT-4 and AT-5: the arbor may lose at most this much
 STILL_TOL = 1.0                  # a train counts as driven if it moves more than this in a test turn
 SET_TURN = 90.0                  # AT-5: in position 2, turn forward and backward this much
-SET_MIN = 5.0                    # ... the minute wheel must turn at least this much each way
+SET_MIN = 2.0                    # ... the minute wheel must turn at least this much each way (twice STILL_TOL; Marco
+                                 # Lang's ml01 turns its real minute wheel about 4.5 deg per 90 deg of crown)
 SWEEP_TURN = 24.0                # AT-5 and AT-6: test turn each way at each stop of the pull and the push
 SWEEP_SAMPLES = 5                # stops between position 1 and 2 (both ends included)
 REWIND_TURN = 90.0               # AT-6: after pushing back in, a forward turn must wind again

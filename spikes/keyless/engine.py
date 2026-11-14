@@ -457,8 +457,10 @@ class World:
         return [o for o in self.bodies.values() if o is not b and (
             any(self.dqs.get(o.name, (0.0, 0.0))) or (o.carrier and self.dqs.get(o.carrier, (0.0, 0.0))[0] > 0))]
 
-    def resolve(self):
-        """Sweeps of pushes. Light springs yield first, then free bodies, then the mainspring arbor."""
+    def resolve(self, riders_yield=True):
+        """Sweeps of pushes. Light springs yield first, then free bodies, then the mainspring arbor.
+        With riders_yield False, carried parts are pushed like any free part (see step())."""
+        self._rider_yielded = False
         fixed_names = {n for n, o in self.bodies.items() if o.kind == "fixed"}
         immovable = {n for n, o in self.bodies.items() if o.kind in ("fixed", "main", "driven")}
         for _ in range(SWEEPS):
@@ -469,7 +471,7 @@ class World:
             # contact pushes them along that freedom within the friction rule (a Breguet ramp) they give
             # way rather than drive the train behind the part they touch; a steep face (a Breguet drive
             # face) cannot be cleared that way and drives the train instead
-            riders = [b for b in self.movers if b.kind == "contact" and b.carrier
+            riders = [b for b in self.movers if riders_yield and b.kind == "contact" and b.carrier
                       and self.dqs.get(b.carrier, (0.0, 0.0))[0] > 0]
             order = [b for b in self.movers if b.kind == "spring"] + riders + \
                     [b for b in self.movers if b.kind != "spring" and b not in riders]
@@ -478,6 +480,7 @@ class World:
                     continue
                 movers_now = self.moved_now(b)
                 if b in riders and self._rider_yields(b, immovable):
+                    self._rider_yielded = True
                     continue
                 if b.kind == "spring":
                     # a pushed spring part moves only the way the contact pushes it (the sign of the
@@ -547,6 +550,13 @@ class World:
         d.p += dp
         self.dqs = {driver: (abs(dq), abs(dp))}
         ok = self.resolve()
+        if not ok and self._rider_yielded:
+            # a carried part gives way only if what it pushes can give way too; where the chain behind it
+            # is held (a sliding pinion backed by the yoke, the yoke by the setting lever), it drives
+            self.restore(snap)
+            d.q += dq
+            d.p += dp
+            ok = self.resolve(riders_yield=False)
         if ok and _depth < 4 and self._max_travel() > MAX_STEP_TRAVEL:
             self.restore(snap)
             return (self.step(driver, dq / 2, dp / 2, main_try_arc / 2, _depth + 1)

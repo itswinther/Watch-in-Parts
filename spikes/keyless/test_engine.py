@@ -164,6 +164,24 @@ def rider_drives_steep_face():
     return ok and abs(math.degrees(paddle.q) - 20) < 2 and abs(arm.q) < 0.01
 
 
+def rider_drives_when_chain_blocked():
+    """...and where giving way would push a part behind it into something that cannot move (a sliding
+    pinion backed by the yoke, the yoke by the setting lever), it does not give way: it drives."""
+    stem = E.Body("stem", S.cyl_x(0, 0, 0, 5, 0.3, 48), "driven", dof="stem", point=(0, 0, 0), direction=(1, 0, 0))
+    arm = E.Body("arm", S.box((1.0, 0.3, -0.1), (1.2, 1.5, 0.1)), "contact", dof="slide", direction=(1, 0, 0),
+                 carrier="stem")
+    link = _block("link", (0.9, 0.3, -0.1), (1.0, 1.5, 0.1), "contact", dof="slide", direction=(1, 0, 0))
+    lever = _block("lever", (0.8, 0.3, -0.1), (0.9, 1.5, 0.1), "contact", dof="slide", direction=(1, 0, 0))
+    wall = _block("wall", (0.7, 0.3, -0.1), (0.8, 1.5, 0.1), "fixed")
+    pts = [(x, y, z) for y in (0.2, 1.6) for (x, z) in ((0.6, 0.92), (1.4, 0.12), (0.6, 1.2), (1.4, 1.2))]
+    ramp = E.Body("ramp", m3.Manifold.hull_points(pts), "contact", dof="rot", point=(0, 0, 0), direction=(1, 0, 0))
+    w = E.World([stem, arm, link, lever, wall, ramp])
+    ok = all(w.step("stem", dq=math.radians(2.0)) for _ in range(10))
+    print("rider on a ramp, backed by a link against a wall: not blocked=%s, ramp turned %.1f deg (expect ~8: "
+          "contact from about 12 deg), rider slid %.3f" % (ok, math.degrees(ramp.q), arm.q))
+    return ok and math.degrees(ramp.q) > 5 and abs(arm.q) < 0.02
+
+
 def touching_can_be_pushed():
     """A part resting on a fixed face with an overlap between TOL/2 and TOL (touching) can still be
     pushed along that face: one threshold, TOL."""
@@ -279,6 +297,7 @@ if __name__ == "__main__":
     res = {"gear": gear_pair(), "ratchet": ratchet_pawl(), "mainspring": mainspring_click(), "detent": detent(),
            "spring_through_link": spring_through_link(), "pull_moves_no_rider": pull_moves_no_rider(),
            "rider_gives_way": rider_gives_way(), "rider_drives_steep_face": rider_drives_steep_face(),
+           "rider_drives_when_chain_blocked": rider_drives_when_chain_blocked(),
            "touching_can_be_pushed": touching_can_be_pushed(), "fit_clearance": fit_clearance(),
            "phase_gears": phase_gears(), "carried_wheel": carried_wheel(), "force_direction": force_direction(),
            "stem_protrudes_at_crown_end": stem_protrudes_at_crown_end(),

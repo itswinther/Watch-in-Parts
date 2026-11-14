@@ -149,8 +149,11 @@ The acceptance test is run on a simulated test rig:
   towards rest. On the way they push along any `free` or `spring` part in their path, but never a fixed
   part, the stem, the barrel arbor, or another spring away from that spring's own rest side; where they
   cannot push, they stop.
-- **Carried mobiles** move with their carrier's rotation (see `carrier`). A carrier that is pushed also
-  answers for the mobiles it carries.
+- **Carried mobiles** move with their carrier's rotation (see `carrier`; a mobile `on_stem` turns with
+  the stem). A carrier that is pushed also answers for the mobiles it carries. A `free` mobile carried by
+  a carrier that is turning is light along its own freedom: where a contact pushes it that way within the
+  friction rule, it gives way first, like a spring. If it cannot give way, or giving way would push a
+  part behind it into something that cannot move, it drives what it touches.
 - **The mainspring** always urges the barrel arbor against winding. It is much stronger than any
   spring, and pushes whatever is in its way.
 - **The crown** is turned in steps of $STEP_DEG degrees and pulled or pushed in steps of $PULL_STEP. A
