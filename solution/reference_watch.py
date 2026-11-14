@@ -57,6 +57,14 @@ SPOKE = dict(rim=0.4, spokes=5, width=0.45, fillet=0.15)  # crossed-out wheels
 Z = {"A": (0.1, 0.9), "B": (1.4, 1.85), "C": (2.6, 3.2), "D": (3.8, 4.4), "E": (6.4, 7.2), "F": (7.6, 8.4)}
 PLATE, BRIDGE, DIAL = (-1.7, -0.3), (5.0, 6.0), (8.8, 9.6)
 PLATE_MARGIN = 0.1        # plate rim beyond the farthest swept wheel or hand
+# The five-part delivery (--keyless) sets this True before building: the minute hand is pressed on a pipe of the
+# cannon pinion, as in a real watch, so that the cannon pinion and the minute hand are one seated piece when they
+# become their own mobile carried by friction on the centre arbor (friction_on, Decisions 15:47). Centre arbor
+# 0.3 above the cannon's seat (to CANNON_ARBOR_TOP), cannon bore 0.3 + FIT with a pipe of CANNON_PIPE_R up to
+# CANNON_PIPE_TOP (inside the hour wheel's 0.6 bore), minute hand with a blind bore resting on the pipe's top.
+# False (default): the four-part reference as before, byte for byte in its JSON files.
+CANNON_PIPE = False
+CANNON_PIPE_R, CANNON_PIPE_TOP, CANNON_ARBOR_TOP, CANNON_BORE_ARBOR = 0.55, 11.0, 10.9, 0.3
 PILLAR_R, PILLAR_GAP = 0.75, 0.15
 dist = lambda p, q: math.hypot(p[0] - q[0], p[1] - q[1])
 on = lambda c, r, a: (c[0] + r * math.cos(a), c[1] + r * math.sin(a))
@@ -214,6 +222,9 @@ def centre_arbor(C, lo, hi, pinion, wheel):
     """Centre arbor, stepped so the cannon (on the 0.6 -> 0.5 step at 6.4) and the minute hand (on the
     0.5 -> 0.35 step at 10.7) slide down onto it."""
     cx, cy = C
+    if CANNON_PIPE:     # the cannon's pipe carries the minute hand; the arbor above the cannon's seat is thinner
+        return union([cyl(cx, cy, lo, 6.4, 0.6), cyl(cx, cy, lo - 0.7, lo + 0.01, 0.3),
+                      cyl(cx, cy, 6.39, CANNON_ARBOR_TOP, CANNON_BORE_ARBOR), pinion, wheel])
     return union([cyl(cx, cy, lo, 6.4, 0.6), cyl(cx, cy, lo - 0.7, lo + 0.01, 0.3),
                   cyl(cx, cy, 6.39, 10.7, 0.5), cyl(cx, cy, 10.69, 11.4, 0.35), pinion, wheel])
 
@@ -241,7 +252,11 @@ def build_stage1():
     w2, ph_w2 = wheel_at(C, 90, M_C, Z["C"], ang(C, T), hub_r=1.2)
     parts["centre"] = centre_arbor(C, lo, hi, p2, w2)
     can, ph_can = gear_at(C, 12, M_E, Z["E"], ang(C, Mw))
-    parts["cannon"] = minus(can, cyl(cx, cy, Z["E"][0] - 1, Z["E"][1] + 1, 0.5 + FIT))
+    if CANNON_PIPE:
+        parts["cannon"] = minus(union([can, cyl(cx, cy, Z["E"][1] - 0.01, CANNON_PIPE_TOP, CANNON_PIPE_R)]),
+                                cyl(cx, cy, Z["E"][0] - 1, CANNON_PIPE_TOP + 1, CANNON_BORE_ARBOR + FIT))
+    else:
+        parts["cannon"] = minus(can, cyl(cx, cy, Z["E"][0] - 1, Z["E"][1] + 1, 0.5 + FIT))
     p3, _ = gear_at(T, 12, M_C, Z["C"], ang(T, C), (90, ph_w2))
     w3, ph_w3 = wheel_at(T, 96, M_D, Z["D"], ang(T, S))
     parts["fourth"] = union([arbor(T, lo, hi), p3, w3])
@@ -257,7 +272,11 @@ def build_stage1():
     parts["hour_wheel"] = minus(union([cyl(cx, cy, 7.4, 9.9, 1.0), cyl(cx, cy, 9.89, 10.3, 0.9), cyl(cx, cy, 8.4, 8.65, 1.6), w6]),
                                 cyl(cx, cy, 7.0, 10.6, 0.6))
     parts["hour_hand"] = hand(C, 9.9, 10.2, 6.0, 1.3, 0.9 + FIT)
-    parts["minute_hand"] = hand(C, 10.7, 11.0, 9.0, 1.0, 0.35 + FIT)
+    if CANNON_PIPE:     # a blind bore: the hand rests on the pipe's top (held down, one piece with the cannon)
+        h = union([cyl(cx, cy, 10.7, CANNON_PIPE_TOP + 0.3, 1.0), box((cx, cy - 0.3, 10.7), (cx + 9.0, cy + 0.3, 11.0))])
+        parts["minute_hand"] = minus(h, cyl(cx, cy, 9.7, CANNON_PIPE_TOP, CANNON_PIPE_R + FIT))
+    else:
+        parts["minute_hand"] = hand(C, 10.7, 11.0, 9.0, 1.0, 0.35 + FIT)
     parts["seconds_hand"] = hand(S, 9.9, 10.2, 5.0, 0.9, 0.3 + FIT)
     parts.update(frame(P, with_day=False))
     doc = {
@@ -620,6 +639,8 @@ def main_job_keyless(out, split=True, check=False):
     os.makedirs(work)
     log = os.path.join(work, "keyless_v2.log")
     ref, dl, kv2 = os.path.join(work, "job"), os.path.join(work, "delivery"), os.path.join(work, "kv2")
+    global CANNON_PIPE
+    CANNON_PIPE = True      # the minute hand on the cannon's pipe (A's split makes cannon + minute hand one mobile)
     main_job(ref, split)
     _run_a([KEYLESS_V2, kv2, "--ref", ref] + (["--check"] if check else []) + ["--deliver", dl], log)
     mp = os.path.join(dl, "movement.json")
