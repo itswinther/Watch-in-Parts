@@ -1,0 +1,6 @@
+/app/BRIEF.md
+/app/supplied/barrel_arbor.stl
+/app/supplied/dial_plate.stl
+/app/supplied/main_plate.stl
+/app/supplied/minute_post.stl
+/app/supplied/minute_wheel.stl
