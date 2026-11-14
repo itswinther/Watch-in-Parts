@@ -162,44 +162,46 @@ def old_wheel_as_fixed(d, base):
     edit(d, lambda doc: doc["fixed"].append("third"))
 
 
-def _far_xy(d, gap):
-    """A point `gap` beyond the case radius, to +x of case_centre: clear of every part of any reference."""
-    with open(os.path.join(d, "movement.json")) as f:
-        cx, cy = json.load(f)["case_centre"]
-    return cx + W.CASE_RADIUS + gap, cy
+def _excess(limit, used):
+    """A volume that takes `used` 10 percent of `limit` over `limit`."""
+    return limit - used + 0.1 * limit
 
 
 def heavy_fixed_block(d, base):
-    """One extra fixed part: a solid block whose volume alone is 1.2 x FIXED_VOLUME_MAX. No room for it in the
-    case, so it stands outside the case radius (size fails too), at z 0 to 6, clear of everything."""
+    """One extra fixed part: a slab under the main plate, centred under the minute hand's axis (where the plate
+    carries the centre arbor's bearing), its top face on the plate's bottom face so it is joined to the frame. It is
+    as thick as the height limit leaves (less 0.01), inside the case, below every mobile, and big enough to take the
+    fixed parts 10 percent of FIXED_VOLUME_MAX over that limit."""
     import cadquery as cq
     from geometry.core import write_step
-    s = math.sqrt(1.2 * W.FIXED_VOLUME_MAX / 6.0)
-    x, y = _far_xy(d, s)
-    write_step(os.path.join(d, "parts", "ballast.step"), cq.Workplane("XY").box(s, s, 6.0, centered=(True, True, False)).translate((x, y, 0)))
+    m = W.load_movement(d)
+    e = m.extent()
+    t = W.CASE_HEIGHT - (e["z_max"] - e["z_min"]) - 0.01
+    side = math.sqrt(_excess(W.FIXED_VOLUME_MAX, m.volumes()[0]) / t)
+    x, y = m.mobiles[m.hands["minute"][0]]["axis"]
+    slab = cq.Workplane("XY").box(side, side, t, centered=(True, True, False)).translate((x, y, e["z_min"] - t))
+    write_step(os.path.join(d, "parts", "ballast.step"), slab)
     edit(d, lambda doc: doc["fixed"].append("ballast"))
 
 
 def heavy_mobile(d, base):
-    """One extra mobile: a solid cylinder of volume 1.2 x MOBILE_VOLUME_MAX turning in a closed fixed cage with
-    0.1 clearance (so it turns freely and is held), outside the case radius (size fails too)."""
+    """One extra part on the minute hand's mobile (driven): a disc on the top of the centre arbor, resting on the
+    minute hand, bored to the arbor's top step (radius 0.35 in the reference's centre_arbor, plus its FIT), up to
+    the arbor's top, so the movement gets no taller. Its radius takes the mobile parts 10 percent of
+    MOBILE_VOLUME_MAX over that limit. Seated (bore on the arbor, resting on the hand), one piece with the mobile,
+    clear of everything else (nothing else reaches above the minute hand)."""
     import cadquery as cq
     from geometry.core import write_step
-    r, c, wall = 5.0, 0.1, 1.0
-    h = 1.2 * W.MOBILE_VOLUME_MAX / (math.pi * r * r)
-    x, y = _far_xy(d, r + c + wall + 5.0)
-    rotor = cq.Workplane("XY").circle(r).extrude(h).translate((x, y, 0))
-    side = 2 * (r + c + wall)
-    cage = cq.Workplane("XY").box(side, side, h + 2 * (c + wall), centered=(True, True, False)).translate((x, y, -c - wall))
-    cage = cage.cut(cq.Workplane("XY").circle(r + c).extrude(h + 2 * c).translate((x, y, -c)))
-    cage = cage.cut(cq.Workplane("XY").circle(1.0).extrude(wall + 2).translate((x, y, h)))     # a vent: one shell
-    write_step(os.path.join(d, "parts", "flywheel.step"), rotor)
-    write_step(os.path.join(d, "parts", "flywheel_cage.step"), cage)
-
-    def fn(doc):
-        doc["fixed"].append("flywheel_cage")
-        doc["mobiles"]["flywheel"] = {"axis": [x, y], "parts": ["flywheel"]}
-    edit(d, fn)
+    m = W.load_movement(d)
+    mob, hand_part = m.hands["minute"]
+    x, y = m.mobiles[mob]["axis"]
+    z0 = m.mobiles[mob]["parts"][hand_part].bounding_box()[5]
+    z1 = m.mobiles[mob]["solid"].bounding_box()[5]
+    bore = 0.35 + ref.FIT
+    r = math.sqrt(_excess(W.MOBILE_VOLUME_MAX, m.volumes()[1]) / (math.pi * (z1 - z0)) + bore * bore)
+    disc = cq.Workplane("XY").workplane(offset=z0).center(x, y).circle(r).circle(bore).extrude(z1 - z0)
+    write_step(os.path.join(d, "parts", "ballast_disc.step"), disc)
+    edit(d, lambda doc: doc["mobiles"][mob]["parts"].append("ballast_disc"))
 
 
 # (name, stage, change(folder, base), expected score)
@@ -316,9 +318,9 @@ ANCHORS = [
     ("s1 one tooth count declared wrong", 1, lambda d, b: edit(d, lambda doc: doc["meshes"][1].update(driven_teeth=31)),
      fails(1, "train", "tolerant", "minute", "hour", "seconds")),     # the jam shows in the shifted positions too
     ("s1 barrel not held from above", 1, lambda d, b: edit(d, lambda doc: doc["fixed"].remove("barrel_cock")), fails(1, "held")),
-    # mass budget: these pass as "light and size fail" only once the reference itself meets the budget
-    ("s1 one extra solid block added as a fixed part", 1, heavy_fixed_block, fails(1, "light", "size")),
-    ("s1 one extra heavy mobile in a fixed cage", 1, heavy_mobile, fails(1, "light", "size")),
+    # mass budget: one extra part takes the fixed parts, or the mobile parts, 10 percent over the limit
+    ("s1 one extra solid block added as a fixed part", 1, heavy_fixed_block, fails(1, "light")),
+    ("s1 a heavy disc added to a driven mobile", 1, heavy_mobile, fails(1, "light")),
     # tooth exactness: the thinned pinion does not drive, so the seconds hand downstream stands still
     ("s1 a pinion with teeth thinned until they no longer drive", 1, thin_seconds_pinion, fails(1, "train", "tolerant", "seconds")),
     ("s1 a pinion cut 3 percent too coarse", 1, coarse_third_pinion, fails(1, "tolerant")),
@@ -356,7 +358,7 @@ ANCHORS = [
      lambda d, b: parts_score(1, len(W.load_movement(d).all_parts()))),     # all parts, the barrel included
     ("s1 seconds pinion with fat teeth (no backlash)", 1, fat_seconds_pinion, fails(1, "tolerant")),
     # the reference's bridge is a skeleton: it blocks the barrel, third, centre, fourth and seconds (measured)
-    ("s4 bridge on before the wheels", 4, lambda d, b: edit(d, reorder("bridge", "barrel"), "assembly.json"), parts_score(5)),
+    ("s4 bridge on before the wheels", 4, lambda d, b: edit(d, reorder("bridge", "barrel"), "assembly.json"), parts_score(6)),   # the barrel cock now rises to the bridge to join the frame, so it cannot come down through it either
 ]
 
 
