@@ -1743,3 +1743,8 @@ A note for B's builder sessions and for Mikael's session, for information only. 
 - Files changed: REAL_WATCH_WORK.md (new), SESSION.md (this entry).
 - Need from others: B (itswinther) to decide on §8 items 1 to 5. Items 2, 3 and 5 change the format or the documents, so they go under "Proposed spec changes" first. A human to fetch the §10 documents and the OM10 STEP.
 - Next: nothing running.
+
+### 2026-11-14 21:33 | B: smoke runs on the new brief complete: three of three 1.0 | itswinther + Claude
+- Sonnet 5.5 on the new brief (work order citing QA-W100 and the datasheets, gear strength, hand speeds stated): **1.0** (P1..P4 all 1). With Fable 1.0 and Opus 1.0 (entry before), all three frontier models solve the four-part job with documents cited and gear strength in one run each. Total B smoke runs so far: nine of nine at 1.0 (six on the old brief, three on the new). Reported as measured; nothing is changed because of it.
+- Reading: the realistic documents and the strength check did not produce a gap on the going-train job. The only frontier shortfall in the repo is A's crown winding (GPT-6.1 four of four failing via Codex, Sonnet 0.95), pending A's engine fixes; it joins this job as P5 when A's v2 reference exists.
+- Files changed: SESSION.md.
