@@ -1,0 +1,13 @@
+# Public-domain source documents (committed verbatim)
+
+Decided by Mikael, 14 Nov 14:20: public-domain documents are committed so the task stays reproducible if a website disappears. Copyrighted documents are fetched at build time instead (see REAL_DATASHEETS.md at the repo root). Books are committed as their archive.org or Project Gutenberg text (the scanned PDFs are 4 to 17 MB of images); government standards as the original PDF.
+
+| File | What it is | Why public domain | Source URL | sha256 |
+| --- | --- | --- | --- | --- |
+| grossmann_lessons_1905_djvu.txt | J. & H. Grossmann, Lessons in Horology (1905), text; mainspring torque law with worked example | published before 1929 (US public domain) | https://archive.org/download/lessonsinhorolog00gros/lessonsinhorolog00gros_djvu.txt | 9463393b8bf93baaded5aae2a420866d3215df70d36d3da5f24fbdb553afec3f |
+| saunier_treatise_1887_djvu.txt | C. Saunier, Treatise on Modern Horology (1887 English ed.), text; includes keyless works | published before 1929 (US public domain) | https://archive.org/download/in.ernet.dli.2015.220719/2015.220719.A-Treatise_djvu.txt | d00a3d7bef471f6ea4cc9e24d02f029823afba53eaa050fa0d938203ba705f2f |
+| gutenberg_saunier_76850.txt | C. Saunier, watchmaker's hand book (1892 ed.), Project Gutenberg text (keeps the PG licence header) | published before 1929 (US public domain) | https://www.gutenberg.org/cache/epub/76850/pg76850.txt | e488d40d61d5239354c78b04714b5d11b0f09a9344c11c8a7fcb59a34638a770 |
+| lewis_friction_1896_djvu.txt | W. Lewis, Friction and Lubrication (1896), text; friction data | published before 1929 (US public domain) | https://archive.org/download/frictionlubricat00lewi/frictionlubricat00lewi_djvu.txt | dd9440cded3179eb3d7a49eaa2a5f79f95ea5fc73538c57f618a076752d0d3e1 |
+| mil_std_1472h.pdf | MIL-STD-1472H, human engineering (knob torque limits, Fig. 10) | US government work; distribution statement A / public release | https://everyspec.com/MIL-STD/MIL-STD-1400-1499/download.php?spec=MIL-STD-1472H.057041.pdf | 74ca9890986bd86d787a964cd2f37f101e1ec9c8c2087259abf1e11abdb96d65 |
+| naca_tr_1062.pdf | NACA TR-1062, friction of metals | US government work; distribution statement A / public release | https://ntrs.nasa.gov/api/citations/19930092108/downloads/19930092108.pdf | 752dbb70e788a455708f8194e8624926881dfee95812530cdaf474e16a24ea2e |
+| faa_hf_std_001b.pdf | FAA HF-STD-001B, human factors design standard | US government work; distribution statement A / public release | https://hf.tc.faa.gov/publications/2016-12-human-factors-design-standard/full_text.pdf | bcbbe0276186f2042e6b9bca9af5eb08e2e7d502b89b944735e49e6ef696fa4d |
