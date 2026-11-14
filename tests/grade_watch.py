@@ -621,9 +621,13 @@ def keyless_prepare(m, work, run=None):
     return gates, details
 
 
-def keyless_run(work, deadline=None, force=False, jobs=1):
+def keyless_run(work, deadline=None, force=False, jobs=1, extra=()):
     """P5, second half: A's AT-0 to AT-6 on the world in work, in a fresh interpreter (tests/grade_keyless.py), at
-    most KJ.KEYLESS_TIMEOUT_S and never past deadline. Returns (checks, details): one check per A step."""
+    most KJ.KEYLESS_TIMEOUT_S and never past deadline. Returns (checks, details): one check per A step.
+    The runner starts in its own process group (a new session); on a timeout the whole group is killed, so no
+    worker it spawned (--jobs) keeps running. Steps whose phases finished before then are kept (the runner writes
+    its result file after every phase). extra: more arguments for the runner (tests only: --test-fault)."""
+    import signal
     import subprocess
     steps = list(KJ.step_weights())
     checks = {k: False for k in steps}
@@ -632,15 +636,32 @@ def keyless_run(work, deadline=None, force=False, jobs=1):
         return checks, {"error": "not run: the whole-run time limit of %d s was reached" % JOB_TIME_LIMIT_S}
     out = os.path.join(work, "result.json")
     cmd = [sys.executable, "-I", os.path.join(HERE, "grade_keyless.py"), work, out] + (["--force"] if force else []) \
-        + (["--jobs", str(jobs)] if jobs > 1 else [])
+        + (["--jobs", str(jobs)] if jobs > 1 else []) + list(extra)
     det = {}
+    p = None
+
+    def kill_group():
+        try:
+            os.killpg(p.pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
     try:
-        p = subprocess.run(cmd, cwd=HERE, capture_output=True, text=True, timeout=limit)
-        if p.returncode != 0:
-            det["process"] = {"returncode": p.returncode, "stderr": p.stderr[-4000:]}
-    except subprocess.TimeoutExpired:
-        det["process"] = {"error": "timeout after %.0f s; the phases finished before it are kept" % limit}
+        p = subprocess.Popen(cmd, cwd=HERE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+                             start_new_session=True)
+        try:
+            _, err = p.communicate(timeout=limit)
+            if p.returncode != 0:
+                det["process"] = {"returncode": p.returncode, "stderr": err[-4000:]}
+        except subprocess.TimeoutExpired:
+            kill_group()
+            p.communicate()
+            det["process"] = {"error": "timeout after %.0f s; the phases finished before it are kept" % limit}
+        finally:
+            kill_group()            # also any worker left behind by a runner that exited
+        det.setdefault("process", {})["pgid"] = p.pid
     except Exception as e:      # noqa: a failed part, never a crash
+        if p is not None:
+            kill_group()
         det["process"] = {"error": "%s: %s" % (type(e).__name__, e)}
     try:
         with open(out) as f:
