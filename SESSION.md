@@ -23,6 +23,8 @@ work that takes. Work from the top; when the situation changes, reorder this
 list instead of dropping items. The one fixed date is the submission: Sunday
 15 Nov, 10:00 Helsinki.
 
+This list assigns nobody. Who does what is decided by the team in person.
+
 **1. The gap (30 points): frontier models must consistently score below the reference.**
 - Find a mechanism that makes Fable, Opus and GPT-class models fall short, not only Sonnet. Today no frontier model does.
 - Finish and test the three checks being built (`light`, `seated`, `tolerant`).
@@ -44,10 +46,11 @@ list instead of dropping items. The one fixed date is the submission: Sunday
 - Close the open review notes (hard links, project name in file headers, the reference's thin drive margin).
 
 **4. Craft (15 points): it makes sense and anyone can reproduce it.**
-- One Harbor task for all stages; reference 1.0 and do-nothing 0.0 in the sandbox; one command in the README.
+- One Harbor task for all stages; reference 1.0 and do-nothing 0.0 in the sandbox; one command in the README. Rebuild the image and rerun both whenever a new check lands.
 - A dry run from a clean clone by someone who did not write the README.
 - Repeat runs, so every reported number is shown to repeat.
-- README in a human voice; demo script and video.
+- README in a human voice (the organisers warned that AI-written READMEs read poorly); demo script and video, using `tools/viewer/` to show the reference running and a part that cannot be installed.
+- A read of `environment/public/SPEC_WATCH.md` by someone who knows watches, flagging anything a watchmaker would call wrong.
 
 **5. Tiebreaker: a smaller model that improves after training on our environment.**
 - This was cut from scope on day one. The organisers name it as the tiebreaker and as something they look for, so it is back on the list; a human should confirm.
@@ -66,9 +69,6 @@ line and ticks it. Format: `- [ ] to B, from A, HH:MM: what you need`.
 - [ ] to A, from B, 2026-11-14 04:55: read your 05:10 to 06:00 entries. The most useful run now is the one neither of us has: the **frozen** staged watch on GPT-6.1-sol in your Harbor sandbox. Stages and grader are on main (`tests/grade_watch.py --stage N --prev FOLDER`, bundles from `environment/make_bundle_watch.py OUT --stage N --prev FOLDER --tools no`, reference from `solution/reference_watch.py`). Each step must start a fresh conversation, receive the previous step's submission as read-only `previous/` plus a copy in `work/`, and must not be able to change frozen files (the grader checks bytes). Image needs `manifold3d==3.5.5 scipy trimesh numpy`. Grading a stage takes 2 to 3 minutes. If you can run three chains, post the per-step scores here. An overnight orchestrator session may change the stage list (it adds a change-request stage and STEP files); the three-stage version on main at commit 6bfb150 is stable and is the one to run first.
 - [ ] to A, from B (orchestrator), 2026-11-14 06:07: what Harbor needs for the staged watch as it is on main now. (1) Four steps, one fresh conversation each: design, extend, change, assemble; step N+1 starts from step N's `submission/` (bundle: `python environment/make_bundle_watch.py OUT --stage N --prev PREV_SUBMISSION`). (2) Grader per step: `python -I tests/grade_watch.py /abs/submission --stage N [--prev /abs/previous_submission] --reward /logs/verifier/reward.txt`; it needs `geometry/` next to `tests/`. (3) Image packages for agent and verifier: `manifold3d==3.5.5 scipy numpy trimesh cadquery==2.8.0` (cadquery-ocp 7.9.3.1.1; build123d cannot be installed beside it). (4) Verifier resources: a stage takes 3 to 4 minutes and peaks at 5.7 GB of memory here (the thickness check on the plates), so give it 8 GB and a 15-minute timeout. (5) Reward: Harbor has only `mean` and `final`; our chain score is the product, so use `final` with the last verifier grading all four folders, or report the mean and say so. (6) Artifacts per step: `movement.json`, `parts/*.step`, `scripts/`, and `assembly.json` at step 4. STL parts stop being accepted once the reference port lands tonight.
 - [ ] to A, from B (orchestrator), 2026-11-14 06:11: when you package the staged watch in Harbor, the verifier must take `--prev` from the previous step's own graded submission, never from the `previous/` copy inside the agent's workspace (the agent can edit that copy, which would defeat the frozen-file and kept-file checks). Found by the reviewer; `environment/run_clean_chain.sh` already does this.
-- [ ] to A (Mikael), from itswinther's first B session, 2026-11-14 10:15: priority for today. (1) Package the four-stage watch as one Harbor task (the two orchestrator requests above have the details) and show oracle 1.0 and nop 0.0 in the sandbox. (2) Run three chains on GPT-6.1-sol; that is the first non-Claude reading of this task. (3) When the three new checks (`light`, `seated`, `tolerant`) land on main, rebuild the image and rerun oracle and nop. Please post a time estimate for (1) here.
-- [ ] to E (Yoseph), from itswinther's first B session, 2026-11-14 10:15: README.md was rewritten today for the watch task (it described Board in a Box, dated 00:50). It is yours again from here: give it a human pass, since the organisers warned that AI-written READMEs read poorly. Then the 10-minute demo: script and video, using `tools/viewer/` to show the reference running and the Sonnet part that cannot be installed (`transcripts/watch4_chain_sonnet`, final entry of 09:14 explains it).
-- [ ] to Abhishek, from itswinther's first B session, 2026-11-14 10:15: two jobs nobody owns. (1) Attack the grader the way the judges will for 15 minutes: try to score without building a working watch, and write down every attempt and its score; anything that scores should become an anchor in `tests/test_anchors_watch.py`. (2) Define and run the stop-early baseline (what an agent leaves if it stops after its first submission) and add its score to the README table. Also read `environment/public/SPEC_WATCH.md` as someone who knows watches and flag anything a watchmaker would call wrong.
 
 ## Open questions
 
@@ -673,4 +673,12 @@ Template:
 - Not verified, or assumed: `HANDOFF_OVERNIGHT.md` and `HANDOFF_PROMPT.md` still contain last night's time boxes; they describe a finished run and I left them as history.
 - Files changed: SESSION.md, `CLAUDE.md`.
 - Need from others: a human yes or no on putting the training tiebreaker back in scope.
+- Next: nothing running here.
+
+### 2026-11-14 10:18 | Requests to teammates withdrawn | itswinther + Claude (first B session)
+- Did: on itswinther's instruction, removed the three requests I added at 10:15 (to Mikael, Yoseph and Abhishek). The work they named is all in "To do, in priority order" at the top of this file, which now says it assigns nobody: who does what is decided by the team in person. Where my 10:15 and 10:25 entries say those requests exist or stand, read this entry instead.
+- Verified by (command and result): `grep -c "first B session, 2026-11-14 10:15" SESSION.md` counts no remaining request line.
+- Not verified, or assumed: three older lines addressed to A are still under Requests (mine of 04:55 about a GPT run, and the orchestrator's of 06:07 and 06:11 with the Harbor details). I left them because they carry technical details whoever packages the task will need.
+- Files changed: SESSION.md.
+- Need from others: nothing.
 - Next: nothing running here.
