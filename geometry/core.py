@@ -36,7 +36,10 @@ def read_stl(path, max_triangles, max_bytes):
         for line in text.splitlines():
             p = line.split()
             if len(p) == 4 and p[0] == "vertex":
-                vals.append((float(p[1]), float(p[2]), float(p[3])))
+                try:
+                    vals.append((float(p[1]), float(p[2]), float(p[3])))
+                except ValueError:
+                    raise FormatError("non-numeric vertex coordinate")
                 if len(vals) > 3 * max_triangles:
                     raise FormatError("more than %d triangles" % max_triangles)
         if not vals or len(vals) % 3:
@@ -164,6 +167,16 @@ def write_step(path, shape):
     w.Transfer(shape, STEPControl_AsIs)
     if w.Write(str(path)) != IFSelect_RetDone:
         raise OSError("STEP write failed: %s" % path)
+    # neutral header: the base name only, no time stamp, no author or directories
+    import re
+    with open(path, "r", encoding="latin-1") as f:
+        text = f.read()
+    name = os.path.basename(str(path)).replace("'", "")
+    text = re.sub(r"FILE_NAME\(.*?\);\s*(?=FILE_SCHEMA)", "FILE_NAME('%s','',(''),(''),'','','');\n" % name,
+                  text, count=1, flags=re.S)
+    text = re.sub(r"Open CASCADE STEP translator [0-9.]+ \d+", "part", text)    # a per-process counter otherwise
+    with open(path, "w", encoding="latin-1", newline="") as f:
+        f.write(text)
 
 
 def _step_child(path, lin, ang, max_tris, max_tri_faces, memory_mb):

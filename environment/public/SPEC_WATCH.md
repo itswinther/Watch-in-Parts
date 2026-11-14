@@ -45,33 +45,45 @@ The barrel is a mobile named `barrel`. You must hold it like any other mobile.
 
 ## What you submit
 
-A folder `work/` containing `movement.json` and one file per part,
+A folder `work/` containing `movement.json` and one STEP file per part,
 `parts/<name>.step`, made with a CAD kernel (CadQuery 2.8.0 / OpenCASCADE is
-installed). Keep the scripts that made your parts in `scripts/`; they are copied
-with your submission and kept with it, but nothing in them is run or graded.
-An STL file `parts/<name>.stl` is also accepted for a part; if both
-`parts/<name>.step` and `parts/<name>.stl` exist, the `.step` file is the part
-and the `.stl` is ignored.
+installed). STL part files are not accepted. Keep the scripts that made your
+parts in `scripts/`; they are copied with your submission and archived with it,
+but nothing in them is run or graded. **A later stage does not receive your
+scripts**: the next engineer gets only `movement.json` and the `parts/` STEP
+files (in `work/` and again in `previous/`), and reworks the movement from
+those files alone.
 
-Each part is in its assembled position. At most 60 parts. Part names use
-letters, digits, `_` and `-`. How a part file becomes the solid that every test
+The supplied barrel is the one exception: it is given as a mesh,
+`meshes/barrel.stl` (binary STL, millimetres, in its place). You do not submit
+it. To use it in your own checks, load it as a `manifold3d` solid, for example
+with `tools/kernel.py`: `kernel.tris_to_manifold(kernel.read_stl(path, 200000,
+33554432))`.
+
+Each part is in its assembled position. At most 60 parts. Part and mobile
+names use letters, digits, `_` and `-`, 1 to 40 characters; `barrel` is taken
+by the supplied barrel and may not name a part or another mobile. Tooth counts
+in `meshes` are integers from 3 to 1000. `movement.json` may be at most
+1,048,576 bytes and `assembly.json` at most 67,108,864 bytes. Every file the
+grader opens (`movement.json`, `assembly.json`, each part file, and the `parts/`
+folder) must be a real file or folder inside the submission folder: a symbolic
+link, or a file outside the folder, is a format error. How a part file becomes the solid that every test
 below uses:
 
-- STEP: at most 16,777,216 bytes. The file's length unit must be millimetre; a
-  file in any other unit (inch, metre, ...) is rejected, not converted. It must
-  hold exactly one solid, valid by OpenCASCADE's shape check, and nothing outside
-  that solid. A file with more than 500 flat three-sided faces is rejected as a
-  faceted mesh rather than a CAD solid. Reading and meshing one file may take at
-  most 120 s and 4,096 MB of memory (it runs in its own process). The solid is meshed with OpenCASCADE (`BRepMesh_IncrementalMesh`)
-  with a linear deflection of 0.001 mm (absolute) and an angular deflection of
-  0.1 radians, and the triangles then go through the STL rule below. A meshed
-  curved surface lies within 0.001 mm of the true one (inside a convex surface,
-  outside a concave one, such as a hole).
-- STL: at most 33,554,432 bytes.
-- Either way: at most 200,000 triangles (for STEP, after meshing); the triangles,
-  with identical vertices joined, must form a single closed manifold shell with
-  positive volume, and its volume may change by at most 0.5% when the solid is
-  united with itself.
+- At most 16,777,216 bytes. The file's length unit must be millimetre; a file
+  in any other unit (inch, metre, ...) is rejected, not converted. It must hold
+  exactly one solid, valid by OpenCASCADE's shape check, and nothing outside
+  that solid. A file whose solid has more than 500 flat faces with exactly three
+  edges is rejected (the rule counts only such triangular faces). Reading and meshing one file may take
+  at most 120 s and 4,096 MB of memory (it runs in its own process).
+- The solid is meshed with OpenCASCADE (`BRepMesh_IncrementalMesh`) with a
+  linear deflection of 0.001 mm (absolute) and an angular deflection of 0.1
+  radians. A meshed curved surface lies within 0.001 mm of the true one (inside
+  a convex surface, outside a concave one, such as a hole).
+- The mesh may have at most 200,000 triangles; the triangles, with identical
+  vertices joined, must form a single closed manifold shell with positive
+  volume, and its volume may change by at most 0.5% when the solid is united
+  with itself.
 
 `movement.json`:
 
@@ -299,7 +311,7 @@ numbers above let you decide that yourself.
 | `extent` | largest distance from the case centre reached by anything, the z range, and how far each hand reaches |
 | `submit` | copies `movement.json` and the parts it names to the submission folder; answers "accepted" or a format error |
 
-PART is one of your part names (no `.stl`) or `barrel`. MOBILE is one of your
+PART is one of your part names (no extension) or `barrel`. MOBILE is one of your
 mobile names or `barrel`.
 
 You may import the code the tools use (`tools/geometry/`) in your own scripts.

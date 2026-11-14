@@ -10,7 +10,7 @@ movement after you: one adds a 24-hour hand without changing your wheels, one
 reworks it for a faster barrel while keeping as many of your part files as it
 can, one assembles it part by part. Their rules are in the same document.
 
-Write your parts and `movement.json` into `work/`, then submit as the spec
+Parts are STEP files made with CadQuery (see "What you submit" in the spec). Write your parts and `movement.json` into `work/`, then submit as the spec
 describes. Only the last accepted submission is graded, by a separate program.
 You have about 35 minutes.
 

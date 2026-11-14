@@ -58,6 +58,9 @@ STEP_MEMORY_MB = 4096           # address-space limit of that child process
 SELF_UNION_TOL = 0.005          # relative volume change allowed under self-union
 MAX_SCRIPTS_BYTES = 4 * 1024 * 1024   # scripts/ copied with a submission (never opened by the grader)
 MAX_SCRIPT_FILES = 200
+MAX_ASSEMBLY_BYTES = 64 * 1024 * 1024
+MIN_TEETH, MAX_TEETH = 3, 1000       # tooth counts declared in meshes (Movement.__init__ still types 3 and 1000 inline)
+MAX_NAME_LEN = 40                    # the {1,40} of NAME_RE
 
 
 # ---------------- supplied barrel and a cylinder helper ----------------
@@ -323,8 +326,8 @@ class Movement:
 
 
 def load_movement(folder):
-    """folder holds movement.json and parts/<name>.step or .stl. Opens only the files movement.json names."""
-    path = os.path.join(folder, "movement.json")
+    """folder holds movement.json and parts/<name>.step. Opens only the files movement.json names."""
+    path = inside(folder, os.path.join(folder, "movement.json"))
     if os.path.getsize(path) > MAX_JSON_BYTES:
         raise FormatError("movement.json too large")
     with open(path, "r", encoding="utf-8") as f:
@@ -336,7 +339,9 @@ def load_movement(folder):
     def load(name):
         p = part_path(folder, name)
         if p is None:
-            raise FormatError("part file parts/%s.step (or .stl) not found" % name)
+            if os.path.isfile(os.path.join(folder, "parts", name + ".stl")):
+                raise FormatError("parts/%s.stl: parts must be STEP files (parts/%s.step); STL is not accepted" % (name, name))
+            raise FormatError("part file parts/%s.step not found" % name)
         try:
             return load_part_file(p)
         except FormatError as e:
@@ -344,21 +349,35 @@ def load_movement(folder):
     return Movement(doc, load)
 
 
+def inside(folder, path):
+    """path, if it is a regular file (or directory) inside folder reached without any symbolic link;
+    FormatError otherwise. Missing files are returned unchanged (the caller reports them)."""
+    rel = os.path.relpath(path, folder)
+    cur = folder
+    for comp in rel.split(os.sep):
+        cur = os.path.join(cur, comp)
+        if os.path.islink(cur):
+            raise FormatError("%s is a symbolic link; submitted files must be real files in the folder" % rel)
+    if os.path.exists(path):
+        real, root = os.path.realpath(path), os.path.realpath(folder)
+        if os.path.commonpath([real, root]) != root:
+            raise FormatError("%s lies outside the submitted folder" % rel)
+    return path
+
+
 def part_path(folder, name):
-    """parts/<name>.step if it exists, else parts/<name>.stl if it exists, else None."""
-    for ext in (".step", ".stl"):
-        p = os.path.join(folder, "parts", name + ext)
-        if os.path.isfile(p):
-            return p
-    return None
+    """parts/<name>.step if it exists, else None. (Parts are STEP files; STL parts are not accepted.)
+    FormatError if it, or parts/, is a symbolic link or lies outside folder."""
+    p = inside(folder, os.path.join(folder, "parts", name + ".step"))
+    return p if os.path.isfile(p) else None
 
 
 def load_part_file(p):
-    """One part file (.step or .stl) as a normalised Manifold, or FormatError."""
-    if p.endswith(".step"):
-        return core.load_step_part(p, MAX_STEP_BYTES, MAX_TRIANGLES, STEP_LINEAR_DEFLECTION, STEP_ANGULAR_DEFLECTION,
-                                   STEP_MAX_TRIANGLE_FACES, STEP_TIMEOUT_S, STEP_MEMORY_MB, SELF_UNION_TOL)
-    return core.load_part(p, MAX_TRIANGLES, MAX_STL_BYTES, SELF_UNION_TOL)
+    """One STEP part file as a normalised Manifold, or FormatError."""
+    if not p.endswith(".step"):
+        raise FormatError("parts must be STEP files (.step)")
+    return core.load_step_part(p, MAX_STEP_BYTES, MAX_TRIANGLES, STEP_LINEAR_DEFLECTION, STEP_ANGULAR_DEFLECTION,
+                               STEP_MAX_TRIANGLE_FACES, STEP_TIMEOUT_S, STEP_MEMORY_MB, SELF_UNION_TOL)
 
 
 def _asm_messages(name, solid, P, lo, hi):
@@ -392,8 +411,8 @@ def _asm_messages(name, solid, P, lo, hi):
 
 def load_assembly(folder, movement):
     """assembly.json: {"order": [every part name and "barrel"], "paths": {name: [4x4, ...]}}"""
-    path = os.path.join(folder, "assembly.json")
-    if os.path.getsize(path) > 64 * 1024 * 1024:
+    path = inside(folder, os.path.join(folder, "assembly.json"))
+    if os.path.getsize(path) > MAX_ASSEMBLY_BYTES:
         raise FormatError("assembly.json too large")
     with open(path, "r", encoding="utf-8") as f:
         try:
