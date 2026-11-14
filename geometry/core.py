@@ -1,8 +1,9 @@
 """Mesh loading, rigid transforms, intersection volume, voxels. No spec numbers here."""
+import os
 import struct
+import sys
 import numpy as np
 import manifold3d as m3
-from scipy import ndimage
 
 SEG = 64
 
@@ -83,7 +84,11 @@ def tris_to_manifold(tris):
 
 def load_part(path, max_triangles, max_bytes, self_union_tol):
     """Returns a normalised Manifold or raises FormatError (gate G1)."""
-    tris = read_stl(path, max_triangles, max_bytes)
+    return tris_to_part(read_stl(path, max_triangles, max_bytes), self_union_tol)
+
+
+def tris_to_part(tris, self_union_tol):
+    """Triangles -> normalised Manifold: one closed shell, positive volume, unchanged by self-union."""
     man = tris_to_manifold(tris)
     vol = man.volume()
     if not np.isfinite(vol) or vol <= 0:
@@ -96,6 +101,159 @@ def load_part(path, max_triangles, max_bytes, self_union_tol):
         if abs(a - vol) > self_union_tol * vol:
             raise FormatError("volume changes under self-union")
     return norm
+
+
+# ---------- STEP (CAD) ----------
+# A STEP part is read with OpenCASCADE (OCP) in a child process with a hard time limit,
+# checked (millimetre units, exactly one valid solid, not a dump of mesh triangles),
+# tessellated with an absolute linear deflection (mm) and an angular deflection (radians),
+# and the triangles then go through the same path as an STL (tris_to_part).
+def read_step(path, max_bytes, max_triangles, linear_deflection, angular_deflection,
+              max_triangle_faces, timeout_s, memory_mb):
+    """Triangles (N x 3 x 3, mm) of the one solid in a STEP file, or FormatError."""
+    import subprocess
+    try:
+        size = os.path.getsize(path)
+    except OSError:
+        raise FormatError("cannot be read")
+    if size > max_bytes:
+        raise FormatError("file larger than %d bytes" % max_bytes)
+    with open(path, "rb") as f:
+        head = f.read(64).lstrip()
+    if not head.startswith(b"ISO-10303-21;"):
+        raise FormatError("not a STEP file (must start with ISO-10303-21;)")
+    cmd = [sys.executable, "-I", os.path.abspath(__file__), "--step-child", os.path.abspath(path),
+           repr(float(linear_deflection)), repr(float(angular_deflection)), str(int(max_triangles)),
+           str(int(max_triangle_faces)), str(int(memory_mb))]
+    try:
+        r = subprocess.run(cmd, stdin=subprocess.DEVNULL, capture_output=True, timeout=timeout_s)
+    except subprocess.TimeoutExpired:
+        raise FormatError("reading the STEP file took longer than %g s" % timeout_s)
+    out = r.stdout
+    if r.returncode == 0 and out[:3] == b"OK\n" and (len(out) - 3) % 72 == 0 and len(out) > 3:
+        tris = np.frombuffer(out[3:], dtype="<f8").reshape(-1, 3, 3).copy()
+        if not np.isfinite(tris).all():
+            raise FormatError("non-finite vertex coordinate")
+        return tris
+    if out[:4] == b"ERR\n":
+        raise FormatError(out[4:].decode("utf-8", "replace").strip()[:300])
+    raise FormatError("the STEP reader failed on this file (exit code %d)" % r.returncode)
+
+
+def load_step_part(path, max_bytes, max_triangles, linear_deflection, angular_deflection,
+                   max_triangle_faces, timeout_s, memory_mb, self_union_tol):
+    """A STEP part as a normalised Manifold, exactly as the grader builds it, or FormatError."""
+    tris = read_step(path, max_bytes, max_triangles, linear_deflection, angular_deflection,
+                     max_triangle_faces, timeout_s, memory_mb)
+    return tris_to_part(tris, self_union_tol)
+
+
+def write_step(path, shape):
+    """Write a CadQuery Workplane / Shape or an OCP TopoDS_Shape to STEP in millimetres."""
+    from OCP.STEPControl import STEPControl_Writer, STEPControl_AsIs
+    from OCP.Interface import Interface_Static
+    from OCP.IFSelect import IFSelect_RetDone
+    if hasattr(shape, "vals"):                       # cadquery Workplane
+        vals = shape.vals()
+        if len(vals) != 1:
+            raise ValueError("the Workplane holds %d objects; combine them into one solid first" % len(vals))
+        shape = vals[0]
+    shape = getattr(shape, "wrapped", shape)
+    Interface_Static.SetCVal_s("write.step.unit", "MM")
+    w = STEPControl_Writer()
+    w.Transfer(shape, STEPControl_AsIs)
+    if w.Write(str(path)) != IFSelect_RetDone:
+        raise OSError("STEP write failed: %s" % path)
+
+
+def _step_child(path, lin, ang, max_tris, max_tri_faces, memory_mb):
+    """Runs in its own process. Prints b'OK\\n' + float64 triangles, or b'ERR\\n' + a message."""
+    import resource
+    resource.setrlimit(resource.RLIMIT_AS, (memory_mb * 1024 * 1024, memory_mb * 1024 * 1024))
+    sys.stdout.flush()
+    out = os.fdopen(os.dup(1), "wb")                 # our channel; OpenCASCADE's own printing goes to /dev/null
+    os.dup2(os.open(os.devnull, os.O_WRONLY), 1)
+
+    def fail(msg):
+        out.write(b"ERR\n" + msg.encode())
+        out.flush()
+        os._exit(0)
+    from OCP.STEPControl import STEPControl_Reader
+    from OCP.IFSelect import IFSelect_RetDone
+    from OCP.Interface import Interface_Static
+    from OCP.TColStd import TColStd_SequenceOfAsciiString
+    from OCP.TopExp import TopExp_Explorer, TopExp
+    from OCP.TopAbs import TopAbs_SOLID, TopAbs_FACE, TopAbs_EDGE, TopAbs_REVERSED
+    from OCP.TopoDS import TopoDS
+    from OCP.TopTools import TopTools_IndexedMapOfShape
+    from OCP.BRepAdaptor import BRepAdaptor_Surface
+    from OCP.GeomAbs import GeomAbs_Plane
+    from OCP.BRepCheck import BRepCheck_Analyzer
+    from OCP.BRepMesh import BRepMesh_IncrementalMesh
+    from OCP.BRep import BRep_Tool
+    from OCP.TopLoc import TopLoc_Location
+    Interface_Static.SetCVal_s("xstep.cascade.unit", "MM")
+    rd = STEPControl_Reader()
+    if rd.ReadFile(path) != IFSelect_RetDone:
+        fail("not a readable STEP file")
+    names, _a, _s = TColStd_SequenceOfAsciiString(), TColStd_SequenceOfAsciiString(), TColStd_SequenceOfAsciiString()
+    rd.FileUnits(names, _a, _s)
+    units = [names.Value(i + 1).ToCString().strip().lower() for i in range(names.Length())]
+    if not units:
+        fail("no length unit declared; the unit must be millimetre")
+    bad = [u for u in units if u not in ("millimetre", "millimeter", "mm")]
+    if bad:
+        fail("length unit is %s; the unit must be millimetre" % bad[0])
+    rd.TransferRoots()
+    shape = rd.OneShape()
+    if shape is None or shape.IsNull():
+        fail("no shape in the file")
+    solids = []
+    ex = TopExp_Explorer(shape, TopAbs_SOLID)
+    while ex.More():
+        solids.append(TopoDS.Solid_s(ex.Current()))
+        ex.Next()
+    if len(solids) != 1:
+        fail("holds %d solids; exactly one solid is required" % len(solids))
+    solid = solids[0]
+    all_faces, solid_faces = TopTools_IndexedMapOfShape(), TopTools_IndexedMapOfShape()
+    TopExp.MapShapes_s(shape, TopAbs_FACE, all_faces)
+    TopExp.MapShapes_s(solid, TopAbs_FACE, solid_faces)
+    if all_faces.Extent() != solid_faces.Extent():
+        fail("holds faces outside its solid")
+    if not BRepCheck_Analyzer(solid).IsValid():
+        fail("the solid is not valid (OpenCASCADE BRepCheck)")
+    tri_faces = 0
+    for i in range(1, solid_faces.Extent() + 1):
+        f = TopoDS.Face_s(solid_faces.FindKey(i))
+        if BRepAdaptor_Surface(f).GetType() == GeomAbs_Plane:
+            em = TopTools_IndexedMapOfShape()
+            TopExp.MapShapes_s(f, TopAbs_EDGE, em)
+            if em.Extent() == 3:
+                tri_faces += 1
+    if tri_faces > max_tri_faces:
+        fail("%d flat triangular faces (limit %d): a faceted mesh, not a CAD solid" % (tri_faces, max_tri_faces))
+    BRepMesh_IncrementalMesh(solid, lin, False, ang, True)
+    chunks, n = [], 0
+    for i in range(1, solid_faces.Extent() + 1):
+        f = TopoDS.Face_s(solid_faces.FindKey(i))
+        loc = TopLoc_Location()
+        tri = BRep_Tool.Triangulation_s(f, loc)
+        if tri is None:
+            fail("a face could not be tessellated")
+        tr = loc.Transformation()
+        nodes = np.array([tri.Node(k).Transformed(tr).Coord() for k in range(1, tri.NbNodes() + 1)], dtype=np.float64)
+        idx = np.array([tri.Triangle(k).Get() for k in range(1, tri.NbTriangles() + 1)], dtype=np.int64) - 1
+        if f.Orientation() == TopAbs_REVERSED:
+            idx = idx[:, ::-1]
+        n += len(idx)
+        if n > max_tris:
+            fail("more than %d triangles after tessellation" % max_tris)
+        chunks.append(nodes[idx])
+    tris = np.concatenate(chunks).astype("<f8")
+    out.write(b"OK\n" + tris.tobytes())
+    out.flush()
+    os._exit(0)
 
 
 # ---------- primitives ----------
@@ -202,6 +360,7 @@ def grid_for(lo, hi, h, jitter):
 
 def edt(mask):
     """Distance, in voxels, from each True voxel to the nearest False voxel centre."""
+    from scipy import ndimage
     return ndimage.distance_transform_edt(mask)
 
 
@@ -214,6 +373,11 @@ def opening_test(solid, erode_vox, dilate_vox):
         return 0, float("inf")
     dist_to_core = edt(~core)
     opened = (dist_to_core <= dilate_vox) & pad
+    from scipy import ndimage
     _, n = ndimage.label(opened, structure=np.ones((3, 3, 3)))
     dev = edt(~opened)[pad].max()
     return int(n), float(dev)
+
+
+if __name__ == "__main__" and len(sys.argv) == 8 and sys.argv[1] == "--step-child":
+    _step_child(sys.argv[2], float(sys.argv[3]), float(sys.argv[4]), int(sys.argv[5]), int(sys.argv[6]), int(sys.argv[7]))
