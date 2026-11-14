@@ -1,6 +1,10 @@
-"""Reference for the four-stage watch task.
+"""Reference for the watch task.
     python solution/reference_watch.py OUT_DIR
 writes OUT_DIR/stage1 .. OUT_DIR/stage4, each with movement.json and parts/*.step (stage4 also assembly.json).
+    python solution/reference_watch.py OUT_DIR --job
+writes OUT_DIR as one delivery folder (Decisions 2026-11-14 15:44): movement.json (the stage-2 design: 8-hour
+barrel, with the 24-hour hand), variant_6h.json (the stage-3 design: same frame, 1/6 barrel turn per hour),
+assembly.json (order and paths for movement.json) and parts/*.step, one file per part name for both movements.
 Parts are built on the CAD kernel (geometry/watch_gears_cad.py, CadQuery/OpenCASCADE) and written as STEP.
 Like an agent, each stage copies the part files it keeps from the stage before and writes only new ones.
 
@@ -314,13 +318,20 @@ ORDER = ["main_plate", "barrel", "barrel_cock", "third_54", "centre_36", "fourth
          "minute_wheel", "hour_wheel", "day", "day_idler", "dial", "hour_hand", "seconds_hand", "day_hand", "minute_hand"]
 
 
-def build_assembly(folder):
-    """Every part comes straight down from above, in ORDER."""
+# the same order for the 8-hour movement, which has the 60/30 third wheel and centre pinion
+ORDER_8H = [{"third_54": "third", "centre_36": "centre"}.get(n, n) for n in ORDER]
+
+
+def build_assembly(folder, order=None):
+    """Every part comes straight down from above, in `order` (default ORDER)."""
+    order = ORDER if order is None else order
     m = W.load_movement(folder)
     allp = m.all_parts()
+    if sorted(order) != sorted(allp):
+        raise RuntimeError("assembly order does not list every part once: %s" % sorted(set(order) ^ set(allp)))
     lo, hi = m.assembly_box()
     paths = {}
-    for n in ORDER:
+    for n in order:
         bb = allp[n].bounding_box()
         lift = hi[2] + 0.5 - bb[2]
         k = int(math.ceil(lift / 0.19))
@@ -330,7 +341,7 @@ def build_assembly(folder):
             T[2, 3] = lift * (1 - i / k)
             P.append(T.tolist())
         paths[n] = P
-    return {"order": ORDER, "paths": paths}
+    return {"order": list(order), "paths": paths}
 
 
 def write(folder, doc, parts):
@@ -366,5 +377,41 @@ def main(out):
     print("stage1 parts", len(parts1), "stage2 parts", len(parts2), "axes", {k: [round(v, 2) for v in a] for k, a in P.items() if k != "case"}, "case", P["case"])
 
 
+def main_job(out):
+    """One delivery folder: the 8-hour movement with its 24-hour hand, the 6-hour variant on the same frame,
+    the assembly plan for the 8-hour movement, and one parts/ folder. A part name used by both movements is
+    one solid and one file; a part that differs between them has its own name."""
+    out = os.path.abspath(out)
+    doc1, parts1, P, phase = build_stage1()
+    doc2, parts2 = build_stage2(doc1, parts1, P, phase)
+    doc3, parts3 = build_stage3(doc2, parts2, P)
+    names = lambda d: list(d["fixed"]) + [p for mm in d["mobiles"].values() for p in mm["parts"]]
+    shared = set(names(doc2)) & set(names(doc3))
+    for n in shared:
+        if parts2[n] is not parts3[n]:
+            raise RuntimeError("part %s differs between the two movements but has one name" % n)
+    if doc2["fixed"] != doc3["fixed"] or doc2["case_centre"] != doc3["case_centre"]:
+        raise RuntimeError("the two movements do not share one frame")
+    if os.path.isdir(out):
+        shutil.rmtree(out)
+    os.makedirs(os.path.join(out, "parts"))
+    solids = {n: parts2[n] for n in names(doc2)}
+    solids.update({n: parts3[n] for n in names(doc3)})
+    for n, solid in solids.items():
+        GC.export(os.path.join(out, "parts", n + ".step"), solid)
+    with open(os.path.join(out, "movement.json"), "w") as f:
+        json.dump(doc2, f, indent=1)
+    with open(os.path.join(out, "variant_6h.json"), "w") as f:
+        json.dump(doc3, f, indent=1)
+    with open(os.path.join(out, "assembly.json"), "w") as f:
+        json.dump(build_assembly(out, ORDER_8H), f)
+    print("job folder", out, "parts", len(solids), "movement", len(names(doc2)), "variant", len(names(doc3)),
+          "only in variant", sorted(set(names(doc3)) - set(names(doc2))), "only in movement", sorted(set(names(doc2)) - set(names(doc3))))
+
+
 if __name__ == "__main__":
-    main(sys.argv[1] if len(sys.argv) > 1 else "out")
+    args = [a for a in sys.argv[1:] if a != "--job"]
+    if "--job" in sys.argv[1:]:
+        main_job(args[0] if args else "out_job")
+    else:
+        main(args[0] if args else "out")
