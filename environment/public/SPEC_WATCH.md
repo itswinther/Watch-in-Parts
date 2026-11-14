@@ -13,8 +13,8 @@ of the stage before:
 4. **Assemble** it: an order and a collision-free path for every part.
 
 Your instruction file says which stage you are doing. Read the later stages too:
-what you design in stage 1 has to survive them, and the size limit is the same
-at every stage.
+what you design in stage 1 has to survive them, and the size limits and the two
+volume limits are the same at every stage.
 
 The mainspring barrel is supplied (`meshes/barrel.stl`). It turns **clockwise,
 once every 8 hours** (at stage 3 it turns once every 6 hours; see "Stage 3").
@@ -77,7 +77,8 @@ below uses:
   exactly one solid, valid by OpenCASCADE's shape check, and nothing outside
   that solid. A file whose solid has more than 500 flat faces with exactly three
   edges is rejected (the rule counts only such triangular faces). Reading and meshing one file may take
-  at most 120 s and 4,096 MB of memory (it runs in its own process).
+  at most 120 s and, where the operating system supports such a limit,
+  4,096 MB of memory (it runs in its own process).
 - The solid is meshed with OpenCASCADE (`BRepMesh_IncrementalMesh`) with a
   linear deflection of 0.001 mm (absolute) and an angular deflection of 0.1
   radians. A meshed curved surface lies within 0.001 mm of the true one (inside
@@ -169,9 +170,11 @@ Each passes or fails. Weights in brackets; the total is 23.
     is held makes them intersect by more than 0.01 mm3 (the teeth really drive).
 - **The train runs with its arbors slightly out of place [2].** Arbors are never
   exactly where they were drawn. Every declared mesh must also pass the test of
-  "The train runs" twice more: with the driven mobile moved 0.03 straight away
-  from the driver's axis, and with it moved 0.03 straight towards the driver's
-  axis (in both cases it turns about its moved axis). In both positions the same
+  "The train runs" twice more: with the driven mobile (the one declared as
+  `driven` in the mesh) moved 0.03 straight away from the driver's axis, and
+  with it moved 0.03 straight towards the driver's axis (in both cases it turns
+  about its moved axis; if the two axes coincide, "away" is +x and "towards" is
+  -x). In both positions the same
   three conditions must hold, with the same steps and the same turning angles as
   in the drawn position. This requirement does not change which meshes drive the
   hands: that is decided in the drawn position only.
@@ -205,7 +208,10 @@ Each passes or fails. Weights in brackets; the total is 23.
   most 278 mm3. The limits are the same at every stage. Volumes are those
   of the solids the grader builds from your part files: for the fixed parts, the
   volume of their union; for the mobiles, the sum of the volumes of every part
-  of every mobile, each part counted on its own.
+  of every mobile, each part counted on its own. Stages 2 and 3 add or remake
+  parts under these same two limits, and the parts you receive cannot be made
+  lighter without being changed, so a design that spends a limit at stage 1
+  leaves no room for what the later stages need.
 
 ## Score
 
