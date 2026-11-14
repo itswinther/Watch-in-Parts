@@ -112,8 +112,8 @@ below uses:
 - `fixed`: parts that do not move (plates, bridges, pillars, cocks). Fixed parts
   must not overlap one another.
 - `mobiles`: each mobile is a set of parts that turn together as one rigid body
-  about the vertical line through `axis`. Parts of one mobile may overlap each
-  other. Do not list `barrel`; it already exists.
+  about the vertical line through `axis`. Parts of one mobile touch but must not
+  overlap each other (see "Assembled"). Do not list `barrel`; it already exists.
 - `meshes`: every pair of gears that drive one another, with the tooth count of
   the gear on each mobile. All meshes are external (the two mobiles turn in
   opposite directions). Speeds are worked out from these tooth counts as exact
@@ -128,8 +128,12 @@ If either fails the score is 0.
 
 - Files: `movement.json` and every part it names are valid as described above.
 - Assembled: in the positions given, the fixed parts taken together and each
-  mobile (the barrel included) intersect one another by at most 0.01 mm3, and no
-  two fixed parts intersect each other by more than 0.01 mm3.
+  mobile (the barrel included) intersect one another by at most 0.01 mm3, no
+  two fixed parts intersect each other by more than 0.01 mm3, and no two parts
+  of the same mobile intersect each other by more than 0.01 mm3 (they may touch,
+  like a wheel on its arbor). Because curved surfaces are meshed to within 0.001
+  of the true surface, a bore and a shaft drawn with the same radius can overlap
+  by slivers; a fit needs a small radial clearance.
 
 ## Scored requirements
 
@@ -143,6 +147,13 @@ Each passes or fails. Weights in brackets; the total is 17.
   other mobiles). For the two moves along z, only the fixed parts and mobiles on
   the same axis (within 0.01) count: a wheel may not be kept in place by a wheel
   on a different arbor. So each mobile can turn but cannot wander.
+- **Seated [2].** Every part of a mobile that has more than one part is seated
+  on the rest of its mobile: moved 0.3 along +x, -x, +y and -y in turn it must
+  intersect the other parts of the same mobile by more than 0.01 mm3 every time,
+  and moved 0.3 along +z or along -z (at least one of the two) it must intersect
+  them by more than 0.01 mm3. So a wheel needs a bore that fits its arbor and a
+  shoulder to rest against; a part that floats free of its mobile fails. The
+  supplied barrel and mobiles of one part are not tested.
 - **The train runs [3].** No mobile is given two different speeds by the
   declared meshes, each of the three hand mobiles is driven from the barrel, and
   every declared mesh passes this test. Starting from the assembled position,
@@ -302,8 +313,8 @@ Rules for a path:
 3. Between consecutive poses no vertex of the part moves more than 0.2.
 4. At least 2 and at most 1,500 poses.
 5. In every pose the part intersects each part placed before it by at most
-   0.01 mm3. Parts of the same mobile are pressed onto each other and are not
-   tested against one another. The barrel counts as a part of the mobile `barrel`.
+   0.01 mm3, parts of its own mobile included: every part has to slide into
+   place past the parts already there.
 
 A part whose path obeys rules 1 to 5 is installed. A part that breaks a rule is
 not installed, but it still stands in its assembled position for the parts that

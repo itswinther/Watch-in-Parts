@@ -220,6 +220,32 @@ class Movement:
         return worst, pair
 
     # ---- assembly ----
+    # ---- parts of one mobile: no overlap, and each seated on the rest ----
+    def mobile_overlap(self):
+        """Largest overlap between two parts of the same mobile: (volume, 'mobile:a/b')."""
+        worst, pair = 0.0, None
+        for k, mo in self.mobiles.items():
+            names = list(mo["parts"])
+            for i in range(len(names)):
+                for j in range(i + 1, len(names)):
+                    v = ivol(mo["parts"][names[i]], mo["parts"][names[j]])
+                    if v > worst:
+                        worst, pair = v, "%s:%s/%s" % (k, names[i], names[j])
+        return worst, pair
+
+    def seated(self, name):
+        """Each part of a mobile with more than one part, moved HELD_MOVE along each axis direction:
+        its overlap with the other parts of that mobile. {} for a one-part mobile."""
+        parts = self.mobiles[name]["parts"]
+        if len(parts) < 2:
+            return {}
+        out = {}
+        for pn, ps in parts.items():
+            rest = union([q for qn, q in parts.items() if qn != pn])
+            out[pn] = {label: ivol(ps.translate([c * HELD_MOVE for c in d]), rest) for label, d in
+                       (("+x", (1, 0, 0)), ("-x", (-1, 0, 0)), ("+y", (0, 1, 0)), ("-y", (0, -1, 0)), ("+z", (0, 0, 1)), ("-z", (0, 0, -1)))}
+        return out
+
     def all_parts(self):
         """name -> (solid, group). Parts of one mobile share a group and may pass through each other."""
         out = {"barrel": (self.mobiles["barrel"]["solid"], "mobile:barrel")}
@@ -239,7 +265,7 @@ class Movement:
 
     def assembly_replay(self, order, paths):
         """Put the parts in one at a time. Returns per-part results and the list installed cleanly.
-        A part is tested against every part placed before it, except parts of its own mobile.
+        A part is tested against every part placed before it, parts of its own mobile included.
         A part missing from `order` stands in its assembled position from the start and is not installed."""
         parts = self.all_parts()
         lo, hi = self.assembly_box()
@@ -256,8 +282,6 @@ class Movement:
                 for i, T in enumerate(P):
                     mv = core.apply(solid, T)
                     for pn, ps, pg in placed:
-                        if pg == group:
-                            continue
                         v = ivol(mv, ps)
                         if v > worst[0]:
                             worst = (v, i, pn)
