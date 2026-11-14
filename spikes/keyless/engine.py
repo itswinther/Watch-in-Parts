@@ -363,10 +363,16 @@ class World:
                 movers_now = [o for o in self.bodies.values() if o is not b and (
                     any(self.dqs.get(o.name, (0.0, 0.0))) or (o.carrier and any(self.dqs.get(o.carrier, (0.0, 0.0)))))]
                 if b.kind == "spring":
-                    # light: yields to anything it touches, if it can within the friction cone
+                    # light: first it yields to anything it touches, if it can within the friction cone
                     touching = [o for o in self.bodies.values() if o is not b and self.pairs_ok(b, o)]
-                    if not self.push(b, self.budget(b, touching)):
-                        bad = True
+                    if self.push(b, self.budget(b, touching)):
+                        continue
+                    # if it cannot simply give way, a pushed spring part passes the push on like a rigid
+                    # link (it never drives anything by its own spring, only when something pushes it)
+                    pushers = {o.name for o in movers_now} | fixed_names
+                    if self.pen(b, only=pushers) > TOL and self.push(b, self.budget(b, movers_now), only=pushers):
+                        continue
+                    bad = True
                     continue
                 # pushed: clear the bodies that moved in this step (and the fixed ones); what it
                 # runs into downstream is resolved by those bodies in turn

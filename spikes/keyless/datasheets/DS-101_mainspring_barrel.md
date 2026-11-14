@@ -220,3 +220,11 @@ full wind, which is no more than M_el.
 [^d6]: Not published; derived as r = D/6 with the scaled D of Table 1, and N from [^d1] at that r. Hub Ø/t = (D/3)/t.
 [^d7]: Not published at this scale; derived as the 1:1 value from [^sel] × s³ = 4.229 [^d5]. Ratios to M½ are computed from [^sel].
 [^d5]: Geometric similarity: with every length × s, the stress σ = 6M/(h·t²) stays the same when M scales with s³, and M = E·h·t³·θ/(12·L) does scale with s³ for the same θ. N depends only on length ratios, so turns and hours do not change. https://www.codecogs.com/page/1150/v/3359 ; https://calculator.academy/spiral-torsion-spring-calculator/
+
+
+## Arbor core radius (stated)
+
+The arbor core (the hub the inner coil winds onto) is one third of the barrel's inner radius:
+Grossmann, *Lessons in Horology* (1905), art. 108–111, and Saunier, *Treatise on Modern Horology*,
+art. 517. With this stated, the turns of the mainspring are fixed, which removes the 47 h versus 28 h
+ambiguity.

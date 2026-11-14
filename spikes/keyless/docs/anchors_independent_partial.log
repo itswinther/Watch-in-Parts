@@ -1,0 +1,18 @@
+# Anchors, independent scoring (whole-build share 0.5, AT-2 held at the end), partial at 15:55
+
+| # | anchor | reward | product | steps failed |
+|---|---|---|---|---|
+| a00 | reference | 1.0000 | 1.000 | - |
+| a01 | reference, repeat 2 | 1.0000 | 1.000 | - |
+| a02 | reference, repeat 3 | 1.0000 | 1.000 | - |
+| a03 | stop early: only the stem and the barrel wheel | 0.0221 | 0.025 | wind, hold, run, backward, set, return |
+| a04 | stop early: reference without the click and the setting train | 0.1544 | 0.175 | hold, run, backward, set |
+| a05 | do nothing (empty folder) | 0.0000 | 0.000 | assemble, wind, hold, run, backward, set, return |
+| a06 | skip the hardest step: everything except the setting train (AT-5) | 0.3893 | 0.410 | set |
+| a07 | Breguet teeth symmetric (ramps both ways): cannot wind | 0.0882 | 0.100 | wind, run, backward, set, return |
+| a09 | click present, ratchet rim without teeth | 0.1544 | 0.175 | hold, run, backward, set |
+| a11 | winding works brake the barrel (square dog teeth instead of Breguet) | 0.0000 | 0.000 | assemble, wind, hold, run, backward, set, return |
+| a15 | crown wheel 0.1 off its declared axis (caught at rest) | 0.0000 | 0.000 | assemble, wind, hold, run, backward, set, return |
+| a19 | X NaN in a declared axis point | 0.0000 | 0.000 | assemble, wind, hold, run, backward, set, return |
+| a23 | X click a 0.002-thick sliver (passes through) | 0.1324 | 0.150 | assemble, hold, run, backward, set |
+| a27 | X a mobile named 'fixed' (shadowing the grader's body) | 0.0000 | 0.000 | assemble, wind, hold, run, backward, set, return |

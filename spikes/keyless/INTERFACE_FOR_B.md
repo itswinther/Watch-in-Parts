@@ -135,3 +135,13 @@ there, or offer an equivalent post. Extents are from the current reference, ×1.
   - the datasheet values (DS-*) scaled the same way where they are lengths, with forces, torques and
     stresses converted consistently and stated as such in the brief;
   - the reference regraded and the anchors rerun at that scale.
+
+## Notes from the demonstration-scale datasheets (74c05ae, s = 1.617)
+
+- **Stem travel in the joined job:** 1.29 mm (Sellita's 0.80 mm × s). Keyless v1 standalone keeps
+  `PULL = 0.9`.
+- **The brief must state the barrel's core ratio.** An arbor core radius of r = 12·t or of r = 16·t (t the
+  mainspring thickness) changes the mainspring's turns enough to move the reserve between about 47 h and
+  28 h. Without it, the reserve requirement is not decidable from the datasheet.
+- **The crown-torque limit** (finger torque on the crown) only binds for crowns below about Ø 3.1 mm. A
+  normal crown will not meet it.

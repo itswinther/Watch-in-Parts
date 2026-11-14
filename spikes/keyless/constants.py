@@ -25,8 +25,11 @@ GRADER_VERSION = "keyless-acceptance-1.0"
 STEPS = ("assemble", "wind", "hold", "run", "backward", "set", "return")
 AT_IDS = {"assemble": "AT-0", "wind": "AT-1", "hold": "AT-2", "run": "AT-3", "backward": "AT-4", "set": "AT-5",
           "return": "AT-6"}
-STEP_WEIGHTS = {"assemble": 0.20, "wind": 0.15, "hold": 0.15, "run": 0.20, "backward": 0.10, "set": 0.12,
-                "return": 0.08}          # importance to the owner; product = sum over the steps passed in order
+STEP_WEIGHTS = {"assemble": 0.05, "wind": 0.20, "hold": 0.15, "run": 0.20, "backward": 0.12, "set": 0.18,
+                "return": 0.10}          # importance to the owner; each step scored on its own (no gating)
+W_WHOLE = 0.50                   # whole-build term: 1 only if every step passes (B's formula, SESSION 14:45)
+PREWIND_DEG = 45.0               # AT-2 and later start from an arbor the rig has wound this far itself
+COUPLED_TURN = 30.0              # AT-3 and AT-4 end with a forward crown turn that must wind > STILL_TOL
 WIND_TURNS = 1.0                 # AT-1: crown turned forward this many turns in position 1
 WIND_BAND = (3.0, 12.0)          # ... crown turns per barrel-arbor turn, inclusive (STANDARDS.md)
 BARREL_HOURS_PER_TURN = 8.0      # AT-3: the barrel turns once per 8 hours while the watch runs
@@ -38,6 +41,8 @@ HOLD_STEPS = 40                  # AT-2: crown let go (free to turn) for this ma
 TAP_EVERY = 5                    # AT-2: the rig taps the movement every 5 steps while the crown is let go ...
 TAP_ARC = 0.05                   # ... each tap moves every free part up to this far (surface travel) in the
                                  # direction it can move furthest; sprung parts return, free parts do not
+HELD_LAST_STEPS = 10             # AT-2: over the last 10 hold steps the arbor moves at most HELD_DRIFT (it is held,
+HELD_DRIFT = 0.3                 # ... not still running back slowly)
 CLICK_RUNBACK = 30.0             # ... the arbor may run back at most this much (2 teeth of a 24-tooth ratchet)
 HOLD_TOL = 4.0                   # AT-4 and AT-5: the arbor may lose at most this much
 STILL_TOL = 1.0                  # a train counts as driven if it moves more than this in a test turn

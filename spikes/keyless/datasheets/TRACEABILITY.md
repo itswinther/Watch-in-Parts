@@ -249,3 +249,10 @@ This is our reading, not legal advice.
     reading.
 - **The core-ratio calibration rests on one real spring** (the 2801).
 - **The Nivaflex data** are wire data, applied to strip.
+
+
+## Realism comparison: real keyless tooth counts (not used by the grader, never in the brief)
+
+Grossmann (1905), art. 168–169, gives these counts: sliding pinion 16, setting wheels 27 and 18,
+minute wheel 30, cannon pinion 12, ratchet 44, crown wheel 42, winding pinion 18. The comparison with
+the reference is in `../docs/SOLUTION.md`.

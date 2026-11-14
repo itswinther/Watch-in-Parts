@@ -296,31 +296,43 @@ def worker(args):
         w.settle()
         fw = C.FORWARD
         out = {}
-        if phase == "first":
-            # 1 WIND
+        if phase == "wind":
+            # AT-1 WIND, from a flat mainspring
             s0 = _state(w)
             bl = _turn(w, fw * 360 * C.WIND_TURNS)
             s1 = _state(w)
             wound = _deg(s0, s1, "barrel", C.WIND_SENSE)
             ratio = (360.0 * C.WIND_TURNS / wound) if wound > 1e-9 else float("inf")
-            out["wind"] = {"blocked": bl, "barrel_deg": wound, "minute_deg": _deg(s0, s1, "minute_wheel"),
-                           "crown_turns_per_barrel_turn": round(ratio, 3) if math.isfinite(ratio) else None}
-            out["wind"]["ok"] = (bl == 0 and C.WIND_BAND[0] <= ratio <= C.WIND_BAND[1]
-                                 and abs(out["wind"]["minute_deg"]) <= C.STILL_TOL)
-            # 2 HOLD: the crown is let go, so it is free to turn (pushed like any free body)
+            out = {"blocked": bl, "barrel_deg": wound, "minute_deg": _deg(s0, s1, "minute_wheel"),
+                   "crown_turns_per_barrel_turn": round(ratio, 3) if math.isfinite(ratio) else None}
+            out["ok"] = (bl == 0 and C.WIND_BAND[0] <= ratio <= C.WIND_BAND[1]
+                         and abs(out["minute_deg"]) <= C.STILL_TOL)
+        elif phase == "first":
+            # AT-2 HOLD, independent of AT-1: a fresh movement whose arbor the rig winds itself
+            w = make_world(parts, sup, defs)
+            w.settle()
+            _set_kind(w, "barrel", "driven")
+            n = int(round(C.PREWIND_DEG / C.FREE_RUN_STEP))
+            pw_bl = sum(0 if w.step("barrel", dq=C.WIND_SENSE * math.radians(C.FREE_RUN_STEP)) else 1 for _ in range(n))
+            _set_kind(w, "barrel", "main")
+            sw = _state(w)
             _set_kind(w, "stem", "contact")
-            taps = 0
+            last = None
             for i in range(C.HOLD_STEPS):
+                if i == C.HOLD_STEPS - C.HELD_LAST_STEPS:
+                    last = _state(w)
                 w.step("fixed", dq=0.0)
                 if (i + 1) % C.TAP_EVERY == 0:
-                    taps += 1
                     _tap(w)
             _set_kind(w, "stem", "driven")
             s2 = _state(w)
-            runback = -_deg(s1, s2, "barrel", C.WIND_SENSE)
-            out["hold"] = {"runback_deg": runback, "crown_spun_back_deg": _deg(s1, s2, "stem", C.FORWARD),
-                           "ok": runback <= C.CLICK_RUNBACK}
-            # 3 RUN: from full wind, the click's run-back is lost; the rest gives the reserve
+            drift = abs(_deg(last, s2, "barrel"))
+            prewound = _deg(sw, sw, "barrel")  # 0, kept for clarity
+            runback = -_deg(sw, s2, "barrel", C.WIND_SENSE)
+            out["hold"] = {"prewind_blocked": pw_bl, "runback_deg": runback, "last_steps_drift_deg": round(drift, 4),
+                           "crown_spun_back_deg": _deg(sw, s2, "stem", C.FORWARD),
+                           "ok": pw_bl == 0 and runback <= C.CLICK_RUNBACK and drift <= C.HELD_DRIFT}
+            # AT-3 RUN, from the state after AT-2
             stored = max(0.0, C.CAPACITY_TURNS - max(runback, 0.0) / 360.0)
             reserve = stored * C.BARREL_HOURS_PER_TURN
             snap = w.snapshot()
@@ -328,9 +340,16 @@ def worker(args):
             n = int(round(C.FREE_RUN_DEG / C.FREE_RUN_STEP))
             fr_bl = sum(0 if w.step("barrel", dq=C.WIND_SENSE * math.radians(C.FREE_RUN_STEP)) else 1 for _ in range(n))
             _set_kind(w, "barrel", "main")
+            w.restore(snap)                      # the coupling check starts from the AT-2 end state
+            a = _state(w)
+            cb = _turn(w, fw * C.COUPLED_TURN)
+            b = _state(w)
+            coupled = _deg(a, b, "barrel", C.WIND_SENSE)
             w.restore(snap)
             out["run"] = {"stored_turns": round(stored, 4), "reserve_h": round(reserve, 3), "free_run_blocked": fr_bl,
-                          "ok": reserve >= C.RESERVE_MIN and fr_bl == 0}
+                          "then_winds_deg": round(coupled, 3), "then_blocked": cb,
+                          "ok": reserve >= C.RESERVE_MIN and fr_bl == 0 and cb == 0 and coupled > C.STILL_TOL
+                          and runback <= C.CLICK_RUNBACK and drift <= C.HELD_DRIFT}
             out["state"] = w.snapshot()
         elif phase == "backward":
             w.restore(start)
@@ -339,8 +358,12 @@ def worker(args):
             s1 = _state(w)
             out = {"blocked": bl, "barrel_deg": _deg(s0, s1, "barrel", C.WIND_SENSE),
                    "minute_deg": _deg(s0, s1, "minute_wheel")}
-            out["ok"] = bl == 0 and abs(out["minute_deg"]) <= C.STILL_TOL and out["barrel_deg"] >= -C.HOLD_TOL \
-                and out["barrel_deg"] <= C.STILL_TOL
+            a = _state(w)
+            cb = _turn(w, fw * C.COUPLED_TURN)
+            b = _state(w)
+            out["then_winds_deg"], out["then_blocked"] = round(_deg(a, b, "barrel", C.WIND_SENSE), 3), cb
+            out["ok"] = (bl == 0 and abs(out["minute_deg"]) <= C.STILL_TOL and out["barrel_deg"] >= -C.HOLD_TOL
+                         and out["barrel_deg"] <= C.STILL_TOL and cb == 0 and out["then_winds_deg"] > C.STILL_TOL)
         elif phase == "set":
             w.restore(start)
             samples, pb = [], 0
@@ -515,14 +538,18 @@ def grade(sub, data, jobs=4):
     seq = {}
     if gates["rest"]:
         try:
-            _, first, err = worker(("first", (sub, data), defs, None))
-            if err:
-                raise RuntimeError(err)
-            state = first.pop("state")
-            seq.update({k: first[k] for k in ("wind", "hold", "run")})
             with ProcessPoolExecutor(max_workers=max(1, min(jobs, 3))) as ex:
-                for ph, out, err in ex.map(worker, [(ph, (sub, data), defs, state)
-                                                    for ph in ("backward", "set", "return")]):
+                fw_ = ex.submit(worker, ("wind", (sub, data), defs, None))      # AT-1 alongside AT-2/AT-3
+                _, first, err = worker(("first", (sub, data), defs, None))
+                if err:
+                    raise RuntimeError(err)
+                state = first.pop("state")
+                seq.update({k: first[k] for k in ("hold", "run")})
+                futs = [ex.submit(worker, (ph, (sub, data), defs, state)) for ph in ("backward", "set", "return")]
+                ph, out, err = fw_.result()
+                seq["wind"] = out if err is None else {"error": err, "ok": False}
+                for f in futs:
+                    ph, out, err = f.result()
                     seq[ph] = out if err is None else {"error": err, "ok": False}
         except Exception as e:  # noqa: BLE001
             det["sequence_error"] = "%s: %s" % (type(e).__name__, e)
@@ -532,18 +559,14 @@ def grade(sub, data, jobs=4):
             steps[k] = bool(seq[k]["ok"])
         except Exception:  # noqa: BLE001
             steps[k] = False
-    product, passed = 0.0, []
-    for k in C.STEPS:
-        if not steps[k]:
-            break
-        product += C.STEP_WEIGHTS[k]
-        passed.append(C.AT_IDS[k])
-    if not steps["wind"]:
-        product = 0.0       # AT-0 is a precondition: its weight is earned together with AT-1 (a movement that
-                            # assembles but does not wind is not accepted at all)
+    # every step scored on its own (no gating), plus the whole-build term (1 only if every step passes)
+    per_step = sum(C.STEP_WEIGHTS[k] for k in C.STEPS if steps[k])
+    whole = 1.0 if all(steps.values()) else 0.0
+    product = (1.0 - C.W_WHOLE) * per_step + C.W_WHOLE * whole
     product = round(product, 6) if math.isfinite(product) else 0.0
-    det["passed_in_order"] = passed
-    det["first_failed"] = next((C.AT_IDS[k] for k in C.STEPS if not steps[k]), None)
+    det["per_step"] = round(per_step, 6)
+    det["whole_build"] = whole
+    det["passed"] = [C.AT_IDS[k] for k in C.STEPS if steps[k]]
     return product, gates, conds, steps, det
 
 

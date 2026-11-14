@@ -198,3 +198,12 @@ with `K=1` to check the setup before running the full k.
 The verifier is separate and collects `/app` as an artifact. After a grader fix,
 `uv run harbor job regrade OUT/jobs/<job> -p OUT/task` rescores old trials without rerunning the agents.
 Then rerun the report step.
+
+## Harness settings
+
+- **Output cap:** the task image sets `OPENCODE_EXPERIMENTAL_OUTPUT_TOKEN_MAX=64000` (in the
+  Dockerfile that `build_task.py` writes), so OpenCode with default settings cannot end a turn empty
+  because of its 32,000-token output cap.
+- **Web search:** run OpenCode with `--ak disable_web_search=true`.
+- **Harbor version:** use 0.26 from source (`uv run harbor ...`). 0.25 reinstalls OpenCode from the
+  internet, which the task's allowlist blocks.

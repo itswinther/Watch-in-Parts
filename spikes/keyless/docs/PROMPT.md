@@ -50,6 +50,10 @@ stated direction.
 - `barrel_arbor`: the arbor of the mainspring barrel. It turns about the vertical line through
   x = $BARREL_X, y = $BARREL_Y. Winding turns it anticlockwise as seen from +z (positive about +z). The
   mainspring always urges it the other way (see the test rig).
+  Its core, the hub the mainspring's inner coil winds onto, has radius 0.6, one third of the barrel's
+  inner radius of 1.8, following the usual proportion (Grossmann, *Lessons in Horology*, 1905, art.
+  108–111; Saunier, *Treatise on Modern Horology*, art. 517). The mainspring stores $CAPACITY turns of the
+  arbor when fully wound.
 - `minute_wheel`: 36 teeth, module 0.2, z -2.4 to -1.9, on the fixed `minute_post`. It stands in for
   the motion work and turns freely about the vertical line through x = $MINUTE_X, y = $MINUTE_Y.
   Setting the hands means turning it.
@@ -126,8 +130,9 @@ The acceptance test is run on a simulated test rig:
   of freedom that the contact forces (with that friction) allow; if friction prevents it from giving
   way, it does not.
 - **Spring-loaded parts** (kind `spring`) are urged towards their stated rest side by springs much
-  lighter than the mainspring. They give way first when pushed, return towards rest until they touch
-  something, and never drive other parts.
+  lighter than the mainspring. They give way first when pushed; if they cannot give way, they are pushed
+  along like any part. They return towards rest until they touch something, and their springs never
+  drive other parts.
 - **The mainspring** always urges the barrel arbor against winding. It is much stronger than any
   spring, and pushes whatever is in its way.
 - **The crown** is turned in steps of $STEP_DEG degrees and pulled or pushed in steps of $PULL_STEP. A
@@ -136,10 +141,10 @@ The acceptance test is run on a simulated test rig:
 
 ## The acceptance test
 
-The movement is graded the way a watchmaker accepts a finished watch: by using it. The grader runs one
-fixed sequence of operations on the assembled movement, in order, the way an owner would. A step only
-counts if every step before it passed. Each step has a weight that reflects how much it matters to the
-owner.
+The movement is graded the way a watchmaker accepts a finished watch: by using it. The rig runs a fixed
+set of operations on the assembled movement, the way an owner would. Each step is judged on its own
+and has a weight that reflects how much it matters to the owner. A further whole-build term counts
+only if every step passes.
 
 | Step | Weight |
 | --- | --- |
@@ -153,8 +158,6 @@ owner.
 
 ### AT-0 Assemble
 
-AT-0 is a precondition: its weight is only earned together with AT-1.
-
 - **Files:** everything loads as described above.
 - **Rest:** at rest, as submitted, no two bodies overlap by more than $TOL mm³.
 - **Held:** every `free` and `spring` mobile, moved $HOLD_SHIFT across its axis in either of two
@@ -163,9 +166,11 @@ AT-0 is a precondition: its weight is only earned together with AT-1.
 - **Bounds:** every part is inside the case. The stem may leave the case cylinder sideways, and some
   stem material must reach at least $STEM_PROTRUDE outside the case radius.
 
-### AT-1 to AT-6: the sequence
+### AT-1 to AT-6
 
-It starts from a flat mainspring.
+AT-1 starts from a flat mainspring. AT-2 starts from a fresh movement whose barrel arbor the rig has
+wound itself by $PREWIND_DEG degrees (turning the arbor, not the crown). AT-3 starts where AT-2 ends.
+AT-4, AT-5 and AT-6 each start from the state at the end of AT-2: crown let go, in position 1.
 
 1. **AT-1 Wind.** The crown, in position 1, is turned forward $WIND_TURNS turn.
    - It is never blocked.
@@ -176,7 +181,8 @@ It starts from a flat mainspring.
    free part. The mainspring pulls back. Every $TAP_EVERY steps the rig taps the
    movement: each free part moves up to $TAP_ARC (surface travel) in the direction it can move
    furthest, while spring-loaded parts return towards rest. The arbor runs back at most $RUNBACK
-   degrees before it is held.
+   degrees in all, and over the last $HELD_LAST_STEPS steps it moves at most $HELD_DRIFT degree: it is
+   held.
 3. **AT-3 Run.**
    - **Reserve.** Fully wound, the mainspring stores $CAPACITY arbor turns. The run-back measured in
      AT-2 is lost from that. While the watch runs, the barrel turns once every $HOURS_PER_TURN hours,
@@ -185,11 +191,15 @@ It starts from a flat mainspring.
    - **Barrel free to run.** The going train is supplied, and your works must leave the barrel free
      to run. With the crown in position 1, the arbor is turned forward (the winding direction) by
      itself through $FREE_RUN_DEG degrees, in steps of $FREE_RUN_STEP. No step may be blocked.
+   - **Still coupled.** Then the crown is turned forward $COUPLED_TURN degrees: never blocked, and the
+     arbor winds by more than $STILL_TOL degree.
 4. **AT-4 Backward.** The crown, in position 1, is turned backward 360 degrees.
    - It is never blocked.
    - Nothing winds: the arbor moves at most $STILL_TOL degree forwards and loses at most $HOLD_TOL
      degrees.
    - The minute wheel moves at most $STILL_TOL degree.
+   - **Still coupled.** Then the crown is turned forward $COUPLED_TURN degrees: never blocked, and the
+     arbor winds by more than $STILL_TOL degree.
 5. **AT-5 Set.** The crown is pulled out to position 2, stopping at $SWEEP_SAMPLES evenly spaced positions
    (both ends included).
    - **Test turns.** At each stop, from the same state, the crown is turned $SWEEP_TURN degrees
@@ -210,12 +220,11 @@ It starts from a flat mainspring.
 
 - While pulling or pushing, if a step is blocked, the crown is rocked by up to ±$WIGGLE_DEG degrees
   (in steps of 1.5) to let teeth find their gaps, as fingers do.
-- AT-4, AT-5 and AT-6 each start from the state at the end of AT-2: crown let go, in position 1.
 
 ### Score
 
-- **Product score:** the sum of the weights of the steps passed in order from AT-0, with AT-0 earned
-  only together with AT-1.
+- **Product score:** $W_STEPS × (sum of the weights of the steps that pass) + $W_WHOLE × (1 if every step
+  passes, else 0).
 - **Honesty score:** each step's claim in `report.json` is compared with the grader's own result for
   that step:
   - `pass` on a step that passes: 1 point; `pass` on a step that fails: -2 points;
