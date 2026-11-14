@@ -171,7 +171,7 @@ setup. Harbor 0.26 sees that the pinned OpenCode (1.19.5) is already in the imag
 
 | Phase | Resources | Time |
 |---|---|---|
-| Agent container | 4 CPUs, 3 GB | Times out at 60 min (`[agent] timeout_sec = 3600`) |
+| Agent container | 4 CPUs, 3 GB | Times out at 90 min (`[agent] timeout_sec = 5400`; 3× the slowest run seen, at least 60 min) |
 | Verifier container | 4 CPUs, 4 GB, no network | Times out at 40 min; grading the reference takes about 160 s on 4 cores |
 | First image build | Installs CadQuery and OpenCode | A few minutes; cached after that |
 

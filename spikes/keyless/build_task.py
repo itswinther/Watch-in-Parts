@@ -20,7 +20,7 @@ sys.path.insert(0, HERE)
 import constants as C  # noqa: E402
 import engine as E  # noqa: E402
 
-AGENT_MINUTES, STOP_MINUTES = 55, 60          # >= 60 min and about 3x the slowest spike run seen (19 min)
+AGENT_MINUTES, STOP_MINUTES = 85, 90          # >= 60 min and about 3x the slowest run seen (GPT prelim, 29 min)
 SECRET_DOCS = ("CONTEXT.md", "SOLUTION.md", "STEP_BY_STEP.md", "REVIEW_RUBRIC.md", "JUDGE_PROMPT.md")
 MARK = "NOT-FOR-AGENT"
 

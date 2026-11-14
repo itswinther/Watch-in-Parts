@@ -90,6 +90,40 @@ MAX_ASSEMBLY_BYTES = 64 * 1024 * 1024
 MIN_TEETH, MAX_TEETH = 3, 1000       # tooth counts declared in meshes (Movement.__init__ still types 3 and 1000 inline)
 MAX_NAME_LEN = 40                    # the {1,40} of NAME_RE
 
+# ---- gear strength (one-job mode, check `strength`; SESSION.md Decisions 2026-11-14 17:56, option 2) ----
+# Load case: the barrel at the highest torque DS-101 states, the train stalled downstream. Each value below is
+# one cell of a supplier sheet in spikes/keyless/datasheets/ (workstream A's); check_strength_sheets() reads
+# the cells from the sheet text and fails if any differs, so the sheet stays the one source.
+BARREL_TORQUE_MAX_NMM = 70.1         # N·mm: DS-101 Table 2a, "Slipping torque of the bridle", column "This series
+                                     # (N·mm)", the upper end of "51.6 to 70.1" (also DS-101 Note 2)
+# DS-201 section 8, table "Design allowables at the upper end of the matching tier": every row, as
+# (the row's Material cell, its ordering code from DS-201 section 2, Allowable (MPa), kind of strength).
+DS201_ALLOWABLE_ROWS = (
+    ("Brass CW614N", "AD-CW614N", 110.0, "tensile"),
+    ("Steel AD-C100-HT, < 1.000 mm", "AD-C100-HT", 750.0, "tensile"),
+    ("Steel AD-C100-HT, 1.000 to < 1.575 mm", "AD-C100-HT", 725.0, "tensile"),
+    ("Corundum, compressive", "AD-AL2O3", 900.0, "compressive"),
+)
+# The material a mobile may declare and the allowable its teeth are rated at (orchestrator's answers to
+# builder S, 2026-11-14, logged under Decisions by B): only a designation with a tensile (yield-based) allowable
+# in DS-201 section 8, since tooth bending is tensile at the root, so the corundum row (compressive) does not
+# qualify; a designation with several rows takes the LOWEST (AD-C100-HT: 725, not 750), because the delivery
+# does not declare stock thickness. AD-C100S and AD-CoNiCr-45 have no allowable in section 8: not accepted.
+# The supplied barrel's own teeth are not rated (a supplied part, rated by its maker): in a mesh with the barrel
+# only the other gear is checked.
+MATERIAL_ALLOWABLE_MPA = {}
+for _cell, _code, _mpa, _kind in DS201_ALLOWABLE_ROWS:
+    if _kind == "tensile":
+        MATERIAL_ALLOWABLE_MPA[_code] = min(_mpa, MATERIAL_ALLOWABLE_MPA.get(_code, float("inf")))
+del _cell, _code, _mpa, _kind
+MATERIAL_DESIGNATIONS = tuple(sorted(MATERIAL_ALLOWABLE_MPA))   # what a mobile may declare (the format check's list)
+STRENGTH_SHEETS = {"DS-101": "DS-101_mainspring_barrel.md", "DS-201": "DS-201_materials.md"}
+# Lewis form factor: full-depth involute teeth cut by the standard basic rack (addendum 1.0 m, dedendum 1.25 m),
+# see lewis_form_factor(). LEWIS_Y is the table the grader uses (4 decimals, the values DS-W04 prints), frozen in
+# geometry/data/lewis_y.json and checked against lewis_form_factor() by tests/test_strength.py.
+LEWIS_ADDENDUM, LEWIS_DEDENDUM = 1.0, 1.25
+LEWIS_DECIMALS = 4
+
 
 # ---------------- supplied barrel and a cylinder helper ----------------
 def cyl(x, y, z0, z1, r, seg=48):
@@ -134,7 +168,9 @@ def rot_about(man, axis_xy, deg):
 class Movement:
     """A parsed movement: fixed solid, mobiles (name -> solid, axis), meshes, hands."""
 
-    def __init__(self, doc, load_stl, barrel_solid=None):
+    def __init__(self, doc, load_stl, barrel_solid=None, materials=False):
+        """materials: one-job mode; every mobile must declare "material", a key of MATERIAL_ALLOWABLE_MPA (a format
+        error otherwise, C1). Without it (stage mode) the field is not read."""
         if not isinstance(doc, dict):
             raise FormatError("movement.json: top level must be an object")
         cc = doc.get("case_centre")
@@ -182,6 +218,12 @@ class Movement:
             names = m.get("parts")
             ps = parts(names, "mobile '%s'" % name)
             self.mobiles[name] = {"axis": (float(ax[0]), float(ax[1])), "solid": union(ps), "parts": dict(zip(names, ps))}
+            if materials:
+                mat = m.get("material")
+                if not isinstance(mat, str) or mat not in MATERIAL_ALLOWABLE_MPA:
+                    raise FormatError("mobile '%s': 'material' must be the designation of a material with a bending "
+                                      "(tensile) design allowable in DS-201 section 8" % name)
+                self.mobiles[name]["material"] = mat
         self.meshes = []
         for i, e in enumerate(doc.get("meshes") or []):
             try:
@@ -445,7 +487,8 @@ class Movement:
         drive test: pushing the driver DRIVE_FRACTION of a tooth pitch further with the driven gear held,
         the intersection that the push creates (the part of the pushed driver's intersection with the driven
         mobile that the driver did not already occupy before the push), alone and divided by (its height in z
-        x module squared).
+        x module squared), and the smallest of those heights in z over the steps (smallest_drive_height: the face
+        width of the strength check; 0 if a step creates no new overlap).
         shift: the driven mobile (and its axis) is first moved this far straight away from the driver's
         axis (negative: towards it); same steps and angles. cut=False skips the speed-up (same results)."""
         A, ax_a = self.mobiles[a]["solid"], self.mobiles[a]["axis"]
@@ -467,6 +510,7 @@ class Movement:
         da = 360.0 / (SAMPLES_PER_TOOTH * ta)                 # driver turns counter-clockwise here; the sign is irrelevant
         db = -da * ta / tb
         worst, gap, drive, ratio = (0.0, 0), 0.0, float("inf"), float("inf")
+        height = float("inf")         # smallest height in z of the push's new overlap (0 at a step that has none)
         push = DRIVE_FRACTION * 360.0 / ta
         for i in range(n):
             Ai, Bi = pa(da * i), pb(db * i)
@@ -482,7 +526,7 @@ class Movement:
                     if vf > worst[0]:
                         worst = (vf, i + float(f))
                 P = pa(da * i + push)
-                extra, r = 0.0, 0.0
+                extra, r, hz = 0.0, 0.0, 0.0
                 if core.bbox_overlap(P, Bi):
                     N = (P ^ Bi) - Ai              # intersection the push creates: not already there before it
                     extra = float(N.volume()) if not N.is_empty() else 0.0
@@ -493,8 +537,15 @@ class Movement:
                         hz = zb[5] - zb[2]
                         r = extra / (hz * module * module) if hz > 1e-9 and module > 1e-9 else 0.0
                 drive, ratio = min(drive, extra), min(ratio, r)
+                height = min(height, hz if extra > 0.0 else 0.0)
         return {"worst_volume": worst[0], "step": worst[1], "steps": n, "largest_gap": gap,
-                "smallest_drive_overlap": drive, "smallest_drive_ratio": ratio, "module": module}
+                "smallest_drive_overlap": drive, "smallest_drive_ratio": ratio, "module": module,
+                "smallest_drive_height": height}
+
+    @staticmethod
+    def drive_passes(x):
+        """The drive test alone (the third condition of the mesh test) on a mesh_run result."""
+        return x["smallest_drive_overlap"] >= DRIVE_MIN_VOLUME and x["smallest_drive_ratio"] > DRIVE_AREA_RATIO
 
     @staticmethod
     def mesh_passes(x):
@@ -584,12 +635,13 @@ def _near_cut(S, ax, O, ax_o):
     return S ^ keep
 
 
-def load_movement(folder, name="movement.json", cache=None, barrel_solid=None):
+def load_movement(folder, name="movement.json", cache=None, barrel_solid=None, materials=False):
     """folder holds movement.json and parts/<name>.step. Opens only the files movement.json names.
     name: the movement file in folder to read instead of movement.json (a plain file name, e.g. variant_6h.json).
     cache: an optional dict shared between calls; a part file whose name and bytes were loaded before is
     taken from it instead of being read again (the same solid; the result does not depend on the cache).
-    barrel_solid: the supplied barrel's solid (default barrel(); the stage mode passes barrel_stage())."""
+    barrel_solid: the supplied barrel's solid (default barrel(); the stage mode passes barrel_stage()).
+    materials: one-job mode, every mobile declares a material (see Movement)."""
     if not isinstance(name, str) or os.path.basename(name) != name or not name.endswith(".json"):
         raise FormatError("bad movement file name %r" % (name,))
     path = inside(folder, os.path.join(folder, name))
@@ -626,7 +678,7 @@ def load_movement(folder, name="movement.json", cache=None, barrel_solid=None):
         if key is not None:
             cache[key] = solid
         return solid
-    return Movement(doc, load, barrel_solid)
+    return Movement(doc, load, barrel_solid, materials=materials)
 
 
 def inside(folder, path):
@@ -727,4 +779,211 @@ def thin(part):
     n, dev = core.opening_test_slabs(part, lo * h - 0.0137, tuple(int(v) for v in hi - lo), h,
                                      THIN_ERODE_VOX, THIN_DILATE_VOX, THIN_DEV_CAP_VOX, THIN_SLAB)
     return n, (dev * h if np.isfinite(dev) else 1e9)
+
+
+# ---------------- gear strength: Lewis form factor, materials, the load case ----------------
+def rack_tip_radius(alpha_deg=PRESSURE_ANGLE, addendum=LEWIS_ADDENDUM, dedendum=LEWIS_DEDENDUM):
+    """Tip radius of the basic rack, in modules. ISO 53 (20 deg) takes the radius at which the rack's straight flank
+    ends exactly at the depth of the addendum: c / (1 - sin a), c = dedendum - addendum (0.38 at 20 deg). At 25 deg
+    that radius (0.433) is larger than the rack tooth's tip can carry (the two rounds would overlap), so the tip is
+    then a full round: half the tip width x tan(45 deg + a/2) (0.317 at 25 deg)."""
+    a = math.radians(alpha_deg)
+    c = dedendum - addendum
+    half_tip = math.pi / 4.0 - dedendum * math.tan(a)
+    return min(c / (1.0 - math.sin(a)), half_tip * math.tan(math.pi / 4.0 + a / 2.0))
+
+
+def _rack_cut_tooth(z, alpha_deg, n=4000, grid=20001):
+    """Half of one tooth (module 1) of a z-tooth spur gear cut by the basic rack without profile shift, as
+    (R, phi, fillet_phi): for each radius R the angle phi from the tooth's centre line to its flank (the smallest
+    angle the cutter reaches at that radius), and the angle the cutter's tip round alone reaches (inf where it does
+    not). The flank and the tip round of the rack are carried through every rolling position by their envelope
+    (a rack point is cutting when its profile normal passes through the pitch point); every branch, the loops of an
+    undercut included, is kept, and the tooth is what no branch reaches."""
+    a = math.radians(alpha_deg)
+    r = z / 2.0
+    rho = rack_tip_radius(alpha_deg)
+    v0 = -LEWIS_DEDENDUM + rho                    # centre of the tip round, rack frame (v: height, 0 on the pitch line)
+    u0 = (rho + math.cos(a) * math.pi / 4.0 - math.sin(a) * v0) / math.cos(a)
+    vt = v0 - rho * math.sin(a)                   # where the round meets the straight flank
+    v = np.linspace(vt, LEWIS_ADDENDUM + 0.05, n)
+    flank = (math.pi / 4.0 - v * math.tan(a), v, np.full(n, -math.cos(a)), np.full(n, -math.sin(a)))
+    th = np.linspace(math.atan2(-math.sin(a), -math.cos(a)), -math.pi / 2.0, n)
+    round_ = (u0 + rho * np.cos(th), v0 + rho * np.sin(th), np.cos(th), np.sin(th))
+    R = np.linspace(r - LEWIS_DEDENDUM + 1e-6, r + LEWIS_ADDENDUM, grid)
+    out = []
+    for u, vv, nu, nv in (flank, round_):
+        psi = (u - vv * nu / nv) / r              # the gear's turn at which this rack point cuts
+        X, Y = u - r * psi, r + vv
+        gx = np.cos(psi) * X + np.sin(psi) * Y    # into the gear's frame (turned back by psi)
+        gy = -np.sin(psi) * X + np.cos(psi) * Y
+        rr, pp = np.hypot(gx, gy), np.arctan2(gx, gy)
+        best = np.full(grid, np.inf)
+        d = np.sign(np.diff(rr))
+        cuts = list(np.nonzero(d[1:] != d[:-1])[0] + 1) + [len(rr) - 1]
+        start = 0
+        for c in cuts:                            # each piece monotone in radius
+            x, y = rr[start:c + 1], pp[start:c + 1]
+            if x[0] > x[-1]:
+                x, y = x[::-1], y[::-1]
+            if len(x) > 1:
+                best = np.minimum(best, np.interp(R, x, y, left=np.inf, right=np.inf))
+            start = c
+        out.append(best)
+    return R, np.minimum(out[0], out[1]), out[1]
+
+
+def lewis_form_factor(z, alpha_deg=PRESSURE_ANGLE):
+    """Lewis form factor Y of a z-tooth full-depth involute spur gear, by Lewis's method: the tangential load
+    W_t acts at the tip of one tooth, on its centre line at the tip circle (the cantilever of Shigley, Mechanical
+    Engineering Design, section 14-1); the weakest section is where the parabola of constant strength with its
+    vertex at the load point is tangent to the root fillet; there, with t the tooth thickness and l the distance
+    from the load point, sigma = 6 W_t l / (b t^2) = W_t / (b m Y), so Y = t^2 / (6 l m), the smallest over the
+    fillet. The tooth is the one the basic rack cuts (addendum 1.0 m, dedendum 1.25 m, tip radius
+    rack_tip_radius(), no profile shift; undercut included); the fillet is the part of the flank the rack's tip
+    round cuts. The radial (compressive) component of the load is neglected, as in Lewis. Y does not depend on
+    the module. A tooth pointed below the tip circle is loaded at its point."""
+    R, phi, fil = _rack_cut_tooth(z, alpha_deg)
+    ok = np.isfinite(phi) & (phi > 0.0)
+    R, phi, fil = R[ok], phi[ok], fil[ok]
+    x, y = R * np.sin(phi), R * np.cos(phi)       # half thickness, height on the centre line
+    top = float(R[-1])                            # tip circle (or the point of a pointed tooth)
+    on_fillet = fil <= phi + 1e-12
+    h = top - y
+    sel = on_fillet & (h > 1e-9)
+    if not sel.any():
+        raise ArithmeticError("no root fillet found for %d teeth" % z)
+    return float((4.0 * x[sel] ** 2 / (6.0 * h[sel])).min())
+
+
+def lewis_table_doc(lo=MIN_TEETH, hi=MAX_TEETH):
+    """The frozen table as written to geometry/data/lewis_y.json: Y rounded to LEWIS_DECIMALS for every tooth count."""
+    return {"pressure_angle": PRESSURE_ANGLE, "addendum": LEWIS_ADDENDUM, "dedendum": LEWIS_DEDENDUM,
+            "rack_tip_radius": round(rack_tip_radius(), 6), "decimals": LEWIS_DECIMALS,
+            "method": "geometry.watch.lewis_form_factor",
+            "Y": {str(z): round(lewis_form_factor(z), LEWIS_DECIMALS) for z in range(lo, hi + 1)}}
+
+
+def _load_lewis_table():
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "lewis_y.json")
+    if not os.path.isfile(path):
+        return {}                     # only while the table is being built (tests/test_strength.py --write-lewis)
+    with open(path) as f:
+        doc = json.load(f)
+    if doc.get("pressure_angle") != PRESSURE_ANGLE or doc.get("addendum") != LEWIS_ADDENDUM \
+            or doc.get("dedendum") != LEWIS_DEDENDUM or doc.get("decimals") != LEWIS_DECIMALS:
+        raise RuntimeError("geometry/data/lewis_y.json was made for other constants; rebuild it "
+                           "(python3 tests/test_strength.py --write-lewis)")
+    return {int(k): float(v) for k, v in doc["Y"].items()}
+
+
+LEWIS_Y = _load_lewis_table()          # teeth -> Y, every tooth count from MIN_TEETH to MAX_TEETH
+
+
+def check_strength_sheets(folder=None):
+    """The supplier-sheet cells the strength constants come from, read from the sheet text. Returns a list of
+    differences (empty when every constant equals its cell). folder: the datasheets folder (default A's)."""
+    if folder is None:
+        folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "spikes", "keyless", "datasheets")
+    bad = []
+    with open(os.path.join(folder, STRENGTH_SHEETS["DS-101"]), encoding="utf-8") as f:
+        ds101 = f.read()
+    row = re.search(r"^\|\s*Slipping torque of the bridle\s*\|[^|\n]*\|\s*\*\*([0-9.]+) to ([0-9.]+)\*\*\s*\|\s*$", ds101, re.M)
+    if not row:
+        bad.append("DS-101 Table 2a: row 'Slipping torque of the bridle' with a bold 'a to b' cell not found")
+    elif float(row.group(2)) != BARREL_TORQUE_MAX_NMM:
+        bad.append("DS-101 Table 2a slipping torque upper end is %s, BARREL_TORQUE_MAX_NMM is %s" % (row.group(2), BARREL_TORQUE_MAX_NMM))
+    with open(os.path.join(folder, STRENGTH_SHEETS["DS-201"]), encoding="utf-8") as f:
+        ds201 = f.read()
+    sec = re.search(r"^## 8\..*?\n(?=## )", ds201, re.M | re.S)
+    tab = re.search(r"\*\*Design allowables[^\n]*\n\n((?:\|[^\n]*\n)+)", sec.group(0)) if sec else None
+    if not tab:
+        bad.append("DS-201 section 8: design allowables table not found")
+        return bad
+    rows = []
+    for line in tab.group(1).splitlines()[2:]:
+        cells = [c.strip() for c in line.strip().strip("|").split("|")]
+        mpa = re.match(r"([0-9.]+)", cells[-1])
+        rows.append((cells[0], float(mpa.group(1)) if mpa else None))
+    want = [(cell, mpa) for cell, _, mpa, _ in DS201_ALLOWABLE_ROWS]
+    if rows != want:
+        bad.append("DS-201 section 8 allowables are %r, DS201_ALLOWABLE_ROWS has %r" % (rows, want))
+    codes = re.search(r"^## 2\..*?\n(?=## )", ds201, re.M | re.S)
+    for _, code, _, _ in DS201_ALLOWABLE_ROWS:
+        if not codes or not re.search(r"^\|\s*%s\s*\|" % re.escape(code), codes.group(0), re.M):
+            bad.append("DS-201 section 2: ordering code %s not found" % code)
+    return bad
+
+
+def going_train(m, runs):
+    """The going train: the declared meshes on the path from the barrel to the mobile that carries the seconds
+    hand, through declared meshes that pass the mesh test (the shortest such path; among equals, the one found
+    first in declaration order). Returns (list of indices into m.meshes, None) or (None, reason)."""
+    sec = m.hands["seconds"][0]
+    prev = {"barrel": None}
+    queue = ["barrel"]
+    while queue:
+        cur = queue.pop(0)
+        for i, ((a, _, b, _), x) in enumerate(zip(m.meshes, runs)):
+            if not Movement.mesh_passes(x):
+                continue
+            for src, dst in ((a, b), (b, a)):
+                if src == cur and dst not in prev:
+                    prev[dst] = (cur, i)
+                    queue.append(dst)
+    if sec not in prev:
+        return None, "the seconds hand's mobile '%s' is not driven from the barrel through meshes that pass the mesh test" % sec
+    path, cur = [], sec
+    while prev[cur] is not None:
+        cur, i = prev[cur]
+        path.append(i)
+    return path[::-1], None
+
+
+def strength_run(m, runs, driven):
+    """The strength check of movement m: tooth bending by Lewis under the load case. runs: m.mesh_run of every
+    declared mesh, in m.meshes order (None if the mesh test did not run); driven: m.speeds(passing meshes)[0].
+    Rated: the going train (going_train: barrel to the seconds hand's mobile through passing meshes; the motion
+    work and other branches are not rated, as a watchmaker rates a train: the cannon pinion slips; Decisions,
+    orchestrator's answer (B) to builder S). For each rated mesh: T at the driver = BARREL_TORQUE_MAX_NMM x
+    |barrel speed / driver speed| (N·mm), F = T / (m z_D / 2) (N) with m = 2 x axis distance / (z_D + z_N) (mm),
+    b = the smallest height in z of the drive test's new overlap over its steps (mm), sigma = F / (b m Y(z)) (MPa)
+    for each gear with its own z and its mobile's material, the supplied barrel's gear not rated. A rated mesh
+    whose drive test fails has no b, and fails (cannot happen on the path, which passes the mesh test).
+    Returns (passed, details); details "margin" = allowable / sigma - 1 (passes when >= 0)."""
+    if runs is None:
+        return False, {"error": "the mesh test did not run to the end"}
+    path, why = going_train(m, runs)
+    if path is None:
+        return False, {"error": why, "meshes": []}
+    out, ok = [], True
+    wb = abs(driven.get("barrel", m.barrel_speed))
+    for i in path:
+        (a, ta, b, tb), x = m.meshes[i], runs[i]
+        T = BARREL_TORQUE_MAX_NMM * float(wb / abs(driven[a]))
+        mod = x["module"]
+        F = T / (mod * ta / 2.0)
+        e = {"pair": "%s/%s" % (a, b), "torque_nmm": T, "force_n": F, "module": mod}
+        out.append(e)
+        if not Movement.drive_passes(x):
+            e["error"] = "the drive test fails, so the face width is not measured"
+            ok = False
+            continue
+        bw = x["smallest_drive_height"]
+        e["face_width"] = bw
+        e["gears"] = {}
+        for name, z in ((a, ta), (b, tb)):
+            if name == "barrel":
+                e["gears"][name] = {"teeth": z, "rated": False}
+                continue
+            Y = LEWIS_Y[z]
+            sig = F / (bw * mod * Y)
+            mat = m.mobiles[name]["material"]
+            allow = MATERIAL_ALLOWABLE_MPA[mat]
+            e["gears"][name] = {"teeth": z, "Y": Y, "sigma_mpa": sig, "material": mat, "allowable_mpa": allow,
+                                "margin": allow / sig - 1.0}
+            ok = ok and sig <= allow
+    margins = [g["margin"] for e in out for g in e.get("gears", {}).values() if "margin" in g]
+    return ok and bool(out), {"meshes": out, "smallest_margin": min(margins) if margins else None,
+                              "barrel_torque_nmm": BARREL_TORQUE_MAX_NMM, "going_train": [out_["pair"] for out_ in out]}
 

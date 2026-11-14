@@ -24,6 +24,9 @@ Values that belong to a supplied item are taken from that item's supplier docume
 | DS-W02 | the case: inner radius and inner height (section 2) |
 | DS-W03 | the printability test (section 3) |
 | `/app/FORMAT.md` | the file formats, and how a part file becomes the solid that is measured |
+| DS-W04 | Part 1, check 14 |
+| VM-DS-101 | Part 1, check 14 |
+| AD-DS-201 | Part 1, check 14 |
 
 ## 3. Acceptance
 
@@ -127,6 +130,38 @@ Checks. Each passes or fails.
     case (DS-W02, section 2, column "Inner height along the axis (mm)").
 13. **Printable.** Each part of the delivery (not the barrel) is printable by the printability test of the process
     named in the work order (DS-W03, section 3).
+14. **Gear strength.** The gears of the going train are strong enough in tooth bending.
+
+    *Load case.* The barrel delivers the highest torque that the mainspring sheet states for this calibre class:
+    T_barrel is the upper end of the bridle's slipping torque, DS-101, Table 2a, row "Slipping torque of the
+    bridle", column for this series (N·mm). The going train is stalled at its end, so each of its meshes carries
+    the full torque that reaches it.
+
+    *Meshes rated.* The going train: the declared meshes on the path from the barrel to the mobile that carries
+    the seconds hand, through declared meshes that pass the mesh test (check 4). The motion work, and any other
+    mesh off that path, is not rated. If the seconds hand's mobile is not reached from the barrel that way, this
+    check fails. For each rated mesh, with D the mobile that the declaration names as `driver`, N the one it names
+    as `driven`, and z_D and z_N their declared tooth counts:
+
+    - torque at D: T_D = T_barrel x |n_barrel / n_D| (N·mm), with n the turns per hour that the declared tooth
+      counts give through meshes that pass the mesh test (the same speeds as the hand checks);
+    - module: m = 2 x (distance between the two axes in the assembled positions) / (z_D + z_N) (mm), as in the
+      mesh test;
+    - tooth load: F = T_D / (m x z_D / 2) (N), on the pitch circle of D;
+    - face width: b = the smallest H over the drive steps of the mesh test for this mesh (mm), H being the height
+      in z of the region that the further-turned D shares with N and did not occupy before;
+    - bending stress of each of the two gears, each with its own tooth count z (z_D or z_N): sigma = F / (b x m x
+      Y(z)) (MPa, that is N/mm2), Y(z) the Lewis form factor of DS-W04, section 3, for z teeth.
+
+    *Allowable.* A gear's allowable stress is that of its mobile's `material`: the lowest design allowable that
+    DS-201 section 8 gives for that ordering code (a code with several rows, for example by stock thickness, is
+    rated at the lowest of them, since the delivery does not state stock thickness). Tooth bending puts the root
+    of the tooth in tension, so only a bending (tensile, yield-based) allowable applies: a row that gives a
+    compressive allowable does not, and a code without a bending allowable in section 8 cannot be declared (C1).
+
+    *Pass.* sigma <= the allowable for both gears of every rated mesh. The supplied barrel's own teeth are not
+    rated here (the barrel is a supplied part, rated by its maker): in a mesh with the barrel only the other gear
+    is rated.
 
 ## 6. Part 2: 24-hour hand (`movement.json`)
 

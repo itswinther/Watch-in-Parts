@@ -42,6 +42,7 @@ TIMEOUT_S = 1800
 # 1 turn per 6 h), assembly.json (order and paths for movement.json), parts/<name>.step for both movements.
 JOB_MOVEMENT, JOB_VARIANT, JOB_ASSEMBLY = "movement.json", "variant_6h.json", "assembly.json"
 JOB_CHECKS_1 = {k: w for k, w in WEIGHTS.items() if k != "light"}      # P1: stage-1 checks without light
+JOB_CHECKS_1["strength"] = 2        # P1 and P3: gear strength (Decisions 17:56, option 2), one-job mode only
 JOB_CHECKS_2 = dict(WEIGHTS_2)                                          # P2: the 24-hour hand
 # The parts of the job: (id, what it is, weight, gates, check weights). Gates are the brief's conditions
 # (environment/public/job/PROMPT.md): files C1, assembled C2, day_declared C3, same_frame C4; P4's are C1 of
@@ -252,7 +253,11 @@ def _check_table(m, runs, speeds, conflicts, driven, thin_cache=None):
         fixed, mobile = m.volumes()
         return fixed <= W.FIXED_VOLUME_MAX and mobile <= W.MOBILE_VOLUME_MAX, {"fixed_volume": fixed, "mobile_volume": mobile}
 
-    return {"seated": seated, "light": light, "printable": printable, "day_hand": day_hand, "day_place": day_place,
+    def strength():
+        """One-job mode only (needs the mobiles' materials): tooth bending under the load case, W.strength_run."""
+        return W.strength_run(m, runs, driven)
+
+    return {"seated": seated, "light": light, "strength": strength, "printable": printable, "day_hand": day_hand, "day_place": day_place,
             "spin": spin, "held": held, "train": train, "clear": clear, "minute": hand("minute"), "hour": hand("hour"),
             "seconds": hand("seconds"), "coaxial": coaxial, "hands": hands, "size": size, "tolerant": tolerant}
 
@@ -512,7 +517,7 @@ def _job_movement(folder, name, barrel_speed, keys, extra_gates, run, cache, thi
     checks = {k: False for k in keys}
 
     def load():
-        st["m"] = W.load_movement(folder, name, cache=cache)
+        st["m"] = W.load_movement(folder, name, cache=cache, materials=True)
         return True, {}
     gates["files"], details["files"] = run(load)
     if not gates["files"]:
