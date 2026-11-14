@@ -8,7 +8,7 @@ table. Everything below "Session entries" is append-only, newest at the bottom.
 
 | ID | Workstream | Owner | Status | Last update |
 | --- | --- | --- | --- | --- |
-| A | Harness wiring | Mikael | starting: adding the organisers' starter kit to the repo | 2026-11-14 01:40 |
+| A | Harness wiring | Mikael | session running. No starter kit exists (see 02:20 entry). Docker and Harbor 0.25.0 installed locally; building the Harbor task around B's grader next | 2026-11-14 02:20 |
 | B | Reference script and grader (H1) | itswinther | first agent attempt scored 1.0 in 5 minutes: H1 shows NO GAP as specified. Waiting for a human decision on how to make it harder | 2026-11-14 02:15 |
 | C | Hold the Line spike | unassigned | not started | |
 | D | Mentor questions, anchors, transcripts | unassigned | not started | |
@@ -32,8 +32,8 @@ Spec version in use: 0.1
 One line per request to another workstream. The addressee answers on the same
 line and ticks it. Format: `- [ ] to B, from A, HH:MM: what you need`.
 
-- [ ] to A, from B, 01:40: say here when the starter kit is in the repo, and where the verifier expects the grader entry point and the reward file. Until then B assumes `tests/grade.py <base.stl> <door.stl> <assembly.json>` taking three absolute paths.
-- [ ] to A, from B, 02:05: is a session for A running? Nothing from A is on `origin/main` yet. Please push the starter kit as its own first commit, even untouched, so B can read the verifier contract.
+- [x] to A, from B, 01:40: say here when the starter kit is in the repo, and where the verifier expects the grader entry point and the reward file. Until then B assumes `tests/grade.py <base.stl> <door.stl> <assembly.json>` taking three absolute paths. **A, 02:20: there is no starter kit and no scoring skeleton. The organisers' only contract is a plain Harbor task whose verifier writes one number in 0..1 to `/logs/verifier/reward.txt` (your guess was right). Harbor runs `tests/test.sh`; A will write that to call `grade.py` with your three-path signature, so keep it.**
+- [x] to A, from B, 02:05: is a session for A running? Nothing from A is on `origin/main` yet. Please push the starter kit as its own first commit, even untouched, so B can read the verifier contract. **A, 02:20: yes, running since about 02:00 with push rights to main. Nothing to push as a starter kit; the organiser message is quoted in the 02:20 entry.**
 - [ ] to all, from B, 02:05: sessions started before 01:40 still follow the old CLAUDE.md. Tell your session to `git fetch origin && git rebase origin/main` and re-read CLAUDE.md.
 - [ ] to whoever owns branch `claude/fervent-brown-cb0201` (`cala-tests/`, Cala API responses): is that meant for this repo? It is not on main.
 
@@ -41,17 +41,17 @@ line and ticks it. Format: `- [ ] to B, from A, HH:MM: what you need`.
 
 Write the answer and who gave it next to the question, then tick it.
 
-- [ ] Which model and effort setting do the judges run?
+- [ ] Which model and effort setting do the judges run? (Partly answered 02:20: the organisers "urge" OpenCode and give the example `harbor run -p ./my-task -a opencode -m [provider/model]`; the model is not named, and credits are Google/OpenAI/Modal, so we choose what we benchmark on.)
 - [ ] Per-trial timeout?
 - [ ] Wall-clock budget for the judges' rerun?
 - [ ] Can the agent see images?
 - [ ] How is the stop-early baseline defined?
-- [ ] How large is the model-credit grant?
+- [x] How large is the model-credit grant? **None. Organiser message (Mikael, 02:20): AfterQuery gives no inference credits; use the Google, OpenAI and Modal sponsor credits.**
 - [ ] Which environment provider does the rerun use? (decides compose sidecar or in-container MCP server)
-- [ ] Does the organisers' OpenCode register MCP servers declared in task.toml?
+- [x] Does the organisers' OpenCode register MCP servers declared in task.toml? **Yes, per Harbor source v0.26.0 (`src/harbor/agents/installed/opencode.py`, `_build_register_config_command`): it writes `[[environment.mcp_servers]]` into OpenCode's config, stdio as a local command or HTTP as a remote URL. Read in source by A, not yet seen in a transcript. There is no organiser-specific OpenCode build.**
 - [ ] When do the AfterQuery demo and rerun happen?
-- [ ] What does the scoring skeleton record when the verifier is killed or times out?
-- [ ] Can agent network access be limited to the model API?
+- [x] What does the scoring skeleton record when the verifier is killed or times out? **There is no scoring skeleton. What plain Harbor records on a verifier timeout is still untested (A will test).**
+- [x] Can agent network access be limited to the model API? **Yes in Harbor's task config: `[environment] network_mode = "allowlist"` with `allowed_hosts`. From the Harbor docs, not yet run by A.**
 - [ ] H1 scored 1.0 on the first agent attempt (02:15). Do we harden Board in a Box, or move weight to Hold the Line? Needs a human answer before more is built.
 
 ## Decisions
@@ -59,6 +59,7 @@ Write the answer and who gave it next to the question, then tick it.
 Append one line per decision: time, decision, who agreed.
 
 - 2026-11-14 00:50 Working plan is the second review, updated version. SPEC.md 0.1 is taken from it.
+- 2026-11-14 02:20 Organiser contract replaces the "starter kit wins" rule: the environment is a plain Harbor task (`instruction.md`, `task.toml`, `environment/Dockerfile`, `tests/`, `solution/`), run as `harbor run -p ./my-task -a opencode -m provider/model`, reward is one number 0..1 in `/logs/verifier/reward.txt`. Submission also needs at least one Harbor run log with its score and a short README. Source: organiser message relayed by Mikael.
 
 ## Proposed spec changes
 
@@ -199,3 +200,25 @@ Template:
 - Files changed: `transcripts/agent1/` (the agent's script, its three submitted files, grader details), SESSION.md.
 - Need from others: a human decision. Options: (a) rerun clean after removing the internal note from CLAUDE.md, to confirm; (b) make H1 harder; (c) give Hold the Line an owner now. See Open questions.
 - Next: nothing built until the decision.
+
+### 2026-11-14 02:20 | A harness wiring | Mikael + Claude
+- Did: started workstream A. Relaying the organisers' "Required Stack" message, which the team has not seen. Read Harbor's public docs and source for the points A depends on. Installed tooling on Mikael's Mac.
+- Organiser message, in short:
+  - Framework is Harbor (github.com/laude-institute/harbor). The environment is a Harbor task: `instruction.md`, `task.toml`, `environment/Dockerfile`, `tests/`, `solution/`.
+  - Harness: they "urge" OpenCode: `harbor run -p ./my-task -a opencode -m [provider/model]`.
+  - Reward: the verifier writes one score between 0 and 1 to `/logs/verifier/reward.txt`. Partial credit is welcome.
+  - Before submitting: at least one Harbor run log with its score; a short README (what the agent does, why it is hard, how it is scored; they warn AI-written READMEs may communicate poorly); playthroughs encouraged in the demo video.
+  - AfterQuery provides NO inference credits. Use the Google, OpenAI and Modal sponsor credits.
+  - "What we're looking for: super cool simulations, environments, and some post-training experiments." Post-training is the tiebreaker and is now named outright; we cut it from scope.
+  - No starter kit or scoring skeleton is mentioned anywhere. CLAUDE.md's "Starter kit wins" rule and several open questions assumed one.
+- Verified by (command and result):
+  - `uv tool install harbor` then `harbor --version` printed `0.25.0`. `harbor agent list` includes `oracle`, `nop`, `opencode`.
+  - Harbor source cloned at v0.26.0. `grep -n -i mcp src/harbor/agents/installed/opencode.py` shows the agent writing task-declared MCP servers into OpenCode's config (lines 839 to 858, 927 to 929).
+  - `examples/tasks/sidecar-artifacts/task.toml` shows `environment_mode = "separate"` and artifacts declared one file at a time, optionally from a named sidecar service.
+  - `brew install --cask docker` reports Docker Desktop installed. Not yet started, no container run.
+- Not verified, or assumed: nothing has run in Harbor yet. Harbor docs say multi-step tasks start a fresh agent conversation per step, compose sidecars run on Modal only through Docker-in-Docker, and the default verifier is shared (separate is opt-in); all read, none run.
+- Proposal from A, needs a human yes (interface between A and B): run the MCP tool server INSIDE the agent's container over stdio, not as a compose sidecar. Reason: SPEC 0.1 never says how a sidecar reads a mesh the agent just wrote (separate filesystem, and a model cannot pass an STL as a tool argument); in-container needs no compose file, so it also runs on Modal. Cost: the agent can read the tool source, so the tools bundle must hold only geometry primitives. B's 02:15 entry says `constants.py` in the bundle currently exposes check IDs, weights and the reference volume; that file needs a public/private split before this is safe.
+- On B's 02:15 result (H1 scored 1.0 in 5 minutes): A's work is the same for either idea, so A continues. Note for the decision: the organisers no longer supply the model, so "the judged agent" is whatever we can run on Google/OpenAI credits through OpenCode, which may be weaker or stronger than the subagent B tested. A clean rerun in the real harness is the measurement that counts.
+- Files changed: SESSION.md (row A, two requests answered, five open questions answered, one decision line, this entry).
+- Need from others: B, a yes or no on in-container tools, and the `constants.py` split. Anyone with sponsor credits: an OpenAI or Google API key for the first OpenCode run (do not commit it).
+- Next: build the Harbor task (`task.toml` with separate verifier and three single-file artifacts, `environment/Dockerfile`, `tests/test.sh`, `solution/solve.sh`), then run `oracle` (expect 1.0) and `nop` (expect 0).
