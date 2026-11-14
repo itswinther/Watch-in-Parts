@@ -1,0 +1,101 @@
+{
+  "mobiles": {
+    "stem": {
+      "kind": "stem",
+      "parts": [
+        "stem"
+      ]
+    },
+    "barrel": {
+      "kind": "barrel",
+      "parts": [
+        "barrel_ratchet"
+      ]
+    },
+    "winding_pinion": {
+      "kind": "free",
+      "dof": "rot",
+      "point": [
+        3.05,
+        0,
+        0
+      ],
+      "direction": [
+        1,
+        0,
+        0
+      ],
+      "parts": [
+        "winding_pinion"
+      ]
+    },
+    "winding_transfer": {
+      "kind": "free",
+      "dof": "rot",
+      "point": [
+        2.15,
+        0,
+        0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "parts": [
+        "winding_transfer"
+      ]
+    },
+    "setting_transfer": {
+      "kind": "free",
+      "dof": "rot",
+      "point": [
+        6.091995492364662,
+        0,
+        0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "parts": [
+        "setting_transfer"
+      ]
+    },
+    "clutch": {
+      "kind": "spring",
+      "dof": "slide",
+      "direction": [
+        1,
+        0,
+        0
+      ],
+      "rest": -1,
+      "on_stem": true,
+      "parts": [
+        "sliding_clutch"
+      ]
+    },
+    "click": {
+      "kind": "spring",
+      "dof": "slide",
+      "direction": [
+        1,
+        0,
+        0
+      ],
+      "rest": -1,
+      "parts": [
+        "click"
+      ]
+    }
+  },
+  "fixed": [
+    "click_guide",
+    "winding_post",
+    "setting_post",
+    "left_bearing",
+    "right_bearing"
+  ]
+}

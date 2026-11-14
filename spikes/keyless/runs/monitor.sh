@@ -31,7 +31,7 @@ while true; do
         if [ "$prev" != "$size" ]; then echo "$size" > "$STATE/$name.size"; echo "$now" > "$STATE/$name.time"; fi
         changed=$(cat "$STATE/$name.time" 2>/dev/null || echo $now)
         idle=$(( (now - changed) / 60 ))
-        [ $idle -ge 10 ] && [ ! -f "$t/result.json" ] && flags="$flags STALL-${idle}min"
+        [ $idle -ge 10 ] && ! grep -q '"finished_at": "' "$t/result.json" 2>/dev/null && flags="$flags STALL-${idle}min"
       fi
       rw=$(cat "$t/verifier/reward.txt" 2>/dev/null || echo "-")
       echo "| $name | $el | $size | $last | $cost | $rw | ${flags:--} |"
@@ -41,6 +41,6 @@ while true; do
     docker stats --no-stream --format '{{.Name}} {{.MemUsage}} {{.CPUPerc}}' 2>/dev/null
     echo '```'
   } > "$OUT"
-  [ -f "$JOB/result.json" ] && break
+  grep -q '"finished_at": "' "$JOB/result.json" 2>/dev/null && break
   sleep "$INT"
 done
