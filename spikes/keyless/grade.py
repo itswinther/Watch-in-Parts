@@ -98,7 +98,7 @@ def load(sub, data):
         raise FormatError("mobiles 'stem' and 'barrel' are required")
     names = []
     for mn, mob in mobiles.items():
-        if not isinstance(mn, str) or not re.match(C.NAME_RE, mn) or mn in ("minute_wheel",):
+        if not isinstance(mn, str) or not re.match(C.NAME_RE, mn) or mn in ("minute_wheel", "fixed"):
             raise FormatError("bad mobile name")
         if not isinstance(mob, dict) or not isinstance(mob.get("parts"), list) or not mob["parts"]:
             raise FormatError("mobile %s needs a non-empty parts list" % mn)
@@ -242,6 +242,11 @@ def scenario(args):
             s1 = _state(w)
             out["barrel_deg"] = _deg(s0, s1, "barrel", C.WIND_SENSE)
             out["minute_deg"] = _deg(s0, s1, "minute_wheel")
+            # let go of the crown: the mainspring tries to run back; the click must stop it
+            for _ in range(C.HOLD_STEPS):
+                w.step("stem", dq=0.0)
+            s2 = _state(w)
+            out["runback_deg"] = _deg(s1, s2, "barrel", C.WIND_SENSE)
         elif name == "slip":
             s0 = _state(w)
             out["blocked"] = _turn(w, -fw * 360)
@@ -398,7 +403,8 @@ def grade(sub, data, jobs=4):
         pass
     try:
         r1, r2 = res["slip"], res["set"]
-        checks["click"] = r1["barrel_deg"] >= -C.HOLD_TOL and r2["barrel_min_deg"] >= -C.HOLD_TOL
+        checks["click"] = (r1["barrel_deg"] >= -C.HOLD_TOL and r2["barrel_min_deg"] >= -C.HOLD_TOL
+                           and res["wind"]["runback_deg"] >= -C.CLICK_RUNBACK)
     except Exception:  # noqa: BLE001
         pass
     try:
@@ -427,8 +433,15 @@ def grade(sub, data, jobs=4):
         checks["sweep"] = ok
     except Exception:  # noqa: BLE001
         pass
+    # a check that a do-nothing design passes trivially only counts with real behaviour behind it
+    counted = dict(checks)
+    counted["slip"] = checks["slip"] and checks["wind"]
+    core = sum(1 for k in C.CORE if counted[k])
+    for k in ("click", "held", "bounds"):
+        counted[k] = checks[k] and core >= C.CORE_NEEDED
+    det["counted"] = counted
     tot = sum(C.WEIGHTS.values())
-    score = sum(C.WEIGHTS[k] for k, v in checks.items() if v) / tot
+    score = sum(C.WEIGHTS[k] for k, v in counted.items() if v) / tot
     for v in [score]:
         if not math.isfinite(v):
             return 0.0, gates, checks, det
@@ -447,7 +460,8 @@ def main():
         f.write("0\n")
     t = time.time()
     score, gates, checks, det = grade(os.path.abspath(a.sub), os.path.abspath(a.data), a.jobs)
-    out = {"reward": score, "gates": gates, "checks": checks, "details": det, "seconds": round(time.time() - t, 1)}
+    out = {"reward": score, "gates": gates, "checks": checks, "counted": det.get("counted", {}), "details": det,
+           "seconds": round(time.time() - t, 1)}
     if a.details:
         json.dump(out, open(a.details, "w"), indent=1, default=str)
     with open(a.reward, "w") as f:

@@ -97,14 +97,14 @@ def build(opts=None):
     r_in, r_out = 0.45, 0.85
     wp = G.pinion_along_x(ZP, M_FACE, xw0, xw1, 0.0, 0.0)
     hub = S.cyl_x(0, 0, xw1 - 0.01, bx0 + 0.01, 0.68, 64)
-    wteeth = breguet(o, bx0, bx1, r_in, r_out, sliding=False)
+    wteeth = None if o.get("no_teeth") else breguet(o, bx0, bx1, r_in, r_out, sliding=False)
     wpin = S.union([wp, hub, wteeth]) - S.cyl_x(0, 0, 0, 5, 0.37, 48)
     parts["winding_pinion"] = wpin
 
     # ---------- sliding pinion ----------
     sx0 = bx1 + o["clear"]            # body starts just behind the teeth band
     st0, st1 = (v + o.get("teeth_shift", 0.0) for v in o["sp_teeth_x"])
-    steeth = breguet(o, bx0 + o["clear"] / 2, sx0, r_in, r_out, sliding=True)
+    steeth = None if o.get("no_teeth") else breguet(o, bx0 + o["clear"] / 2, sx0, r_in, r_out, sliding=True)
     body = S.cyl_x(0, 0, sx0 - 0.002, st0 + 0.01, 0.85, 64)
     spur_t = G.pinion_along_x(ZP, M_FACE, st0, st1, 0.0, 0.0)
     sp = S.union([steeth, body, spur_t])
@@ -171,7 +171,7 @@ def build(opts=None):
 
     # ---------- click ----------
     if o["click"]:
-        ck, piv = S.click(24, 2.5, 2.9, 2.0, 2.5)
+        ck, piv = S.click(24, 2.5, 2.9, 2.0, 2.5) if not o.get("sliver_click") else S.click(24, 2.5, 2.9, 2.249, 2.251)
         ck = ck.rotate([0, 0, 180]).translate([bx, by, 0])
         pv = (-piv[0] + bx, -piv[1] + by)
         ck = ck - S.cyl_z(pv[0], pv[1], 1.5, 3.0, 0.23, 48)
@@ -198,7 +198,7 @@ def build(opts=None):
         if (g ^ _minute_wheel()).volume() < 1e-6:
             sspur = g
             break
-    setw = S.union([sring, sweb, shub, sspur])
+    setw = S.union([None if o.get("no_teeth") else sring, sweb, shub, sspur])
     setw = setw - S.cyl_z(xsw, 0, -3.0, -1.0, 0.36, 48) - S.cyl_z(xsw, 0, -1.62, -1.4, 0.66, 48)
     parts["setting_wheel"] = setw
     spost = S.union([S.cyl_z(xsw, 0, -2.7, -1.5, 0.33, 48), S.cyl_z(xsw, 0, -1.57, -1.45, 0.6, 48)])
