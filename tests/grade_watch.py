@@ -2,7 +2,8 @@
     python -I grade_watch.py /abs/delivery_folder [--reward FILE] [--details FILE]
 One-job mode (no --stage): the delivery folder holds movement.json, variant_6h.json, assembly.json and
 parts/<name>.step; it is graded part by part (JOB_PARTS: P1 going train and hands, P2 24-hour hand,
-P3 6-hour variant, P4 assembly), with no part frozen and no part gating another. See grade_job.
+P3 6-hour variant, P4 assembly; P5 crown winding only when geometry/keyless_job.py KEYLESS_IN_JOB is True, run by
+grade_keyless.py in a fresh interpreter), with no part frozen and no part gating another. See grade_job.
     python -I grade_watch.py /abs/submission_folder --stage 1|2|3|4 [--prev /abs/previous_stage_folder]
                              [--reward FILE] [--details FILE] [--skip CHECK,CHECK]
 Stage mode (kept to regrade old runs and for the stage anchors; it uses the one-body barrel those runs were given,
