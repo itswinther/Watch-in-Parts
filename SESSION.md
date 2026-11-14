@@ -928,3 +928,19 @@ This is information, so nobody duplicates it. The to-do list says nobody has pac
 - Files changed: `HARBOR_RESEARCH.md` (new), SESSION.md.
 - Need from others: B and humans: decide whether the run-log judge enters the reward (the file recommends keeping it as a separate, reported dimension, with a deterministic honesty check via `report.json`).
 - Next: whatever the humans pick from the top-10.
+
+### 2026-11-14 13:30 | A: status after a network outage; standards and Harbor research landed | Mikael + Claude
+- Landed on main: `STANDARDS.md` (7085732) and `HARBOR_RESEARCH.md` (31cdd55).
+  - STANDARDS: agent-evaluation standards (METR, Terminal-Bench, Inspect), test documentation (ISO 29119-3, ISO 9001 8.3, V-model), watch standards and real movement data, and real components with licensing notes. ETA 2824-2 from ETA's own document: Ø 25.6 mm, reserve at least 38 h, keyless parts list. Unitas 6497: 46 h. Click run-back about 2 teeth.
+  - HARBOR_RESEARCH: what Harbor already has (RewardKit with judge criteria over the ATIF trajectory and `samples`/`guard`, `harbor analyze` with a custom rubric, `harbor check`/`lint`, metric.py, Hub leaderboards), Terminal-Bench conventions, and where models fail.
+  - Its top 10 starts with: grade function; keep the headline reward deterministic, with the run-log judge as a labelled dimension at most; `harbor analyze` with our own failure rubric on every job; TB2.1-style reporting over `-k 8`; also run each model under its native harness (TB2 harness gaps 3 to 22 points; OpenCode the weakest for Opus 4.5); prove the timeout and memory never bind.
+- Keyless (`spikes/keyless/`), saved as work in progress in this push:
+  - built: acceptance scoring (AT steps in order), the honesty report, the judge task and docs (PROMPT, CONTEXT, STEP_BY_STEP, SOLUTION draft, REVIEW_RUBRIC, JUDGE_PROMPT);
+  - broken: forward winding under the latest engine change; it was being traced when the builder session dropped (network outage about 13:20). Not yet fixed. No model runs yet.
+- Queued for keyless: STANDARDS fixes before the runs:
+  - winding band of 3 to 12 crown turns per barrel turn (today's WIND_MIN accepts about 180);
+  - reserve at least 38 h; click run-back at most 2 teeth;
+  - AT-0 to AT-6 IDs; a deliberate "try to cheat" run; a hardened judge.
+
+  Then v2, "engineer with datasheets": supplied component datasheets plus one blanket clause ("operate within the ratings in the supplied datasheets and accepted watchmaking practice"), with implied checks traced to datasheet values.
+- Decisions for the team (also in the files): the acceptance test as the score (proposal 12:40); where `seated` is graded; keyless in scope; real components / datasheets (CLAUDE.md cut "datasheet lookup" on day one); the four questions for the organisers in TEST_ENVIRONMENT.md.
