@@ -235,6 +235,27 @@ def _set_kind(w, name, kind):
     w.movers = w.order_spring + w.order_contact + w.order_main
 
 
+def _tap(w):
+    """A tap: every free (contact) part moves up to TAP_ARC in the direction it can move furthest without
+    overlapping anything. Springs and the mainspring then act in the next step."""
+    for b in w.order_contact:
+        if b.name == "stem":
+            continue
+        dmax = b.coord_from_arc(C.TAP_ARC)
+        best = 0.0
+        for sgn in (1.0, -1.0):
+            ok_d = 0.0
+            for i in range(1, 11):
+                d = sgn * dmax * i / 10
+                if w.pen(b, b.q + d) <= 0.5 * E.TOL:
+                    ok_d = d
+                else:
+                    break
+            if abs(ok_d) > abs(best):
+                best = ok_d
+        b.q += best
+
+
 def _test_turns(w):
     """From the current state, a test turn forward and one backward (each restored). Returns a record."""
     rec = {"p": round(w.bodies["stem"].p, 4)}
@@ -288,8 +309,12 @@ def worker(args):
                                  and abs(out["wind"]["minute_deg"]) <= C.STILL_TOL)
             # 2 HOLD: the crown is let go, so it is free to turn (pushed like any free body)
             _set_kind(w, "stem", "contact")
-            for _ in range(C.HOLD_STEPS):
+            taps = 0
+            for i in range(C.HOLD_STEPS):
                 w.step("fixed", dq=0.0)
+                if (i + 1) % C.TAP_EVERY == 0:
+                    taps += 1
+                    _tap(w)
             _set_kind(w, "stem", "driven")
             s2 = _state(w)
             runback = -_deg(s1, s2, "barrel", C.WIND_SENSE)

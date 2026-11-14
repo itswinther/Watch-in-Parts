@@ -173,8 +173,10 @@ It starts from a flat mainspring.
      this turn).
    - The minute wheel moves at most $STILL_TOL degree.
 2. **AT-2 Hold.** The crown is let go for $HOLD_STEPS steps. It is now free to turn, pushed like any
-   free part. The mainspring pulls back. The arbor runs back at most $RUNBACK degrees before
-   it is held.
+   free part. The mainspring pulls back. Every $TAP_EVERY steps the rig taps the
+   movement: each free part moves up to $TAP_ARC (surface travel) in the direction it can move
+   furthest, while spring-loaded parts return towards rest. The arbor runs back at most $RUNBACK
+   degrees before it is held.
 3. **AT-3 Run.**
    - **Reserve.** Fully wound, the mainspring stores $CAPACITY arbor turns. The run-back measured in
      AT-2 is lost from that. While the watch runs, the barrel turns once every $HOURS_PER_TURN hours,

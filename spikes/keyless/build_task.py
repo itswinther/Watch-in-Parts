@@ -97,7 +97,7 @@ def values():
         "MINUTE_X": g(C.MINUTE_AXIS[0]), "MINUTE_Y": g(C.MINUTE_AXIS[1]),
         "MAX_TRIANGLES": C.MAX_TRIANGLES, "TOL": g(E.TOL), "STEP_DEG": g(C.STEP_DEG), "PULL_STEP": g(C.PULL_STEP),
         "K": g(E.K), "CONE_DEG": "%d" % round(math.degrees(math.atan(E.K))), "RELAX_MAX": g(E.RELAX_MAX),
-        "MAIN_TRY": g(C.MAIN_TRY), "HOLD_SHIFT": g(C.HOLD_SHIFT), "MU": g(C.MU), "MU_STATIC": g(C.MU_STATIC), "MU_SLIDING": g(C.MU_SLIDING),
+        "MAIN_TRY": g(C.MAIN_TRY), "HOLD_SHIFT": g(C.HOLD_SHIFT), "MU": g(C.MU), "TAP_EVERY": C.TAP_EVERY, "TAP_ARC": g(C.TAP_ARC), "MU_STATIC": g(C.MU_STATIC), "MU_SLIDING": g(C.MU_SLIDING),
         "STEM_PROTRUDE": g(C.STEM_PROTRUDE), "WIND_TURNS": g(C.WIND_TURNS), "WIND_LO": g(C.WIND_BAND[0]),
         "WIND_HI": g(C.WIND_BAND[1]),
         "STILL_TOL": g(C.STILL_TOL), "HOLD_STEPS": C.HOLD_STEPS, "RUNBACK": g(C.CLICK_RUNBACK),
