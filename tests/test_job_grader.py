@@ -10,7 +10,7 @@ Cases (the letters of the builder brief):
   a  empty folder: reward 0, every part 0, the reward file says 0
   b  the reference job folder: 1.0
   c  variant_6h.json missing: P3's gates fail, the others pass, reward = 0.5 x (1 - 0.15/0.75)
-  d  the variant names a different fixed list (bridge_alt, a byte copy of bridge): P3's same_frame gate fails
+  d  the variant names a different fixed list (bridge_alt, a byte copy of bridge): P3's same_frame gate (C4) fails
   e  assembly.json missing: P4 scores 0, the others pass, reward = 0.5 x (1 - 0.25/0.75)
   f  movement.json missing, variant present: P1, P2 and P4 fail their gates; P3 is still graded, all its checks
      run, and its same_frame gate fails because there is no movement.json to compare with, so P3 scores 0 too
@@ -83,6 +83,10 @@ def case_frame_gate(job, tmp):
     v2 = W.load_movement(folder, G.JOB_VARIANT, cache=cache)
     ok2, info2 = G.job_same_frame(folder, v2)
     assert not ok2 and info2["only_in_movement"] == ["bridge"] and info2["only_in_variant"] == ["bridge_alt"], info2
+    # the same names in another order fail it (C4: the same names in the same order)
+    _edit(folder, G.JOB_VARIANT, lambda doc: doc.update(fixed=list(reversed(v.doc["fixed"]))))
+    ok5, info5 = G.job_same_frame(folder, W.load_movement(folder, G.JOB_VARIANT, cache=cache))
+    assert not ok5 and not info5["same_fixed"] and not info5["only_in_variant"], info5
     # a different case_centre alone also fails it
     _edit(folder, G.JOB_VARIANT, lambda doc: doc.update(fixed=v.doc["fixed"], case_centre=[doc["case_centre"][0] + 0.5, doc["case_centre"][1]]))
     ok3, info3 = G.job_same_frame(folder, W.load_movement(folder, G.JOB_VARIANT, cache=cache))
@@ -91,8 +95,28 @@ def case_frame_gate(job, tmp):
     os.remove(os.path.join(folder, G.JOB_MOVEMENT))
     ok4, info4 = G._run(lambda: G.job_same_frame(folder, v))
     assert not ok4 and "movement.json not found" in info4["error"], info4
-    return "reference variant passes; bridge->bridge_alt fails (%s); case centre +0.5 fails; no movement.json fails (%s)" % (
+    return "reference variant passes; bridge->bridge_alt fails (%s); same names reversed fail; case centre +0.5 fails; no movement.json fails (%s)" % (
         info2["only_in_variant"], info4["error"])
+
+
+def case_day_gate(job, tmp):
+    """C3 (P2 and P3): hands.day declared on a part no other hand uses. A missing day hand fails C3, not C1."""
+    from geometry import watch as W
+    for name in (G.JOB_MOVEMENT, G.JOB_VARIANT):
+        m = W.load_movement(job, name)
+        ok, info = G.job_day_declared(m)
+        assert ok, (name, info)
+        for h in ("hour", "minute", "seconds"):
+            m.hands["day"] = m.hands[h]
+            ok, info = G.job_day_declared(m)
+            assert not ok and info["also_used_by"] == [h], (name, h, info)
+    folder = os.path.join(tmp, "noday")
+    shutil.copytree(job, folder)
+    _edit(folder, G.JOB_VARIANT, lambda doc: doc["hands"].pop("day"))
+    v = W.load_movement(folder, G.JOB_VARIANT)          # C1 still holds
+    ok, info = G.job_day_declared(v)
+    assert not ok and "no 'day' hand" in info["error"], info
+    return "both reference movements pass; day on the hour, minute or seconds hand part fails; no day hand: C1 holds, C3 fails"
 
 
 def case_cache(job, tmp):
@@ -172,7 +196,7 @@ def case_c(job, tmp):
 def case_d(job, tmp):
     d, text, sec = _full(job, tmp, "other_frame", _different_fixed)
     p3 = d["parts"]["P3"]
-    assert p3["gates"] == {"files": True, "assembled": True, "same_frame": False}, p3["gates"]
+    assert p3["gates"] == {"files": True, "assembled": True, "day_declared": True, "same_frame": False}, p3["gates"]
     assert all(p3["checks"].values()) and p3["s"] == 0.0
     assert all(part_ok(d, pid) for pid in ("P1", "P2", "P4")), _summary(d, sec)
     assert d["reward"] == without("P3"), _summary(d, sec)
@@ -193,14 +217,14 @@ def case_f(job, tmp):
     for pid in ("P1", "P2", "P4"):
         assert not d["parts"][pid]["gates"]["files"] and d["parts"][pid]["s"] == 0.0, pid
     p3 = d["parts"]["P3"]
-    assert p3["gates"] == {"files": True, "assembled": True, "same_frame": False}, p3["gates"]
+    assert p3["gates"] == {"files": True, "assembled": True, "day_declared": True, "same_frame": False}, p3["gates"]
     assert all(p3["checks"].values()), p3["checks"]      # still graded: every check ran and passed
     assert "movement.json not found" in p3["details"]["same_frame"]["error"]
     assert d["reward"] == 0.0 and text.strip() == "0.000000"
     return _summary(d, sec) + "; P3 checks all ran and passed, same_frame: %s" % p3["details"]["same_frame"]["error"]
 
 
-QUICK = [("a", case_a), ("frame_gate", case_frame_gate), ("cache", case_cache), ("deadline", case_deadline),
+QUICK = [("a", case_a), ("frame_gate", case_frame_gate), ("day_gate", case_day_gate), ("cache", case_cache), ("deadline", case_deadline),
          ("reward_formula", case_reward_formula)]
 SLOW = [("b", case_b), ("c", case_c), ("d", case_d), ("e", case_e), ("f", case_f)]
 

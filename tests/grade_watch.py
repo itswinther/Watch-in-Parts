@@ -42,14 +42,17 @@ TIMEOUT_S = 600
 JOB_MOVEMENT, JOB_VARIANT, JOB_ASSEMBLY = "movement.json", "variant_6h.json", "assembly.json"
 JOB_CHECKS_1 = {k: w for k, w in WEIGHTS.items() if k != "light"}      # P1: stage-1 checks without light
 JOB_CHECKS_2 = dict(WEIGHTS_2)                                          # P2: the 24-hour hand
-# The parts of the job: (id, what it is, weight, gates, check weights). The reward renormalises the weights
+# The parts of the job: (id, what it is, weight, gates, check weights). Gates are the brief's conditions
+# (environment/public/job/PROMPT.md): files C1, assembled C2, day_declared C3, same_frame C4; P4's are C1 of
+# movement.json and plan (assembly.json valid). The reward renormalises the weights
 # over the parts listed here. P4's checks are one per part of movement.json, weight 1 each (None here).
 # P5 (crown winding, AT-0 to AT-6, weight 0.25) joins this table when the keyless geometry is agreed
-# (SESSION.md Decisions 15:29 and 15:44), with its grader in JOB_GRADERS below.
+# (SESSION.md Decisions 15:29 and 15:44): one row here and one grading step in grade_job that sets raw["P5"].
 JOB_PARTS = (
     ("P1", "going train and hands", Fraction(25, 100), ("files", "assembled"), JOB_CHECKS_1),
     ("P2", "24-hour hand", Fraction(10, 100), ("files", "assembled", "day_declared"), JOB_CHECKS_2),
-    ("P3", "6-hour variant", Fraction(15, 100), ("files", "assembled", "same_frame"), dict(JOB_CHECKS_1, **JOB_CHECKS_2)),
+    ("P3", "6-hour variant", Fraction(15, 100), ("files", "assembled", "day_declared", "same_frame"),
+     dict(JOB_CHECKS_1, **JOB_CHECKS_2)),
     ("P4", "assembly", Fraction(25, 100), ("files", "plan"), None),
 )
 JOB_TIME_LIMIT_S = 1500     # s, whole run: once it has passed, every check not yet run fails (kept well under a 30-minute verifier)
@@ -468,7 +471,8 @@ def _read_json(folder, name):
 
 
 def job_day_declared(m):
-    """P2 gate: a 24-hour hand is declared, and its part is used by no other hand."""
+    """P2 and P3 gate (C3): hands.day names a mobile and one of its parts (the loader checks that), and that part
+    is not the part of the hour, minute or seconds hand."""
     if "day" not in m.hands:
         return False, {"error": "no 'day' hand declared"}
     part = m.hands["day"][1]
@@ -477,8 +481,8 @@ def job_day_declared(m):
 
 
 def job_same_frame(folder, v):
-    """P3 gate: the variant v uses the frame of movement.json: the same set of 'fixed' part names (one parts/
-    folder, so the same files) and the same case_centre. Read from movement.json's JSON only, so it does not
+    """P3 gate (C4): the variant v uses the frame of movement.json: the same 'fixed' list, the same names in the
+    same order (one parts/ folder, so the same files), and the same case_centre. Read from movement.json's JSON only, so it does not
     depend on movement.json's parts loading; it fails if movement.json cannot be read."""
     import math
     doc = _read_json(folder, JOB_MOVEMENT)
@@ -488,7 +492,7 @@ def job_same_frame(folder, v):
     info = {"movement_fixed": fixed, "variant_fixed": vf, "movement_case_centre": cc, "variant_case_centre": list(v.case_centre)}
     if not (isinstance(fixed, list) and all(isinstance(n, str) for n in fixed)):
         return False, dict(info, error="movement.json: 'fixed' is not a list of part names")
-    same_fixed = sorted(fixed) == sorted(vf)
+    same_fixed = fixed == vf
     same_cc = isinstance(cc, list) and len(cc) == 2 and all(isinstance(x, (int, float)) and math.isfinite(x) for x in cc) \
         and (float(cc[0]), float(cc[1])) == v.case_centre
     info.update(same_fixed=same_fixed, same_case_centre=same_cc,
@@ -616,7 +620,8 @@ def grade_job(folder):
 
     def variant():
         _, g, c, d = _job_movement(folder, JOB_VARIANT, W.CHANGED_BARREL_TURNS_PER_HOUR, by_id["P3"][4],
-                                   {"same_frame": lambda v: job_same_frame(folder, v)}, run, cache, thin_cache)
+                                   {"day_declared": job_day_declared, "same_frame": lambda v: job_same_frame(folder, v)},
+                                   run, cache, thin_cache)
         raw["P3"] = (g, c, d)
     guarded(("P3",), variant)
 
