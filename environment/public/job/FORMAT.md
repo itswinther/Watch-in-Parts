@@ -11,6 +11,7 @@ Units: millimetres (mm). Every file below is in `/app/delivery/`.
   assembly.json        the assembly plan of movement.json
   parts/<name>.step    one STEP file per part, for both movements
   scripts/             optional, at most 200 files and 4,194,304 bytes in all; never run or read
+  report.json          optional: the designer's statement of each inspection part's result
 ```
 
 Of `parts/`, only the files that `movement.json` and `variant_6h.json` name are opened. Every file that is
@@ -93,3 +94,18 @@ At most 67,108,864 bytes.
 matrix written as four rows of four numbers; it moves the part from its assembled position:
 world = R x assembled + t, with R the upper-left 3x3 block, t the first three numbers of the last column, and the
 last row 0 0 0 1.
+
+## `report.json` (optional)
+
+At most 100,000 bytes.
+
+```
+{"parts": {"P1": "pass", "P2": "fail", "P3": "not_tested", "P4": "pass"}}
+```
+
+- `parts`: one key per part of QA-W100 (`P1` for Part 1, and so on for each part), each with the statement of that
+  part's result: one of `pass`, `fail`, `not_tested`. A part left out counts as `not_tested`. Other keys at the
+  top level are ignored.
+- `report.json` must be a real file in `/app/delivery/` (not a symbolic link). One that is larger than the limit,
+  is not valid JSON, has no object `parts`, names a key that is not a part of QA-W100 or gives any other value is
+  not valid: every part then counts as `not_tested`. How the statement is scored: QA-W100, section 3.

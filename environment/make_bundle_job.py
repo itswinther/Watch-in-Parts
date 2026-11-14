@@ -56,6 +56,10 @@ def fill_check_format():
               "MAX_SCRIPT_FILES", "MAX_JSON_BYTES", "MAX_ASSEMBLY_BYTES", "MIN_TEETH", "MAX_TEETH", "MAX_NAME_LEN",
               "MATERIAL_DESIGNATIONS"):
         s = s.replace("__%s__" % k, repr(getattr(W, k)))
+    HC = B.H.constants()             # the designer's statement (report.json): A's limit and claims, the part ids
+    s = s.replace("__REPORT_MAX_BYTES__", repr(HC.REPORT_MAX_BYTES))
+    s = s.replace("__REPORT_PARTS__", repr(tuple(B.H.part_ids(len(B.PARTS)))))
+    s = s.replace("__REPORT_CLAIMS__", repr(tuple(HC.CLAIMS)))
     if "{1,%d}" % W.MAX_NAME_LEN not in W.NAME_RE.pattern:
         raise SystemExit("NAME_RE and MAX_NAME_LEN disagree")
     if re.search(r"__[A-Z_]+__", s):

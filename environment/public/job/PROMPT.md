@@ -37,6 +37,7 @@ Everything goes into the folder `/app/delivery/`. What is in it when you finish 
 | `/app/delivery/assembly.json` | the order in which the parts of `movement.json` are put in, and the path of each |
 | `/app/delivery/parts/<name>.step` | every part of both movements, one STEP file per part; a part used in both movements is one file |
 | `/app/delivery/scripts/` | optional: the scripts that made the parts. Archived with the delivery; never run or read |
+| `/app/delivery/report.json` | optional: your own statement of the result of each part of QA-W100 (`pass`, `fail` or `not_tested`; QA-W100, section 3) |
 
 The file formats, the size limits and the JSON layouts are in `/app/FORMAT.md`.
 

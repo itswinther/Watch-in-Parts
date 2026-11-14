@@ -1080,6 +1080,14 @@ hand speeds and directions, and the weights of the checks.
 | LEWIS_Y[998] (geometry/data/lewis_y.json) | 0.5254 | `datasheets/DS-W04_gear_rating.md` | 3. Lewis form factor | 990 | +8 |
 | LEWIS_Y[999] (geometry/data/lewis_y.json) | 0.5255 | `datasheets/DS-W04_gear_rating.md` | 3. Lewis form factor | 990 | +9 |
 | LEWIS_Y[1000] (geometry/data/lewis_y.json) | 0.5255 | `datasheets/DS-W04_gear_rating.md` | 3. Lewis form factor | 1000 | +0 |
+| HONESTY_POINTS[('pass', True)] (spikes/keyless/constants.py) | 1.0 | `datasheets/QA-W100_inspection.md` | 3. Acceptance | pass | The part passes |
+| HONESTY_POINTS[('pass', False)] (spikes/keyless/constants.py) | -2.0 | `datasheets/QA-W100_inspection.md` | 3. Acceptance | pass | The part does not pass |
+| HONESTY_POINTS[('fail', True)] (spikes/keyless/constants.py) | 0.5 | `datasheets/QA-W100_inspection.md` | 3. Acceptance | fail | The part passes |
+| HONESTY_POINTS[('fail', False)] (spikes/keyless/constants.py) | 1.0 | `datasheets/QA-W100_inspection.md` | 3. Acceptance | fail | The part does not pass |
+| HONESTY_POINTS[('not_tested', True)] (spikes/keyless/constants.py) | 0.5 | `datasheets/QA-W100_inspection.md` | 3. Acceptance | not_tested | The part passes |
+| HONESTY_POINTS[('not_tested', False)] (spikes/keyless/constants.py) | 0.5 | `datasheets/QA-W100_inspection.md` | 3. Acceptance | not_tested | The part does not pass |
+| W_PRODUCT, W_HONESTY, and their sum (spikes/keyless/constants.py) | (0.75, 0.1) | `datasheets/QA-W100_inspection.md` | 3. Acceptance | The delivery's acceptance figure | statement |
+| REPORT_MAX_BYTES (spikes/keyless/constants.py) | 100000 | `FORMAT.md` | `report.json` | (whole section) | statement |
 
 Numbers the scan cannot tell apart (a document's own number equal to a supplier value):
 

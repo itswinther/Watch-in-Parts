@@ -2,7 +2,8 @@
     python3 tools/check_format.py [FOLDER]
 FOLDER defaults to the folder `delivery` next to this tools folder. Checks movement.json, variant_6h.json
 and assembly.json (each when present: a missing file is reported, and the rest is still checked), the part
-names, and every part file they name, read and turned into a solid exactly as the inspection does.
+names, every part file they name, read and turned into a solid exactly as the inspection does, and report.json
+when it is there (optional; its layout only, not whether its statements are right).
 Prints "format ok" or every format error found, one per line, and exits 0 or 1. Copies and changes nothing."""
 import json
 import math
@@ -29,6 +30,9 @@ MAX_ASSEMBLY_BYTES = __MAX_ASSEMBLY_BYTES__
 MIN_TEETH, MAX_TEETH = __MIN_TEETH__, __MAX_TEETH__
 MAX_NAME_LEN = __MAX_NAME_LEN__
 MATERIALS = __MATERIAL_DESIGNATIONS__
+REPORT_MAX_BYTES = __REPORT_MAX_BYTES__
+REPORT_PARTS = __REPORT_PARTS__
+REPORT_CLAIMS = __REPORT_CLAIMS__
 NAME = re.compile(r"__NAME_RE__")
 MOVEMENT_FILES = ("movement.json", "variant_6h.json")
 
@@ -149,6 +153,21 @@ def check_assembly(folder):
             raise Bad("assembly.json: paths.%s must be a list of 4x4 matrices (four rows of four numbers)" % n)
 
 
+def check_report(folder):
+    """report.json, if present: its layout only (FORMAT.md). An invalid one counts every part as not_tested."""
+    p = os.path.join(folder, "report.json")
+    if not os.path.lexists(p):
+        return
+    doc = read_json(folder, "report.json", REPORT_MAX_BYTES)
+    if not isinstance(doc, dict) or not isinstance(doc.get("parts"), dict):
+        raise Bad("report.json: top level must be an object with an object 'parts'")
+    for k, v in doc["parts"].items():
+        if k not in REPORT_PARTS:
+            raise Bad("report.json: parts: %r is not a part of the inspection (%s)" % (k, ", ".join(REPORT_PARTS)))
+        if v not in REPORT_CLAIMS:
+            raise Bad("report.json: parts.%s must be one of %s" % (k, ", ".join(REPORT_CLAIMS)))
+
+
 def check_scripts(folder):
     d = os.path.join(folder, "scripts")
     if not os.path.isdir(d):
@@ -185,6 +204,7 @@ def main(argv):
     for n in parts:
         run(load_part, folder, n)
     run(check_assembly, folder)
+    run(check_report, folder)
     run(check_scripts, folder)
     if errors:
         for e in errors:
