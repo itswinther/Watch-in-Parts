@@ -271,7 +271,7 @@ ANCHORS = [
     ("s1 two fixed parts overlap", 1, lambda d, b: dup_fixed(d), 0.0),
     ("s1 hour and minute hands swapped", 1, lambda d, b: edit(d, swap_hands), fails(1, "hour", "minute")),
     ("s1 one tooth count declared wrong", 1, lambda d, b: edit(d, lambda doc: doc["meshes"][1].update(driven_teeth=31)),
-     fails(1, "train", "minute", "hour", "seconds")),
+     fails(1, "train", "tolerant", "minute", "hour", "seconds")),     # the jam shows in the shifted positions too
     ("s1 barrel not held from above", 1, lambda d, b: edit(d, lambda doc: doc["fixed"].remove("barrel_cock")), fails(1, "held")),
     # mass budget: these pass as "light and size fail" only once the reference itself meets the budget
     ("s1 one extra solid block added as a fixed part", 1, heavy_fixed_block, fails(1, "light", "size")),
