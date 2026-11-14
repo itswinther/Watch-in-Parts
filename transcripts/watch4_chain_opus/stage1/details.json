@@ -1,0 +1,305 @@
+{
+ "reward": 1.0,
+ "p": 1.0,
+ "gates": {
+  "files": true,
+  "assembled": true
+ },
+ "checks": {
+  "spin": true,
+  "held": true,
+  "train": true,
+  "clear": true,
+  "minute": true,
+  "hour": true,
+  "seconds": true,
+  "coaxial": true,
+  "hands": true,
+  "size": true,
+  "printable": true
+ },
+ "details": {
+  "files": {},
+  "assembled": {
+   "worst_volume": 0.0,
+   "pair": null,
+   "fixed_parts_worst": 0.0,
+   "fixed_pair": null
+  },
+  "spin": {
+   "barrel": {
+    "worst_volume": 0.0,
+    "step": 0,
+    "steps": 72
+   },
+   "third": {
+    "worst_volume": 0.0,
+    "step": 0,
+    "steps": 72
+   },
+   "centre": {
+    "worst_volume": 0.0,
+    "step": 0,
+    "steps": 72
+   },
+   "fourth": {
+    "worst_volume": 0.0,
+    "step": 0,
+    "steps": 72
+   },
+   "seconds": {
+    "worst_volume": 0.0,
+    "step": 0,
+    "steps": 72
+   },
+   "motion": {
+    "worst_volume": 0.0,
+    "step": 0,
+    "steps": 72
+   },
+   "hour": {
+    "worst_volume": 0.0,
+    "step": 0,
+    "steps": 72
+   }
+  },
+  "held": {
+   "barrel": {
+    "+x": 0.5144271398957871,
+    "-x": 0.2235518764005576,
+    "+y": 0.5049566152500603,
+    "-y": 0.2539968803147531,
+    "+z": 0.15663140901033304,
+    "-z": 28.47038139372588
+   },
+   "third": {
+    "+x": 0.311973473797538,
+    "-x": 0.5107528521492641,
+    "+y": 0.15878043864094474,
+    "-y": 0.6553223055285411,
+    "+z": 0.0769371514372378,
+    "-z": 0.7933914732981866
+   },
+   "centre": {
+    "+x": 0.9180496749483955,
+    "-x": 0.8894157759546472,
+    "+y": 1.0713010096196776,
+    "-y": 0.7975423667410998,
+    "+z": 0.693824962989221,
+    "-z": 1.5171722601530255
+   },
+   "fourth": {
+    "+x": 0.26040739460923673,
+    "-x": 0.25578378547482244,
+    "+y": 0.2689819585735076,
+    "-y": 0.2710751456731607,
+    "+z": 0.07693716307850268,
+    "-z": 0.07693714014945231
+   },
+   "seconds": {
+    "+x": 0.22423102146684676,
+    "-x": 0.3478218386095629,
+    "+y": 0.3630814623109175,
+    "-y": 0.219769857594772,
+    "+z": 0.2021719181756088,
+    "-z": 0.07693711438118905
+   },
+   "motion": {
+    "+x": 0.14837193235474092,
+    "-x": 0.15013454392690162,
+    "+y": 0.062085658815370696,
+    "-y": 0.38580131498359627,
+    "+z": 0.2702723565466362,
+    "-z": 7.030619774447616
+   },
+   "hour": {
+    "+x": 0.4487135714862523,
+    "-x": 0.44871357148625246,
+    "+y": 0.5616084096857673,
+    "-y": 0.4072877155787968,
+    "+z": 0.8043915358843331,
+    "-z": 0.5198397512267032
+   }
+  },
+  "train": {
+   "conflicts": [],
+   "meshes": [
+    {
+     "worst_volume": 0.0,
+     "step": 0,
+     "steps": 768,
+     "largest_gap": 0.022802724307238936,
+     "smallest_drive_overlap": 0.07455488476582978,
+     "pair": "barrel/third",
+     "passes": true
+    },
+    {
+     "worst_volume": 0.0,
+     "step": 0,
+     "steps": 320,
+     "largest_gap": 0.018486438675206805,
+     "smallest_drive_overlap": 0.07535897670024176,
+     "pair": "third/centre",
+     "passes": true
+    },
+    {
+     "worst_volume": 0.0,
+     "step": 0,
+     "steps": 640,
+     "largest_gap": 0.01830687412941622,
+     "smallest_drive_overlap": 0.027407978363712827,
+     "pair": "centre/fourth",
+     "passes": true
+    },
+    {
+     "worst_volume": 0.0,
+     "step": 0,
+     "steps": 600,
+     "largest_gap": 0.018237122317703594,
+     "smallest_drive_overlap": 0.024706525523401635,
+     "pair": "fourth/seconds",
+     "passes": true
+    },
+    {
+     "worst_volume": 0.0,
+     "step": 0,
+     "steps": 360,
+     "largest_gap": 0.01829943747946819,
+     "smallest_drive_overlap": 0.030307592905711462,
+     "pair": "centre/motion",
+     "passes": true
+    },
+    {
+     "worst_volume": 0.0,
+     "step": 0,
+     "steps": 384,
+     "largest_gap": 0.018656457541874817,
+     "smallest_drive_overlap": 0.027816648487140643,
+     "pair": "motion/hour",
+     "passes": true
+    }
+   ]
+  },
+  "clear": {
+   "worst_volume": 0.0,
+   "pair": null
+  },
+  "minute": {
+   "clockwise_turns_per_hour_through_working_meshes": "1"
+  },
+  "hour": {
+   "clockwise_turns_per_hour_through_working_meshes": "1/12"
+  },
+  "seconds": {
+   "clockwise_turns_per_hour_through_working_meshes": "60"
+  },
+  "coaxial": {
+   "distance": 0.0
+  },
+  "hands": {
+   "hour": 5.108815825775398,
+   "minute": 5.6055774842459165,
+   "seconds": 5.304773591059074
+  },
+  "size": {
+   "radius": 20.300000385404612,
+   "z_min": -1.5,
+   "z_max": 9.800000190734863
+  },
+  "printable": {
+   "bottom_plate": {
+    "pieces": 1,
+    "max_deviation": 0.07071067811865477
+   },
+   "top_plate": {
+    "pieces": 1,
+    "max_deviation": 0.07071067811865477
+   },
+   "n_cap": {
+    "pieces": 1,
+    "max_deviation": 0.07071067811865477
+   },
+   "a_arbor": {
+    "pieces": 1,
+    "max_deviation": 0.07071067811865477
+   },
+   "a_pinion": {
+    "pieces": 1,
+    "max_deviation": 0.08660254037844387
+   },
+   "a_wheel": {
+    "pieces": 1,
+    "max_deviation": 0.08660254037844387
+   },
+   "m_arbor": {
+    "pieces": 1,
+    "max_deviation": 0.07071067811865477
+   },
+   "m_pinion": {
+    "pieces": 1,
+    "max_deviation": 0.08660254037844387
+   },
+   "m_wheel": {
+    "pieces": 1,
+    "max_deviation": 0.1224744871391589
+   },
+   "cannon_pinion": {
+    "pieces": 1,
+    "max_deviation": 0.1224744871391589
+   },
+   "minute_hand": {
+    "pieces": 1,
+    "max_deviation": 0.07071067811865477
+   },
+   "x_arbor": {
+    "pieces": 1,
+    "max_deviation": 0.07071067811865477
+   },
+   "x_pinion": {
+    "pieces": 1,
+    "max_deviation": 0.08660254037844387
+   },
+   "x_wheel": {
+    "pieces": 1,
+    "max_deviation": 0.1224744871391589
+   },
+   "s_arbor": {
+    "pieces": 1,
+    "max_deviation": 0.07071067811865477
+   },
+   "s_pinion": {
+    "pieces": 1,
+    "max_deviation": 0.1224744871391589
+   },
+   "seconds_hand": {
+    "pieces": 1,
+    "max_deviation": 0.07071067811865477
+   },
+   "n_arbor": {
+    "pieces": 1,
+    "max_deviation": 0.07071067811865477
+   },
+   "n_wheel": {
+    "pieces": 1,
+    "max_deviation": 0.1224744871391589
+   },
+   "n_pinion": {
+    "pieces": 1,
+    "max_deviation": 0.08660254037844387
+   },
+   "h_tube": {
+    "pieces": 1,
+    "max_deviation": 0.07071067811865477
+   },
+   "h_wheel": {
+    "pieces": 1,
+    "max_deviation": 0.1118033988749895
+   },
+   "hour_hand": {
+    "pieces": 1,
+    "max_deviation": 0.07071067811865477
+   }
+  }
+ },
+ "skipped": []
+}

@@ -1,0 +1,154 @@
+{
+ "case_centre": [
+  10.5,
+  0.0
+ ],
+ "fixed": [
+  "bottom_plate",
+  "top_plate",
+  "n_cap",
+  "day_post"
+ ],
+ "mobiles": {
+  "third": {
+   "axis": [
+    8.89,
+    6.812334401657039
+   ],
+   "parts": [
+    "a_arbor",
+    "a_pinion",
+    "a_wheel"
+   ]
+  },
+  "centre": {
+   "axis": [
+    10.5,
+    0.0
+   ],
+   "parts": [
+    "m_arbor",
+    "m_pinion",
+    "m_wheel",
+    "cannon_pinion",
+    "minute_hand"
+   ]
+  },
+  "fourth": {
+   "axis": [
+    14.83881636538414,
+    -5.1707999910531015
+   ],
+   "parts": [
+    "x_arbor",
+    "x_pinion",
+    "x_wheel"
+   ]
+  },
+  "seconds": {
+   "axis": [
+    18.93658737713583,
+    -10.054333315936585
+   ],
+   "parts": [
+    "s_arbor",
+    "s_pinion",
+    "seconds_hand"
+   ]
+  },
+  "motion": {
+   "axis": [
+    10.5,
+    4.5
+   ],
+   "parts": [
+    "n_arbor",
+    "n_wheel",
+    "n_pinion"
+   ]
+  },
+  "hour": {
+   "axis": [
+    10.5,
+    0.0
+   ],
+   "parts": [
+    "h_tube",
+    "h_wheel",
+    "hour_hand"
+   ]
+  },
+  "day": {
+   "axis": [
+    10.5,
+    12.6
+   ],
+   "parts": [
+    "day_wheel",
+    "day_hand"
+   ]
+  }
+ },
+ "meshes": [
+  {
+   "driver": "barrel",
+   "driver_teeth": 96,
+   "driven": "third",
+   "driven_teeth": 16
+  },
+  {
+   "driver": "third",
+   "driver_teeth": 35,
+   "driven": "centre",
+   "driven_teeth": 35
+  },
+  {
+   "driver": "centre",
+   "driver_teeth": 80,
+   "driven": "fourth",
+   "driven_teeth": 10
+  },
+  {
+   "driver": "fourth",
+   "driver_teeth": 75,
+   "driven": "seconds",
+   "driven_teeth": 10
+  },
+  {
+   "driver": "centre",
+   "driver_teeth": 15,
+   "driven": "motion",
+   "driven_teeth": 45
+  },
+  {
+   "driver": "motion",
+   "driver_teeth": 12,
+   "driven": "hour",
+   "driven_teeth": 48
+  },
+  {
+   "driver": "motion",
+   "driver_teeth": 12,
+   "driven": "day",
+   "driven_teeth": 96
+  }
+ ],
+ "hands": {
+  "hour": {
+   "mobile": "hour",
+   "part": "hour_hand"
+  },
+  "minute": {
+   "mobile": "centre",
+   "part": "minute_hand"
+  },
+  "seconds": {
+   "mobile": "seconds",
+   "part": "seconds_hand"
+  },
+  "day": {
+   "mobile": "day",
+   "part": "day_hand"
+  }
+ }
+}

@@ -1,0 +1,122 @@
+{
+ "schema": "watch-chain-pack/2",
+ "parts_store": {
+  "files": 32,
+  "stored_bytes": 9487409,
+  "raw_bytes": 60889807,
+  "references": 112
+ },
+ "run": "sonnet",
+ "model": "claude-sonnet-5-5",
+ "harness": "claude-code 2.1.325 headless (claude -p, stream-json)",
+ "chain_score": 0.468262,
+ "stages_run": 4,
+ "total_cost_usd": 2.2010408999999997,
+ "total_tool_calls": 66,
+ "stages": [
+  {
+   "stage": 1,
+   "ran": true,
+   "skipped": false,
+   "missing": false,
+   "start": 1794634022.0,
+   "end": 1794635185.0,
+   "duration_s": 1163.0,
+   "exit_code": 0,
+   "killed_by_time_limit": false,
+   "tool_calls": 17,
+   "num_turns": 18,
+   "cost_usd": 0.8702635000000001,
+   "result_subtype": "success",
+   "reward": 1.0,
+   "p": 1.0,
+   "failed_gates": [],
+   "failed_checks": [],
+   "inherited_failures": [],
+   "new_failures": [],
+   "files": {
+    "scripts": 4,
+    "submission": 27
+   }
+  },
+  {
+   "stage": 2,
+   "ran": true,
+   "skipped": false,
+   "missing": false,
+   "start": 1794635185.0,
+   "end": 1794636038.0,
+   "duration_s": 853.0,
+   "exit_code": 0,
+   "killed_by_time_limit": false,
+   "tool_calls": 18,
+   "num_turns": 19,
+   "cost_usd": 0.6341554999999999,
+   "result_subtype": "success",
+   "reward": 1.0,
+   "p": 1.0,
+   "failed_gates": [],
+   "failed_checks": [],
+   "inherited_failures": [],
+   "new_failures": [],
+   "files": {
+    "scripts": 8,
+    "submission": 38
+   }
+  },
+  {
+   "stage": 3,
+   "ran": true,
+   "skipped": false,
+   "missing": false,
+   "start": 1794636038.0,
+   "end": 1794636444.0,
+   "duration_s": 406.0,
+   "exit_code": 0,
+   "killed_by_time_limit": false,
+   "tool_calls": 11,
+   "num_turns": 12,
+   "cost_usd": 0.2339764,
+   "result_subtype": "success",
+   "reward": 1.0,
+   "p": 1.0,
+   "failed_gates": [],
+   "failed_checks": [],
+   "inherited_failures": [],
+   "new_failures": [],
+   "files": {
+    "scripts": 4,
+    "submission": 35
+   }
+  },
+  {
+   "stage": 4,
+   "ran": true,
+   "skipped": false,
+   "missing": false,
+   "start": 1794636444.0,
+   "end": 1794638030.0,
+   "duration_s": 1586.0,
+   "exit_code": 0,
+   "killed_by_time_limit": false,
+   "tool_calls": 20,
+   "num_turns": 21,
+   "cost_usd": 0.4626455,
+   "result_subtype": "success",
+   "reward": 0.468262,
+   "p": 0.967741935483871,
+   "failed_gates": [],
+   "failed_checks": [
+    "day_cock"
+   ],
+   "inherited_failures": [],
+   "new_failures": [
+    "day_cock"
+   ],
+   "files": {
+    "scripts": 5,
+    "submission": 37
+   }
+  }
+ ]
+}

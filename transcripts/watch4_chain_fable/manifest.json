@@ -1,0 +1,118 @@
+{
+ "schema": "watch-chain-pack/2",
+ "parts_store": {
+  "files": 32,
+  "stored_bytes": 6856273,
+  "raw_bytes": 40060310,
+  "references": 106
+ },
+ "run": "fable",
+ "model": "claude-fable-5-2",
+ "harness": "claude-code 2.1.325 headless (claude -p, stream-json)",
+ "chain_score": 1.0,
+ "stages_run": 4,
+ "total_cost_usd": 6.7395966000000005,
+ "total_tool_calls": 34,
+ "stages": [
+  {
+   "stage": 1,
+   "ran": true,
+   "skipped": false,
+   "missing": false,
+   "start": 1794634022.0,
+   "end": 1794634607.0,
+   "duration_s": 585.0,
+   "exit_code": 0,
+   "killed_by_time_limit": false,
+   "tool_calls": 7,
+   "num_turns": 8,
+   "cost_usd": 2.5770350000000004,
+   "result_subtype": "success",
+   "reward": 1.0,
+   "p": 1.0,
+   "failed_gates": [],
+   "failed_checks": [],
+   "inherited_failures": [],
+   "new_failures": [],
+   "files": {
+    "scripts": 2,
+    "submission": 25
+   }
+  },
+  {
+   "stage": 2,
+   "ran": true,
+   "skipped": false,
+   "missing": false,
+   "start": 1794634607.0,
+   "end": 1794635609.0,
+   "duration_s": 1002.0,
+   "exit_code": 0,
+   "killed_by_time_limit": false,
+   "tool_calls": 8,
+   "num_turns": 9,
+   "cost_usd": 1.8060971999999997,
+   "result_subtype": "success",
+   "reward": 1.0,
+   "p": 1.0,
+   "failed_gates": [],
+   "failed_checks": [],
+   "inherited_failures": [],
+   "new_failures": [],
+   "files": {
+    "scripts": 5,
+    "submission": 34
+   }
+  },
+  {
+   "stage": 3,
+   "ran": true,
+   "skipped": false,
+   "missing": false,
+   "start": 1794635610.0,
+   "end": 1794636209.0,
+   "duration_s": 599.0,
+   "exit_code": 0,
+   "killed_by_time_limit": false,
+   "tool_calls": 10,
+   "num_turns": 11,
+   "cost_usd": 1.1085048,
+   "result_subtype": "success",
+   "reward": 1.0,
+   "p": 1.0,
+   "failed_gates": [],
+   "failed_checks": [],
+   "inherited_failures": [],
+   "new_failures": [],
+   "files": {
+    "scripts": 5,
+    "submission": 34
+   }
+  },
+  {
+   "stage": 4,
+   "ran": true,
+   "skipped": false,
+   "missing": false,
+   "start": 1794636209.0,
+   "end": 1794636436.0,
+   "duration_s": 227.0,
+   "exit_code": 0,
+   "killed_by_time_limit": false,
+   "tool_calls": 9,
+   "num_turns": 10,
+   "cost_usd": 1.2479596,
+   "result_subtype": "success",
+   "reward": 1.0,
+   "p": 1.0,
+   "failed_gates": [],
+   "failed_checks": [],
+   "inherited_failures": [],
+   "new_failures": [],
+   "files": {
+    "scripts": 5,
+    "submission": 35
+   }
+  }
+ ]
+}

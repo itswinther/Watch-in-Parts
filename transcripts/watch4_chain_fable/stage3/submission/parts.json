@@ -1,0 +1,114 @@
+{
+ "bottom_plate.step": {
+  "bytes": 54793,
+  "sha256": "c5054ce5d0293b3106532d8d08a1e997459a935914d0850a4cc7a42478351475"
+ },
+ "cannon_pinion_12t_m040.step": {
+  "bytes": 850049,
+  "sha256": "4469f66a527c2b0c0c3071b4df9ed029ed75af3fefd1d4b6683cd0aee0b9c64c"
+ },
+ "centre_wheel_96t_m017.step": {
+  "bytes": 6197434,
+  "sha256": "23020db189ea6079d750ba57d0fbbc7f0cb267204d3dc9f79cc9668a2d0ecb65"
+ },
+ "day_arbor.step": {
+  "bytes": 24014,
+  "sha256": "81b667ec8e43d916d1d61b0d9663cacad10ce96453573957d6fb789bf752eafb"
+ },
+ "day_hand.step": {
+  "bytes": 22146,
+  "sha256": "146a4a8ebf59a172809a47f29a8498558f5bf90c1304891f1e49aec81b752214"
+ },
+ "day_wheel_40t_m020.step": {
+  "bytes": 2716729,
+  "sha256": "26e75abce205fb2f7b71b1f426bf61dd7b677b3ebb3cb1ceb1beab20bedc5293"
+ },
+ "hour_hand.step": {
+  "bytes": 21685,
+  "sha256": "2d69a5fdecce758ab89bf94c617bd274c6718edce63d5a860f1717f0fe9d5ef5"
+ },
+ "hour_tube.step": {
+  "bytes": 19458,
+  "sha256": "1da402ed433e36a9b9fd432f75dad0bcc2eb55f9ac4f94ba570d1da0dcab2944"
+ },
+ "hour_wheel_48t_m032.step": {
+  "bytes": 3062764,
+  "sha256": "e48593987008ee0c9b97059eb645d28f5322b171d5cffe8a77e9df9c251752af"
+ },
+ "idler_arbor.step": {
+  "bytes": 24013,
+  "sha256": "ce5ea7db0d401b10e5083317ac483380fe1e4f2d4babd4cdfdc1a0abfd9a3f4b"
+ },
+ "idler_pinion_10t_m020.step": {
+  "bytes": 745492,
+  "sha256": "48d2dd7547981340ae771484992ee70aea640c99e2b4a4b72d3c9a2bf71374ca"
+ },
+ "idler_wheel_24t_m032.step": {
+  "bytes": 1811681,
+  "sha256": "f5fe2bfa2bcaaa6507d6d65a1b5ee47dda1d3856e28871c90e383d776a8d0b07"
+ },
+ "intermediate_arbor.step": {
+  "bytes": 14834,
+  "sha256": "c51f54db1e9175bb113043aba79a7d54e3d9f48d75c7cff1ae8338be968bf2fc"
+ },
+ "intermediate_pinion_24t_m020.step": {
+  "bytes": 1715575,
+  "sha256": "a16391076ef52f59bd7c0734270c17fcb5af4abc48cbb8152966ba2b7b24811e"
+ },
+ "intermediate_wheel_45t_m025.step": {
+  "bytes": 4142213,
+  "sha256": "cb02b96bfe59d8dbba5bc3760b1462d8ff269d9cce948160ea4adb101be5b6a8"
+ },
+ "minute_drive_pinion_30t_m025.step": {
+  "bytes": 2756721,
+  "sha256": "e081d9b6c6d0d840c7b64ca5b3b5a1e0e48da8608ea8731f17acd1c9367b419e"
+ },
+ "minute_hand.step": {
+  "bytes": 21692,
+  "sha256": "498924ed97422d6c8c6a49085efade3efa2ca229e2c6a65402e479f4bd16e2ef"
+ },
+ "minute_tube.step": {
+  "bytes": 10438,
+  "sha256": "0fb445e5ecb0f5d366d6d45ba2daabf4c0fbfe16b0faef671379461154a26bff"
+ },
+ "motion_arbor.step": {
+  "bytes": 24271,
+  "sha256": "04df7d4fcd3427c57456fab561158f7a8c7dcf2b1339000c25f4751be52937bd"
+ },
+ "motion_pinion_12t_m032.step": {
+  "bytes": 850212,
+  "sha256": "7705b6d90c5c15b045f8fb8ecba8d280b6c11ff09873df2fe27a7dd65991af4f"
+ },
+ "motion_wheel_36t_m040.step": {
+  "bytes": 2298170,
+  "sha256": "3988856874ab149243317be5e555765a5e670400dede15d11a74517ac7956a37"
+ },
+ "seconds_arbor.step": {
+  "bytes": 14576,
+  "sha256": "eebd1939b1b072a00041b4e54f4f58871679dcc8923a0c225fb7d580637ecb79"
+ },
+ "seconds_hand.step": {
+  "bytes": 21692,
+  "sha256": "e9662afd1045e4e2b993affb3cd5a914f7b99fab5d83dff06caf5c2eee5b7abe"
+ },
+ "seconds_pinion_12t_m018.step": {
+  "bytes": 852313,
+  "sha256": "a23458ab5be39c289b6f46873701ca9855ec4a296e471aee6e17dfe4c699f2e3"
+ },
+ "third_arbor.step": {
+  "bytes": 24150,
+  "sha256": "945c6d7d8ed3efc6cd92e0c3da94f8e3302aaaccd17dc9e4e6f754a380773deb"
+ },
+ "third_pinion_12t_m017.step": {
+  "bytes": 850179,
+  "sha256": "a5d36e7a8366c7cc204c7668b38b410902bcf5d99502a8e5beacbbf5d0114b56"
+ },
+ "third_wheel_90t_m018.step": {
+  "bytes": 5799619,
+  "sha256": "b0e63ea10d8b6755deb9c155ec8174e749cea5b4d62ad37828f5bdb7f739029f"
+ },
+ "top_plate.step": {
+  "bytes": 45197,
+  "sha256": "1c827dc6cc9774d02d61e811d033ecc9679c943a7f6f7e167493569b2e544f85"
+ }
+}

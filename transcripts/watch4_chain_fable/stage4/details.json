@@ -1,0 +1,253 @@
+{
+ "reward": 1.0,
+ "p": 1.0,
+ "gates": {
+  "files": true,
+  "locked": true,
+  "plan": true
+ },
+ "checks": {
+  "barrel": true,
+  "bottom_plate": true,
+  "top_plate": true,
+  "intermediate_arbor": true,
+  "intermediate_pinion_24t_m020": true,
+  "intermediate_wheel_45t_m025": true,
+  "minute_tube": true,
+  "minute_drive_pinion_30t_m025": true,
+  "centre_wheel_96t_m017": true,
+  "cannon_pinion_12t_m040": true,
+  "minute_hand": true,
+  "third_arbor": true,
+  "third_pinion_12t_m017": true,
+  "third_wheel_90t_m018": true,
+  "seconds_arbor": true,
+  "seconds_pinion_12t_m018": true,
+  "seconds_hand": true,
+  "motion_arbor": true,
+  "motion_wheel_36t_m040": true,
+  "motion_pinion_12t_m032": true,
+  "hour_tube": true,
+  "hour_wheel_48t_m032": true,
+  "hour_hand": true,
+  "idler_arbor": true,
+  "idler_wheel_24t_m032": true,
+  "idler_pinion_10t_m020": true,
+  "day_arbor": true,
+  "day_wheel_40t_m020": true,
+  "day_hand": true
+ },
+ "details": {
+  "files": {},
+  "locked": {
+   "changed": []
+  },
+  "plan": {},
+  "parts": {
+   "idler_arbor": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 84
+   },
+   "day_wheel_40t_m020": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 58
+   },
+   "top_plate": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 82
+   },
+   "idler_wheel_24t_m032": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 71
+   },
+   "hour_wheel_48t_m032": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 71
+   },
+   "hour_tube": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 88
+   },
+   "motion_wheel_36t_m040": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 64
+   },
+   "motion_pinion_12t_m032": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 71
+   },
+   "minute_drive_pinion_30t_m025": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 52
+   },
+   "centre_wheel_96t_m017": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 58
+   },
+   "intermediate_wheel_45t_m025": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 52
+   },
+   "cannon_pinion_12t_m040": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 64
+   },
+   "third_wheel_90t_m018": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 45
+   },
+   "third_pinion_12t_m017": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 58
+   },
+   "third_arbor": {
+    "format_messages": [],
+    "worst_volume": 0.0014377087175114146,
+    "pose_index": 61,
+    "hit": "centre_wheel_96t_m017",
+    "poses": 84
+   },
+   "seconds_pinion_12t_m018": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 45
+   },
+   "minute_tube": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 76
+   },
+   "hour_hand": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 36
+   },
+   "minute_hand": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 33
+   },
+   "seconds_hand": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 30
+   },
+   "seconds_arbor": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 94
+   },
+   "motion_arbor": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 84
+   },
+   "intermediate_pinion_24t_m020": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 39
+   },
+   "intermediate_arbor": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 84
+   },
+   "idler_pinion_10t_m020": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 76
+   },
+   "day_hand": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 36
+   },
+   "day_arbor": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 88
+   },
+   "barrel": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 42
+   },
+   "bottom_plate": {
+    "format_messages": [],
+    "worst_volume": 6.210208400043299e-16,
+    "pose_index": 79,
+    "hit": "top_plate",
+    "poses": 80
+   }
+  }
+ },
+ "skipped": []
+}

@@ -1,0 +1,271 @@
+{
+ "reward": 0.4682622268470344,
+ "p": 0.967741935483871,
+ "gates": {
+  "files": true,
+  "locked": true,
+  "plan": true
+ },
+ "checks": {
+  "barrel": true,
+  "main_plate": true,
+  "bridge": true,
+  "day_cock": false,
+  "p1": true,
+  "w1": true,
+  "arb_train1": true,
+  "g_in": true,
+  "s0": true,
+  "mw": true,
+  "arb_minute": true,
+  "hand_minute": true,
+  "s1p": true,
+  "s1w": true,
+  "arb_idler": true,
+  "s2p": true,
+  "arb_seconds": true,
+  "hand_seconds": true,
+  "cw": true,
+  "cp": true,
+  "arb_motion": true,
+  "hw": true,
+  "hour_tube": true,
+  "hand_hour": true,
+  "gh": true,
+  "wa": true,
+  "pa": true,
+  "arb_a": true,
+  "wd": true,
+  "arb_day": true,
+  "hand_day": true
+ },
+ "details": {
+  "files": {},
+  "locked": {
+   "changed": []
+  },
+  "plan": {},
+  "parts": {
+   "main_plate": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 98
+   },
+   "barrel": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 94
+   },
+   "p1": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 88
+   },
+   "w1": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 82
+   },
+   "g_in": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 82
+   },
+   "s0": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 77
+   },
+   "s1p": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 77
+   },
+   "s1w": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 72
+   },
+   "s2p": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 72
+   },
+   "mw": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 66
+   },
+   "cw": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 66
+   },
+   "cp": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 61
+   },
+   "hw": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 61
+   },
+   "arb_train1": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 94
+   },
+   "arb_minute": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 94
+   },
+   "arb_idler": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 94
+   },
+   "arb_seconds": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 94
+   },
+   "arb_motion": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 94
+   },
+   "hour_tube": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 61
+   },
+   "bridge": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 83
+   },
+   "hand_hour": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 49
+   },
+   "hand_minute": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 46
+   },
+   "gh": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 43
+   },
+   "wa": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 43
+   },
+   "pa": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 39
+   },
+   "wd": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 39
+   },
+   "arb_a": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 43
+   },
+   "arb_day": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 39
+   },
+   "hand_seconds": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 49
+   },
+   "hand_day": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 30
+   },
+   "day_cock": {
+    "format_messages": [
+     "day_cock: path must be a list of 4x4 matrices"
+    ],
+    "worst_volume": null,
+    "pose_index": null,
+    "hit": null,
+    "poses": 0
+   }
+  }
+ },
+ "skipped": []
+}

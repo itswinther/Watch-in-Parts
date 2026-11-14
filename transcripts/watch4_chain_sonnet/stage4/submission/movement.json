@@ -1,0 +1,172 @@
+{
+ "case_centre": [
+  4.98,
+  5.36
+ ],
+ "fixed": [
+  "main_plate",
+  "bridge",
+  "day_cock"
+ ],
+ "mobiles": {
+  "train1": {
+   "axis": [
+    11.2,
+    0.0
+   ],
+   "parts": [
+    "p1",
+    "w1",
+    "arb_train1"
+   ]
+  },
+  "minute": {
+   "axis": [
+    11.2,
+    8.4
+   ],
+   "parts": [
+    "g_in",
+    "s0",
+    "mw",
+    "arb_minute",
+    "hand_minute"
+   ]
+  },
+  "idler": {
+   "axis": [
+    5.679088050874203,
+    11.5875
+   ],
+   "parts": [
+    "s1p",
+    "s1w",
+    "arb_idler"
+   ]
+  },
+  "seconds": {
+   "axis": [
+    2.7540880508742043,
+    16.653748612138966
+   ],
+   "parts": [
+    "s2p",
+    "arb_seconds",
+    "hand_seconds"
+   ]
+  },
+  "motion": {
+   "axis": [
+    16.91576766497729,
+    5.099999999999998
+   ],
+   "parts": [
+    "cw",
+    "cp",
+    "arb_motion"
+   ]
+  },
+  "hour": {
+   "axis": [
+    11.2,
+    8.4
+   ],
+   "parts": [
+    "hw",
+    "hour_tube",
+    "hand_hour",
+    "gh"
+   ]
+  },
+  "daymid": {
+   "axis": [
+    5.455586099018469,
+    4.059296262792153
+   ],
+   "parts": [
+    "wa",
+    "pa",
+    "arb_a"
+   ]
+  },
+  "day": {
+   "axis": [
+    3.8599155709680444,
+    2.8535452246788626
+   ],
+   "parts": [
+    "wd",
+    "arb_day",
+    "hand_day"
+   ]
+  }
+ },
+ "meshes": [
+  {
+   "driver": "barrel",
+   "driver_teeth": 96,
+   "driven": "train1",
+   "driven_teeth": 16
+  },
+  {
+   "driver": "train1",
+   "driver_teeth": 21,
+   "driven": "minute",
+   "driven_teeth": 21
+  },
+  {
+   "driver": "minute",
+   "driver_teeth": 75,
+   "driven": "idler",
+   "driven_teeth": 10
+  },
+  {
+   "driver": "idler",
+   "driver_teeth": 80,
+   "driven": "seconds",
+   "driven_teeth": 10
+  },
+  {
+   "driver": "minute",
+   "driver_teeth": 15,
+   "driven": "motion",
+   "driven_teeth": 45
+  },
+  {
+   "driver": "motion",
+   "driver_teeth": 12,
+   "driven": "hour",
+   "driven_teeth": 48
+  },
+  {
+   "driver": "hour",
+   "driver_teeth": 24,
+   "driven": "daymid",
+   "driven_teeth": 48
+  },
+  {
+   "driver": "daymid",
+   "driver_teeth": 10,
+   "driven": "day",
+   "driven_teeth": 10
+  }
+ ],
+ "hands": {
+  "hour": {
+   "mobile": "hour",
+   "part": "hand_hour"
+  },
+  "minute": {
+   "mobile": "minute",
+   "part": "hand_minute"
+  },
+  "seconds": {
+   "mobile": "seconds",
+   "part": "hand_seconds"
+  },
+  "day": {
+   "mobile": "day",
+   "part": "hand_day"
+  }
+ }
+}
