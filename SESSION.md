@@ -76,6 +76,7 @@ line and ticks it. Format: `- [ ] to B, from A, HH:MM: what you need`.
 - [x] to A (Mikael), from B (orchestrator), 2026-11-14 14:08: itswinther's two calls are under Decisions at this time: every part counts with no in-order gating and no feedback to the agent, and crown winding is the fifth part of the one job. To join the two halves I need from you, on this line: (1) the keyless engine's entry point and what it reads (part format: your spike takes STL, the watch takes STEP through `geometry/core.py`; mobiles with general axes in `winding.json` against our `movement.json`); (2) the fixed interface between the going train and the winding works that the brief must state (stem line, crown position, the square on the barrel arbor, which side of the main plate), so my reference leaves that space free; (3) your acceptance steps with their numbers as they will stand after dropping the gating; (4) whether your reference can sit on my current skeleton reference (313.8 mm3 of fixed parts, main plate cut down to bars) or needs a plate region kept solid. My side: one verifier call that runs my engine and yours on one delivered folder and writes one reward plus per-part details; I will build it on the exploit-fixed grader once that is on main. Proposed weights for five parts, open: going train and hands 0.25, 24-hour hand 0.10, 6-hour variant 0.15, crown winding 0.25, assembly 0.25; score = 0.5 x weighted share of checks passed + 0.5 x (1 if the whole build passes everything, else 0). **A (Mikael, 14:45): agreed.** No in-order gating anywhere: each part and step graded on its own plus the whole-build term; no verdict or score ever reaches the agent; crown winding is the fifth part. Answers to the four interface points are in `spikes/keyless/INTERFACE_FOR_B.md` (pushed with keyless's next milestone). Weights for five parts: B's 14:08 proposal is fine with A (going train and hands 0.25, 24-hour hand 0.10, 6-hour variant 0.15, crown winding 0.25, assembly 0.25).
 - [x] to A (Mikael), from B (orchestrator), 2026-11-14 15:21: the orchestrator session is handing workstream B to a new session (the handoff is given to it directly, not kept in the repo). Three things so the hand-over does not cost you time. (1) Your `INTERFACE_FOR_B.md` is read but **not yet confirmed**; the new session confirms or corrects it under Decisions as its first act, so please do not treat it as fixed until that line exists. (2) Your 15:35 item for B (state the supplied barrel's arbor core radius as a fact of the part, in the constants, the barrel datasheet and the brief) is noted in the handoff and not done. (3) Please write on this line the current state of the keyless reference and engine (it was 0.72 with one exploit open at 14:05) and whether the acceptance steps and numbers in `INTERFACE_FOR_B.md` are still the ones to build against. Nothing on B's side is running; itswinther has the recommended next steps and has not yet said go. **A (15:25):** (3) Keyless state now: the reference scores **1.0 three times in a row** (reference ×3 in the current anchor batch, product 1.0, honesty 1.0; files in A's scratchpad, logged in the next keyless push). It was 0.61 at 14:56; the jam on pulling the crown and the run-step coupling are fixed. The anchors and exploits are running now: broken designs finished so far score 0 to 0.09. The old free-click exploit is being rechecked under the stricter AT-2 hold (barrel must stay within 0.3° over the last 10 steps). The acceptance steps AT-0 to AT-6 in `INTERFACE_FOR_B.md` are the ones to build against, with two updates since it was written: scoring is independent per step with a whole-build share of 0.5 (Decisions 14:45; single-step skips score 0.40 to 0.475), and the arbor core radius is stated as a fact (0.6, one third of the barrel's 1.8 inner radius, Grossmann art. 108 to 111, Saunier art. 517). Demonstration-scale values for the joined job (stem travel 1.29, s = 1.617) are in the interface file and `spikes/keyless/datasheets/` (74c05ae). (1) Noted: not fixed until the new B session confirms it under Decisions. (2) Noted. **B (new session, 15:29): read, thank you. Follow-up in the Requests line of 15:29.**
 - [ ] to A (Mikael), from B (new session), 2026-11-14 15:29: a new session has taken over row B. Four things. (1) Please read Decisions 15:29: I confirm your engine entry point, the adapter and AT-0 to AT-6 graded on their own, but not the geometry of `INTERFACE_FOR_B.md` sections 2 and 4 (it puts the keyless works below my main plate, which in my frame is the side away from the dial, and the square does not fit my arbor). Agree or correct on that Decisions line; neither of us builds on the geometry until it says agreed. (2) Keyless state since your 15:25 answer: the result of the free-click exploit under the stricter AT-2 hold, and the anchor batch. (3) Datasheet quantities: please post one table, at demonstration scale, of every quantity the brief will state that has changed since your 14:20 table (I see stem travel 0.80 -> 1.29, brass allowable 110 MPa, the crown-torque cap, core ratio 1/3 and the arbor core radius, MIL-W-46374F pull and torque); I put them in the constants from that table only. (4) The 6-hour barrel variant: with a capacity of 6 turns it gives 6 x 6 = 36 h, below the 38 h minimum of AT-3. Which barrel does the variant get on its datasheet (its capacity), or does AT-3 apply to the 8-hour build only? **A (15:55):** (1) answered on Decisions 15:29. (2) The keyless anchor batch is still running: reference 1.0 three times; the broken designs finished so far score 0 to 0.09. The free-click exploit result and the full batch follow when it finishes (about 16:00). (3) The table is in A's 15:34 entry (17 rows at s = 1.617, 2244a3c), including the core one third (capacity 6.7 turns), stem travel 1.29, brass allowable 110 MPa, crown pull 58.1 N, side force 13.1 N, no-damage crown torque 179.3 N·mm and the 32 N·mm knob maximum (not scaled). (4) Answered under Decisions 15:29 (vi): 6.7 turns x 6 h, about 40 h, so AT-3 holds for both builds.
+- [ ] to B, from A (Mikael), 2026-11-14 16:25: `harbor/watch_one/` is built to your 15:44 interface (`/app/delivery`, the allowlisted `/app`, `python3 -I tests/grade_watch.py /app/delivery --reward F --details F`) and runs today on a placeholder (`GRADER = "spec06-stage1"`). `GRADER=one-job harbor/watch_one/run_all.sh MODEL 8` starts real runs once these are on main; today it stops because of (1). Gaps against main: (1) `environment/make_bundle_watch.py OUT` with no flags must write `datasheets/`, `supplied/barrel.stl`, `tools/kernel.py` and `tools/check_format.py`; it still writes `meshes/`, `work/` and `submission/`. (2) The brief: write it as `OUT/instruction.md` or `OUT/PROMPT.md` from the bundle builder, or tell me its repo path. (3) The reference as one delivery: which command, and which folder it writes (I assume `reference_watch.py /tmp/reference` writes the delivery at `/tmp/reference`). (4) The grader's measured time and peak memory, plus any files it needs beyond `tests/grade_watch.py` and `geometry/`. Each of these is a one-line change in `GRADERS["one-job"]` in `build_task.py`.
 
 ## Open questions
 
@@ -1292,3 +1293,71 @@ A note for B's builder sessions and for Mikael's session, for information only. 
 - Files changed: SESSION.md (this entry only).
 - Need from others: nothing.
 - Next: nothing scheduled; itswinther decides what, if anything, follows from this.
+
+### 2026-11-14 16:25 | A: Harbor task for the one-brief watch (`harbor/watch_one/`), built to B's 15:44 interface | Mikael + Claude
+- Did: built `harbor/watch_one/`, the Harbor packaging around B's one-job grader. It answers B's 13:36 split (A builds the Harbor task) and follows Decisions 15:44.
+  - `build_task.py OUT --agent opencode|codex|oracle [--grader spec06-stage1|one-job]` writes the task:
+    - `instruction.md`: the canary, then the brief, with HTML comments stripped.
+    - `task.toml`: `[task]` and `[metadata]`, with expert and junior hours marked as author estimates. Agent 3 h, 4 CPUs, 4 GB, `allowlist` to the model endpoint only (`api.anthropic.com`, or `chatgpt.com` for codex). Verifier `separate`, `no-network`, 4 GB, 800 s. `artifacts = ["/app"]`, which covers `/app/delivery`.
+    - `environment/Dockerfile`: python:3.12-slim with cadquery 2.8.0, manifold3d 3.5.5, scipy 1.18.1, numpy 2.5.4, trimesh 5.2.1, opencode-ai 1.19.5 and codex 0.169.0 pre-installed, and `OPENCODE_EXPERIMENTAL_OUTPUT_TOKEN_MAX=64000`.
+    - The agent's `/app`, built from an allowlist: `datasheets/`, `supplied/barrel.stl`, `tools/kernel.py`, `tools/check_format.py` and an empty `delivery/`. The build refuses:
+      - any other path;
+      - the `tests`, `solution`, `anchors`, `realcad`, `report`, `runs`, `review`, `geometry` and `.git` folders;
+      - the SOLUTION, STEP_BY_STEP, CONTEXT, TRACEABILITY, SESSION and CLAUDE files;
+      - any renamed copy of a grader, reference or secret file (by sha256);
+      - the NOT-FOR-AGENT mark;
+      - a pre-filled delivery.
+    - `tests/`: `tests/Dockerfile` (the verifier image, with B's grader and `geometry/` baked in) and `test.sh`. `test.sh` writes reward 0, runs `python3 -I /tests/grade_watch.py /app/delivery ...` under `/usr/bin/time -v`, copies `details.json` and overwrites `reward.txt`.
+    - `solution/solve.sh`: runs `reference_watch.py` in the container and copies its delivery to `/app/delivery`.
+    - `.dockerignore` and `.harborignore` files.
+  - **Grader switch:** the one line `GRADER = ...` in `build_task.py`, or `--grader`, or `GRADER=` for `run_all.sh`.
+    - `spec06-stage1` is today's placeholder. It runs the SPEC 0.6 grader with `--stage 1` on `/app/delivery` and grades `movement.json` only. It takes today's bundle mapped onto the new layout, plus `SPEC_WATCH.md`, and uses `PROMPT_PLACEHOLDER.md` as the brief.
+    - `one-job` is exactly the 15:44 call with no `--stage`, and takes B's bundle and brief.
+  - `A_DATASHEETS = ()` adds A's DS-101 to DS-501 to the agent's `datasheets/`. It stays empty until P5, as B's 16:08 answer says.
+  - `run_all.sh MODEL K [OUT]` is the one command. It runs, in order:
+    1. the build in Docker;
+    2. the allowlist and no-network guards;
+    3. `harbor lint`;
+    4. oracle ×3 and nop;
+    5. the model with `-k K -n 2 --ak disable_web_search=true`, on Harbor 0.26 from source;
+    6. the summary (`spikes/keyless/report/`, in Docker);
+    7. the verifier's time and peak memory per trial;
+    8. a key scan.
+  - Also in the folder: `README.md` and `IMAGE_CONTENTS.txt`.
+- Verified by (command and result). Python ran only in Docker.
+  - Build: `docker run --rm -m 2g -v WT:/repo:ro -v WT/harbor/watch_one/out:/out keyless-grade python3 -B -I /repo/harbor/watch_one/build_task.py /out/task --agent opencode`. It printed "task written ... 3 files in the agent's /app". The same command with `--agent codex` and `--agent oracle` gave the matching `allowed_hosts`.
+  - `cd ~/Desktop/dev/harbor && uv run --quiet harbor lint OUT/task` (and on `task-codex` and `task-oracle`): no findings, exit 0. `harbor lint --json` returned `[]`.
+  - Leak assertion, all in Docker. Each of these was refused:
+    - the grader renamed to `datasheets/notes.md`;
+    - TRACEABILITY.md saved as `datasheets/DS-999.md`;
+    - a `solution/` folder;
+    - a pre-filled `delivery/movement.json`;
+    - an extra file beside the Dockerfile.
+  - The agent image's `/app` tree is in `IMAGE_CONTENTS.txt`: `SPEC_WATCH.md` (placeholder only), `supplied/barrel.stl`, `tools/kernel.py`, and empty `datasheets/` and `delivery/`. No `/tests`, `/solution` or `/geometry`. No grader, reference, TRACEABILITY, SESSION, CLAUDE, SOLUTION or STEP_BY_STEP file anywhere in the image. The versions are as pinned above.
+  - `SKIP_MODEL=1 HARBOR_SRC=~/Desktop/dev/harbor harbor/watch_one/run_all.sh none 0 OUT` on the 15:44 layout (main at 6622d43):
+    - lint clean;
+    - **oracle 1.0, 1.0, 1.0** (3 of 3, 10 m 47 s in total);
+    - **nop 0.0**;
+    - key scan clean.
+  - Verifier, from `/usr/bin/time` in `test.sh`: grading takes 2:40 to 2:47, peak RSS 1.70 to 1.71 GB. Over the earlier run on the old layout plus this one (7 oracle trials), grading took 2:16 to 2:47 and peaked at 1.70 to 1.72 GB.
+  - The oracle's agent phase (B's reference, all four stages) takes about 33 s.
+  - The verifier timeout is 800 s: 2× the slowest grading anyone has seen (374 s, B, on a loaded host). Memory is 4 GB, 2.4× the peak.
+  - `--grader one-job` today stops with "B's bundle builder did not produce supplied/barrel.stl (interface of Decisions 15:44)", as expected. The `test.sh` it writes has exactly B's call.
+- Not verified, or assumed:
+  - `harbor check` was not run. Its evaluator is Claude Code with an Anthropic model, which needs the paid key, and this session was told not to touch it.
+  - No model has run.
+  - Modal is untried.
+  - The one-job grader's time and memory are a guess (2400 s, 4 GB) until B measures them.
+  - Two Python no-ops ran on the host by mistake (`python3 -c 1` and an empty heredoc). Nothing else ran Python outside Docker.
+- Answer to B's 15:11 note ("A, the task image and bundles are out of date; the verifier now needs about 1.7 GB"):
+  - The new task is built from main at 6622d43 with the SPEC 0.6 grader after the exploit fixes.
+  - The verifier gets 4 GB, and 1.70 to 1.72 GB peak was measured.
+  - The image rebuilds from main on every `run_all.sh`, so it cannot go stale again.
+  - `harbor/watch4/` (the frozen per-stage tasks) is not rebuilt; it is superseded for new runs.
+- Files changed: `harbor/watch_one/` (new: `build_task.py`, `run_all.sh`, `PROMPT_PLACEHOLDER.md`, `README.md`, `IMAGE_CONTENTS.txt`, `.gitignore`), and SESSION.md (one Requests line to B, this entry). No file of B's and nothing in `spikes/keyless/` was edited.
+- Need from others: B, the Requests line of 16:25:
+  1. a bundle builder that writes the 15:44 `/app`;
+  2. the brief's path;
+  3. the reference as one delivery;
+  4. the grader's measured time and memory.
+- Next: when G and R are on main, run `GRADER=one-job harbor/watch_one/run_all.sh` with `SKIP_MODEL=1` (oracle 1.0, nop 0.0), then the model runs, 8 per model.

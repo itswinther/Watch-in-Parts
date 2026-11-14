@@ -1,0 +1,30 @@
+# Agent image /app tree: harbor/watch_one, build_task.py --agent opencode, GRADER spec06-stage1 (placeholder), layout of B Decisions 15:44
+# built 2026-11-14T14:01Z from origin/main 6622d43; listed with: docker run --rm watch-one-agent (find /app ...)
+
+/app/
+/app/SPEC_WATCH.md  21658 bytes  sha256 4bf82baeda0b52dd
+/app/datasheets/
+/app/delivery/
+/app/supplied/
+/app/supplied/barrel.stl  345484 bytes  sha256 c503ce8fce091301
+/app/tools/
+/app/tools/kernel.py  21775 bytes  sha256 4c9a8ae4280862b5
+
+# outside /app: grader, solution and project files (expect none)
+absent /tests
+absent /solution
+absent /geometry
+absent /logs/verifier
+found by name anywhere: 0
+
+# versions
+opencode 1.19.5
+codex codex-cli 0.169.0
+node v20.19.2
+Python 3.12.16
+cadquery           2.8.0
+manifold3d         3.5.5
+numpy              2.5.4
+scipy              1.18.1
+trimesh            5.2.1
+OPENCODE_EXPERIMENTAL_OUTPUT_TOKEN_MAX=64000
