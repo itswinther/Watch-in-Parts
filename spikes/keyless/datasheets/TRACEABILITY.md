@@ -1,224 +1,178 @@
 <!-- NOT-FOR-AGENT: secret. Traces every implied check to a datasheet value. Never copied into the agent image. -->
 # Datasheets v2: traceability (secret)
 
-Written by Mikael + Claude (workstream A), 14 Nov 2026. This file is for the graders and the judges.
-The agent receives only `DS-*.md` and `INDEX.md`.
+Written by Mikael + Claude (workstream A), 14 Nov 2026. This revision regenerates the sheets at the
+demonstration scale. This file is for the graders and the judges; the agent receives only `DS-*.md` and
+`INDEX.md`.
 
-## 0. Build rule (for the keyless builder session)
+## 0. Build rule (for the keyless and watch builders)
 
-- **What build_task.py copies:** only `datasheets/DS-*.md` and `datasheets/INDEX.md`, into the agent
-  image (for example `/app/datasheets/`).
-- **What must fail the build:** `TRACEABILITY.md`, or any file containing `NOT-FOR-AGENT`, reaching the
-  image. The first line of this file carries that marker, so the existing `assert_clean()` catches it
-  once the datasheets directory is inside the walked `env_dir`. Also add `TRACEABILITY.md` to
-  `SECRET_DOCS`, or make an explicit check.
+- **Copy:** only `datasheets/DS-*.md` and `datasheets/INDEX.md`, into the agent image.
+- **Keep out:**
+  - `TRACEABILITY.md`, and anything containing `NOT-FOR-AGENT` (this file's first line);
+  - `public_domain/`, unless that is decided separately.
+- **Fail the build** if any of those would be included. `assert_clean()` in `spikes/keyless/build_task.py`
+  already rejects the marker. Also add `TRACEABILITY.md` to `SECRET_DOCS`.
 - **`.harborignore`** in this folder lists `TRACEABILITY.md`.
-- This session did **not** edit `build_task.py`.
+- This session did not edit any builder.
 
-## 1. Scale decision: full scale, no scaling
+## 1. Scale: s = 1.617 to an 11½‴ calibre
 
-The task's case is Ø 17.4 mm (`CASE_RADIUS = 8.7`). That is a real 7¾‴ calibre:
+**The decision.** One scale for the whole job: B's demonstration scale (SESSION.md, Decisions 14:23 B
+and 14:45 A).
 
-- 7.75 × 2.2558 mm = 17.48 mm (https://en.wikipedia.org/wiki/Ligne);
-- the ETA 2671 is 7¾‴, Ø 17.20 mm (https://portal.eta.ch/en/mecaline/2671-2671-5.html).
+**The factor.**
 
-The supplied geometry is also of watch size:
+- Inputs:
+  - `geometry/watch.py` on main: `CASE_RADIUS = 20.7`, so the case is Ø 41.4 mm;
+  - ETA 2824-2 Ø 25.60 mm (ETA CT 2824-2, https://shopb2b.eta.ch/technicaldocuments/index/pdf/id/1883).
+- **s = 41.4/25.6 = 1.6172**, given as 1.617; s² = 2.615; s³ = 4.229 (Docker).
+- Other checks in `geometry/watch.py`:
+  - `BARREL_MODULE = 0.2`, `BARREL_TEETH = 96`: pitch Ø 19.2 mm, which is 11.9 mm at 1:1, plausible
+    for an 11½‴ barrel;
+  - `MIN_FEATURE = 0.2` mm, which is 0.12 mm at 1:1, about a real pivot;
+  - `CASE_HEIGHT = 13.4` mm, which is 2.9 times the 2824-2's 4.60 mm. Height is **not** geometrically
+    scaled. The sheets scale lengths by s only.
 
-- spur module 0.2 and face module 0.15 in the reference;
-- a stem square of about 0.62 mm;
-- a crown of Ø 2.0 mm in the reference.
+**The assumptions.**
 
-The task is therefore not an enlarged printable model. All datasheets are 1:1, with no scaling factor,
-and each says "full scale (1:1)". Two points are larger than in a real 7¾‴:
+- **Geometric similarity:** every length × s, with the same materials.
+- **What scales with s:**
+  - dimensions (strip h, t, L, D; jewel hole, OD and tolerances; bushings; crown Ø; tube; stem thread,
+    length and travel; stem squares; clearance).
+- **What scales with s³:**
+  - torques. M = E·h·t³·θ/(12L) and M_el = Rp·h·t²/6 both scale with s³ for the same θ, so the stress
+    6M/(h·t²) stays the same.
+  - stem torsion ratings (0.208·a³·τ).
+- **What scales with s²:** forces and radial load ratings (F = M/r scales with s², and F_max = p·d·ℓ
+  scales with s², so the pressure stays the same).
+- **What does not scale:**
+  - turns N, which depend only on length ratios;
+  - hours;
+  - ratios;
+  - friction coefficients;
+  - material strengths, moduli and safety factors;
+  - **human finger torque and force**, since humans do not scale. That makes the crown-torque check
+    4.229 times tighter than at 1:1 (section 3).
+- **The mainspring still gives 38 h or more:** the 11½‴-class variants pass at the stated core ratio
+  (section 3, row 1).
 
-- **Movement height:** the plates span z ±3.2 mm, against the 2671's 4.80 mm.
-- **Modules:** they are on the large side for keyless works.
+## 2. Every scaled value and its derivation
 
-Neither changes a rating; both only add margin.
+Scaled value = 1:1 cited value × s, computed in Docker (`python:3.12-slim`, 2 GB).
 
-## 2. Implied checks → datasheet value → formula → source
-
-The checks below are written in terms of the agent's choices:
-
-- the variant V from DS-101;
-- the crown Ø D;
-- the gear stages i;
-- the jewel or bushing sizes.
-
-| # | Implied check (the brief's blanket clause) | Datasheet value used | Formula | Source of formula and inputs |
-|---|---|---|---|---|
-| 1 | Reserve: power reserve ≥ 38 h from full wind (`RESERVE_MIN`) | DS-101 Table 3: N(V) | reserve = N(V) × 8 h (`BARREL_HOURS_PER_TURN`) | N: DS-101 [^d1] (area conservation; thickness correction and r = 16·t from watchesbysjx 2025). 8 h: Wikipedia Mainspring. 38 h: ETA CT 2824-2 |
-| 1a | The spring fits: barrel inner Ø D(V) plus the drum wall fits the free space at `BARREL_AXIS` | DS-101 Table 1: D(V) | D(V)/2 + wall ≤ 8.7 − 4.371 = 4.33 mm (barrel axis to case centre is 4.371 mm) | Geometry from constants.py. The drum wall is not published: the builder states it or lets the agent design it |
-| 2 | Tooth bending under mainspring torque ≤ allowable | DS-101 Table 2: M_el(V). DS-201 §8: σ_allow (brass 115, steel 750 or 725 MPa) | At a stage with torque M_s: F_t = M_s/r_p. Lewis σ = F_t/(b·m·Y) (NPTEL eq. 7.12), or, for non-involute teeth, the cantilever σ = 6·F_t·h/(b·t²) (NPTEL eq. 7.6), measured on the agent's tooth. M_s = M_el at the ratchet and barrel gear, and M_el/(product of ratios to that stage) upstream | NPTEL Machine Design II, Lecture 7 (https://archive.nptel.ac.in/content/storage2/courses/112106137/pdf/2_7.pdf). M_el: DS-101 [^d3]. Allowables: Aalco and Alleima ÷ Juvinall S = 2 (UWA) |
-| 3 | The click and its spring hold the mainspring torque | DS-101: M_el(V). DS-201 Table 7: μ steel/steel 0.5 to 0.8 (static), brass/steel 0.51. DS-201 §8 allowables | Tooth load F = M_el/r_tip. (a) **Draw:** with μ = 0, the contact normal's moment about the click pivot must pull the click into the ratchet. Since μ only adds margin, μ = 0 is the conservative case. (b) The click tooth and the ratchet tooth under F stay ≤ σ_allow (as in row 2). (c) The click spring is not loaded by M_el if the draw holds; its bending stress at working deflection ≤ steel allowable (σ = 6M/(b·t²)) | Friction: Engineering ToolBox. Stress: codecogs. Material: Alleima / Aalco |
-| 4 | Winding torque at the crown ≤ finger torque | DS-501 Table 3: T_rec(D) = 4.20·D N·mm. DS-101: M_el(V) | T_crown = M_el(V)/i, where i is crown turns per barrel turn, frictionless. Check T_crown ≤ T_rec(D) | T = μ·F·D, with μ = 0.6 (Seo & Armstrong 2009), F = 0.15 × 46.7 N (Mathiowetz 1985 via topendsports; Rohmert 15 % via Ergoweb) |
-| 5a | Pivots fit their holes | DS-301 Tables 1 and 2 (hole sizes). §5.1: clearance about 0.01 mm at about 0.14 mm | Hole must be a catalogue size, and 0 < hole − pivot. Recommended: hole − pivot ≈ 0.01 mm for pivots of about 0.14 mm; a grader tolerance band is the builder's choice (e.g. 0.005 to 0.03 mm) | Watch Repair Talk (secondary, practitioner). Sizes: H.S. Walsh, Otto Frei |
-| 5b | Pivot load ≤ rating | DS-301 §5.3: p_max = 900 N/mm² (jewel), 115 N/mm² (brass bushing) | F_radial ≤ p_max·d·ℓ, with F_radial the bearing reaction from the tooth forces at M_el | p = F/(d·ℓ): Engineers Edge. 2700 MPa: makeitfrom. S: UWA/Juvinall and Engineers Edge |
-| 6 | Stem torque ≤ rating | DS-401 Table 2: T_yield = 0.208·a³·837; recommended ÷ 2 | T_crown (row 4) ≤ the recommended value for the agent's square size a | Torsion 0.208: UoK lecture notes. von Mises: Wikipedia. Rp 1450: Alleima |
-| 7 | Stem positions | DS-401 §4: 2 positions, travel about 1 mm | `PULL = 0.9` lies within "about 1 mm" | watchesbysjx (2026); Eterna 2824-2 manual |
-
-**Which variants pass row 1** (N × 8 h ≥ 38 h):
-
-| Variant | N × 8 h | Passes? | Note |
+| Sheet | Quantity | 1:1 value (source) | Scaled |
 |---|---|---|---|
-| A | 46 h | Yes | |
-| B | 44 h | Yes | |
-| C | 35 h | **No** | A real selection trap: a plausible small spring that falls short |
-| D | 81 h | Yes | N = 10.1, above `CAPACITY_TURNS = 6`. The builder must decide whether the simulation uses N(V) or caps it at 6 |
-| E | 54 h | Yes | |
-| F | 48 h | Yes | N = 6.0, which matches `CAPACITY_TURNS` exactly; the natural pick |
-| G | 47 h | Yes | |
-| H | 50 h | Yes | Barrel D 9.0 does not fit the 8.66 mm envelope (row 1a) |
-| I | 39 h | Yes | Barrel D 10.5 does not fit the 8.66 mm envelope (row 1a) |
+| DS-101 | Strip h, t, L, D, variants A to K | ressortdebarillet.ch product pages (cited per row) | ×1.617 (Table 1) |
+| DS-101 | Thickness correction | 0.003 mm (watchesbysjx 2025: 0.002 to 0.004) | 0.0049 mm |
+| DS-101 | Core radius r | 12·t or 16·t (watchesbysjx 2025) | uses the scaled t |
+| DS-101 | N | geometric, scale-free | unchanged (checked: the same N at both scales) |
+| DS-101 | M_el, k, Table 4 | from the scaled sizes | equal to the 1:1 values × 4.229 |
+| DS-201 | All values | — | not scaled (material properties) |
+| DS-301 | Jewel holes 0.14 to 0.32; OD 2.60 / 3.00 | H.S. Walsh | 0.226 to 0.517; 4.20 / 4.85 |
+| DS-301 | Hole tolerance 5.1 / 2.5 µm; concentricity 5.1 / 12.7 µm | Bird Precision | 8.2 / 4.1; 8.2 / 20.5 µm |
+| DS-301 | Bushings (9 sizes) | Otto Frei | ×1.617 |
+| DS-301 | Clearance 0.01 mm | Watch Repair Talk (secondary) | 0.016 mm |
+| DS-301 | F_max | p·d·ℓ, with p not scaled | the 1:1 values × 2.615 |
+| DS-401 | Crowns 3.00 to 7.0 | Perrin, Esslinger | 4.85 to 11.32 |
+| DS-401 | Tube 2.0 / 2.5 | Esslinger | 3.23 / 4.04 |
+| DS-401 | Thread S 0.90; stem length 15.50; travel 0.80; crown gap ≤ 0.1 | Sellita SW200-1 DocTec (link-only, confidential drawings, not reproduced) | 1.455; 25.07; **1.29**; 0.16 |
+| DS-401 | Stem squares 0.50 / 0.60 / 0.70 (Valtorre's offer, not cited) | — | 0.809 / 0.970 / 1.132; T_y 92.1 / 159.1 / 252.6 N·mm |
+| DS-501 | All values | — | not scaled (human) |
 
-**How tight the checks are, for a sane design.** For variant F, M_el = 4.32 N·mm.
+**For the builder:** the stem travel at demonstration scale is 1.29 mm (0.80 × s). The keyless
+constant `PULL` should become 1.29 at this scale. The 0.9 × 1.6 = 1.44 in `INTERFACE_FOR_B.md` was based
+on the v1 pull and on 1.6 rather than 1.617.
 
-- **Row 2:** a reference-like ratchet (pitch radius about 2.7 mm, module about 0.22, face 0.5 mm,
-  Y ≈ 0.3) carries F_t ≈ 1.6 N. Then σ ≈ 1.6/(0.5 × 0.22 × 0.3) ≈ 48 MPa, against 115 MPa for brass.
-  It fails only for thin or short teeth.
-- **Row 4:** at the band edge i = 3 (`WIND_BAND`), T_crown = 1.44 N·mm, against T_rec(Ø 2.0) = 8.4 N·mm.
-  It cannot fail inside the winding band with any listed spring: the worst case is I, 6.27/3 = 2.1 N·mm.
-  This is realistic, since watches are easy to wind. Keep it as a check of reading DS-501 and the
-  units, not as a discriminator.
-- **Row 5b:** keyless reactions are around 1 N, against ratings of 3 to 90 N. It fails only on gross
-  misuse.
+## 3. Implied checks → datasheet value → formula → source
 
-The discriminating rows are 1/1a (picking and fitting the spring), 2, 3 and 5a (fits).
+| # | Check | Datasheet values | Formula | Sources |
+|---|---|---|---|---|
+| 1 | Reserve ≥ 38 h | DS-101 Table 3: N(V) at the core ratio of the supplied barrel | N × 8 h ≥ 38 h | N: area conservation (watchesbysjx 2025). 8 h: Wikipedia Mainspring. 38 h: ETA CT 2824-2 |
+| 2 | Tooth bending | DS-101: M_el(V). DS-201 §8: brass 110, steel 750 or 725 MPa | F_t = M_s/r_p. σ = F_t/(b·m·Y), or σ = 6·F_t·h/(b·t²) on the agent's actual tooth (NPTEL lecture 7, eq. 7.12 / 7.6). M_s = M_el at the barrel side, divided by the stage ratios upstream | NPTEL https://archive.nptel.ac.in/content/storage2/courses/112106137/pdf/2_7.pdf ; Wieland; Alleima; UWA (Juvinall) |
+| 3 | The click holds | DS-101: M_el. DS-201 Table 7 | F = M_el/r_tip. The draw holds at μ = 0 (conservative). Click and tooth stress ≤ allowable. The click-spring stress at working deflection ≤ steel allowable | Engineering ToolBox; Grossmann art. 335; codecogs |
+| 4 | Crown torque ≤ human | DS-501: T_rec = min(4.20·D, 32) N·mm. DS-101: M_el | M_el(V)/i ≤ T_rec(D), with i the crown turns per barrel turn | Seo & Armstrong; Mathiowetz; Rohmert / Ergoweb; MIL-STD-1472H |
+| 5a | Pivot fit | DS-301 Tables 1 and 3; clearance 0.016 mm at about 0.226 mm | Catalogue hole; 0 < hole − pivot; recommended ≈ 0.016 mm (band at the builder's choice) | Watch Repair Talk (secondary); H.S. Walsh; Otto Frei |
+| 5b | Pivot load | DS-301 §5.3: p_max 900 / 110 N/mm² | F_radial ≤ p_max·d·ℓ | Engineers Edge; makeitfrom; Wieland; UWA |
+| 6 | Stem torque | DS-401 Table 3 | M_el/i ≤ the recommended value for the square size a | UoK notes; von Mises; Alleima |
+| 7 | Stem positions | DS-401: travel 1.29 mm | `PULL` = 1.29 | Sellita (fact only) |
 
-## 3. How each derived number was computed
+**Row 1, which variants pass:**
 
-The computations ran in Docker (`python:3.12-slim`, 2 GB memory) with the script below. They can be
-rerun the same way.
+- **At r = 12·t:** every variant passes. The lowest is K, at 5.8 turns = 47 h.
+- **At r = 16·t:** C (35 h) and K (28 h) fail.
+- **The real check:** K is the ETA 2801 size, and ETA states 42 h for the 2801-2. r = 12·t gives 47 h;
+  r = 16·t gives 28 h. So r = 12·t is the realistic column, and r = 16·t is the conservative one.
+- **The builder must state the barrel's core ratio** (or its core radius) in the brief or the supplied
+  barrel. The supplied arbor's `BARREL_ARBOR_R = 0.5` is the pivot, not the spring core.
+- **For the 11½‴-class barrels:** H, I, J and K have scaled inner Ø 14.6 to 17.0 mm, which suits B's
+  19.2 mm pitch-Ø barrel wheel.
 
-```python
-import math
-E=220000.0; RP=2475.0; DE=0.003          # MPa (VAC 45/5), MPa (aged, 90 % CW), mm (watchesbysjx correction)
-for n,b,t,L,D in [("A",0.90,0.08,240,7.0),("B",0.70,0.08,355,7.5),("C",0.70,0.09,200,7.0),
-                  ("D",0.87,0.07,310,7.9),("E",1.25,0.085,300,8.0),("F",1.45,0.085,240,7.5),
-                  ("G",1.30,0.08,220,7.0),("H",1.20,0.10,300,9.0),("I",0.90,0.13,300,10.5)]:
-    R=D/2; te=t+DE; r=16*t; A=L*te/math.pi
-    N=(math.sqrt(r*r+A)-r)/te-(R-math.sqrt(R*R-A))/te           # turns of development
-    k=E*b*t**3/(12*L)                                            # N.mm/rad
-    M_N=k*2*math.pi*N; M_el=RP*b*t*t/6; sig_N=6*M_N/(b*t*t)
-# finger: T = 0.6*F*D, F = 46.7 N (women's mean max), 80.1 N (men's), 0.15*46.7 N (recommended)
-# stem:   T = 0.208*a**3*1450/sqrt(3), recommended /2
-# jewel:  F = (2700/3)*d*l ; bushing: F = (230/2)*d*h
-```
+**Row 4: is the crown-torque limit binding at this scale?**
 
-- **DS-101 N:** the strip's area L·t′ is conserved, with t′ = t + 0.003 mm.
-  - Wound up, it is an annulus on the core of radius r: n_w = (√(r² + L·t′/π) − r)/t′.
-  - Let down, it is an annulus against the wall of radius R: n_d = (R − √(R² − L·t′/π))/t′.
-  - N = n_w − n_d.
-  - r = 16·t (Defossez, via watchesbysjx 2025).
-  - This is the textbook geometric result the article describes in words; its figures were not readable.
-- **DS-101 torque:** M = E·b·t³·θ/(12·L), linear from the let-down state, frictionless. This
-  under-represents the real torque at let-down (free-shape preload) and over-represents the delivered
-  torque (coil friction). Hence every check uses **M_el = Rp0.2·b·t²/6**: the largest moment that the
-  strip's section carries elastically, a strict upper bound on the torque whatever the free shape.
-- **DS-101 stress at N:** σ = 6·M_N/(b·t²). Every value (851 to 1574 MPa) is below Rp0.2 = 2475 MPa, so
-  Table 4 is internally consistent.
-- **DS-201 allowables:** basis ÷ S.
-  - S = 2 (upper end of Juvinall's "well-known materials" tier) for brass and steel, on yield.
-  - S = 3 (upper end of "brittle materials") for corundum, on compressive ultimate.
-- **DS-301 loads:** projected-area pressure.
-- **DS-401 stem:** square-section torsion with von Mises shear yield.
-- **DS-501:** two-pad Coulomb friction, T = 2·μ·F·D/2. The pound-force norms are converted at
-  4.448 N/lbf.
+- M_el at demonstration scale is 7.4 to 38.5 N·mm (variants D to K).
+- The worst case inside `WIND_BAND` (i ≥ 3) is K: 38.5/3 = 12.8 N·mm.
+- Every catalogue crown in DS-401 is at least Ø 4.85 mm, so T_rec ≥ 20.4 N·mm.
+- **So the check is not binding for any catalogue crown.** It binds only if the agent makes its own
+  crown smaller than M_el/(3 × 4.20) mm:
+  - K: 3.06 mm;
+  - I: 2.10 mm;
+  - F: 1.45 mm.
+- At the old 1:1 scale, the same thresholds were 4.229 times smaller (about 0.7 mm for K), so the check
+  is now 4.2 times tighter. It is still not a discriminator for sane designs.
+- **Real cross-check:** a 2824-class spring under Grossmann's law gives about 6 to 9 N·mm at 1:1, which
+  is 25 to 38 N·mm at demonstration scale. At the NH35's i ≈ 6.9, that is about 3.7 to 5.5 N·mm at the
+  crown, well below T_rec.
 
-**Assumptions stated in the sheets themselves:**
+**The other rows, for sane designs:**
 
-- The Nivaflex 45/5 data are wire data, applied to strip.
-- The brass grade of the Otto Frei bushings is assumed to be CW614N-class.
-- The steel stem has strip proof strength (1450 MPa, the lowest Alleima row).
-- No jewel outside-diameter tolerance, jewel height, mainspring tolerance, bridle slipping torque,
-  arbor square, crown-thread rating or travel tolerance was published. Each is marked "not published"
-  rather than invented.
+- **Row 2:** a reference-like ratchet at this scale (pitch r about 4.4 mm, module about 0.35, face
+  0.8 mm, Y ≈ 0.3) with M_el = 18.3 (F) carries F_t ≈ 4.2 N. Then σ ≈ 4.2/(0.8 × 0.35 × 0.3) ≈ 50 MPa,
+  against 110 MPa for brass. The stresses are the same as at 1:1, as geometric similarity requires.
+- **Row 5b:** reactions of about 2 to 10 N against ratings of 7 to 230 N.
 
-## 4. Source register (every URL used in DS-*.md)
+The discriminating rows remain 1 (choosing the spring at the right core ratio), 2, 3 and 5a.
 
-- **Mainsprings:**
-  - ressortdebarillet.ch:
-    - https://en.ressortdebarillet.ch/collections/ressort-de-barillet-epaisseur-0-102
-    - …/products/0-90-x-08-x-240-x-7-mecanique
-    - …/0-70-x-08-x-355-x-7-5-non-automatique
-    - …/0-70-x-09-x-200-x-7-non-automatique
-    - …/ressort-de-barillet-0-87-x-0-07-x-310-x-7-9-db-end-jaeger-le-coultre-818
-    - …/1-25-x-085-x-300-x-8-automatique
-    - …/1-45-x-085-x-240-x-7-5-automatique
-    - …/1-30-x-08-x-220-x-7-automatique
-    - …/1-20-x-10-x-300-x-9-automatique
-    - …/0-90-x-13-x-300-x-10-5-automatique
-  - Barrel design: https://watchesbysjx.com/2025/11/in-depth-balancing-mainspring-dimensions-inside-the-barrel.html
-  - Spiral-spring formula: https://calculator.academy/spiral-torsion-spring-calculator/
-  - Strip bending: https://www.codecogs.com/page/1150/v/3359
-  - Barrel speed: https://en.wikipedia.org/wiki/Mainspring
-- **Movements:**
-  - ETA 2671: https://portal.eta.ch/en/mecaline/2671-2671-5.html
-  - ETA 2824-2: https://shopb2b.eta.ch/technicaldocuments/index/pdf/id/1883
-  - Ligne: https://en.wikipedia.org/wiki/Ligne
-- **Materials:**
-  - Nivaflex 45/5: https://www.cousinsuk.com/pdf/skus/9601_9596_nivaflex_45_5.pdf (text extracted with
-    pypdf in Docker)
-  - Brass CW614N: https://www.aalco.co.uk/datasheets/Copper-and-Copper-Alloys-CW614N-Brass-Rod_31.ashx
-  - Alleima 20C: https://alleima.com/en/technical-center/material-datasheets/strip-steel/alleima-20c
-  - C100S: https://www.mfgrobots.com/Article/material/metal/37153.html (secondary)
-  - Sapphire: https://makeitfrom.com/material-properties/Synthetic-Sapphire (secondary)
-  - Ruby: https://holowiki.org/wiki/Ruby (secondary)
-- **Friction and safety factors:**
-  - Friction: https://engineeringtoolbox.com/friction-coefficients-d_778.html
-  - Basis of the allowable: https://engineersedge.com/analysis/factor-of-safety-review.htm
-  - Juvinall tiers: https://danotes.mech.uwa.edu.au/SSS/safety/safety.html
-- **Jewels:**
-  - Bird Precision: https://catalog.birdprecision.com/Asset/Ring_jewel.pdf (text extracted with pypdf in
-    Docker)
-  - H.S. Walsh: https://www.hswalsh.com/watch-parts-straps-batteries/jewel-holes-endstones-roller-pins-pallet-stones/jewel-holes/cat-8
-  - Otto Frei: https://www.ofrei.com/page454.html
-  - Watch Repair Talk:
-    - https://watchrepairtalk.com/topic/27101-balance-staff-pivot-tolerance-to-jewel-hole
-    - https://watchrepairtalk.com/topic/30199-sizing-a-jewel-from-the-jewel-setting
-    - https://watchrepairtalk.com/topic/14596-jewel-replace-size-question
-  - Bearing pressure: https://engineersedge.com/calculators/journal_bearing_lubrication_15314.htm
-- **Crowns and stems:**
-  - Esslinger: https://www.esslinger.com/double-o-ring-waterproof-watch-crown-assortment-83-015-9-stainless-steel-12-pieces/
-  - Perrin: five product pages, listed in DS-401
-  - Keyless works: https://watchesbysjx.com/2026/08/keyless-works-explained.html
-  - Eterna 2824-2 manual: https://www.manualslib.fr/manual/627394/Eterna-Eta-2824-2.html?page=5
-  - Torsion of a square: https://prof.uok.ac.ir/Ka.Karami/Courses/Mechanic-of-Material-II/06-Torsion-of-Noncircular-Members.pdf
-  - von Mises: https://en.wikipedia.org/wiki/Von_Mises_yield_criterion
-- **Human factors:**
-  - Mathiowetz 1985: https://pubmed.ncbi.nlm.nih.gov/3970660/
-  - Norm tables: https://www.topendsports.com/testing/tests/pinch-grip-strength.htm
-  - Fingertip friction: https://stacks.cdc.gov/view/cdc/215047
-  - Rohmert 15 %: https://ergoweb.com/static-load/
-  - Pound-force: https://en.wikipedia.org/wiki/Pound_(force)
-- **Gear stress (graders only):** https://archive.nptel.ac.in/content/storage2/courses/112106137/pdf/2_7.pdf
+## 4. Real-document values from REAL_DATASHEETS.md (on main), and what they corrected
 
-## 5. Licensing basis
+| Value | Source (from REAL_DATASHEETS.md) | Where used / corrected |
+|---|---|---|
+| NH35: 55 crown turns for a full wind, 8 ratchet-wheel turns, so **about 6.9 crown turns per barrel turn** [derived] | TMI NH3 technical guide, https://timemodule.com/upload/category/24/technical_guide/NH35_TG.pdf (link-only) | Row 4 cross-check. Inside `WIND_BAND` 3 to 12. Kept out of the DS sheets, so that no design ratio is hinted |
+| **Grossmann's torque law** M = E·h·e³·2πn/(12L), n from the free state; worked example 5,640 g·mm, −389 g·mm per turn | Grossmann 1905, art. 97 and 99 (PD; text in `public_domain/`, verified by grep) | DS-101 now cites it as the primary source of the formula. Note 2 corrected: n counts from the free spring, so a real spring has torque at let-down. Table 4 is relabelled "torque gained above let-down", and M_el remains the bound |
+| **MIL-STD-1472H:** knob max **32 mN·m** for Ø ≤ 25 mm (42 above); fingertip knob Ø 10 to 100 mm | everyspec copy of MIL-STD-1472H fig. 10 (PD) | DS-501: T_rec is now capped at 32 N·mm |
+| **Imrhan 2013:** MVC finger torque **69 to 155 mN·m** (smooth Ø 3.3 to 5.0 mm, women's tightening to men's loosening) | westpointpressjournals ISER 1(2) (link-only) | **Corrected DS-501:** the earlier friction-model "maximum finger torque" columns (e.g. 140 N·mm for women at Ø 5) overstated the measured 90 to 96. They are removed and replaced by Imrhan's measured table. The recommended limit (20 % of the lowest measured maximum at 3.3 mm) is consistent |
+| **Sellita SW200-1 / SW215-1: stem travel 0.80 mm**, S 0.90, stem 15.50 mm, crown gap ≤ 0.1 mm | Sellita DocTec SW200-1 rev 07 (**link-only; drawing pages marked confidential; values cited as facts, document not reproduced or shipped**) | **Corrected DS-401:** the travel was "about 1 mm" (watchesbysjx, secondary); it is now 0.80 mm (primary) × s = 1.29 mm |
+| **ETA 6497-2: 53 h; ETA 6498-1: 46 h** | ETA CT 6497-2 and 6498-1 (heritage-site mirrors, link-only) | DS-101 comparison table. Corrects STANDARDS.md 3.5's "6497-1, 46 h" (that figure is the 6498-1's) |
+| ETA 2801-2: 42 h | ETA CT 2801-2, https://shopb2b.eta.ch/technicaldocuments/index/pdf/id/1626 | Calibrates DS-101's core ratio (variant K) |
+| Wieland CuZn39Pb3: R430 Rp0.2 220 MPa; E 96 GPa; density 8.46 g/cm³ | Wieland Z32/Z33 | **Corrected DS-201:** the brass design minimum was 230 MPa (Aalco); it is now 220 MPa, so the allowable is 110 MPa (was 115), and the DS-301 bushing p_max is 110 |
+| Grossmann friction: metal on metal 0.15 to 0.17; metal on stones 0.15 | Grossmann art. 335 (PD) | Added to DS-201 Table 7 and DS-301 §5.2. Consistent with Bird's 0.14 |
 
-- **What is restated:** facts (dimensions, material properties, norm means), as a small cited selection
-  in our own words, layout and tables. STANDARDS.md 4.6 applies: facts are restated with a citation, and
-  no maker's document text, layout, table, drawing or logo is copied.
-- **Selections:**
-  - About 9 mainspring sizes out of a catalogue of hundreds.
-  - 6 of the 13 rows of Alleima's strength table.
-  - 9 of the 34 Otto Frei bushing sizes.
-  - The jewel sizes are a product list, not a document table.
-- **Supplier names:** fictional (Valtorre Microtechnique SA, Aciers Duval SA, Rubis Lumen SA). Real
-  makers and sellers appear only as cited sources, never as branding.
-- **Not used:** no Générale Ressorts, Seitz, NIHS or ISO table was reproduced. "Nivaflex 45/5 type" names
-  a material grade for identification; it is not branding.
+## 5. Sources and licensing
+
+- **Every URL** used is in the footnotes of the DS sheets. The full list of the previous revision is
+  unchanged, plus:
+  - Wieland, Grossmann, MIL-STD-1472H, Imrhan, Sellita DocTec SW200-1;
+  - ETA CT 2801-2, 6497-2, 6498-1;
+  - the ressortdebarillet pages for 1.45 × 0.10 × 380 × 10 and for the 2801 size;
+  - Wikipedia "Ounce-force".
+- **What is restated:** facts only, in our own words and layout, as small selections.
+- **Suppliers:** fictional (Valtorre Microtechnique SA, Aciers Duval SA, Rubis Lumen SA).
+- **Sellita:** its numbers are cited as facts with a link. The document is not reproduced, quoted or
+  shipped.
+- **Public domain:** Grossmann and MIL-STD-1472H.
+- **Link-only:** Imrhan, ETA, TMI and Sellita.
 
 This is our reading, not legal advice.
 
 ## 6. Not verified
 
-- Several ressortdebarillet product pages hit an HTTP 429 rate limit on re-fetch. Their sizes are taken
-  from the product titles in search results.
-- The watchesbysjx keyless-works URL is taken from STANDARDS.md and was not re-fetched in this session.
-- The Perrin 5.00 mm Tissot crown diameter is taken from a search summary.
-- The Esslinger assortment's intermediate sizes were not listed, so only the 4.0 and 7.0 mm ends are
-  used.
-- The mfgrobots C100S, makeitfrom and holowiki data are secondary.
-- The 0.01 mm clearance rule comes from a practitioner forum.
-- The 38 h minimum is ETA's figure for the 2824-2. For the 2671, ETA's product page gives a typical
-  44 h; a 38 h minimum for the 2671 was seen only in a search summary of an ETA sheet.
+- **Not re-fetched:** some ressortdebarillet sizes come from product titles (the HTTP 429 rate limit).
+  The 1.45 × 0.10 × 380 × 10 and 2801 pages were not re-fetched.
+- **Secondary or reported values:**
+  - the Perrin Ø 5.00 mm crown comes from a search summary;
+  - the Imrhan, MIL-STD and Sellita values are as reported in REAL_DATASHEETS.md (read there from
+    pypdf text) and were not re-read in this session;
+  - Imrhan's column order (smooth then knurled, loosening then tightening) is REAL_DATASHEETS.md's
+    reading.
+- **The core-ratio calibration rests on one real spring** (the 2801).
+- **The Nivaflex data** are wire data, applied to strip.

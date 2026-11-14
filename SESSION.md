@@ -1109,3 +1109,25 @@ This is information, so nobody duplicates it. The to-do list says nobody has pac
   - `INTERFACE_FOR_B.md` goes out with its next push;
   - the datasheets' size-dependent values get regenerated at demonstration scale;
   - keyless v1's anchors, Harbor validation and runs continue.
+
+### 2026-11-14 16:10 | A: datasheets regenerated at demonstration scale | Mikael + Claude
+- Did: regenerated DS-101 to DS-501, INDEX and TRACEABILITY at B's demonstration scale, which per Decisions 14:45 is one scale for the whole job.
+  - **The scale:** s = 41.4/25.6 = 1.617, from `CASE_RADIUS` 20.7 in geometry/watch.py against the ETA 2824-2's Ø 25.60 mm.
+  - **What scales:**
+    - lengths × s;
+    - torques and stem ratings × s³ = 4.229;
+    - forces and load ratings × s².
+  - **What does not scale:** turns, hours, friction, material properties and human data.
+- Corrections from REAL_DATASHEETS.md:
+  - stem travel 0.80 mm (Sellita, cited as a fact only; the document is confidential and not reproduced), which is 1.29 mm at this scale;
+  - the brass minimum is now 220 MPa (Wieland), so the allowable is 110 MPa;
+  - DS-501's maximum finger torques are now Imrhan's measured values, and T_rec is capped at MIL-STD-1472H's 32 N·mm;
+  - Grossmann 1905 is cited for the torque law and for the torque a spring has at let-down;
+  - the ETA 6497-2 (53 h), 6498-1 (46 h) and 2801-2 (42 h) are added. The 2801 calibrates the core ratio: r = 12·t gives 47 h, r = 16·t gives 28 h, so DS-101 gives both columns.
+- Crown torque:
+  - It is not binding for any catalogue crown (Ø ≥ 4.85 mm, so T_rec ≥ 20.4 N·mm, against a worst case of 12.8 N·mm at i = 3).
+  - It binds only for a crown the agent makes below Ø 3.1 mm.
+- For the builder:
+  - `PULL` = 1.29 at this scale;
+  - the brief must state the barrel's core ratio (TRACEABILITY.md section 3).
+- Verified by: the computations ran in `python:3.12-slim` (Docker). Not verified: listed in TRACEABILITY.md section 6.

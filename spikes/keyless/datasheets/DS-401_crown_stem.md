@@ -1,99 +1,97 @@
-# Valtorre Microtechnique SA: Crowns and winding stems
+# Valtorre Microtechnique SA: Crowns and winding stems, demonstration-scale series
+
+**Demonstration-scale series, scale 1.617:1 to an 11½‴ calibre (s = 1.617).**
 
 | Document | Revision | Date | Status |
 |---|---|---|---|
-| VM-DS-401 | B | 2026-11-14 | Released |
+| VM-DS-401 | C | 2026-11-14 | Released |
 
 > **About this document.** Valtorre Microtechnique SA is a fictional supplier, used for this exercise
-> only. The crown sizes and thread are those of real catalogue items, cited per row. The stem torque
-> ratings are **calculated**, and their footnotes give the method and inputs.
+> only.
+>
+> - **What is real:** the 1:1 dimensions are those of real parts and documents, cited per row.
+> - **What this series changes:** it enlarges every length by s = 1.617.[^s] **Use the scaled columns.**
+> - **What is calculated:** the stem torque ratings (section 5).
 
 ## 1. Scope
 
-This sheet covers:
-
-- crowns with a Ø 0.90 mm female thread;
-- winding stems with a Ø 0.90 mm thread, as used in two-position (winding and setting) keyless works.
-
-All data are full scale (1:1).
+This sheet covers crowns and winding stems for two-position keyless works (winding, then hand
+setting).
 
 ## 2. Ordering codes
 
-- **Crowns:** `VM-CR-<Ø in 1/100 mm>-<form>`, where the form is R (round), S (square) or
-  T10 (10-sided).
-- **Stems:** `VM-ST-090-<square A/F in 1/100 mm>`. The movement maker cuts the stem to length when
-  casing.
+- **Crowns:** `VM-CR-<1:1 Ø in 1/100 mm>-<form>-DS`.
+- **Stems:** `VM-ST-090-<1:1 square A/F in 1/100 mm>-DS`.
 
 ## 3. Crowns (Table 1)
 
-| Ordering code | Crown Ø (mm) | Form | Thread Ø (mm) | Case tube Ø (mm) | Source |
-|---|---|---|---|---|---|
-| VM-CR-300-S | 3.00 | Square | 0.90 | not stated | [^p300] |
-| VM-CR-400-R | 4.0 | Round | 0.90 | 2.0 or 2.5 | [^ess] |
-| VM-CR-500-R | 5.00 | Round | 0.90 | not stated | [^p500] |
-| VM-CR-510-R | 5.10 | Round | 0.90 | not stated | [^p510] |
-| VM-CR-520-T10 | 5.20 | 10-sided | 0.90 | not stated | [^p520] |
-| VM-CR-600-R | 6.00 | Round | 0.90 | not stated | [^p600] |
-| VM-CR-700-R | 7.0 | Round | 0.90 | 2.0 or 2.5 | [^ess] |
+| Ordering code | 1:1 crown Ø (mm) | Source | **Crown Ø (mm)**[^s] | Form |
+|---|---|---|---|---|
+| VM-CR-300-S-DS | 3.00 | [^p300] | 4.85 | Square |
+| VM-CR-400-R-DS | 4.0 | [^ess] | 6.47 | Round |
+| VM-CR-500-R-DS | 5.00 | [^p500] | 8.09 | Round |
+| VM-CR-510-R-DS | 5.10 | [^p510] | 8.25 | Round |
+| VM-CR-520-T10-DS | 5.20 | [^p520] | 8.41 | 10-sided |
+| VM-CR-600-R-DS | 6.00 | [^p600] | 9.70 | Round |
+| VM-CR-700-R-DS | 7.0 | [^ess] | 11.32 | Round |
 
-The 4.0 and 7.0 mm sizes are the ends of a 4.0 to 7.0 mm assortment for 2.0 and 2.5 mm tubes.[^ess]
+- **Thread:** every crown is threaded to fit the stem in section 4: S 0.90 at 1:1, **Ø 1.455 mm** in this
+  series.[^ess][^sel][^s]
+- **Case tube:** Ø 2.0 or 2.5 mm at 1:1, which is **3.23 or 4.04 mm** in this series.[^ess][^s]
+- **Tolerances:** not published by the cited sellers.
 
-**Tolerances:** not published by the cited sellers.
+For the finger torque available on each crown diameter, see VM-AN-501. Finger torque does not scale.
 
-For the finger torque available on each crown diameter, see VM-AN-501.
+## 4. Winding stem (Table 2)
 
-## 4. Stem functions and positions
+| Quantity | 1:1 value | Source | **This series**[^s] |
+|---|---|---|---|
+| Thread | S 0.90 (Ø 0.90 mm) | [^sel] | Ø 1.455 mm |
+| Length, normal | 15.50 mm | [^sel] | 25.07 mm |
+| Travel from position 1 (winding) to position 2 (setting) | 0.80 mm | [^sel] | **1.29 mm** |
+| Gap from crown to case middle | at most 0.1 mm | [^sel] | at most 0.16 mm |
 
-| Position | Function | Stem travel from position 1 |
-|---|---|---|
-| 1 (pushed in) | Winding | 0 |
-| 2 (pulled out) | Hand setting | about 1 mm[^sjx] |
-
-- **Positions:** a no-date calibre has two crown positions, winding and setting.[^eterna] Date calibres
-  add a quick-set position between them.[^eterna]
-- **Forward winding:** the sliding pinion's ratchet (Breguet) teeth drive the winding pinion.
-- **Backward turning:** the same teeth slip over each other, so nothing reaches the barrel or the
+- **Positions:** a no-date calibre has two positions, winding and setting. Date calibres add a quick-set
+  position.[^eterna]
+- **Backward turning:** the sliding pinion's Breguet teeth slip, so nothing reaches the barrel or the
   click.[^sjx]
 - **Travel tolerance:** not published.
 
-## 5. Ratings
+## 5. Ratings: absolute maximum torque on the stem square (Table 3, calculated)
 
-### 5.1 Absolute maximum torque on the stem square (Table 2, calculated)
+The stem fails in torsion at the square that drives the sliding pinion. The maximum shear stress in a
+solid square of side a under a torque T is τ = T/(0.208·a³).[^uok] The steel yields in shear at
+τ_y = Rp/√3 (von Mises).[^vm] With Rp = 1450 MPa, the lowest proof strength in AD-DS-201,[^alleima]
+τ_y = 837 MPa.
 
-The stem fails in torsion at its smallest section, the square that drives the sliding pinion. The
-maximum shear stress in a solid square of side a under a torque T is τ = T/(0.208·a³).[^uok] The steel
-yields in shear at τ_y = Rp/√3 (von Mises).[^vm]
+| Ordering code | 1:1 square A/F (mm) | **Square A/F a (mm)**[^s] | **T at shear yield (N·mm)**[^d1] | **Recommended max., S = 2 (N·mm)**[^d1] |
+|---|---|---|---|---|
+| VM-ST-090-050-DS | 0.50 | 0.809 | 92.1 | 46.0 |
+| VM-ST-090-060-DS | 0.60 | 0.970 | 159.1 | 79.5 |
+| VM-ST-090-070-DS | 0.70 | 1.132 | 252.6 | 126.3 |
 
-The ratings use Rp = 1450 MPa, the lowest proof strength listed for hardened and tempered 1 % C steel
-in AD-DS-201.[^alleima] That gives τ_y = 837 MPa.
+For another size, T_yield = 0.208·a³·837 N·mm, with a in mm. The rating scales with s³, the same as the
+torques it carries.
 
-| Ordering code | Square A/F a (mm) | T at shear yield (N·mm) | Recommended max., S = 2 (N·mm) |
-|---|---|---|---|
-| VM-ST-090-050 | 0.50 | 21.8[^d1] | 10.9[^d1] |
-| VM-ST-090-060 | 0.60 | 37.6[^d1] | 18.8[^d1] |
-| VM-ST-090-070 | 0.70 | 59.7[^d1] | 29.9[^d1] |
-
-For another square size, T_yield = 0.208·a³·837 N·mm, with a in mm.
-
-### 5.2 Torque at the crown thread
-
-Not published by the cited sellers.
+**Torque at the crown thread:** not published.
 
 ## 6. Handling
 
-- Screw the crown fully home on the thread before the stem is cut to length.
+Screw the crown fully home on the thread before cutting the stem to length.
 
 ## Sources
 
-[^ess]: Esslinger, stainless steel crown assortment 83-015-9: Ø 4.0 to 7.0 mm, 0.90 mm thread, 2.0 and 2.5 mm tube openings, https://www.esslinger.com/double-o-ring-waterproof-watch-crown-assortment-83-015-9-stainless-steel-12-pieces/
+[^s]: Scale s = 41.4 mm / 25.60 mm = 1.617. 41.4 mm is the case diameter of the demonstration movement this series is made for; 25.60 mm is the ETA 2824-2 (11½‴), https://shopb2b.eta.ch/technicaldocuments/index/pdf/id/1883. Scaled length = 1:1 length × 1.617.
+[^sel]: Sellita, SW200-1 Documentation technique, rev 07 (2024): stem thread S 0.90; stem travel ("course de la tige") 0.80 mm; stem length 15.50 mm; crown-to-case gap ≤ 0.1 mm. Cited as facts only; the document is not reproduced (its drawing pages are marked confidential). https://www.sellita.ch/scripts/calibres/images/DocTec_SW200-1_7.pdf
+[^ess]: Esslinger, crown assortment 83-015-9: Ø 4.0 to 7.0 mm, 0.90 mm thread, 2.0 and 2.5 mm tubes, https://www.esslinger.com/double-o-ring-waterproof-watch-crown-assortment-83-015-9-stainless-steel-12-pieces/
 [^p300]: Perrin, crown, tap 0.90 mm, square, Ø 3.00 mm, https://perrinwatchparts.com/collections/watch-case-parts-for-omega/products/omega-crown-waterproof-tap-090-mm-square-diameter-300-mm-see-all-case-numbers-in-description
-[^p500]: Perrin, crown TI-TIS21, steel, medium pipe, fits a stem tap 0.90 mm, Ø 5.00 mm, https://perrinwatchparts.com/en-us/products/tissot-crown-mido-style-ti-tis21-steel-medium-pipe-fits-a-stem-tap-090-mm
-[^p510]: Perrin, crown, tap 0.90 mm, steel, Ø 5.10 mm, https://perrinwatchparts.com/products/omega-crown-waterproof-tap-090-mm-steel-diameter-510-mm-case-numbers-1660064-1660066-1660108-1660144-1660146-1660175-5660016
-[^p520]: Perrin, crown, tap 0.90 mm, steel, 10 sides, Ø 5.20 mm, https://perrinwatchparts.com/en-us/products/omega-crown-waterproof-tap-090-mm-steel-10-sides-diameter-520-mm-see-all-case-numbers-in-description
-[^p600]: Perrin, crown, tap 0.90 mm, steel, Ø 6.00 mm, https://perrinwatchparts.com/products/omega-crown-waterproof-tap-090-mm-steel-diameter-600-mm-see-all-case-numbers-in-description
-[^sjx]: Keyless works explained: stem travel about 1 mm between positions; the Breguet teeth slip when turned backward. https://watchesbysjx.com/2026/08/keyless-works-explained.html
-[^eterna]: ETA 2824-2 (Eterna-cased) manual: position A winding, position B setting; date versions add a quick-set position. https://www.manualslib.fr/manual/627394/Eterna-Eta-2824-2.html?page=5
-[^uok]: Torsion of non-circular members: square section, τ_max = T/(0.208·a³) (coefficient 0.208 for b/a = 1), https://prof.uok.ac.ir/Ka.Karami/Courses/Mechanic-of-Material-II/06-Torsion-of-Noncircular-Members.pdf
-[^vm]: von Mises criterion: the shear yield stress is σ_y/√3, https://en.wikipedia.org/wiki/Von_Mises_yield_criterion
-[^alleima]: Alleima 20C strip, proof strength 1450 MPa (1.000 to < 1.575 mm), the lowest row, https://alleima.com/en/technical-center/material-datasheets/strip-steel/alleima-20c
-[^d1]: Not published; calculated as T = 0.208·a³·(1450/√3), with the formula from [^uok] and [^vm] and the input from [^alleima]. The recommended value divides by S = 2, the upper end of the 1.5 to 2 tier at https://danotes.mech.uwa.edu.au/SSS/safety/safety.html.
+[^p500]: Perrin, crown TI-TIS21, fits stem tap 0.90 mm, Ø 5.00 mm, https://perrinwatchparts.com/en-us/products/tissot-crown-mido-style-ti-tis21-steel-medium-pipe-fits-a-stem-tap-090-mm
+[^p510]: Perrin, crown, tap 0.90 mm, Ø 5.10 mm, https://perrinwatchparts.com/products/omega-crown-waterproof-tap-090-mm-steel-diameter-510-mm-case-numbers-1660064-1660066-1660108-1660144-1660146-1660175-5660016
+[^p520]: Perrin, crown, tap 0.90 mm, 10 sides, Ø 5.20 mm, https://perrinwatchparts.com/en-us/products/omega-crown-waterproof-tap-090-mm-steel-10-sides-diameter-520-mm-see-all-case-numbers-in-description
+[^p600]: Perrin, crown, tap 0.90 mm, Ø 6.00 mm, https://perrinwatchparts.com/products/omega-crown-waterproof-tap-090-mm-steel-diameter-600-mm-see-all-case-numbers-in-description
+[^sjx]: Keyless works explained (Breguet teeth slip backward), https://watchesbysjx.com/2026/08/keyless-works-explained.html
+[^eterna]: ETA 2824-2 (Eterna-cased) manual, positions, https://www.manualslib.fr/manual/627394/Eterna-Eta-2824-2.html?page=5
+[^uok]: Torsion of a square section, τ_max = T/(0.208·a³), https://prof.uok.ac.ir/Ka.Karami/Courses/Mechanic-of-Material-II/06-Torsion-of-Noncircular-Members.pdf
+[^vm]: von Mises shear yield σ_y/√3, https://en.wikipedia.org/wiki/Von_Mises_yield_criterion
+[^alleima]: Alleima 20C, proof strength 1450 MPa (1.000 to < 1.575 mm), https://alleima.com/en/technical-center/material-datasheets/strip-steel/alleima-20c
+[^d1]: Not published; calculated as T = 0.208·a³·1450/√3 with the scaled a ([^uok], [^vm], [^alleima]). The recommended value divides by S = 2 (https://danotes.mech.uwa.edu.au/SSS/safety/safety.html).

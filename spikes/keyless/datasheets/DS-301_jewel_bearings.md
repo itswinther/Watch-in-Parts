@@ -1,153 +1,150 @@
-# Rubis Lumen SA: Jewel holes and pivot bushings
+# Rubis Lumen SA: Jewel holes and pivot bushings, demonstration-scale series
+
+**Demonstration-scale series, scale 1.617:1 to an 11½‴ calibre (s = 1.617).**
 
 | Document | Revision | Date | Status |
 |---|---|---|---|
-| RL-DS-301 | B | 2026-11-14 | Released |
+| RL-DS-301 | C | 2026-11-14 | Released |
 
-> **About this document.** Rubis Lumen SA is a fictional supplier, used for this exercise only. The
-> sizes are those of real catalogue items, cited per table, and the tolerances and friction come from
-> a real jewel-bearing maker. **Load ratings are not published by any source we found.** Section 5
-> calculates them, and its footnotes give the method and inputs.
+> **About this document.** Rubis Lumen SA is a fictional supplier, used for this exercise only.
+>
+> - **What is real:** the 1:1 sizes are real catalogue items, cited per table. The tolerances and
+>   friction come from a real jewel-bearing maker.
+> - **What this series changes:** it enlarges every length by s = 1.617.[^s] Both the 1:1 and the
+>   scaled values are given. **Use the scaled columns.**
+> - **What is calculated:** no source we found publishes load ratings, so section 5 calculates them.
 
 ## 1. Scope
 
-This sheet covers two product lines:
-
-- **RL-J:** synthetic ruby jewel holes, flat with a cylindrical hole (hole sizes in Table 1);
-- **RL-B:** brass friction bushings (sizes in Table 2), for parts that do not justify a jewel.
-
-Both lines are full scale (1:1) watch parts.
+- **RL-J:** synthetic ruby jewel holes, flat with a cylindrical hole.
+- **RL-B:** brass friction bushings, for parts that do not justify a jewel.
 
 ## 2. Ordering code
 
-- **Jewels:** `RL-J-<hole>-<OD>`, with the hole in 1/100 mm and the outside diameter in 1/100 mm.
-  Example: `RL-J-20-300` is a hole of Ø 0.20 mm with an outside diameter of Ø 3.00 mm.
-- **Bushings:** `RL-B-<hole>-<OD>-<height>`, all in 1/100 mm.
+- **Jewels:** `RL-J-<1:1 hole in 1/100 mm>-<1:1 OD in 1/100 mm>-DS`, for example `RL-J-20-300-DS`.
+- **Bushings:** `RL-B-<1:1 hole>-<1:1 OD>-<1:1 height>-DS`.
 
-## 3. RL-J jewel holes: sizes (Table 1)
+## 3. RL-J jewel holes (Table 1)
 
-Every size is offered with an outside diameter of Ø 2.60 or Ø 3.00 mm, except as marked.[^hsw]
+Each hole size is offered with one of two outside diameters:
 
-| Hole Ø (mm) | OD 2.60 | OD 3.00 |
-|---|---|---|
-| 0.14 | RL-J-14-260 | RL-J-14-300 |
-| 0.15 | RL-J-15-260 | RL-J-15-300 |
-| 0.16 | RL-J-16-260 | RL-J-16-300 |
-| 0.17 | RL-J-17-260 | – |
-| 0.18 | – | RL-J-18-300 |
-| 0.19 | RL-J-19-260 | RL-J-19-300 |
-| 0.20 | RL-J-20-260 | RL-J-20-300 |
-| 0.22 | RL-J-22-260 | RL-J-22-300 |
-| 0.24 | RL-J-24-260 | RL-J-24-300 |
-| 0.26 | RL-J-26-260 | RL-J-26-300 |
-| 0.28 | RL-J-28-260 | RL-J-28-300 |
-| 0.32 | RL-J-32-260 | RL-J-32-300 |
+- 1:1 OD 2.60 mm, which is **4.20 mm** in this series;
+- 1:1 OD 3.00 mm, which is **4.85 mm** in this series.[^hsw][^s]
 
-**Jewel height:** not stated by the size source. Specify it on order.
-
-**Tolerances, from a ring-jewel maker's published capability:**[^bird]
-
-| Feature | Value |
-|---|---|
-| Hole Ø, standard (holes under 0.080″, about 2 mm) | 0.0002″ total (5.1 µm) |
-| Hole Ø, on request | 0.0001″ total (2.5 µm) |
-| Hole-to-OD concentricity, specifiable | down to 0.0002″ TIR (5.1 µm) |
-| Concentricity after mounting in a bushing | 0.0005″ TIR (12.7 µm); 0.0002 to 0.0003″ after truing |
-| Surface finish of the bore | 2 µin (0.05 µm) and under |
-
-**Outside-diameter tolerance:** not published in any source we found. Fit the jewel so that it seats
-without force and with almost no free play,[^wrt3] in a straight plate hole slightly smaller than the
-jewel's largest outside diameter.[^wrt2]
-
-## 4. RL-B brass friction bushings: sizes (Table 2)
-
-| Ordering code | Hole Ø (mm) | OD (mm) | Height (mm) |
+| 1:1 hole Ø (mm)[^hsw] | **Hole Ø, this series (mm)**[^s] | With OD 4.20 | With OD 4.85 |
 |---|---|---|---|
-| RL-B-10-070-25 | 0.10 | 0.70 | 0.25 |
-| RL-B-11-100-35 | 0.11 | 1.00 | 0.35 |
-| RL-B-12-150-55 | 0.12 | 1.50 | 0.55 |
-| RL-B-16-200-70 | 0.16 | 2.00 | 0.70 |
-| RL-B-30-100-30 | 0.30 | 1.00 | 0.30 |
-| RL-B-40-150-55 | 0.40 | 1.50 | 0.55 |
-| RL-B-60-200-70 | 0.60 | 2.00 | 0.70 |
-| RL-B-80-260-80 | 0.80 | 2.60 | 0.80 |
-| RL-B-100-260-80 | 1.00 | 2.60 | 0.80 |
+| 0.14 | 0.226 | RL-J-14-260-DS | RL-J-14-300-DS |
+| 0.15 | 0.243 | RL-J-15-260-DS | RL-J-15-300-DS |
+| 0.16 | 0.259 | RL-J-16-260-DS | RL-J-16-300-DS |
+| 0.17 | 0.275 | RL-J-17-260-DS | – |
+| 0.18 | 0.291 | – | RL-J-18-300-DS |
+| 0.19 | 0.307 | RL-J-19-260-DS | RL-J-19-300-DS |
+| 0.20 | 0.323 | RL-J-20-260-DS | RL-J-20-300-DS |
+| 0.22 | 0.356 | RL-J-22-260-DS | RL-J-22-300-DS |
+| 0.24 | 0.388 | RL-J-24-260-DS | RL-J-24-300-DS |
+| 0.26 | 0.420 | RL-J-26-260-DS | RL-J-26-300-DS |
+| 0.28 | 0.453 | RL-J-28-260-DS | RL-J-28-300-DS |
+| 0.32 | 0.517 | RL-J-32-260-DS | RL-J-32-300-DS |
 
-All sizes are from the cited listing.[^ofrei] The source does not state the brass grade or the
-tolerances.
+**Jewel height:** not stated by the size source.
+
+**Tolerances (Table 2):** the 1:1 values are a ring-jewel maker's published capability,[^bird] scaled
+with the part.[^s]
+
+| Feature | 1:1 value | **This series** |
+|---|---|---|
+| Hole Ø, standard | 0.0002″ total (5.1 µm) | 8.2 µm |
+| Hole Ø, on request | 0.0001″ total (2.5 µm) | 4.1 µm |
+| Hole-to-OD concentricity | down to 0.0002″ TIR (5.1 µm) | 8.2 µm |
+| Concentricity after mounting | 0.0005″ TIR (12.7 µm) | 20.5 µm |
+
+**Outside-diameter tolerance:** not published. Fit the jewel so that it seats without force and with
+almost no free play,[^wrt3] in a straight plate hole slightly smaller than the jewel's largest outside
+diameter.[^wrt2]
+
+## 4. RL-B brass friction bushings (Table 3)
+
+| Ordering code | 1:1 hole × OD × height (mm)[^ofrei] | **Hole Ø (mm)**[^s] | **OD (mm)**[^s] | **Height (mm)**[^s] |
+|---|---|---|---|---|
+| RL-B-10-070-25-DS | 0.10 × 0.70 × 0.25 | 0.162 | 1.13 | 0.404 |
+| RL-B-11-100-35-DS | 0.11 × 1.00 × 0.35 | 0.178 | 1.62 | 0.566 |
+| RL-B-12-150-55-DS | 0.12 × 1.50 × 0.55 | 0.194 | 2.43 | 0.889 |
+| RL-B-16-200-70-DS | 0.16 × 2.00 × 0.70 | 0.259 | 3.23 | 1.132 |
+| RL-B-30-100-30-DS | 0.30 × 1.00 × 0.30 | 0.485 | 1.62 | 0.485 |
+| RL-B-40-150-55-DS | 0.40 × 1.50 × 0.55 | 0.647 | 2.43 | 0.889 |
+| RL-B-60-200-70-DS | 0.60 × 2.00 × 0.70 | 0.970 | 3.23 | 1.132 |
+| RL-B-80-260-80-DS | 0.80 × 2.60 × 0.80 | 1.294 | 4.20 | 1.294 |
+| RL-B-100-260-80-DS | 1.00 × 2.60 × 0.80 | 1.617 | 4.20 | 1.294 |
+
+The source states neither the brass grade nor the tolerances.[^ofrei]
 
 ## 5. Ratings
 
 ### 5.1 Recommended pivot clearance (diametral)
 
-| Pivot Ø | Recommended hole | Basis |
+| Pivot Ø | 1:1 rule | **This series** |
 |---|---|---|
-| about 0.14 mm | pivot + 0.01 mm (0.14 mm pivot in a 0.15 mm hole) | [^wrt1] [secondary] |
-| about 0.07 mm and below | proportionally smaller clearance | [^wrt1] [secondary] |
+| About 0.14 mm at 1:1 (0.226 mm here) | Hole = pivot + 0.01 mm (0.14 mm pivot in a 0.15 mm hole)[^wrt1] [secondary] | Hole = pivot + 0.016 mm[^s] |
+| Smaller pivots | Proportionally smaller clearance[^wrt1] | Proportionally smaller |
 
-A hole equal to the pivot diameter has zero clearance and binds.[^wrt3] The pivot must never be larger
-than the hole.
+A hole equal to the pivot diameter has zero clearance and binds.[^wrt3]
 
-### 5.2 Friction and alignment
+### 5.2 Friction and alignment (size-independent)
 
-- **Friction:** steel on ruby, dry, μ ≈ 0.14. Lubrication lowers it.[^bird]
-- **Friction moment of a pivot of Ø p under load S:** M = (1/3)·μ·S·p for a straight hole, and
+- **Steel on ruby, dry:** μ ≈ 0.14.[^bird] Metal on precious stones: 0.15.[^gro]
+- **Friction moment** of a pivot of Ø p under load S: M = (1/3)·μ·S·p for a straight hole and
   M = (1/6)·μ·S·p for an olive hole.[^bird]
-- **Misalignment:** an olive (rounded) hole tolerates about 2 to 5° of shaft misalignment. A straight
-  hole needs accurate alignment.[^bird]
+- **Misalignment:** an olive hole tolerates 2 to 5°.[^bird]
 
-### 5.3 Absolute maximum radial load (Table 3, calculated)
+### 5.3 Absolute maximum radial load (Table 4, calculated)
 
-The radial load is limited by the bearing pressure on the projected area, p = F/(d·ℓ):[^ee] d is the
-hole diameter and ℓ the engaged length of the pivot in the hole. The allowable pressures are:
+The bearing pressure on the projected area is p = F/(d·ℓ),[^ee] where ℓ is the engaged length of the
+pivot. The allowable pressures do not depend on scale:
 
-- **RL-J:** p_max = 900 N/mm², that is corundum's compressive strength of 2700 MPa divided by S = 3
-  for a brittle material;[^d1]
-- **RL-B:** p_max = 115 N/mm², that is the lowest brass proof stress, 230 MPa, divided by S = 2.[^d2]
+- **Jewels:** p_max = 900 N/mm².[^d1]
+- **Brass bushings:** p_max = 110 N/mm².[^d2]
 
-These ratings are for slow or intermittent turning, as in keyless works and the barrel. They do not
-cover a continuously running train.
+So F_max = p_max·d·ℓ, which scales with s². This rating is for slow or intermittent turning (keyless
+works, barrel).
 
 | Product | Hole Ø d (mm) | Engaged length ℓ (mm) | F_max radial (N) |
 |---|---|---|---|
-| RL-J | 0.14 | 0.15 | 18.9 |
-| RL-J | 0.14 | 0.30 | 37.8 |
-| RL-J | 0.20 | 0.15 | 27.0 |
-| RL-J | 0.20 | 0.30 | 54.0 |
-| RL-J | 0.32 | 0.15 | 43.2 |
-| RL-J | 0.32 | 0.30 | 86.4 |
-| RL-B-10-070-25 | 0.10 | 0.25 (full height) | 2.9 |
-| RL-B-11-100-35 | 0.11 | 0.35 | 4.4 |
-| RL-B-12-150-55 | 0.12 | 0.55 | 7.6 |
-| RL-B-16-200-70 | 0.16 | 0.70 | 12.9 |
-| RL-B-30-100-30 | 0.30 | 0.30 | 10.4 |
-| RL-B-40-150-55 | 0.40 | 0.55 | 25.3 |
-| RL-B-60-200-70 | 0.60 | 0.70 | 48.3 |
-| RL-B-80-260-80 | 0.80 | 0.80 | 73.6 |
-| RL-B-100-260-80 | 1.00 | 0.80 | 92.0 |
-
-For any other engaged length, F_max = p_max·d·ℓ.
+| RL-J (1:1 hole 0.14) | 0.226 | 0.243 | 49.4 |
+| RL-J (1:1 hole 0.14) | 0.226 | 0.485 | 98.9 |
+| RL-J (1:1 hole 0.20) | 0.323 | 0.243 | 70.6 |
+| RL-J (1:1 hole 0.20) | 0.323 | 0.485 | 141.2 |
+| RL-J (1:1 hole 0.32) | 0.517 | 0.243 | 113.0 |
+| RL-J (1:1 hole 0.32) | 0.517 | 0.485 | 226.0 |
+| RL-B-10-070-25-DS | 0.162 | 0.404 (full height) | 7.2 |
+| RL-B-11-100-35-DS | 0.178 | 0.566 | 11.1 |
+| RL-B-12-150-55-DS | 0.194 | 0.889 | 19.0 |
+| RL-B-16-200-70-DS | 0.259 | 1.132 | 32.2 |
+| RL-B-30-100-30-DS | 0.485 | 0.485 | 25.9 |
+| RL-B-40-150-55-DS | 0.647 | 0.889 | 63.3 |
+| RL-B-60-200-70-DS | 0.970 | 1.132 | 120.8 |
+| RL-B-80-260-80-DS | 1.294 | 1.294 | 184.1 |
+| RL-B-100-260-80-DS | 1.617 | 1.294 | 230.1 |
 
 ### 5.4 Absolute maximum axial load
 
-Not published. Calculate it the same way, as F_ax,max = p_max × the actual contact area of the pivot
-shoulder on the jewel or bushing face. Use p_max from 5.3 for the face material.
+Not published. Take F_ax,max = p_max × the actual contact area of the pivot shoulder on the jewel or
+bushing face.
 
 ## 6. Handling and lubrication
 
-- **Lubrication:** jewels can run dry in open systems. In closed systems, a light boundary film, or an
-  oil cup recessed into the jewel, lowers friction.[^bird]
-- **Pressing in:** press the jewel square into the plate. Do not press on the hole or on the bore
-  surface.
+Jewels can run dry in open systems. In closed systems, a light boundary film or a recessed oil cup lowers
+friction.[^bird]
 
 ## Sources
 
-[^hsw]: H.S. Walsh, jewel holes (Bergeon 30712 series), hole × OD sizes, https://www.hswalsh.com/watch-parts-straps-batteries/jewel-holes-endstones-roller-pins-pallet-stones/jewel-holes/cat-8
-[^ofrei]: Otto Frei, friction bushing refills, hole × OD × height, https://www.ofrei.com/page454.html
-[^bird]: Bird Precision, Ring Jewel Bearings (tolerances, friction 0.14 and moment formulas citing Seitz, olive-hole misalignment of 2 to 5°, lubrication), https://catalog.birdprecision.com/Asset/Ring_jewel.pdf
-[^wrt1]: Watch Repair Talk forum, "0.14 mm pivot for a 0.15 jewel, 0.01 mm side shake" (secondary, practitioner), https://watchrepairtalk.com/topic/27101-balance-staff-pivot-tolerance-to-jewel-hole
-[^wrt2]: Watch Repair Talk forum, jewel seating discussion, https://watchrepairtalk.com/topic/30199-sizing-a-jewel-from-the-jewel-setting
-[^wrt3]: Watch Repair Talk forum: "if you have a hole with the same diameter as a pivot you have zero clearance", https://watchrepairtalk.com/topic/14596-jewel-replace-size-question
+[^s]: Scale s = 41.4 mm / 25.60 mm = 1.617. 41.4 mm is the case diameter of the demonstration movement this series is made for; 25.60 mm is the ETA 2824-2 (11½‴), https://shopb2b.eta.ch/technicaldocuments/index/pdf/id/1883. Scaled length = 1:1 length × 1.617.
+[^hsw]: H.S. Walsh, jewel holes (Bergeon 30712 series), https://www.hswalsh.com/watch-parts-straps-batteries/jewel-holes-endstones-roller-pins-pallet-stones/jewel-holes/cat-8
+[^ofrei]: Otto Frei, friction bushing refills, https://www.ofrei.com/page454.html
+[^bird]: Bird Precision, Ring Jewel Bearings, https://catalog.birdprecision.com/Asset/Ring_jewel.pdf
+[^gro]: J. Grossmann, *Lessons in Horology* (1905), art. 335 (public domain), https://archive.org/download/lessonsinhorolog00gros/lessonsinhorolog00gros_djvu.txt
+[^wrt1]: Watch Repair Talk (practitioner, secondary), https://watchrepairtalk.com/topic/27101-balance-staff-pivot-tolerance-to-jewel-hole
+[^wrt2]: https://watchrepairtalk.com/topic/30199-sizing-a-jewel-from-the-jewel-setting
+[^wrt3]: https://watchrepairtalk.com/topic/14596-jewel-replace-size-question
 [^ee]: Engineers Edge, journal bearing load on the projected area, https://engineersedge.com/calculators/journal_bearing_lubrication_15314.htm
-[^d1]: Not published; calculated as p_max = 2700 MPa / 3. The 2700 MPa is from https://makeitfrom.com/material-properties/Synthetic-Sapphire. The factor S = 3 is the upper end of the "brittle materials" tier (2.5 to 3) at https://danotes.mech.uwa.edu.au/SSS/safety/safety.html, applied to ultimate strength as https://engineersedge.com/analysis/factor-of-safety-review.htm prescribes for brittle materials. See also AD-DS-201.
-[^d2]: Not published; calculated as p_max = 230 MPa / 2. The 230 MPa is the lowest CW614N proof stress at https://www.aalco.co.uk/datasheets/Copper-and-Copper-Alloys-CW614N-Brass-Rod_31.ashx. The factor S = 2 is the upper end of the 1.5 to 2 tier at https://danotes.mech.uwa.edu.au/SSS/safety/safety.html. The brass grade of the listed bushings is not stated by the source, so this sheet assumes it.
+[^d1]: Not published; calculated as 2700 MPa (https://makeitfrom.com/material-properties/Synthetic-Sapphire) / S = 3. S is the upper end of the brittle tier at https://danotes.mech.uwa.edu.au/SSS/safety/safety.html, applied to ultimate strength as https://engineersedge.com/analysis/factor-of-safety-review.htm prescribes.
+[^d2]: Not published; calculated as 220 MPa / S = 2. The 220 MPa is the lowest published CW614N proof stress, https://www.wieland.com/da/content/download/9842/file/Z32-Z33_EX_EN.pdf. S is from https://danotes.mech.uwa.edu.au/SSS/safety/safety.html. The bushings' brass grade is not stated by the source and is assumed here.

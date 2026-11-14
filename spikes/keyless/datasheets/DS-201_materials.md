@@ -2,7 +2,10 @@
 
 | Document | Revision | Date | Status |
 |---|---|---|---|
-| AD-DS-201 | B | 2026-11-14 | Released |
+| AD-DS-201 | C | 2026-11-14 | Released |
+
+**Demonstration-scale series, scale 1.617:1 to an 11½‴ calibre (s = 1.617).** Every value on this
+sheet is a material property and does not depend on size. It applies unchanged at any scale.
 
 > **About this document.** Aciers Duval SA is a fictional supplier, used for this exercise only. Every
 > property below comes from the cited producer or reference datasheet. The design allowables in
@@ -35,14 +38,18 @@ It also gives friction coefficients and accepted safety factors.
 |---|---|---|
 | Tensile strength Rm | 360 to 500 MPa | [^aalco] |
 | Proof stress Rp0.2 | 230 to 350 MPa | [^aalco] |
+| Rp0.2 by temper, R430 / R500 (rod) | 220 / 350 MPa (R360: not stated) | [^wie] |
+| Rm by temper, R360 / R430 / R500 | 360 / 430 / 500 MPa | [^wie] |
+| Modulus of elasticity E | 96 GPa | [^wie] |
+| Density | 8.46 g/cm³ | [^wie] |
 | Elongation A | 5 to 20 % | [^aalco] |
 | Hardness | 90 to 160 HB | [^aalco] |
 | Density | 8.47 g/cm³ | [^aalco] |
 | Modulus of elasticity E | 97 GPa | [^aalco] |
 
 The supplier's values are for rod 6 to 80 mm in diameter (5 to 60 mm across flats). They vary with
-temper, product and size, and are indicative only.[^aalco] Use the **lower bound, 230 MPa**, for
-design unless a mill certificate states otherwise.
+temper, product and size, and are indicative only.[^aalco] Use the **lowest published proof stress,
+220 MPa** (Wieland R430[^wie]), for design unless a mill certificate states otherwise.
 
 ## 4. Carbon steel, 1.00 % C, hardened and tempered strip (AD-C100-HT)
 
@@ -112,6 +119,8 @@ The sources disagree by about a factor of two on flexural strength. Use the lowe
 | Steel on steel | Greased | 0.16 (type not stated) | – | [^etb] |
 | Steel on ruby or sapphire | Dry | – | about 0.14 | [^bird] |
 | Sapphire on sapphire | Clean and dry | 0.2 (type not stated) | – | [^etb] |
+| Metal on metal (watch work) | – | 0.15 to 0.17 | – | [^gro] |
+| Metal on precious stones (watch work) | – | 0.15 | – | [^gro] |
 
 ## 8. Safety factors and design allowables
 
@@ -132,7 +141,7 @@ materials.[^ee]
 
 | Material | Basis | S | Allowable (MPa) |
 |---|---|---|---|
-| Brass CW614N | Rp0.2 min 230 MPa[^aalco] | 2 | 115[^d1] |
+| Brass CW614N | Rp0.2 min 220 MPa[^wie] | 2 | 110[^d1] |
 | Steel AD-C100-HT, < 1.000 mm | Proof min 1500 MPa[^alleima] | 2 | 750[^d1] |
 | Steel AD-C100-HT, 1.000 to < 1.575 mm | Proof 1450 MPa[^alleima] | 2 | 725[^d1] |
 | Corundum, compressive | 2700 MPa[^mif] | 3 | 900[^d1] |
@@ -148,6 +157,8 @@ materials.[^ee]
 
 [^aalco]: Aalco, CW614N brass rod datasheet (EN 12164:2011): Rm 360 to 500 MPa, proof 230 to 350 MPa, A 5 to 20 %, 90 to 160 HB, 8.47 g/cm³, E 97 GPa. https://www.aalco.co.uk/datasheets/Copper-and-Copper-Alloys-CW614N-Brass-Rod_31.ashx
 [^alleima]: Alleima 20C, hardened and tempered carbon steel strip datasheet, https://alleima.com/en/technical-center/material-datasheets/strip-steel/alleima-20c
+[^wie]: Wieland, Z32/Z33 CuZn39Pb3 (CW614N) datasheet: E 96 GPa; density 8.46 g/cm³; rod R360/R430/R500, Rm 360/430/500 MPa, Rp0.2 –/220/350 MPa. https://www.wieland.com/da/content/download/9842/file/Z32-Z33_EX_EN.pdf
+[^gro]: J. Grossmann, *Lessons in Horology* (1905), art. 335, friction table (public domain), https://archive.org/download/lessonsinhorolog00gros/lessonsinhorolog00gros_djvu.txt
 [^c100s]: EN 10132-4 C100S quenched and tempered (secondary compilation), https://www.mfgrobots.com/Article/material/metal/37153.html
 [^vac]: VACUUMSCHMELZE, NIVAFLEX 45/5 alloy information (2008), https://www.cousinsuk.com/pdf/skus/9601_9596_nivaflex_45_5.pdf
 [^mif]: Synthetic sapphire properties (secondary), https://makeitfrom.com/material-properties/Synthetic-Sapphire

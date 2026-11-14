@@ -1,151 +1,182 @@
-# Valtorre Microtechnique SA: Mainsprings for small-calibre barrels
+# Valtorre Microtechnique SA: Mainsprings, demonstration-scale series
+
+**Demonstration-scale series, scale 1.617:1 to an 11½‴ calibre (s = 1.617).**
 
 | Document | Revision | Date | Status |
 |---|---|---|---|
-| VM-DS-101 | C | 2026-11-14 | Released |
+| VM-DS-101 | D | 2026-11-14 | Released |
 
-> **About this document.** Valtorre Microtechnique SA is a fictional supplier, used for this exercise only.
-> Each strip size in Table 1 is a real catalogue item, cited row by row. No maker publishes torque or
-> turns for these springs, so every performance figure in Tables 2 to 4 is **calculated, not measured**.
-> Note 4 gives the method and its sources.
+> **About this document.** Valtorre Microtechnique SA is a fictional supplier, used for this exercise
+> only.
+>
+> - **What is real:** each spring in Table 1 is a real catalogue size, cited row by row. This series
+>   reproduces it with every length multiplied by s = 1.617.
+> - **What is calculated:** no maker publishes torque or turns for these springs, so every performance
+>   figure is calculated, not measured. Note 5 and the footnotes give the method and the sources.
+>
+> Both the 1:1 size and the scaled size are given. **Use the scaled columns** for this series.
 
-## 1. Scope
+## 1. Scope and scale
 
-This sheet covers mainsprings for barrels of 7.0 to 10.5 mm inner diameter.[^rdb] Such barrels fit
-hand-wound and automatic movements of about 7¾‴ (Ø 17.2 mm, for example ETA 2671[^eta2671]) up to
-11½‴ (Ø 25.6 mm[^eta2824]). One ligne (‴) is 2.2558 mm.[^ligne] All data are full scale (1:1).
-
-Two end types are supplied:
-
-- **M (manual):** a fixed outer end. Winding stops when the spring is fully wound, and the click must
-  then hold the full torque.
-- **A (automatic):** a slipping bridle. The bridle slips in the barrel once the spring is fully wound.
+- **Scale:** this series is a geometrically similar enlargement of real watch mainsprings. Every length
+  is multiplied by s = 1.617, the ratio of a Ø 41.4 mm demonstration movement to the 11½‴ (Ø 25.60 mm)
+  ETA 2824-2.[^eta2824][^s]
+- **What the scale changes, and what it does not:** with the same material, stresses are unchanged,
+  torques scale with s³ = 4.229, and turns and hours are unchanged.[^d5]
+- **End types:**
+  - **M (manual):** a fixed outer end. The click must hold the full torque.
+  - **A (automatic):** a slipping bridle, which slips in the barrel once the spring is fully wound.[^wiki]
 
 ## 2. Ordering code
 
-`VM-MS-<end>-<h>-<t>-<L>-<D>`, where:
-
-- `end` is M or A;
-- `h` is the height in 1/100 mm;
-- `t` is the thickness in 1/1000 mm;
-- `L` is the length in mm;
-- `D` is the barrel inner diameter in 1/10 mm.
-
-Example: `VM-MS-A-145-085-240-75` is a 1.45 × 0.085 × 240 mm spring with a bridle, for a barrel of
-Ø 7.5 mm.
+`VM-MS-<end>-<variant>-DS`, for example `VM-MS-A-F-DS`. "DS" marks the demonstration-scale series.
 
 ## 3. Dimensions (Table 1)
 
-| Var. | Ordering code | End | Height h (mm) | Thickness t (mm) | Length L (mm) | Barrel inner Ø D (mm) | Source |
+| Var. | End | Real size h × t × L × D (mm), 1:1 | Source | **Height h (mm)** | **Thickness t (mm)** | **Length L (mm)** | **Barrel inner Ø D (mm)** |
 |---|---|---|---|---|---|---|---|
-| A | VM-MS-M-090-080-240-70 | M | 0.90 | 0.080 | 240 | 7.0 | [^rA] |
-| B | VM-MS-M-070-080-355-75 | M | 0.70 | 0.080 | 355 | 7.5 | [^rB] |
-| C | VM-MS-M-070-090-200-70 | M | 0.70 | 0.090 | 200 | 7.0 | [^rC] |
-| D | VM-MS-M-087-070-310-79 | M (DB end) | 0.87 | 0.070 | 310 | 7.9 | [^rD] |
-| E | VM-MS-A-125-085-300-80 | A | 1.25 | 0.085 | 300 | 8.0 | [^rE] |
-| F | VM-MS-A-145-085-240-75 | A | 1.45 | 0.085 | 240 | 7.5 | [^rF] |
-| G | VM-MS-A-130-080-220-70 | A | 1.30 | 0.080 | 220 | 7.0 | [^rG] |
-| H | VM-MS-A-120-100-300-90 | A | 1.20 | 0.100 | 300 | 9.0 | [^rH] |
-| I | VM-MS-A-090-130-300-105 | A | 0.90 | 0.130 | 300 | 10.5 | [^rI] |
+| A | M | 0.90 × 0.080 × 240 × 7.0 | [^rA] | 1.46 | 0.129 | 388 | 11.3 |
+| B | M | 0.70 × 0.080 × 355 × 7.5 | [^rB] | 1.13 | 0.129 | 574 | 12.1 |
+| C | M | 0.70 × 0.090 × 200 × 7.0 | [^rC] | 1.13 | 0.146 | 323 | 11.3 |
+| D | M (DB end) | 0.87 × 0.070 × 310 × 7.9 | [^rD] | 1.41 | 0.113 | 501 | 12.8 |
+| E | A | 1.25 × 0.085 × 300 × 8.0 | [^rE] | 2.02 | 0.137 | 485 | 12.9 |
+| F | A | 1.45 × 0.085 × 240 × 7.5 | [^rF] | 2.34 | 0.137 | 388 | 12.1 |
+| G | A | 1.30 × 0.080 × 220 × 7.0 | [^rG] | 2.10 | 0.129 | 356 | 11.3 |
+| H | A | 1.20 × 0.100 × 300 × 9.0 | [^rH] | 1.94 | 0.162 | 485 | 14.6 |
+| I | A | 0.90 × 0.130 × 300 × 10.5 | [^rI] | 1.46 | 0.210 | 485 | 17.0 |
+| J | A | 1.45 × 0.100 × 380 × 10.0 | [^rJ] | 2.34 | 0.162 | 615 | 16.2 |
+| K | M (ETA 2801 size) | 1.23 × 0.134 × 400 × 10.5 | [^rK] | 1.99 | 0.217 | 647 | 17.0 |
 
-**Tolerances:** the cited sellers do not publish tolerances on h, t, L or D, and this sheet states
-none. The sellers list sizes in the order height × thickness × length × barrel diameter.[^rdb]
+All scaled values are the real value × s.[^s] The sellers list sizes as height × thickness × length ×
+barrel diameter.[^rdb] **Tolerances:** not published by the cited sellers, and none are stated here.
 
 **Material:** an age-hardened Co-Ni-Cr spring alloy of the Nivaflex 45/5 type, with:[^vac]
 
 - E = 220 GPa;
-- Rp0.2 = 1840 to 2475 MPa after age-hardening (wire data; strip is assumed equivalent, see Note 4);
-- density 8.5 g/cm³;
+- Rp0.2 up to 2475 MPa after age-hardening (wire data, assumed to hold for strip);
 - non-magnetic.
 
-## 4. Absolute maximum ratings (Table 2)
+## 4. Absolute maximum ratings (Table 2, calculated)
 
-Stresses above these values may set the spring permanently, which lowers its torque and run time.
+Torque above M_el sets the spring permanently, which lowers its torque and run time.
 
-| Var. | Max. torque, elastic limit M_el (N·mm)[^d3] | Max. arbor turns from let-down, N (theoretical)[^d1] |
+| Var. | **Max. torque at the elastic limit, M_el (N·mm)**[^d3] | Turns from let-down to M_el, n_el[^d2] |
 |---|---|---|
-| A | 2.38 | 5.7 |
-| B | 1.85 | 5.5 |
-| C | 2.34 | 4.3 |
-| D | 1.76 | 10.1 |
-| E | 3.73 | 6.8 |
-| F | 4.32 | 6.0 |
-| G | 3.43 | 5.9 |
-| H | 4.95 | 6.3 |
-| I | 6.27 | 4.9 |
+| A | 10.0 | 10.7 |
+| B | 7.8 | 15.9 |
+| C | 9.9 | 8.0 |
+| D | 7.4 | 15.9 |
+| E | 15.8 | 12.6 |
+| F | 18.3 | 10.1 |
+| G | 14.5 | 9.8 |
+| H | 20.9 | 10.7 |
+| I | 26.5 | 8.3 |
+| J | 25.3 | 13.6 |
+| K | 38.5 | 10.7 |
 
-**Bridle slipping torque (end type A):** not published by any source we found. For strength checks,
-take the slipping torque as no greater than M_el (Note 4).
+**Bridle slipping torque (type A):** not published. For strength checks, take it as no greater than M_el.
 
-## 5. Recommended operating conditions and characteristics (Table 3, calculated)
+## 5. Turns and run time (Table 3, calculated)
 
-| Var. | Arbor core radius r (mm)[^d0] | Turns N[^d1] | Run time at 8 h per barrel turn (h)[^d4] | Stiffness k (N·mm/rad)[^d2] | Torque at N turns, M_N (N·mm)[^d2] | Bending stress at N (MPa)[^d3] |
+Turns of development N depend strongly on the barrel's arbor core radius r.[^sjx25] Values are given for
+two core ratios:
+
+- **r = 12·t:** within the modern range (minimum about 10);
+- **r = 16·t:** Defossez's ratio.
+
+| Var. | r = 12·t (mm) | **N at r = 12·t** | **Run time (h)** | r = 16·t (mm) | **N at r = 16·t** | **Run time (h)** |
 |---|---|---|---|---|---|---|
-| A | 1.28 | 5.7 | 46 | 0.0352 | 1.27 | 1320 |
-| B | 1.28 | 5.5 | 44 | 0.0185 | 0.64 | 851 |
-| C | 1.44 | 4.3 | 35 | 0.0468 | 1.27 | 1349 |
-| D | 1.12 | 10.1 | 81 | 0.0176 | 1.12 | 1574 |
-| E | 1.36 | 6.8 | 54 | 0.0469 | 2.00 | 1331 |
-| F | 1.36 | 6.0 | 48 | 0.0680 | 2.56 | 1466 |
-| G | 1.28 | 5.9 | 47 | 0.0555 | 2.04 | 1474 |
-| H | 1.60 | 6.3 | 50 | 0.0733 | 2.90 | 1449 |
-| I | 2.08 | 4.9 | 39 | 0.1208 | 3.72 | 1467 |
+| A | 1.55 | 8.0 | 64 | 2.07 | 5.7 | 46 |
+| B | 1.55 | 8.0 | 64 | 2.07 | 5.5 | 44 |
+| C | 1.75 | 6.4 | 51 | 2.33 | 4.3 | 35 |
+| D | 1.36 | 12.6 | 101 | 1.81 | 10.1 | 81 |
+| E | 1.65 | 9.2 | 74 | 2.20 | 6.8 | 54 |
+| F | 1.65 | 8.2 | 66 | 2.20 | 6.0 | 48 |
+| G | 1.55 | 8.1 | 65 | 2.07 | 5.9 | 47 |
+| H | 1.94 | 8.6 | 69 | 2.59 | 6.3 | 50 |
+| I | 2.52 | 7.0 | 56 | 3.36 | 4.9 | 39 |
+| J | 1.94 | 10.4 | 83 | 2.59 | 7.9 | 63 |
+| K | 2.60 | 5.8 | 47 | 3.47 | 3.5 | 28 |
 
-The run time assumes a going train that turns the barrel once per 8 h, which is typical.[^wiki] It is
-not a property of the spring alone. For reference, ETA states a minimum running time of 38 h for its
-11½‴ calibre 2824-2.[^eta2824]
+How these were calculated:
+
+- N is from [^d1]. It is the same at 1:1 and at demonstration scale, because it depends only on length
+  ratios.[^d5]
+- Run time = N × 8 h, at the typical barrel speed of one turn per 8 h.[^wiki] That speed is a property
+  of the going train, not of the spring.
+
+**Calibration against a real movement.**
+
+- **The check:** variant K is the ETA 2801 size,[^rK] and ETA states 42 h for the 2801-2.[^eta2801]
+- **The result:** the r = 12·t column gives 47 h; the r = 16·t column gives 28 h.
+- **The conclusion:** the r = 16·t column is very conservative. Use the column that matches your barrel
+  arbor.
+
+**For comparison, real minimum and typical reserves:**
+
+| Calibre | Reserve |
+|---|---|
+| ETA 2824-2 | min 38 h[^eta2824] |
+| ETA 6497-2 | 53 h[^rds] |
+| ETA 6498-1 | 46 h[^rds] |
 
 ## 6. Torque against arbor turns (Table 4, calculated, frictionless)
 
-Torque at the arbor, in N·mm, after n turns wound from the let-down state.[^d2] A dash means the
-variant is fully wound before that turn.
+Torque at the arbor, in N·mm, gained after n turns wound from the let-down state.[^d2] A dash means the
+spring is fully wound before that turn (r = 12·t column of Table 3). The last column is the torque at
+full wind, which is no more than M_el.
 
-| Var. | n = 1 | 2 | 3 | 4 | 5 | 6 | at N |
-|---|---|---|---|---|---|---|---|
-| A | 0.22 | 0.44 | 0.66 | 0.88 | 1.11 | – | 1.27 |
-| B | 0.12 | 0.23 | 0.35 | 0.47 | 0.58 | – | 0.64 |
-| C | 0.29 | 0.59 | 0.88 | 1.18 | – | – | 1.27 |
-| D | 0.11 | 0.22 | 0.33 | 0.44 | 0.55 | 0.67 | 1.12 (n = 7: 0.78; 8: 0.89; 9: 1.00; 10: 1.11) |
-| E | 0.29 | 0.59 | 0.88 | 1.18 | 1.47 | 1.77 | 2.00 |
-| F | 0.43 | 0.85 | 1.28 | 1.71 | 2.14 | – | 2.56 |
-| G | 0.35 | 0.70 | 1.05 | 1.39 | 1.74 | – | 2.04 |
-| H | 0.46 | 0.92 | 1.38 | 1.84 | 2.30 | 2.76 | 2.90 |
-| I | 0.76 | 1.52 | 2.28 | 3.04 | – | – | 3.72 |
+| Var. | n = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | at N (r = 12·t) |
+|---|---|---|---|---|---|---|---|---|---|
+| A | 0.9 | 1.9 | 2.8 | 3.7 | 4.7 | 5.6 | 6.5 | 7.5 | 7.5 |
+| B | 0.5 | 1.0 | 1.5 | 2.0 | 2.5 | 3.0 | 3.4 | 3.9 | 3.9 |
+| C | 1.2 | 2.5 | 3.7 | 5.0 | 6.2 | – | – | – | 8.0 |
+| D | 0.5 | 0.9 | 1.4 | 1.9 | 2.3 | 2.8 | 3.3 | 3.8 | 5.9 |
+| E | 1.2 | 2.5 | 3.7 | 5.0 | 6.2 | 7.5 | 8.7 | 10.0 | 11.5 |
+| F | 1.8 | 3.6 | 5.4 | 7.2 | 9.0 | 10.8 | 12.7 | 14.5 | 14.9 |
+| G | 1.5 | 2.9 | 4.4 | 5.9 | 7.4 | 8.8 | 10.3 | 11.8 | 11.9 |
+| H | 1.9 | 3.9 | 5.8 | 7.8 | 9.7 | 11.7 | 13.6 | 15.6 | 16.7 |
+| I | 3.2 | 6.4 | 9.6 | 12.8 | 16.1 | 19.3 | 22.5 | – | 22.6 |
+| J | 1.9 | 3.7 | 5.6 | 7.4 | 9.3 | 11.2 | 13.0 | 14.9 | 19.3 |
+| K | 3.6 | 7.2 | 10.8 | 14.4 | 18.0 | – | – | – | 21.0 |
 
 ## Notes
 
-1. **Barrel space.** Fit a spring only in a barrel of its listed inner diameter D. The drum wall
-   thickness and the barrel's outside diameter are not given here; the movement designer must check
-   that the drum fits the movement.
-2. **Real springs do not follow Table 4 exactly.** A real spring still gives some torque when let down,
-   because of its free shape, and friction between its coils lowers the torque it delivers. Neither
-   effect is published for these sizes. M_el (Table 2) is a strict upper bound on the torque the spring
-   can reach without setting, whatever its shape, so use M_el for strength and holding checks.
-3. **Handling.** Wind springs into the barrel with a mainspring winder. Do not hand-wind them in: the
-   strip takes a permanent set when bent beyond the elastic limit used for M_el.
-4. **Method of calculation.** These notes refer to footnotes [^d0] to [^d4]. The thickness correction,
-   the core-radius rule and the half-area rule come from the cited barrel-design article. The torque
-   formula is the flat-strip spiral-spring relation. The stress is beam bending of the rectangular strip.
+1. **Barrel space.** Fit a spring only in a barrel of its listed inner diameter D. The drum wall is not
+   given here.
+2. **Real springs carry torque at let-down.** Grossmann counts turns from the spring's free, unwound
+   state, so a real spring already gives torque when let down. His worked example falls from 5,640 to
+   5,251 g·mm over the first barrel turn of running, so the curve is not flat.[^gro] The free shape of
+   these springs is not published, so Table 4 shows only the torque gained above let-down. Coil friction
+   lowers the torque delivered. **M_el is a strict upper bound** on the torque, whatever the free shape:
+   use it for every strength and holding check.
+3. **Handling.** Use a mainspring winder. Do not wind springs into the barrel by hand.
+4. **Scaled springs.** At this scale the strip is about 0.11 to 0.22 mm thick.
+5. **Method.** Footnotes [^d1] to [^d5].
 
 ## Sources
 
-[^rdb]: Size notation and listings: ressortdebarillet.ch catalogue, https://en.ressortdebarillet.ch/collections/ressort-de-barillet-epaisseur-0-102
-[^eta2671]: ETA 2671: 7¾‴, Ø 17.20 mm, typical reserve about 44 h, https://portal.eta.ch/en/mecaline/2671-2671-5.html
-[^eta2824]: ETA 2824-2: Ø 25.60 mm, running time at least 38 h. ETA Technical Communication CT 2824-2, https://shopb2b.eta.ch/technicaldocuments/index/pdf/id/1883
-[^ligne]: 1 ligne = 2.2558 mm, https://en.wikipedia.org/wiki/Ligne
-[^wiki]: The barrel typically turns once per about 8 h, https://en.wikipedia.org/wiki/Mainspring
-[^vac]: VACUUMSCHMELZE, NIVAFLEX 45/5 alloy information, January 2008. E 220 GPa; Rp0.2 1840/2155/2475 MPa after age-hardening at 50/70/90 % cold work; density 8.5 g/cm³; non-magnetic. https://www.cousinsuk.com/pdf/skus/9601_9596_nivaflex_45_5.pdf
-[^rA]: 0.90 × 0.08 × 240 × 7, mechanical, https://en.ressortdebarillet.ch/products/0-90-x-08-x-240-x-7-mecanique
-[^rB]: 0.70 × 0.08 × 355 × 7.5, non-automatic, https://en.ressortdebarillet.ch/products/0-70-x-08-x-355-x-7-5-non-automatique
-[^rC]: 0.70 × 0.09 × 200 × 7, non-automatic, https://en.ressortdebarillet.ch/products/0-70-x-09-x-200-x-7-non-automatique
-[^rD]: 0.87 × 0.07 × 310 × 7.9, DB end, https://en.ressortdebarillet.ch/products/ressort-de-barillet-0-87-x-0-07-x-310-x-7-9-db-end-jaeger-le-coultre-818
-[^rE]: 1.25 × 0.085 × 300 × 8, automatic, https://en.ressortdebarillet.ch/products/1-25-x-085-x-300-x-8-automatique
-[^rF]: 1.45 × 0.085 × 240 × 7.5, automatic, https://en.ressortdebarillet.ch/products/1-45-x-085-x-240-x-7-5-automatique
-[^rG]: 1.30 × 0.08 × 220 × 7, automatic, https://en.ressortdebarillet.ch/products/1-30-x-08-x-220-x-7-automatique
-[^rH]: 1.20 × 0.10 × 300 × 9, automatic, https://en.ressortdebarillet.ch/products/1-20-x-10-x-300-x-9-automatique
-[^rI]: 0.90 × 0.13 × 300 × 10.5, automatic, https://en.ressortdebarillet.ch/products/0-90-x-13-x-300-x-10-5-automatique
-[^d0]: Not published; derived as r = 16·t, Defossez's ratio r/e = 16 as given in https://watchesbysjx.com/2025/11/in-depth-balancing-mainspring-dimensions-inside-the-barrel.html (the same article gives a modern minimum of about 10).
-[^d1]: Not published; derived from conservation of strip area. The strip occupies L·t′, with t′ = t + 0.003 mm, inside the 0.002 to 0.004 mm correction range given in https://watchesbysjx.com/2025/11/in-depth-balancing-mainspring-dimensions-inside-the-barrel.html. Coils wound on the core: n_w = (√(r² + L·t′/π) − r)/t′. Coils let down against the wall: n_d = (R − √(R² − L·t′/π))/t′, with R = D/2. N = n_w − n_d. Inputs: Table 1 (sources [^rA] to [^rI]) and [^d0].
-[^d2]: Not published; derived from the spiral-spring relation M = E·b·t³·θ/(12·L), with θ in radians, b = h and θ = 2π·n, from https://calculator.academy/spiral-torsion-spring-calculator/. k = E·b·t³/(12·L), with E = 220 GPa from [^vac].
-[^d3]: Not published; derived from the bending stress of a rectangular strip, σ = 6·M/(b·t²), that is M/Z with section modulus Z = b·t²/6, from https://www.codecogs.com/page/1150/v/3359. M_el = Rp0.2·b·t²/6, with Rp0.2 = 2475 MPa (aged, 90 % cold work) from [^vac].
-[^d4]: Derived: run time = N × 8 h, with 8 h per barrel turn from [^wiki].
+[^s]: Scale s = 41.4 mm / 25.60 mm = 1.617. 41.4 mm is the case diameter of the demonstration movement this series is made for; 25.60 mm is the ETA 2824-2 diameter.[^eta2824] Every scaled length = real length × 1.617.
+[^eta2824]: ETA CT 2824-2: 11½‴, Ø 25.60 mm, running time min 38 h, https://shopb2b.eta.ch/technicaldocuments/index/pdf/id/1883
+[^eta2801]: ETA CT 2801-2 (hand-wound, 11½‴): 42 h, https://shopb2b.eta.ch/technicaldocuments/index/pdf/id/1626
+[^rds]: ETA CT 6497-2, 53 h, https://patrimoine.bourgognefranchecomte.fr/documents/ETA_6497-2.pdf ; ETA CT 6498-1, 46 h, https://patrimoine.bourgognefranchecomte.fr/documents/ETA_6498-1.pdf
+[^wiki]: The barrel turns once per about 8 h; the slipping bridle of automatic watches. https://en.wikipedia.org/wiki/Mainspring
+[^vac]: VACUUMSCHMELZE, NIVAFLEX 45/5: E 220 GPa; Rp0.2 1840/2155/2475 MPa after aging (50/70/90 % cold work). https://www.cousinsuk.com/pdf/skus/9601_9596_nivaflex_45_5.pdf
+[^rdb]: Size notation, ressortdebarillet.ch, https://en.ressortdebarillet.ch/collections/ressort-de-barillet-epaisseur-0-102
+[^rA]: https://en.ressortdebarillet.ch/products/0-90-x-08-x-240-x-7-mecanique
+[^rB]: https://en.ressortdebarillet.ch/products/0-70-x-08-x-355-x-7-5-non-automatique
+[^rC]: https://en.ressortdebarillet.ch/products/0-70-x-09-x-200-x-7-non-automatique
+[^rD]: https://en.ressortdebarillet.ch/products/ressort-de-barillet-0-87-x-0-07-x-310-x-7-9-db-end-jaeger-le-coultre-818
+[^rE]: https://en.ressortdebarillet.ch/products/1-25-x-085-x-300-x-8-automatique
+[^rF]: https://en.ressortdebarillet.ch/products/1-45-x-085-x-240-x-7-5-automatique
+[^rG]: https://en.ressortdebarillet.ch/products/1-30-x-08-x-220-x-7-automatique
+[^rH]: https://en.ressortdebarillet.ch/products/1-20-x-10-x-300-x-9-automatique
+[^rI]: https://en.ressortdebarillet.ch/products/0-90-x-13-x-300-x-10-5-automatique
+[^rJ]: https://en.ressortdebarillet.ch/products/1-45-x-10-x-380-x-10-automatique
+[^rK]: 1.23 × 0.134 × 400 × 10.5, ETA 2801, https://en.ressortdebarillet.ch/products/1-23-x-134-x-400-x-10-5-eta-2801-mecanique
+[^sjx25]: Core ratio r/e: Defossez 16; modern minimum about 10; thickness correction 0.002 to 0.004 mm; maximum turns at half the area. https://watchesbysjx.com/2025/11/in-depth-balancing-mainspring-dimensions-inside-the-barrel.html
+[^gro]: J. Grossmann, *Lessons in Horology* (1905), art. 97 (M = E·h·e³·2πn/(12·L), n counted from the free spring) and art. 99 (worked example: 5,640 g·mm at full wind, less 389 g·mm per barrel turn). Public domain. https://archive.org/download/lessonsinhorolog00gros/lessonsinhorolog00gros_djvu.txt
+[^d1]: Not published; derived from conservation of strip area, L·t′ with t′ = t + 0.003·s mm (the correction from [^sjx25], scaled). Coils on the core: n_w = (√(r² + L·t′/π) − r)/t′. Coils against the wall: n_d = (R − √(R² − L·t′/π))/t′, with R = D/2. N = n_w − n_d. Inputs from Table 1; r from [^sjx25].
+[^d2]: Not published; derived from M = E·h·t³·2πn/(12·L) (Grossmann art. 97 [^gro]; also https://calculator.academy/spiral-torsion-spring-calculator/), with E from [^vac] and the scaled sizes. Here n is counted from let-down (Note 2). n_el = M_el/(2π·k), with k = E·h·t³/(12·L).
+[^d3]: Not published; derived as M_el = Rp0.2·h·t²/6 (rectangular section, Z = b·t²/6, https://www.codecogs.com/page/1150/v/3359), with Rp0.2 = 2475 MPa from [^vac] and the scaled h and t.
+[^d5]: Geometric similarity: with every length × s, the stress σ = 6M/(h·t²) stays the same when M scales with s³, and M = E·h·t³·θ/(12·L) does scale with s³ for the same θ. N depends only on length ratios, so turns and hours do not change. https://www.codecogs.com/page/1150/v/3359 ; https://calculator.academy/spiral-torsion-spring-calculator/
