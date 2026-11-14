@@ -1,0 +1,153 @@
+{
+ "stem": {
+  "parts": [
+   "stem"
+  ],
+  "point": [
+   4.0391,
+   -9.6417,
+   5.5
+  ],
+  "direction": [
+   0.406737,
+   0.913545,
+   0.0
+  ]
+ },
+ "arbor": {
+  "parts": [
+   "ratchet"
+  ]
+ },
+ "mobiles": {
+  "winding_pinion": {
+   "kind": "free",
+   "dof": "rot",
+   "direction": [
+    0.406737,
+    0.913545,
+    0.0
+   ],
+   "parts": [
+    "winding_pinion"
+   ],
+   "point": [
+    4.0391,
+    -9.6417,
+    5.5
+   ]
+  },
+  "sliding_pinion": {
+   "kind": "spring",
+   "dof": "slide",
+   "direction": [
+    0.406737,
+    0.913545,
+    0.0
+   ],
+   "parts": [
+    "sliding_pinion"
+   ],
+   "rest": -1,
+   "on_stem": true
+  },
+  "crown_wheel": {
+   "kind": "free",
+   "dof": "rot",
+   "direction": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "parts": [
+    "crown_wheel"
+   ],
+   "point": [
+    7.2727,
+    -2.379,
+    5.5
+   ]
+  },
+  "intermediate_wheel": {
+   "kind": "free",
+   "dof": "rot",
+   "direction": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "parts": [
+    "intermediate_wheel"
+   ],
+   "point": [
+    6.9607,
+    3.4338,
+    5.5
+   ]
+  },
+  "yoke": {
+   "kind": "free",
+   "dof": "slide",
+   "direction": [
+    0.406737,
+    0.913545,
+    0.0
+   ],
+   "parts": [
+    "yoke"
+   ]
+  },
+  "click": {
+   "kind": "spring",
+   "dof": "rot",
+   "direction": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "parts": [
+    "click"
+   ],
+   "point": [
+    -3.5723,
+    3.4732,
+    5.5
+   ],
+   "rest": 1
+  },
+  "setting_wheel": {
+   "kind": "free",
+   "dof": "rot",
+   "direction": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "parts": [
+    "setting_wheel"
+   ],
+   "point": [
+    8.6938,
+    0.8129,
+    5.5
+   ]
+  },
+  "setting_idler": {
+   "kind": "free",
+   "dof": "rot",
+   "direction": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "parts": [
+    "setting_idler"
+   ],
+   "point": [
+    6.0034,
+    -2.1471,
+    5.5
+   ]
+  }
+ }
+}
