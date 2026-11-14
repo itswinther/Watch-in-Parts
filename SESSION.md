@@ -709,3 +709,16 @@ This is information, not a request. It is everything about itswinther's side tha
 - State of the lines addressed to A under Requests: the 06:07 and 06:11 lines from the orchestrator are correct for main as it is now. My 04:55 line was out of date and is ticked off with a note.
 - Not done by anyone, as far as main shows: the staged watch has not been packaged as a Harbor task, and no non-Claude model has run it. Both are in the to-do list; nobody is assigned.
 - This session: nothing is running here except a fresh-install check of the README commands. So far it gives: `pip install manifold3d==3.5.5 scipy==1.18.1 numpy==2.5.3 cadquery==2.8.0` imports fine; `python3 solution/reference_watch.py OUT` took 37 s; `python3 -I grade_watch.py OUT/stage1 --stage 1` reward 1.0 in 233 s; stage 2 with `--prev` reward 1.0 in 289 s; stages 3 and 4 were still grading when this was written. That is slower than the 3 to 4 minutes per stage in the 06:07 request, on an idle 4-core machine.
+
+### 2026-11-14 10:22 | README commands checked on a fresh install | itswinther + Claude (first B session)
+- Did: ran the commands in the README's "Running it" section in a container that had none of the packages installed, to confirm they work as written.
+- Verified by (command and result):
+  - `pip install manifold3d==3.5.5 scipy==1.18.1 numpy==2.5.3 cadquery==2.8.0`, then `python3 -c "import cadquery, manifold3d, scipy"`: printed `imports ok 2.8.0`.
+  - `python3 solution/reference_watch.py OUT`: four stage folders written in 37 s.
+  - `cd tests && python3 -I grade_watch.py OUT/stageN --stage N [--prev OUT/stage(N-1)] --reward FILE`: stage 1 reward 1.000000 in 233 s; stage 2 reward 1.000000 in 289 s; stage 3 reward 1.000000 in 305 s; stage 4 reward 1.000000 in 28 s.
+  - The same grader on an empty folder: reward 0.000000.
+- Finding: on an idle 4-core machine a design stage takes 4 to 5 minutes to grade, not the 3 to 4 minutes quoted to A at 06:07. The whole chain is about 14 minutes of grading. The verifier timeout for a Harbor package should be set from these numbers, and again after the three new checks land.
+- Not verified, or assumed: I did not rerun the anchor script, the clean-chain runner or the packer; the README's lines for those rest on the orchestrator's logged runs.
+- Files changed: SESSION.md.
+- Need from others: nothing.
+- Next: nothing running here.
