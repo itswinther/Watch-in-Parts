@@ -148,18 +148,22 @@ class Movement:
                 raise FormatError("%s: needs a non-empty list of part files" % where)
             out = []
             for n in names:
-                if not isinstance(n, str) or not NAME_RE.match(n):
-                    raise FormatError("%s: bad part name %r (letters, digits, _ and - only, no extension)" % (where, n))
-                if n == "barrel":
-                    raise FormatError("%s: 'barrel' is reserved for the supplied barrel and cannot be a part name" % where)
-                if n in used:
-                    raise FormatError("part '%s' is used more than once" % n)
-                used.add(n)
-                if len(used) > MAX_PARTS:
-                    raise FormatError("more than %d parts" % MAX_PARTS)
+                reserve(n, where)
                 out.append(load_stl(n))
             return out
+
+        def reserve(n, where):
+            if not isinstance(n, str) or not NAME_RE.match(n):
+                raise FormatError("%s: bad part name %r (letters, digits, _ and - only, no extension)" % (where, n))
+            if n == "barrel":
+                raise FormatError("%s: 'barrel' is reserved for the supplied barrel and cannot be a part name" % where)
+            if n in used:
+                raise FormatError("part '%s' is used more than once" % n)
+            used.add(n)
+            if len(used) > MAX_PARTS:
+                raise FormatError("more than %d parts" % MAX_PARTS)
         self.doc = doc
+        self.load_part = load_stl       # Part 5 reads the keyless section's part files through it (same checks, same cache)
         self.barrel_speed = BARREL_TURNS_PER_HOUR      # the grader sets CHANGED_BARREL_TURNS_PER_HOUR at stage 3
         fixed_names = doc.get("fixed")
         self.fixed_parts = dict(zip(fixed_names if isinstance(fixed_names, list) else [], parts(fixed_names, "fixed")))
@@ -189,6 +193,29 @@ class Movement:
             if not all(isinstance(t, int) and 3 <= t <= 1000 for t in (ta, tb)):
                 raise FormatError("meshes[%d]: tooth counts must be integers from 3 to 1000" % i)
             self.meshes.append((a, ta, b, tb))
+        # friction_on (SESSION.md Decisions 2026-11-14 15:47): a mobile carried by friction on another coaxial mobile.
+        # In the going-train checks it turns with its carrier (speeds()); in the crown-winding part it is a free body.
+        self.friction = {}
+        for name, m in mob.items():
+            fo = m.get("friction_on")
+            if fo is None:
+                continue
+            if not isinstance(fo, str) or fo not in self.mobiles or fo in ("barrel", name):
+                raise FormatError("mobile '%s': 'friction_on' must name another mobile of the file (not 'barrel')" % name)
+            self.friction[name] = fo
+        for name, fo in self.friction.items():
+            if fo in self.friction:
+                raise FormatError("mobile '%s': 'friction_on' names '%s', which is itself carried by friction" % (name, fo))
+            a, b = self.mobiles[name]["axis"], self.mobiles[fo]["axis"]
+            if math.hypot(a[0] - b[0], a[1] - b[1]) > COAX_TOL:
+                raise FormatError("mobile '%s': 'friction_on' needs a coaxial mobile; the axes of '%s' and '%s' are %.4f mm "
+                                  "apart (at most %g)" % (name, name, fo, math.hypot(a[0] - b[0], a[1] - b[1]), COAX_TOL))
+        # the crown-winding (keyless) section: its part names count once with the others here; the section itself, and
+        # its part files, are read by geometry/keyless_job.py when Part 5 runs
+        from .keyless_job import keyless_part_names
+        self.keyless_names = keyless_part_names(doc.get("keyless"))
+        for n in self.keyless_names:
+            reserve(n, "keyless")
         self.hands = {}
         hd = doc.get("hands")
         if not isinstance(hd, dict):
@@ -209,17 +236,20 @@ class Movement:
     # ---- arithmetic ----
     def speeds(self, meshes=None):
         """Clockwise turns per hour of every mobile reached from the barrel, as exact fractions.
-        Returns (speeds, conflicts). Every declared mesh is external: it reverses direction.
+        Returns (speeds, conflicts). Every declared mesh is external: it reverses direction. A `friction_on` mobile
+        and its carrier turn as one, at the same speed, whichever of the two is reached first.
         meshes: the meshes to follow (default: every declared mesh)."""
         w = {"barrel": self.barrel_speed}
         conflicts = []
+        links = [(a, b, -Fraction(ta, tb)) for a, ta, b, tb in (self.meshes if meshes is None else meshes)]
+        links += [(c, f, Fraction(1)) for f, c in getattr(self, "friction", {}).items()]
         changed = True
         while changed:
             changed = False
-            for a, ta, b, tb in (self.meshes if meshes is None else meshes):
-                for src, ts, dst, td in ((a, ta, b, tb), (b, tb, a, ta)):
+            for a, b, r in links:
+                for src, dst, k in ((a, b, r), (b, a, 1 / r)):
                     if src in w:
-                        v = -w[src] * Fraction(ts, td)
+                        v = w[src] * k
                         if dst not in w:
                             w[dst] = v
                             changed = True

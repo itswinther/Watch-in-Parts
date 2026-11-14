@@ -47,15 +47,17 @@ JOB_CHECKS_2 = dict(WEIGHTS_2)                                          # P2: th
 # (environment/public/job/PROMPT.md): files C1, assembled C2, day_declared C3, same_frame C4; P4's are C1 of
 # movement.json and plan (assembly.json valid). The reward renormalises the weights
 # over the parts listed here. P4's checks are one per part of movement.json, weight 1 each (None here).
-# P5 (crown winding, AT-0 to AT-6, weight 0.25) joins this table when the keyless geometry is agreed
-# (SESSION.md Decisions 15:29 and 15:44): one row here and one grading step in grade_job that sets raw["P5"].
+# P5 (crown winding, workstream A's AT-0 to AT-6, weight 0.25; SESSION.md Decisions 15:29, 15:44, 17:46) is a row
+# only when geometry/keyless_job.py KEYLESS_IN_JOB is True; its checks are A's steps with A's step weights, its gate
+# is files (movement.json and its keyless section load). grade_keyless_part grades it in a fresh interpreter.
+from geometry import keyless_job as KJ      # noqa: E402  (light: no CadQuery, no manifold at import)
 JOB_PARTS = (
     ("P1", "going train and hands", Fraction(25, 100), ("files", "assembled"), JOB_CHECKS_1),
     ("P2", "24-hour hand", Fraction(10, 100), ("files", "assembled", "day_declared"), JOB_CHECKS_2),
     ("P3", "6-hour variant", Fraction(15, 100), ("files", "assembled", "day_declared", "same_frame"),
      dict(JOB_CHECKS_1, **JOB_CHECKS_2)),
     ("P4", "assembly", Fraction(25, 100), ("files", "plan"), None),
-)
+) + ((("P5", "crown winding", Fraction(*KJ.P5_WEIGHT), ("files",), KJ.step_weights()),) if KJ.KEYLESS_IN_JOB else ())
 JOB_TIME_LIMIT_S = 7200     # s, whole run: generous (the reference takes 6 to 10 min on an idle 4-CPU machine; printable alone took 273 s at load 16); once it has passed, every check not yet run fails, and a running check is stopped
 
 
@@ -584,6 +586,78 @@ def _job_assembly(folder, m, run):
     return gates, checks, details
 
 
+# ---------------- Part 5: crown winding (workstream A's acceptance test, at B's scale) ----------------
+def keyless_prepare(m, work, run=None):
+    """P5, first half, in this process: read movement m's keyless section and its part files (FormatError: the files
+    gate fails), build A's bodies by B's rule (geometry/keyless_job.py build_world), cut the fixed body to the reach
+    of the moving ones, and write the world to the folder work. Returns (gates, details)."""
+    from geometry import watch as W  # noqa: F401
+    gates, details = {"files": False}, {}
+    if m is None:
+        details["files"] = {"error": "not run: %s did not load" % JOB_MOVEMENT}
+        return gates, details
+
+    def build():
+        k, solids = KJ.load_keyless(m)
+        bodies, meta = KJ.build_world(m, k, solids)
+        bodies, n0, n1 = KJ.crop_fixed(bodies)
+        meta["fixed_triangles"] = {"whole": n0, "cut_to_reach": n1}
+        meta["bodies"] = {b["name"]: b["role"] for b in bodies}
+        KJ.write_world(work, bodies, meta)
+        return True, {"world": meta}
+    gates["files"], details["files"] = (run or _run)(build)
+    return gates, details
+
+
+def keyless_run(work, deadline=None, force=False, jobs=1):
+    """P5, second half: A's AT-0 to AT-6 on the world in work, in a fresh interpreter (tests/grade_keyless.py), at
+    most KJ.KEYLESS_TIMEOUT_S and never past deadline. Returns (checks, details): one check per A step."""
+    import subprocess
+    steps = list(KJ.step_weights())
+    checks = {k: False for k in steps}
+    limit = KJ.KEYLESS_TIMEOUT_S if deadline is None else min(KJ.KEYLESS_TIMEOUT_S, deadline - time.monotonic())
+    if limit <= 0:
+        return checks, {"error": "not run: the whole-run time limit of %d s was reached" % JOB_TIME_LIMIT_S}
+    out = os.path.join(work, "result.json")
+    cmd = [sys.executable, "-I", os.path.join(HERE, "grade_keyless.py"), work, out] + (["--force"] if force else []) \
+        + (["--jobs", str(jobs)] if jobs > 1 else [])
+    det = {}
+    try:
+        p = subprocess.run(cmd, cwd=HERE, capture_output=True, text=True, timeout=limit)
+        if p.returncode != 0:
+            det["process"] = {"returncode": p.returncode, "stderr": p.stderr[-4000:]}
+    except subprocess.TimeoutExpired:
+        det["process"] = {"error": "timeout after %.0f s; the phases finished before it are kept" % limit}
+    except Exception as e:      # noqa: a failed part, never a crash
+        det["process"] = {"error": "%s: %s" % (type(e).__name__, e)}
+    try:
+        with open(out) as f:
+            res = json.load(f)
+    except (OSError, ValueError) as e:
+        return checks, dict(det, error="no result from grade_keyless.py (%s)" % e)
+    for k in steps:
+        checks[k] = bool(res.get("steps", {}).get(k, False))
+    det.update(res)
+    return checks, det
+
+
+def grade_keyless_part(m, deadline=None, run=None, force=False, jobs=1, work=None):
+    """P5 on movement m (geometry.watch.Movement, or None if movement.json did not load): (gates, checks, details).
+    work: the folder for the world (a temporary folder, removed afterwards, when None)."""
+    import shutil
+    import tempfile
+    tmp = work or tempfile.mkdtemp(prefix="keyless_p5_")
+    try:
+        gates, details = keyless_prepare(m, tmp, run)
+        if not gates["files"]:
+            return gates, {k: False for k in KJ.step_weights()}, details
+        checks, details["acceptance"] = keyless_run(tmp, deadline, force, jobs)
+        return gates, checks, details
+    finally:
+        if work is None:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+
 def grade_job(folder):
     """One-job mode: grade the delivery folder part by part (JOB_PARTS). A part whose gates fail scores 0; every
     other part is still graded. reward = 0.5 x sum(w_p s_p) / sum(w_p) + 0.5 x [every gate and check of every
@@ -617,6 +691,14 @@ def grade_job(folder):
     def assembly():
         raw["P4"] = _job_assembly(folder, st.get("m"), run)
     guarded(("P4",), assembly)
+    p5 = {}
+    if "P5" in by_id:               # crown winding: build A's world now (it needs the 8-hour movement), run it last
+        import tempfile
+        p5["work"] = tempfile.mkdtemp(prefix="keyless_p5_")
+
+        def keyless_build():
+            p5["prep"] = keyless_prepare(st.get("m"), p5["work"], run)
+        guarded(("P5",), keyless_build)
     st.clear()                      # the 8-hour movement is no longer needed; its part solids stay in the cache
 
     def variant():
@@ -625,6 +707,20 @@ def grade_job(folder):
                                    run, cache, thin_cache)
         raw["P3"] = (g, c, d)
     guarded(("P3",), variant)
+
+    if "P5" in by_id:
+        def keyless():
+            g, d = p5["prep"]
+            c = {k: False for k in by_id["P5"][4]}
+            if g["files"]:
+                c, d["acceptance"] = keyless_run(p5["work"], deadline)
+            raw["P5"] = (g, c, d)
+        try:
+            if "prep" in p5:
+                guarded(("P5",), keyless)
+        finally:
+            import shutil
+            shutil.rmtree(p5["work"], ignore_errors=True)
 
     parts, num, den, all_pass = {}, Fraction(0), Fraction(0), True
     for pid, what, w, gate_names, cw in JOB_PARTS:
@@ -639,7 +735,7 @@ def grade_job(folder):
         all_pass = all_pass and passed
         num += w * s
         den += w
-        keep = set(gate_names) | set(checks) | ({"parts"} if cw is None else set()) | {"error"}
+        keep = set(gate_names) | set(checks) | ({"parts"} if cw is None else set()) | {"error", "acceptance"}
         parts[pid] = {"name": what, "weight": float(w), "gates": gates, "checks": checks, "check_weights": weights,
                       "share_of_checks": float(share), "s": float(s), "s_exact": str(s), "passed": passed,
                       "details": {k: v for k, v in d.items() if k in keep}}
