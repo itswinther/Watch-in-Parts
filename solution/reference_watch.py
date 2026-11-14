@@ -233,6 +233,7 @@ def build_stage1():
     p5, ph_p5 = gear_at(Mw, 12, M_F, Z["F"], ang(Mw, C))
     parts["minute_wheel"] = union([arbor(Mw, BRIDGE[1] + 0.1, DIAL[0] - 0.1, top=0.4), w5, p5])
     w6, phase["hour"] = wheel_at(C, 48, M_F, Z["F"], ang(C, Mw), (12, ph_p5), hub_r=1.6)
+    # the tube starts 0.2 above the cannon: moved 0.3 down, the hour wheel rests on the cannon (held)
     parts["hour_wheel"] = minus(union([cyl(cx, cy, 7.4, 9.9, 1.0), cyl(cx, cy, 9.89, 10.3, 0.9), cyl(cx, cy, 8.4, 8.65, 1.6), w6]),
                                 cyl(cx, cy, 7.0, 10.6, 0.6))
     parts["hour_hand"] = hand(C, 9.9, 10.2, 6.0, 1.3, 0.9 + FIT)
