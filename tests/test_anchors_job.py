@@ -1,5 +1,5 @@
 """Anchors for the one-job watch grader (tests/grade_watch.py without --stage).
-    python3 tests/test_anchors_job.py WORKERS [--job /abs/REF_JOB] [--only NAME[,NAME...]] [--timeout S]
+    python3 tests/test_anchors_job.py WORKERS [--job /abs/REF_JOB] [--only NAME[,NAME...]] [--timeout S] [--keep DIR]
 Run from the repository root (any directory works; paths are taken from this file).
 Each anchor is a delivery folder built from the reference job folder (solution/reference_watch.py --job) by one
 small change, then graded as the verifier grades it: `python3 -I grade_watch.py DELIVERY --reward R --details D`
@@ -8,7 +8,8 @@ test, and the weights of SESSION.md Decisions 2026-11-14 15:44 (B)) and asserted
 part's score s and the names of the gates and checks that fail (from the details file).
 --job reuses a reference job folder; without it one is built into a temporary folder (about 60 s).
 --only runs the anchors whose name contains one of the given texts (an exact name match wins).
---timeout is per anchor (build plus grading), default 4000 s.
+--timeout is per anchor (build plus grading), default 4000 s. --keep DIR keeps each anchor's details file as DIR/NN_details.json.
+A gate or check that ran out of time is reported as TIMED OUT: that says the machine was too slow, not the design.
 Every anchor runs in fresh interpreters: one that builds its folder (`--build INDEX --job REF --out DIR`,
 may load CadQuery), then the grader. This process loads neither CadQuery nor manifold, and starts the children
 from a thread pool of WORKERS threads. Prints one `ok` / `OFF` line per anchor, then a table; exits 1 if any is off.
@@ -667,10 +668,21 @@ def build(index, ref_job, out):
         change(out)
 
 
-def run_anchor(i, ref_job, timeout):
+def timed_out(d):
+    """Names of the gates and checks whose details say they ran out of time (per-check limit or whole run)."""
+    out = []
+    for pid, p in d["parts"].items():
+        for k, v in p.get("details", {}).items():
+            e = v.get("error", "") if isinstance(v, dict) else ""
+            if e == "timeout" or "whole-run time limit" in e:
+                out.append("%s %s" % (pid, k))
+    return out
+
+
+def run_anchor(i, ref_job, timeout, keep=None):
     name, _, x, extra = ANCHORS[i]
     t0 = time.time()
-    tmp = tempfile.mkdtemp(prefix="job_anchor_")
+    tmp = tempfile.mkdtemp(prefix="job_anchor_", dir=keep)
     d = os.path.join(tmp, "delivery")
     reward, details = os.path.join(tmp, "reward.txt"), os.path.join(tmp, "details.json")
     row = {"name": name, "expected": float(x.reward()), "exact": str(x.reward()), "got": None, "s": {}, "ok": False, "msg": ""}
@@ -704,11 +716,16 @@ def run_anchor(i, ref_job, timeout):
         diffs = compare(x, dd, extra)
         if abs(float(text) - dd["reward"]) > 1e-6:
             diffs.append("reward file %r, details %r" % (text, dd["reward"]))
+        late = timed_out(dd)
+        if late:        # not a verdict on the design: the machine was too slow for the grader's time limits
+            diffs.append("TIMED OUT (machine load?): " + ", ".join(late))
         row["ok"] = not diffs
         row["msg"] = "; ".join(diffs)
         return row
     finally:
         row["time"] = time.time() - t0
+        if keep and os.path.isfile(details):
+            shutil.copyfile(details, os.path.join(keep, "%02d_details.json" % i))
         shutil.rmtree(tmp, ignore_errors=True)
 
 
@@ -725,8 +742,8 @@ def main(argv):
     if opt("--build") is not None:
         build(int(opt("--build")), os.path.abspath(opt("--job")), os.path.abspath(opt("--out")))
         return 0
-    from concurrent.futures import ThreadPoolExecutor
-    pos = [a for i, a in enumerate(argv) if not a.startswith("--") and (i == 0 or argv[i - 1] not in ("--only", "--job", "--timeout"))]
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+    pos = [a for i, a in enumerate(argv) if not a.startswith("--") and (i == 0 or argv[i - 1] not in ("--only", "--job", "--timeout", "--keep"))]
     workers = int(pos[0]) if pos else 2
     timeout = float(opt("--timeout") or 4000)
     pick = list(range(len(ANCHORS)))
@@ -749,16 +766,22 @@ def main(argv):
                        check=True, stdout=subprocess.DEVNULL, stdin=subprocess.DEVNULL)
     job = os.path.abspath(job)
     print("reference job folder %s, %d anchors, %d workers, timeout %g s" % (job, len(pick), workers, timeout), flush=True)
-    rows = []
+    keep = os.path.abspath(opt("--keep")) if opt("--keep") else None
+    if keep:
+        os.makedirs(keep, exist_ok=True)
+    rows = {}
     try:
-        with ThreadPoolExecutor(workers) as pool:
-            for row in pool.map(lambda i: run_anchor(i, job, timeout), pick):
-                rows.append(row)
+        with ThreadPoolExecutor(workers) as pool:          # one line per anchor as it finishes; the table is in order
+            futs = {pool.submit(run_anchor, i, job, timeout, keep): i for i in pick}
+            for fu in as_completed(futs):
+                row = fu.result()
+                rows[futs[fu]] = row
                 bad += not row["ok"]
                 print(line(row), flush=True)
     finally:
         if tmp:
             shutil.rmtree(tmp, ignore_errors=True)
+    rows = [rows[i] for i in pick if i in rows]
     print("\n| anchor | expected | got | P1 | P2 | P3 | P4 | time s | |")
     print("|---|---|---|---|---|---|---|---|---|")
     for r in rows:
