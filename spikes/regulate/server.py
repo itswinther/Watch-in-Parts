@@ -17,7 +17,8 @@ SEED = int(open(os.path.join(HERE, "seed.txt")).read())
 # The agent shares this sidecar's network namespace under Harbor's egress control, so
 # "localhost only" is not a boundary. /final needs a token that exists only in this image.
 TOKEN = open(os.path.join(HERE, "token.txt")).read().strip()
-W = timing.Watch(SEED)
+BUDGET = int(open(os.path.join(HERE, "budget.txt")).read()) if os.path.exists(os.path.join(HERE, "budget.txt")) else timing.TIME_BUDGET_MIN
+W = timing.Watch(SEED, BUDGET)
 
 
 class H(BaseHTTPRequestHandler):

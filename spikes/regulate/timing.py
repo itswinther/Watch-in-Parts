@@ -15,6 +15,7 @@ Model (per seed, numbers hidden):
 """
 import math
 import random
+import sys
 
 POSITIONS = {"DU": None, "DD": None, "CU": (0.0, 1.0), "CD": (0.0, -1.0), "CL": (-1.0, 0.0), "CR": (1.0, 0.0)}
 WINDS = ("full", "24h")
@@ -45,9 +46,9 @@ def jfac(A):
 
 
 class Watch:
-    def __init__(self, seed):
+    def __init__(self, seed, budget=TIME_BUDGET_MIN):
         r = random.Random(seed)
-        self.R0 = r.uniform(-120, 120)
+        self.R0 = r.uniform(-120, 120) if budget == TIME_BUDGET_MIN else r.uniform(-55, 55)
         self.K_iso = r.uniform(-6, 6)
         self.H = r.uniform(-3, 3)
         ang = r.uniform(0, 2 * math.pi)
@@ -61,7 +62,7 @@ class Watch:
         self.removed = 0.0
         self.added = 0.0
         self.washers = WASHERS
-        self.time_left = TIME_BUDGET_MIN
+        self.time_left = budget
         self.rng = random.Random(seed * 7919 + 1)
         self.log = []
 
@@ -200,7 +201,48 @@ def reference(seed):
     return w
 
 
+def reference_scarce(seed, budget=100):
+    """Scripted watchmaker for a short budget: verticals first (poise), one horizontal check,
+    then regulate on the model's predicted mid-range. Uses only the agent's actions."""
+    w = Watch(seed, budget)
+    m = lambda p, wd, t: w.measure(p, wd, t)
+    obs = {p: m(p, "full", 18) for p in ("CU", "CD", "CL", "CR")}
+    Av = sum(obs[p]["amplitude_deg"] for p in obs) / 4
+    jf = jfac(Av)
+    uy = (obs["CU"]["rate_s_per_day"] - obs["CD"]["rate_s_per_day"]) / (2 * jf)
+    ux = (obs["CR"]["rate_s_per_day"] - obs["CL"]["rate_s_per_day"]) / (2 * jf)
+    vmean = sum(obs[p]["rate_s_per_day"] for p in obs) / 4
+    removed = 0.0
+    mag = math.hypot(ux, uy)
+    if mag >= 0.15:
+        ang = math.degrees(math.atan2(uy, ux)) % 360
+        s0, s1 = int(math.floor(ang / 45)) % 8, int(math.ceil(ang / 45)) % 8
+        a0, a1 = math.radians(45 * s0), math.radians(45 * s1)
+        det = math.cos(a0) * math.sin(a1) - math.sin(a0) * math.cos(a1)
+        parts = [(s0, mag)] if abs(det) < 1e-9 else [
+            (s0, (ux * math.sin(a1) - uy * math.cos(a1)) / det), (s1, (math.cos(a0) * uy - math.sin(a0) * ux) / det)]
+        for sc, mm in parts:
+            mm = max(0.0, min(1.0, mm))
+            if mm >= 0.05:
+                w.remove(sc, round(mm, 2))
+                removed += mm
+    du = m("DU", "full", 18)
+    # predicted mean over conditions after the poise fix: vertical mean (poise terms cancel) and DU, plus removal
+    level = 0.5 * (vmean + du["rate_s_per_day"]) + RATE_PER_MG * removed
+    w.regulate(max(-1, min(1, -level / 60)))
+    return w
+
+
 if __name__ == "__main__":
+    if len(sys.argv) > 1 and sys.argv[1] == "scarce":
+        import statistics
+        a, b = [], []
+        for s in range(100, 160):
+            a.append(Watch(s, 100).error())
+            b.append(reference_scarce(s).error())
+        print("100-minute budget: untouched mean %.1f, reference mean %.1f (median %.1f, worst %.1f)" % (
+            statistics.fmean(a), statistics.fmean(b), statistics.median(b), max(b)))
+        raise SystemExit
     import statistics
     errs_ref, errs_none = [], []
     for s in range(100, 160):

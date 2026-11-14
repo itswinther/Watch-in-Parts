@@ -1,0 +1,29 @@
+schema_version = "1.3"
+artifacts = [{ source = "/tmp/final.json", service = "timer" }]
+
+[task]
+name = "junction/regulate-watch-s102-b100"
+description = "Regulate a hidden mechanical watch on a timing machine with a time budget and irreversible adjustments."
+
+[metadata]
+category = "engineering-measurement"
+
+[verifier]
+timeout_sec = 120.0
+environment_mode = "separate"
+network_mode = "no-network"
+
+[[verifier.collect]]
+service = "timer"
+command = "python3 -c \"import urllib.request; open('/tmp/final.json','wb').write(urllib.request.urlopen('http://localhost:8000/final?token=' + open('/srv/token.txt').read().strip()).read())\""
+timeout_sec = 30.0
+
+[agent]
+timeout_sec = 2400.0
+
+[environment]
+network_mode = "allowlist"
+allowed_hosts = ["chatgpt.com"]
+build_timeout_sec = 900.0
+cpus = 2
+memory_mb = 2048

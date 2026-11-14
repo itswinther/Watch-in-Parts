@@ -1,0 +1,130 @@
+{
+    "id": "0c61b69f-d1b5-47c7-8296-be9dfbf05e91",
+    "task_name": "junction/regulate-watch-s103-b100",
+    "trial_name": "regulate-s103-b100__wdQreEu",
+    "trial_uri": "file:///private/tmp/claude-501/-Users-mikbs-Desktop-dev-Junction/824d3067-e8b7-4116-9934-5c800c5f6483/scratchpad/jobs/regulate-scarce-gpt/regulate-s103-b100__wdQreEu",
+    "task_id": {
+        "path": "scarce/regulate-s103-b100"
+    },
+    "source": "scarce",
+    "task_checksum": "7c1a89d9e992e67b89a5e1c31b069cb59cf6e600675f55a388ff81c426c55b1f",
+    "config": {
+        "task": {
+            "path": "scarce/regulate-s103-b100",
+            "git_url": null,
+            "git_commit_id": null,
+            "name": null,
+            "ref": null,
+            "overwrite": false,
+            "download_dir": null,
+            "source": "scarce"
+        },
+        "trial_name": "regulate-s103-b100__wdQreEu",
+        "trials_dir": "jobs/regulate-scarce-gpt",
+        "install_only": false,
+        "timeout_multiplier": 1.0,
+        "agent_timeout_multiplier": null,
+        "verifier_timeout_multiplier": null,
+        "agent_setup_timeout_multiplier": null,
+        "environment_build_timeout_multiplier": null,
+        "agent": {
+            "name": "codex",
+            "import_path": null,
+            "model_name": "openai/gpt-6.1-sol",
+            "base_url": null,
+            "model_api_key_name": null,
+            "model_api_format": null,
+            "skip_model_parsing": false,
+            "n_concurrent": null,
+            "concurrency_group": null,
+            "skills": [],
+            "override_timeout_sec": null,
+            "override_setup_timeout_sec": null,
+            "max_timeout_sec": null,
+            "resume_trajectory": false,
+            "load_trajectory": null,
+            "extra_allowed_hosts": [],
+            "kwargs": {},
+            "mcp_servers": []
+        },
+        "user_agent": null,
+        "environment": {
+            "type": "docker",
+            "import_path": null,
+            "force_build": false,
+            "delete": true,
+            "stream": false,
+            "cpu_enforcement_policy": "auto",
+            "memory_enforcement_policy": "auto",
+            "override_cpus": null,
+            "override_memory_mb": null,
+            "override_storage_mb": null,
+            "override_gpus": null,
+            "override_tpu": null,
+            "mounts": null,
+            "extra_docker_compose": [],
+            "kwargs": {},
+            "extra_allowed_hosts": []
+        },
+        "verifier": {
+            "override_timeout_sec": null,
+            "max_timeout_sec": null,
+            "disable": false
+        },
+        "artifacts": [],
+        "extra_instruction_paths": [],
+        "extra_instructions": [],
+        "job_id": "5a72d8d2-6a97-4e8b-bb87-e8efad05a7e6",
+        "source_trial": null
+    },
+    "agent_info": {
+        "name": "codex",
+        "version": "WARNING: failed to clean up stale arg0 temp dirs: Cross-device link (os error 18)",
+        "model_info": {
+            "name": "gpt-6.1-sol",
+            "provider": "openai"
+        }
+    },
+    "agent_result": {
+        "n_input_tokens": 152784,
+        "n_cache_tokens": 119680,
+        "n_output_tokens": 2886,
+        "cost_usd": 0.10703599999999999,
+        "model_usage": {
+            "openai/gpt-6.1-sol": {
+                "n_input_tokens": 152784,
+                "n_cache_tokens": 119680,
+                "n_output_tokens": 2886,
+                "cost_usd": 0.10703599999999999
+            }
+        },
+        "rollout_details": null,
+        "metadata": null
+    },
+    "verifier_result": {
+        "rewards": {
+            "reward": 0.9587
+        }
+    },
+    "verifier_environment_mode": "separate",
+    "exception_info": null,
+    "started_at": "2026-11-14T02:38:38.028880Z",
+    "finished_at": "2026-11-14T02:40:45.618024Z",
+    "environment_setup": {
+        "started_at": "2026-11-14T02:38:38.177820Z",
+        "finished_at": "2026-11-14T02:38:52.140228Z"
+    },
+    "agent_setup": {
+        "started_at": "2026-11-14T02:38:52.140265Z",
+        "finished_at": "2026-11-14T02:38:52.361379Z"
+    },
+    "agent_execution": {
+        "started_at": "2026-11-14T02:38:52.361607Z",
+        "finished_at": "2026-11-14T02:40:19.485304Z"
+    },
+    "verifier": {
+        "started_at": "2026-11-14T02:40:26.209854Z",
+        "finished_at": "2026-11-14T02:40:45.617991Z"
+    },
+    "step_results": null
+}

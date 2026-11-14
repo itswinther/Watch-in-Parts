@@ -16,14 +16,16 @@ sys.path.insert(0, HERE)
 import timing  # noqa: E402
 
 
-def build(seed, out):
+def build(seed, out, budget=timing.TIME_BUDGET_MIN):
     if os.path.exists(out):
         shutil.rmtree(out)
     env = os.path.join(out, "environment")
     os.makedirs(os.path.join(env, "app"))
     os.makedirs(os.path.join(env, "timer"))
-    shutil.copy(os.path.join(HERE, "BRIEF.md"), os.path.join(out, "instruction.md"))
-    shutil.copy(os.path.join(HERE, "BRIEF.md"), os.path.join(env, "app", "BRIEF.md"))
+    brief = open(os.path.join(HERE, "BRIEF.md")).read().replace("you have 480 minutes in total", "you have %d minutes in total" % budget)
+    assert ("%d minutes in total" % budget) in brief
+    open(os.path.join(out, "instruction.md"), "w").write(brief)
+    open(os.path.join(env, "app", "BRIEF.md"), "w").write(brief)
     shutil.copy(os.path.join(HERE, "timer.py"), os.path.join(env, "app", "timer.py"))
     open(os.path.join(env, "Dockerfile"), "w").write(
         "FROM python:3.12-slim\n"
@@ -34,6 +36,7 @@ def build(seed, out):
     for f in ("timing.py", "server.py"):
         shutil.copy(os.path.join(HERE, f), os.path.join(env, "timer", f))
     open(os.path.join(env, "timer", "seed.txt"), "w").write(str(seed))
+    open(os.path.join(env, "timer", "budget.txt"), "w").write(str(budget))
     import secrets
     open(os.path.join(env, "timer", "token.txt"), "w").write(secrets.token_hex(16))
     open(os.path.join(env, "timer", "Dockerfile"), "w").write(
@@ -53,8 +56,10 @@ def build(seed, out):
         "      timeout: 5s\n"
         "      retries: 15\n"
         "      start_period: 3s\n")
-    none = timing.Watch(seed).error()
-    ref = timing.reference(seed).error()
+    scarce = budget != timing.TIME_BUDGET_MIN
+    none = timing.Watch(seed, budget).error()
+    refw = timing.reference_scarce(seed, budget) if scarce else timing.reference(seed)
+    ref = refw.error()
     os.makedirs(os.path.join(out, "tests"))
     json.dump({"untouched_error": none, "reference_error": ref}, open(os.path.join(out, "tests", "anchors.json"), "w"), indent=1)
     open(os.path.join(out, "tests", "test.sh"), "w").write(
@@ -78,7 +83,7 @@ def build(seed, out):
     os.chmod(os.path.join(out, "tests", "test.sh"), 0o755)
     os.makedirs(os.path.join(out, "solution"))
     # oracle: replay the reference watchmaker's actions through the same client
-    w = timing.reference(seed)
+    w = refw
     lines = ["#!/bin/bash", "cd /app"]
     for e in w.log:
         if e[0] == "measure":
@@ -94,7 +99,7 @@ def build(seed, out):
     open(os.path.join(out, "task.toml"), "w").write(
         'schema_version = "1.3"\n'
         'artifacts = [{ source = "/tmp/final.json", service = "timer" }]\n\n'
-        '[task]\nname = "junction/regulate-watch-s%d"\n'
+        '[task]\nname = "junction/regulate-watch-s' + str(seed) + '-b' + str(budget) + '"\n'
         'description = "Regulate a hidden mechanical watch on a timing machine with a time budget and irreversible adjustments."\n\n'
         '[metadata]\ncategory = "engineering-measurement"\n\n'
         '[verifier]\ntimeout_sec = 120.0\nenvironment_mode = "separate"\nnetwork_mode = "no-network"\n\n'
@@ -103,10 +108,10 @@ def build(seed, out):
         'timeout_sec = 30.0\n\n'
         '[agent]\ntimeout_sec = 2400.0\n\n'
         '[environment]\nnetwork_mode = "allowlist"\nallowed_hosts = ["chatgpt.com"]\n'
-        'build_timeout_sec = 900.0\ncpus = 2\nmemory_mb = 2048\n' % seed)
+        'build_timeout_sec = 900.0\ncpus = 2\nmemory_mb = 2048\n')
     return none, ref
 
 
 if __name__ == "__main__":
-    n, r = build(int(sys.argv[1]), sys.argv[2])
+    n, r = build(int(sys.argv[1]), sys.argv[2], int(sys.argv[3]) if len(sys.argv) > 3 else timing.TIME_BUDGET_MIN)
     print("untouched error %.1f, reference error %.1f" % (n, r))
