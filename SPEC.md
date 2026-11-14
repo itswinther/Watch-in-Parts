@@ -135,12 +135,12 @@ under test is P1 to P4. See section 6.
 
 | No. | Key | Weight | Rule, with its numbers |
 |---|---|---|---|
-| 1 | `spin` | 1 | each mobile turned one turn in 72 steps of 5 degrees (`SPIN_STEPS`) never meets the frame by more than 0.01 mm3 |
+| 1 | `spin` | 1 | each mobile turned one turn in 72 steps of 5 degrees (`SPIN_STEPS`), and after every step i also to i + 1/3 and i + 1/5 of a step (`SPIN_OFFGRID`), 216 positions, never meets the frame by more than 0.01 mm3 |
 | 2 | `held` | 2 | each mobile moved 0.3 mm (`HELD_MOVE`) along ±x, ±y, ±z is stopped by the frame, or by a coaxial mobile (axes within 0.01 mm) that is itself held |
 | 3 | `seated` | 2 | each part of a multi-part mobile, moved 0.3 mm along ±x, ±y and one of ±z, meets its mobile's other parts by more than 0.01 mm3; the parts form one piece, each within 0.02 mm of the next (`SEAT_TOUCH`) |
 | 4 | `train` | 3 | every declared mesh passes the mesh test; no mobile gets two speeds; every mobile is driven from the barrel |
 | 5 | `tolerant` | 2 | the mesh test again with the driven mobile moved 0.03 mm (`MESH_SHIFT`) away from and towards the driver's axis |
-| 6 | `clear` | 1 | every undeclared pair of mobiles, turned at their speeds, 144 steps per turn (`CLEAR_STEPS`), meets by at most 0.01 mm3 |
+| 6 | `clear` | 1 | every undeclared pair of mobiles (coaxial ones too): their swept solids (each mobile turned through a full turn, a solid of revolution worked out from horizontal sections, bands of at most 0.02 mm where faces slope, `SWEEP_DZ`; `Movement.clear_swept`) share at most 0.01 mm3, so no pair of angles collides |
 | 7 | `hour` | 2 | hour hand turns clockwise, 1/12 turn per hour (`HAND_SPEED`) |
 | 8 | `minute` | 2 | minute hand, 1 turn per hour |
 | 9 | `seconds` | 2 | seconds hand, 60 turns per hour |
