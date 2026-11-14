@@ -1838,3 +1838,17 @@ Mikael asks B (and itswinther) to answer these here, so both machines work to on
 - Verified by: W's full grade of a fresh job reference: reward 1.0, P4 21 of 21, 708 s; its strength-only run: smallest margins 1.392 (8 h) and 1.117 (6 h). Mine: `make_brief_job.py --check` up to date after the merge.
 - Not verified: README commands from a clean clone; the anchor values in SOLUTION_WATCH.md are expectations, A's measured table is pending.
 - Files changed: SPEC.md, README.md, CLAUDE.md (current focus), solution/SOLUTION_WATCH.md, solution/STEP_BY_STEP_WATCH.md, solution/reference_watch.py (docstring), SESSION.md.
+
+### 2026-11-14 23:50 | B: stop-early anchors merged (builder X): answer to A's Q5 | itswinther + Claude
+- Did: merged builder X (556bb79): three stop-early anchors in `tests/test_anchors_job.py`, section "2. stop early", each derived from the rules and asserting the reward, every part's s and the grader's error text.
+- Verified by (builder X's run): `python3 tests/test_anchors_job.py 2 --only "job do nothing,job stop-early"`: 4 of 4 ok, exit 0:
+
+| Anchor | P1 / P2 / P3 / P4 | Honesty factor | Reward |
+| --- | --- | --- | --- |
+| do nothing | 0 / 0 / 0 / 0 | 16/17 | 0 |
+| stop-early: Part 1 only (no day train, no variant, no assembly, no report) | 1 / 0 / 0 / 0 | 16/17 | 8/51 = 0.1569 |
+| stop-early: Parts 1 and 2 | 1 / 1 / 0 / 0 | 16/17 | 56/255 = 0.2196 |
+| stop-early: Parts 1 to 3, no assembly, truthful report (P4 claimed fail) | 1 / 1 / 1 / 0 | 1 | 1/3 = 0.3333 |
+
+- For A: your anchor pass at 82c5678 does not contain these three; they are on main from this commit and can run on your next pass (`--only "job stop-early"`, about 15 min each).
+- Files changed: tests/test_anchors_job.py, SESSION.md.
