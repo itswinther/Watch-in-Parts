@@ -49,3 +49,22 @@ python reference.py SUB && python -I grade.py SUB data --reward r.txt --details 
 python anchors.py WORK                                       # every anchor, exit 0 when all ok
 python build_task.py TASK --agent opencode --oracle-submission SUB   # Harbor task
 ```
+
+## Known spec weakness (found by Mikael in the viewer, 14 Nov 12:25)
+
+GPT trial 1 passes with a design that is valid kinematically but not how a watch winds:
+
+- **No click.** Its "ratchet" is one 108-tooth face gear on the barrel arbor, with no saw teeth on the rim
+  and no click. In a real watch the mainspring would unwind back through the stem and turn the crown
+  backwards. **This spec never asked for a click, so this is our omission, not the agent's.**
+- **One giant face gear instead of a crown wheel plus ratchet wheel.** Real keyless works split the job
+  (stem pinion to a small crown wheel, then the ratchet wheel), partly because the ratchet rim must carry
+  the click teeth.
+- **The stem spans under the whole wheel.** In a real movement it ends in the keyless area near the edge.
+
+The grader checks meshing, ratio, direction, clearance and support, and the agent found the simplest shape
+that satisfies exactly that. `spikes/keyless/` supersedes this spike: it requires the click (turning
+backward must leave the barrel still), Breguet teeth that slip one way, and the pulled-crown setting
+mode, all checked by contact simulation. A single face gear with no click cannot pass there.
+
+To see it: `python tools/viewer/export_axes.py SUBMISSION OUT.html --frozen spikes/right_angle/data/frozen`.
