@@ -9,7 +9,7 @@ table. Everything below "Session entries" is append-only, newest at the bottom.
 | ID | Workstream | Owner | Status | Last update |
 | --- | --- | --- | --- | --- |
 | A | Harness wiring | Mikael | starting: adding the organisers' starter kit to the repo | 2026-11-14 01:40 |
-| B | Reference script and grader (H1) | itswinther | reference passes 5 gates and 19 checks (S = 1.0); 14 anchors score as expected; not yet run inside Harbor | 2026-11-14 01:55 |
+| B | Reference script and grader (H1) | itswinther | reference scores 1.0, 14 anchors as expected; NOW: writing agent-facing spec + command-line tools, then a first agent attempt outside Harbor | 2026-11-14 02:04 |
 | C | Hold the Line spike | unassigned | not started | |
 | D | Mentor questions, anchors, transcripts | unassigned | not started | |
 | E | Analysis, demo and story | Yoseph | paused: Yoseph is not working overnight | 2026-11-14 01:40 |
@@ -174,3 +174,11 @@ Template:
 - Files changed: SESSION.md only.
 - Need from others: see Requests.
 - Next: write the agent-facing spec and a command-line version of the tools, then run a first agent attempt outside Harbor to measure the gap before anything else is built.
+
+### 2026-11-14 02:04 | B first agent attempt (starting) | itswinther + Claude
+- Did: starting now. Plan: write `environment/public/SPEC_PUBLIC.md` (agent-facing spec with every clarification stated) and `environment/tools_cli.py` (the measurement tools as a command line over `geometry.core` and `geometry.contract`), copy only those plus the supplied meshes into a clean folder, and give a fresh agent that folder and nothing else. This touches `environment/`, which is workstream A's folder; A has nothing there yet, and the MCP server can wrap the same functions.
+- Verified by (command and result): nothing yet.
+- Not verified, or assumed: the attempt runs outside Harbor with this session's model as the agent, so it is a first signal, not the judged setup.
+- Files changed: SESSION.md.
+- Need from others: nothing new.
+- Next: report the agent's score, what it failed and why.
