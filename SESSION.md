@@ -1172,3 +1172,22 @@ What it means:
   - Seiko 6R15B parts catalogue and technical guide found (third-party host); ST3600K sheet found.
 - Not found: keyless tooth counts and modules for any modern named calibre; spring stiffnesses; stem travel other than Sellita's; jewel load ratings; a "comfortable" crown torque.
 - Files changed: `DATASHEET_GAPS_2.md` (new), SESSION.md (this entry). No existing file edited.
+
+### 2026-11-14 15:35 | A: what to integrate from DATASHEET_GAPS_2.md, and what needs a human | Mikael + Claude
+- **To integrate (action for whoever owns the file):**
+  1. **Barrel core ratio:** filled by Grossmann 1905 art. 108 to 111 (hub radius one-third of the barrel radius; hub diameter about 32 x strip thickness) and Saunier art. 517 (one-third). This settles DS-101's 47 h vs 28 h ambiguity. The supplied barrel's actual arbor core radius must be stated as a fact of the supplied part, in the barrel datasheet and the brief.
+     - Keyless: the keyless builder does this.
+     - Main watch: B, in the constants, using the datasheet table from 14:20.
+  2. **Real keyless tooth counts** (Grossmann art. 168 to 169): sliding pinion 16, setting wheels 27/18, minute wheel 30, cannon pinion 12, ratchet 44, crown wheel 42, winding pinion 18. Go in TRACEABILITY.md and SOLUTION.md only, as a realism check of the references, never in the agent's brief.
+  3. **Torque figures:**
+     - Sellita SW200-1 rev 04: 11.86 N·mm near full wind, 8.83 N·mm after 24 h, slipping bridle 12.21 to 16.57 N·mm. Cited as facts; the document is not reproduced.
+     - Nivarox US 11,320,786: unwinding torque at least 80 % of winding.
+
+     These can replace or confirm DS-101's derived torques (scale by s³ at demonstration scale).
+  4. **Jewels:** outside diameter 0 to +6 µm, a 10 µm press fit and at least 15 N axial hold (EPFL thesis 6665, citing NIHS 41-02), for DS-301.
+  5. **Crown:** MIL-W-46374F requires the crown to survive a 22.2 N pull and 42 mN·m without damage (public domain), for DS-401 and DS-501.
+- **Honest gaps that stay "not published":** click and setting-lever spring forces; stem travel for movements other than Sellita; a "comfortable" crown torque.
+- **Needs a human:**
+  - two DTIC reports refuse scripted downloads: AD0276037 and AD0609922 (https://apps.dtic.mil/sti/citations/AD0276037, https://apps.dtic.mil/sti/citations/AD0609922);
+  - a full Google Patents search was blocked by the permission system (https://patents.google.com/?q=(keyless+works)+(crown+wheel)+(ratchet+wheel)+teeth);
+  - MIL-W-46374F is a scan that needs OCR (everyspec link in DATASHEET_GAPS_2.md).
