@@ -11,6 +11,13 @@ hand speeds and directions, and the weights of the checks.
 
 | Constant | Value | Document | Section | Row, or statement anchor | Column |
 |---|---|---|---|---|---|
+| work order names the barrel (the DS-W01 row of BARREL_TEETH ...) | BR-096-20 | `instruction.md` | Order | Barrel | Specification |
+| work order names the case (the DS-W02 row of CASE_RADIUS, CASE_HEIGHT) | CS-414-134 | `instruction.md` | Order | Case | Specification |
+| work order names the print process (DS-W03) | DS-W03 | `instruction.md` | Order | Parts | Specification |
+| work order names the speed class of the 8-hour build (the DS-W01 row of BARREL_TURNS_PER_HOUR) | D | `instruction.md` | Order | 8-hour build (movement.json) | Specification |
+| work order names the speed class of the 6-hour variant (the DS-W01 row of CHANGED_BARREL_TURNS_PER_HOUR) | B | `instruction.md` | Order | 6-hour variant (variant_6h.json) | Specification |
+| demonstration scale, context only, not graded: 2 x CASE_RADIUS / REAL_CALIBRE_DIAMETER_MM (rounded), and REAL_CALIBRE_DIAMETER_MM | 1.617 | `instruction.md` | Work order | You are a movement designer | statement |
+| work order cites the inspection procedure | QA-W100 | `instruction.md` | Acceptance | The delivery is inspected | statement |
 | BARREL_TEETH | 96 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-20 | Teeth |
 | BARREL_MODULE | 0.2 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-20 | Module (mm) |
 | PRESSURE_ANGLE | 25.0 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-20 | Pressure angle |

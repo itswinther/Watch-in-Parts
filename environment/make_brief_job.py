@@ -902,22 +902,42 @@ def index_sheet(S=None):
 
 
 # ------------------------------------------------------------------ traceability: one home cell per graded number
-def cell(constant, value, file, section, row=None, column=None, tokens=(), pick="all", text=None):
+def cell(constant, value, file, section, row=None, column=None, tokens=(), pick="all", text=None, has=None):
     """A home cell. file: path in the agent's folder (instruction.md, FORMAT.md, datasheets/...).
     section: a heading's text, matched as a prefix (any level). With column: a table cell, row = the text of the
     row's first cell, column = a prefix of the column header; tokens = the numbers the cell holds, in order
-    (pick "all"), or the largest of them (pick "max"); text = the whole cell, when given. Without column: row is an
+    (pick "all"), or the largest of them (pick "max"); text = the whole cell, has = a phrase the cell contains, when
+    given (has: for the work order's cells that name a catalogue item). Without column: row is an
     anchor in the section's text (None: the whole section) and the statement runs from it to the next item; every
     token must appear in it."""
     return {"constant": constant, "value": value, "file": file, "section": section, "row": row, "column": column,
-            "tokens": [str(t) for t in tokens], "pick": pick, "text": text}
+            "tokens": [str(t) for t in tokens], "pick": pick, "text": text, "has": has}
 
 
 def traceability_rows(L, B, S=None):
     Q, F = "datasheets/" + QA_FILE, "FORMAT.md"
     p1, p2, p4, t = "5. Part 1", "6. Part 2", "8. Part 4", "4. Terms"
     pe, ge = L["push_every"], L["gap_every"]
-    rows = ds_w01_trace(L, B) + [
+    o, spec = "Order", "Specification"
+    s8, s6 = speed_class_of(W.BARREL_TURNS_PER_HOUR), speed_class_of(W.CHANGED_BARREL_TURNS_PER_HOUR)
+    links = [
+        cell("work order names the barrel (the DS-W01 row of BARREL_TEETH ...)", supplied_barrel_no(), "instruction.md",
+             o, "Barrel", spec, has=supplied_barrel_no()),
+        cell("work order names the case (the DS-W02 row of CASE_RADIUS, CASE_HEIGHT)", ordered_case_no(),
+             "instruction.md", o, "Case", spec, has=ordered_case_no()),
+        cell("work order names the print process (DS-W03)", "DS-W03", "instruction.md", o, "Parts", spec, has="DS-W03"),
+        cell("work order names the speed class of the 8-hour build (the DS-W01 row of BARREL_TURNS_PER_HOUR)", s8,
+             "instruction.md", o, "8-hour build (movement.json)", spec, has="speed class " + s8),
+        cell("work order names the speed class of the 6-hour variant (the DS-W01 row of CHANGED_BARREL_TURNS_PER_HOUR)",
+             s6, "instruction.md", o, "6-hour variant (variant_6h.json)", spec, has="speed class " + s6),
+        cell("demonstration scale, context only, not graded: 2 x CASE_RADIUS / REAL_CALIBRE_DIAMETER_MM (rounded), "
+             "and REAL_CALIBRE_DIAMETER_MM", round(2 * W.CASE_RADIUS / REAL_CALIBRE_DIAMETER_MM, 3), "instruction.md",
+             "Work order", "You are a movement designer", None,
+             [num(round(2 * W.CASE_RADIUS / REAL_CALIBRE_DIAMETER_MM, 3)), num(REAL_CALIBRE_DIAMETER_MM)]),
+        cell("work order cites the inspection procedure", QA, "instruction.md", "Acceptance", "The delivery is inspected",
+             None, []),
+    ]
+    rows = links + ds_w01_trace(L, B) + [
         cell("CASE_RADIUS", W.CASE_RADIUS, "datasheets/DS-W02_case.md", "2. Catalogue", ordered_case_no(),
              "Inner radius", [num(W.CASE_RADIUS)]),
         cell("CASE_HEIGHT", W.CASE_HEIGHT, "datasheets/DS-W02_case.md", "2. Catalogue", ordered_case_no(),
@@ -991,8 +1011,6 @@ def traceability_rows(L, B, S=None):
 # formula constants and names, each with its reason. Any other number in those documents fails number_scan().
 LITERALS = {
     "instruction.md": {
-        "1.617": "the demonstration scale, context only (2 x CASE_RADIUS / 25.6; not graded)",
-        "25.6": "diameter of the real calibre the scale refers to, context only",
         "11": "11 1/2-ligne class, context only", "1/2": "11 1/2-ligne class, context only",
         "2.8": "CadQuery version", "3": "Python 3",
         "8": "the name of the 8-hour build (its speed is the speed class's cell on DS-W01)",
@@ -1096,6 +1114,8 @@ def cell_errors(texts, rows):
             got = [value_of(t) for t in numbers(c)]
             if r["text"] is not None and c != r["text"]:
                 errs.append("cell reads %r, expected %r: %s" % (c, r["text"], where))
+            if r.get("has") is not None and not re.search(r"(?<![\w-])%s(?![\w-])" % re.escape(r["has"]), c):
+                errs.append("cell reads %r, which does not name %r: %s" % (c, r["has"], where))
             if r["pick"] == "max":
                 if not got or max(got) != want[0]:
                     errs.append("cell reads %r, its largest number is not %s: %s" % (c, r["tokens"][0], where))
