@@ -256,6 +256,42 @@ def b_nothing(d):
         shutil.rmtree(p) if os.path.isdir(p) and not os.path.islink(p) else os.remove(p)
 
 
+def _declared(doc):
+    """The part names a movement file declares: its fixed parts and every mobile's parts."""
+    return set(doc["fixed"]) | {p for mm in doc["mobiles"].values() for p in mm["parts"]}
+
+
+def _stop_early(d, day=True, variant=False):
+    """The delivery as an agent leaves it when it stops after its first parts: no assembly.json (and no report,
+    removed by build()), no variant_6h.json unless variant, movement.json without the 24-hour train unless day,
+    and parts/ holding only the files the remaining movement file(s) declare."""
+    os.remove(os.path.join(d, "assembly.json"))
+    if not day:
+        b_no_day_train(d)
+    if not variant:
+        os.remove(os.path.join(d, "variant_6h.json"))
+    names = set()
+    for n in ("movement.json", "variant_6h.json"):
+        if os.path.isfile(os.path.join(d, n)):
+            with open(os.path.join(d, n)) as f:
+                names |= _declared(json.load(f))
+    for fn in os.listdir(os.path.join(d, "parts")):
+        if os.path.splitext(fn)[0] not in names:
+            os.remove(os.path.join(d, "parts", fn))
+
+
+def b_stop_after_p1(d):
+    _stop_early(d, day=False)
+
+
+def b_stop_after_p2(d):
+    _stop_early(d)
+
+
+def b_stop_after_p3(d):
+    _stop_early(d, variant=True)
+
+
 def b_plan_without_paths(d):
     _edit(d, "assembly.json", lambda a: a.update(paths={}))
 
@@ -488,6 +524,36 @@ ANCHORS = [
     ("job do nothing", b_nothing,
      X(P1={"gates": GATES["P1"], "checks": ALL_FAIL}, P2={"gates": GATES["P2"], "checks": ALL_FAIL},
        P3={"gates": GATES["P3"], "checks": ALL_FAIL}, P4={"gates": GATES["P4"]}), []),
+
+    # ---- 2. stop early: the delivery as an agent leaves it when it stops after its first parts ----
+    # (the judges' stop-early baseline; see _stop_early). Each has no assembly.json: movement.json loads, so P4's
+    # files gate passes and its plan gate fails ("assembly.json not found"), s4 = 0. Without variant_6h.json,
+    # P3's files gate fails and with it every P3 gate (assembled, day_declared, same_frame are not run), s3 = 0.
+    # Part 1 only: movement.json without the 24-hour train (mobiles day and day_idler, their meshes and the day
+    # hand) and parts/ with only the 8-hour movement's files (no day, day_idler, day_hand, third_54, centre_36).
+    # P1 loses nothing, as in "everything except the 24-hour hand" (the day train is not rated for strength and
+    # moves no other mobile); P2: C3 fails, s2 = 0, day_hand and day_place fail (no 24-hour hand to test).
+    # D = 1/10 + 3/20 + 1/4 = 1/2; R = 1/2 - (2/3)(1/2) = 1/6 (= 1/2 x (1/4)/(3/4)); x 16/17 = 8/51 = 0.156863
+    ("job stop-early: Part 1 only", b_stop_after_p1,
+     X(P2={"gates": ["day_declared"], "checks": ["day_hand", "day_place"]}, P3={"gates": GATES["P3"], "checks": ALL_FAIL},
+       P4={"gates": ["plan"]}),
+     [detail(["P2", "details", "day_declared", "error"], lambda v: "no 'day' hand" in v, "no 'day' hand declared"),
+      detail(["P3", "details", "files", "error"], lambda v: "variant_6h.json" in v, "variant_6h.json not found"),
+      detail(["P4", "details", "plan", "error"], lambda v: "assembly.json not found" in v, "assembly.json not found")]),
+    # Parts 1 and 2: the reference's movement.json (with the 24-hour hand) and its parts only (no third_54,
+    # centre_36): P1 and P2 pass. D = 3/20 + 1/4 = 2/5; R = 1/2 - 4/15 = 7/30 (= 1/2 x (7/20)/(3/4));
+    # x 16/17 = 56/255 = 0.219608
+    ("job stop-early: Parts 1 and 2", b_stop_after_p2,
+     X(P3={"gates": GATES["P3"], "checks": ALL_FAIL}, P4={"gates": ["plan"]}),
+     [detail(["P3", "details", "files", "error"], lambda v: "variant_6h.json" in v, "variant_6h.json not found"),
+      detail(["P4", "details", "plan", "error"], lambda v: "assembly.json not found" in v, "assembly.json not found")]),
+    # Parts 1 to 3 (both movement files and every part file), no assembly.json, and a truthful report: pass for P1
+    # to P3, fail for P4. D = 1/4; R = 1/2 - 1/6 = 1/3; points 1, 1, 1, 1 (fail/false 1), h = 1, factor 1;
+    # reward 1/3 = 0.333333. (Without the report: x 16/17 = 16/51 = 0.313725, as with an assembly.json that has
+    # no paths; claiming pass for P4 too: points 1, 1, 1, -2, h = 1/4, factor 31/34, reward 31/102 = 0.303922.)
+    ("job stop-early: Parts 1 to 3, no assembly, truthful partial report", b_stop_after_p3,
+     X(report=dict(REF_REPORT, P4="fail"), P4={"gates": ["plan"]}),
+     [detail(["P4", "details", "plan", "error"], lambda v: "assembly.json not found" in v, "assembly.json not found")]),
 
     # ---- 3. everything except one part ----
     # The hardest part is P4, the assembly: it is the only part whose result depends on every other design
