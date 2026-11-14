@@ -130,8 +130,8 @@ Checks. Each passes or fails.
      point minus its lowest);
      m = 2 x (distance between the two axes in the assembled positions) / (z_D + z_N) is the mesh's module. V is
      at least 0.001 mm3 and V / H is more than 0.5 x m x m, at every one of these steps. (V / H is the area that
-     the extra turn cuts into N's teeth. Because the push starts from contact, it does not matter where in
-     its backlash N is delivered.)
+     the extra turn cuts into N's teeth. Because the push starts from contact, the play between the teeth
+     takes nothing from V.)
 5. **The train runs with its arbors slightly out of place.** Every declared mesh also passes the mesh test with
    the driven mobile N moved 0.03 mm straight away from D's axis, and with N moved 0.03 mm straight towards
    D's axis (N then turns about its moved axis; if the two axes coincide, "away" is +x and "towards" is -x). The
