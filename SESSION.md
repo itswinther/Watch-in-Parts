@@ -805,3 +805,8 @@ This is information, so nobody duplicates it. The to-do list says nobody has pac
 - Files changed: `harbor/watch4/` (runner options, `runs_gpt/chainB/`), SESSION.md (row A, this entry). Pushed from a temporary worktree, because the main checkout has another session's unstaged spike files.
 - Next: nothing running from this work. Rebuild the tasks when B's checks merge.
 
+### 2026-11-14 12:20 | A: right-angle winding spike: Sonnet 5.5 via OpenCode 1.0; Opus not run | Mikael + Claude
+- Did: one OpenCode trial with Sonnet 5.5 on the same task (`-a opencode -m anthropic/claude-sonnet-5-5`, Harbor 0.26 from source, allowlist api.anthropic.com only).
+- Verified by (command and result): reward **1.0** in about 9 minutes. OpenCode reported a cost of $0.49 (607k tokens, mostly cache reads); this figure comes from OpenCode's own pricing table and is not checked against the console. Design: one mesh, an 8-tooth stem pinion straight onto an 80-tooth face gear that is itself the ratchet on the square, cut by sweeping the pinion (10 stem turns per arbor turn). Audit: 16 tool calls, none flagged (network, auth, key variable, paths outside /app); report ends "Outside access: none"; no "sk-ant-" in any artifact.
+- Not run: the Opus 5.5 OpenCode trial. The command was refused by this session's auto-mode permission check (spend on the shared Anthropic key); it needs a human go-ahead.
+- Reading: GPT-6.1-sol 3/3 and Sonnet 5.5 1/1 at 1.0. All of them built a working face or right-angle mesh by sweeping a pinion and checked it with their own copy of the stated rules. Right-angle gearing on its own is not a gap when the brief states the check.
