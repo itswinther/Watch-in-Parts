@@ -53,6 +53,8 @@ STEP_MAX_TRIANGLE_FACES = 500   # more flat three-edged faces than this: a facet
 STEP_TIMEOUT_S = 120            # per STEP file, read and tessellation, in a child process
 STEP_MEMORY_MB = 4096           # address-space limit of that child process
 SELF_UNION_TOL = 0.005          # relative volume change allowed under self-union
+MAX_SCRIPTS_BYTES = 4 * 1024 * 1024   # scripts/ copied with a submission (never opened by the grader)
+MAX_SCRIPT_FILES = 200
 
 
 # ---------------- supplied barrel and a cylinder helper ----------------
