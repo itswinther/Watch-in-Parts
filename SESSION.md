@@ -9,7 +9,7 @@ table. Everything below "Session entries" is append-only, newest at the bottom.
 | ID | Workstream | Owner | Status | Last update |
 | --- | --- | --- | --- | --- |
 | A | Harness wiring | Mikael | paused harness work overnight to run three task spikes (see 03:55 entry, `spikes/README.md`): none showed a gap. Docker installed, not yet started | 2026-11-14 03:55 |
-| B | Reference script and grader | itswinther | Watch task measured: Fable 1.0 (4.5 min), Opus 1.0 (7.6 min), Sonnet still running. No gap for the two strongest models. Stopped building, waiting for a human decision | 2026-11-14 03:58 |
+| B | Reference script and grader | itswinther | Single-stage watch: Fable, Opus and Sonnet all 1.0. Built a three-stage watch task (design, add a 24-hour hand to a frozen design, assemble) with the test code withheld; three clean chains running since 04:12 | 2026-11-14 04:13 |
 | C | Hold the Line spike | unassigned | not started | |
 | D | Mentor questions, anchors, transcripts | unassigned | not started | |
 | E | Analysis, demo and story | Yoseph | paused: Yoseph is not working overnight | 2026-11-14 01:40 |
@@ -72,6 +72,8 @@ Append one line per decision: time, decision, who agreed.
 - 2026-11-14 03:42 The mechanical watch gear train (write-up in `MECHANICAL_WATCH_IDEA.md`) is now the main idea. Moving Day, H2 and H1 are backups. Decided: itswinther.
 - 2026-11-14 03:51 Interface for A (watch task): the artifact is a folder holding `movement.json` and `parts/<name>.stl`. Grader call: `python -I tests/grade_watch.py /abs/folder --reward FILE [--details FILE]`; it opens only the files `movement.json` names. `python environment/make_bundle_watch.py DIR` writes everything the agent may see. Grading the reference takes about 35 s.
 - 2026-11-14 03:51 Choices B made while building the watch task, different from or beyond the write-up, open to a human no: (1) all arbors are parallel to z and this is stated; (2) the size limit is stated (radius 23, height 16), not hidden, because a hidden number we chose would be withheld information; (3) only the hour and minute hands must share an axis, since real watches often have a small seconds hand elsewhere; (4) the hand speeds, clockwise direction and that shared axis are the only unstated requirements; (5) the barrel is 96 teeth, module 0.2, 25 degree pressure angle, all stated; (6) the agent is not given a gear maker; (7) "held" accepts another mobile as the thing that holds a mobile, because an hour wheel rides on the centre arbor in real watches; (8) there is no minimum-feature (printability) check yet.
+- 2026-11-14 04:13 Watch task, two changes agreed by itswinther: (1) three stages with frozen hand-over, each stage a fresh agent conversation: design; add a 24-hour hand to a frozen design; give an assembly order and paths for the frozen result. (2) For these runs the agent gets the full written contract, the raw geometry kernel and a format-only submit, but no test code and no measuring tools. This reverses the earlier "tools measure everything" principle on purpose; every graded number is still stated in the spec, except what a watch hand does.
+- 2026-11-14 04:13 Interface for A (staged watch): `python -I tests/grade_watch.py /abs/folder --stage N [--prev /abs/previous_stage_folder] --reward FILE`. Stage 3 adds `assembly.json` to the folder. `python environment/make_bundle_watch.py DIR --stage N [--prev FOLDER] --tools no` writes what the agent may see. `environment/run_clean_chain.sh RUN_DIR MODEL` runs the three stages headless; `python tests/grade_chain.py RUN_DIR` grades them.
 
 ## Proposed spec changes
 
@@ -384,3 +386,20 @@ Template:
 - Files changed: `transcripts/watch_fable`, `transcripts/watch_opus`, `geometry/watch.py` (docstring), SESSION.md.
 - Need from others: a human decision on what to try next.
 - Next: add Sonnet's result when it finishes; nothing else until told.
+
+### 2026-11-14 04:13 | B staged watch task with test code withheld (built, chains running) | itswinther + Claude
+- Did:
+  - Sonnet's single-stage watch run finished: 1.0 in 16 min 55 s, 26 tool calls, $1.22, nothing outside its folder. So the single-stage watch task with tools is 1.0 for all three models.
+  - Closed the loophole Fable used (an idler kept down only by another wheel above it): for the two moves along z, "held" now only accepts fixed parts or a mobile on the same axis. Fixed parts must not overlap each other.
+  - Added stage 2 (add a 24-hour hand; the existing mobiles' axes and part files are frozen; fixed parts may change) and stage 3 (assembly order and rigid paths for every part, step 0.2, parts of one mobile exempt from each other). `tests/grade_watch.py --stage N --prev FOLDER`.
+  - Added the withheld bundle: `environment/make_bundle_watch.py --tools no` ships INSTRUCTION, SPEC, the barrel, `tools/kernel.py` (a copy of `geometry/core.py`) and `tools/submit.py` (format only, generated from `environment/submit_template.py`). The spec now defines the mesh test exactly (turning direction, angles per step).
+  - Reference for all three stages in `solution/reference_watch.py`.
+- Verified by (command and result):
+  - `python3 solution/reference_watch.py OUT` then `python3 -I tests/grade_watch.py OUT/stageN --stage N [--prev OUT/stage(N-1)]`: stage 1 reward 1.0 (42 s), stage 2 reward 1.0 (51 s; day hand 1/24 clockwise turns per hour, axis 10.04 from the hour axis, reach 3.21), stage 3 reward 1.0 (2 s; 18 parts, 1,209 poses).
+  - Stage 3 on the reference with the order changed: centre before third gives 0.446 (third not installed); bridge straight after the main plate gives 0.222 (six parts not installed); no assembly.json gives 0.
+  - Withheld bundle: `tools/submit.py` answered "accepted" for the reference at stages 1 and 3. `grep` for the hand speeds, the gear maker, the mesh test and `Fraction` in the bundle found nothing.
+  - Clean-context probe in the run folder answered `NONE`.
+- Not verified, or assumed: the staged anchor script is not written (only the three order checks above); `tools_watch.py` has no stage 2 or 3 tools, so a with-tools arm of the staged task cannot be run yet; `tests/test_anchors_watch.py` was written for the old single-frame reference and has not been rerun since the reference was split into separate plates.
+- Files changed: `geometry/watch.py`, `tests/grade_watch.py`, `tests/grade_chain.py`, `solution/reference_watch.py`, `environment/make_bundle_watch.py`, `environment/submit_template.py`, `environment/run_clean_chain.sh`, `environment/public/SPEC_WATCH.md`, `SPEC_WATCH_GIVEN_NOTOOLS.md`, `INSTRUCTION_WATCH_S1/2/3.md`, `transcripts/watch_sonnet`, SESSION.md.
+- Need from others: nothing.
+- Next: grade the three chains and report.

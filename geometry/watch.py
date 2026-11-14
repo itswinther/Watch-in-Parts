@@ -30,6 +30,11 @@ DRIVE_FRACTION = 0.25       # of the driver's tooth pitch: backlash must be smal
 CLEAR_STEPS = 144
 HAND_REACH = 5.0
 COAX_TOL = 0.01
+DAY_HAND_REACH = 3.0
+DAY_HAND_OFFSET = 6.0       # its axis is at least this far from the hour hand's axis
+ASM_STEP = 0.2              # mm any vertex may move between consecutive assembly poses
+ASM_MAX_POSES = 1500
+ASM_CLEAR = 5.0             # a part starts wholly outside the movement's bounding box grown by this
 MAX_PARTS = 60
 MAX_TRIANGLES = 200_000
 MAX_STL_BYTES = 32 * 1024 * 1024
@@ -85,8 +90,10 @@ class Movement:
                     raise FormatError("more than %d parts" % MAX_PARTS)
                 out.append(load_stl(n))
             return out
-        self.fixed_parts = parts(doc.get("fixed"), "fixed")
-        self.fixed = union(self.fixed_parts)
+        self.doc = doc
+        fixed_names = doc.get("fixed")
+        self.fixed_parts = dict(zip(fixed_names if isinstance(fixed_names, list) else [], parts(fixed_names, "fixed")))
+        self.fixed = union(list(self.fixed_parts.values()))
         mob = doc.get("mobiles")
         if not isinstance(mob, dict) or not mob:
             raise FormatError("movement.json: 'mobiles' must be a non-empty object")
@@ -115,8 +122,10 @@ class Movement:
         hd = doc.get("hands")
         if not isinstance(hd, dict):
             raise FormatError("movement.json: 'hands' must be an object")
-        for h in ("hour", "minute", "seconds"):
+        for h in ("hour", "minute", "seconds", "day"):
             e = hd.get(h)
+            if h == "day" and e is None:
+                continue
             if not isinstance(e, dict) or e.get("mobile") not in self.mobiles or e.get("mobile") == "barrel" \
                     or e.get("part") not in self.mobiles[e["mobile"]]["parts"]:
                 raise FormatError("hands.%s: needs 'mobile' and a 'part' that belongs to that mobile" % h)
@@ -157,12 +166,76 @@ class Movement:
         return {"worst_volume": worst[0], "step": worst[1], "steps": SPIN_STEPS}
 
     def held(self, name):
-        """Overlap with everything else after moving the mobile HELD_MOVE along each axis direction."""
-        others = union([self.fixed] + [m["solid"] for k, m in self.mobiles.items() if k != name])
+        """Overlap after moving the mobile HELD_MOVE along each axis direction. Sideways moves are
+        tested against everything else; up and down only against the fixed parts and mobiles that
+        share this mobile's axis (two wheels on different axes must not rest on each other)."""
+        ax = self.mobiles[name]["axis"]
+        side = union([self.fixed] + [m["solid"] for k, m in self.mobiles.items() if k != name])
+        coax = [m["solid"] for k, m in self.mobiles.items()
+                if k != name and math.hypot(m["axis"][0] - ax[0], m["axis"][1] - ax[1]) <= COAX_TOL]
+        updown = union([self.fixed] + coax)
         out = {}
         for label, d in (("+x", (1, 0, 0)), ("-x", (-1, 0, 0)), ("+y", (0, 1, 0)), ("-y", (0, -1, 0)), ("+z", (0, 0, 1)), ("-z", (0, 0, -1))):
-            out[label] = ivol(self.posed(name).translate([c * HELD_MOVE for c in d]), others)
+            out[label] = ivol(self.posed(name).translate([c * HELD_MOVE for c in d]), updown if d[2] else side)
         return out
+
+    def fixed_overlap(self):
+        """Largest overlap between two fixed parts."""
+        names = list(self.fixed_parts)
+        worst, pair = 0.0, None
+        for i in range(len(names)):
+            for j in range(i + 1, len(names)):
+                v = ivol(self.fixed_parts[names[i]], self.fixed_parts[names[j]])
+                if v > worst:
+                    worst, pair = v, names[i] + "/" + names[j]
+        return worst, pair
+
+    # ---- assembly ----
+    def all_parts(self):
+        """name -> (solid, group). Parts of one mobile share a group and may pass through each other."""
+        out = {"barrel": (self.mobiles["barrel"]["solid"], "mobile:barrel")}
+        for n, p in self.fixed_parts.items():
+            out[n] = (p, "fixed:" + n)
+        for k, m in self.mobiles.items():
+            for n, p in m["parts"].items():
+                out[n] = (p, "mobile:" + k)
+        return out
+
+    def assembly_box(self):
+        lo, hi = np.full(3, np.inf), np.full(3, -np.inf)
+        for solid, _ in self.all_parts().values():
+            bb = np.array(solid.bounding_box())
+            lo, hi = np.minimum(lo, bb[:3]), np.maximum(hi, bb[3:])
+        return lo - ASM_CLEAR, hi + ASM_CLEAR
+
+    def assembly_replay(self, order, paths):
+        """Put the parts in one at a time. Returns per-part results and the list installed cleanly.
+        A part is tested against every part placed before it, except parts of its own mobile."""
+        parts = self.all_parts()
+        lo, hi = self.assembly_box()
+        placed, results, installed = [], {}, []
+        for name in order:
+            solid, group = parts[name]
+            P = paths.get(name)
+            msgs = _asm_messages(name, solid, P, lo, hi)
+            res = {"format_messages": msgs, "worst_volume": None, "pose_index": None, "hit": None,
+                   "poses": int(len(P)) if isinstance(P, np.ndarray) and P.ndim == 3 else 0}
+            if not msgs:
+                worst = (0.0, -1, None)
+                for i, T in enumerate(P):
+                    mv = core.apply(solid, T)
+                    for pn, ps, pg in placed:
+                        if pg == group:
+                            continue
+                        v = ivol(mv, ps)
+                        if v > worst[0]:
+                            worst = (v, i, pn)
+                res.update(worst_volume=worst[0], pose_index=worst[1], hit=worst[2])
+                if worst[0] <= VOL_TOL:
+                    installed.append(name)
+            placed.append((name, solid, group))
+            results[name] = res
+        return results, installed
 
     def mesh_run(self, a, ta, b, tb, speeds=None):
         """Turn a declared mesh through max(ta, tb) tooth pitches of the driver. Reports the largest
@@ -250,3 +323,58 @@ def load_movement(folder):
         except FormatError as e:
             raise FormatError("parts/%s.stl: %s" % (name, e))
     return Movement(doc, load_stl)
+
+
+def _asm_messages(name, solid, P, lo, hi):
+    if not isinstance(P, np.ndarray) or P.ndim != 3 or P.shape[1:] != (4, 4):
+        return ["%s: path must be a list of 4x4 matrices" % name]
+    if len(P) < 2 or len(P) > ASM_MAX_POSES:
+        return ["%s: %d poses (allowed 2 to %d)" % (name, len(P), ASM_MAX_POSES)]
+    if not np.isfinite(P).all():
+        return ["%s: non-finite number" % name]
+    if np.abs(P[:, 3, :] - np.array([0, 0, 0, 1.0])).max() > 1e-6:
+        return ["%s: last row of a matrix is not 0 0 0 1" % name]
+    R, t = P[:, :3, :3], P[:, :3, 3]
+    rtr = np.einsum("nji,njk->nik", R, R) - np.eye(3)
+    bad = np.nonzero((np.abs(rtr).max(axis=(1, 2)) > 1e-6) | (np.abs(np.linalg.det(R) - 1) > 1e-6))[0]
+    if len(bad):
+        return ["%s: pose %d is not a proper rotation plus translation" % (name, bad[0])]
+    msgs = []
+    V = core.verts(solid)
+    Wd = np.einsum("nij,vj->nvi", R, V) + t[:, None, :]
+    step = np.linalg.norm(Wd[1:] - Wd[:-1], axis=2).max(axis=1)
+    bad = np.nonzero(step > ASM_STEP + 1e-9)[0]
+    if len(bad):
+        msgs.append("%s: a vertex moves %.4f between poses %d and %d (limit %.2f)" % (name, step[bad[0]], bad[0], bad[0] + 1, ASM_STEP))
+    a, b = Wd[0].min(axis=0), Wd[0].max(axis=0)
+    if not ((b < lo) | (a > hi)).any():
+        msgs.append("%s: first pose is not wholly outside the movement's bounding box grown by %.1f" % (name, ASM_CLEAR))
+    if np.abs(P[-1] - np.eye(4)).max() > 1e-6:
+        msgs.append("%s: last pose is not the identity (parts are given in their assembled position)" % name)
+    return msgs
+
+
+def load_assembly(folder, movement):
+    """assembly.json: {"order": [every part name and "barrel"], "paths": {name: [4x4, ...]}}"""
+    path = os.path.join(folder, "assembly.json")
+    if os.path.getsize(path) > 64 * 1024 * 1024:
+        raise FormatError("assembly.json too large")
+    with open(path, "r", encoding="utf-8") as f:
+        try:
+            doc = json.load(f)
+        except ValueError as e:
+            raise FormatError("assembly.json is not valid JSON") from e
+    if not isinstance(doc, dict) or not isinstance(doc.get("order"), list) or not isinstance(doc.get("paths"), dict):
+        raise FormatError("assembly.json: needs a list 'order' and an object 'paths'")
+    names = set(movement.all_parts())
+    order = []
+    for n in doc["order"]:
+        if n in names and n not in order:
+            order.append(n)
+    paths = {}
+    for n in order:
+        try:
+            paths[n] = np.array(doc["paths"].get(n), dtype=np.float64)
+        except (ValueError, TypeError):
+            paths[n] = None
+    return order, paths

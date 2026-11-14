@@ -1,0 +1,140 @@
+{
+ "case_centre": [
+  -9.744065369752178,
+  -0.19555928476054163
+ ],
+ "fixed": [
+  "main_plate",
+  "bridge",
+  "cock_barrel",
+  "cock_A",
+  "cock_D",
+  "cock_E"
+ ],
+ "mobiles": {
+  "mob_A": {
+   "axis": [
+    -10.62639474403554,
+    -5.574920155834866
+   ],
+   "parts": [
+    "mob_A"
+   ]
+  },
+  "mob_D": {
+   "axis": [
+    -14.785816676057983,
+    -11.205125231266017
+   ],
+   "parts": [
+    "mob_D"
+   ]
+  },
+  "mob_E": {
+   "axis": [
+    -19.53982634085615,
+    -7.544607220518682
+   ],
+   "parts": [
+    "mob_E"
+   ]
+  },
+  "mob_B": {
+   "axis": [
+    -23.006066940355744,
+    -1.9489802771787827
+   ],
+   "parts": [
+    "mob_B"
+   ]
+  },
+  "mob_S": {
+   "axis": [
+    -17.50628751720765,
+    -1.8997228237649018
+   ],
+   "parts": [
+    "mob_S",
+    "hand_sec"
+   ]
+  },
+  "mob_M": {
+   "axis": [
+    -17.50628751720765,
+    -1.8997228237649018
+   ],
+   "parts": [
+    "mob_M",
+    "hand_min"
+   ]
+  },
+  "mob_H": {
+   "axis": [
+    -17.50628751720765,
+    -1.8997228237649018
+   ],
+   "parts": [
+    "mob_H",
+    "hand_hour"
+   ]
+  }
+ },
+ "meshes": [
+  {
+   "driver": "barrel",
+   "driver_teeth": 96,
+   "driven": "mob_A",
+   "driven_teeth": 24
+  },
+  {
+   "driver": "mob_A",
+   "driver_teeth": 52,
+   "driven": "mob_M",
+   "driven_teeth": 26
+  },
+  {
+   "driver": "mob_A",
+   "driver_teeth": 60,
+   "driven": "mob_D",
+   "driven_teeth": 10
+  },
+  {
+   "driver": "mob_D",
+   "driver_teeth": 50,
+   "driven": "mob_E",
+   "driven_teeth": 10
+  },
+  {
+   "driver": "mob_E",
+   "driver_teeth": 48,
+   "driven": "mob_S",
+   "driven_teeth": 12
+  },
+  {
+   "driver": "mob_M",
+   "driver_teeth": 10,
+   "driven": "mob_B",
+   "driven_teeth": 45
+  },
+  {
+   "driver": "mob_B",
+   "driver_teeth": 15,
+   "driven": "mob_H",
+   "driven_teeth": 40
+  }
+ ],
+ "hands": {
+  "hour": {
+   "mobile": "mob_H",
+   "part": "hand_hour"
+  },
+  "minute": {
+   "mobile": "mob_M",
+   "part": "hand_min"
+  },
+  "seconds": {
+   "mobile": "mob_S",
+   "part": "hand_sec"
+  }
+ }
+}

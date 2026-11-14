@@ -2,7 +2,16 @@
 
 ## The job
 
-Design the gear train of a mechanical wristwatch, as 3D-printable parts.
+Design the gear train of a mechanical wristwatch, as 3D-printable parts. The work
+is done in three stages, each by a different engineer who starts from the frozen
+result of the stage before:
+
+1. **Design** the movement (this document up to "Stage 2").
+2. **Extend** it with a 24-hour hand, without touching the existing wheels.
+3. **Assemble** it: an order and a collision-free path for every part.
+
+Your instruction file says which stage you are doing. Read the later stages too:
+what you design in stage 1 has to survive them.
 
 The mainspring barrel is supplied (`meshes/barrel.stl`). It turns **clockwise,
 once every 8 hours**. Drive the watch's **hour, minute and seconds hands** from
@@ -60,7 +69,8 @@ use letters, digits, `_` and `-`.
 }
 ```
 
-- `fixed`: parts that do not move (plates, bridges, pillars, cocks).
+- `fixed`: parts that do not move (plates, bridges, pillars, cocks). Fixed parts
+  must not overlap one another.
 - `mobiles`: each mobile is a set of parts that turn together as one rigid body
   about the vertical line through `axis`. Parts of one mobile may overlap each
   other. Do not list `barrel`; it already exists.
@@ -78,7 +88,8 @@ If either fails the score is 0.
 
 - Files: `movement.json` and every part it names are valid as described above.
 - Assembled: in the positions given, the fixed parts taken together and each
-  mobile (the barrel included) intersect one another by at most 0.01 mm3.
+  mobile (the barrel included) intersect one another by at most 0.01 mm3, and no
+  two fixed parts intersect each other by more than 0.01 mm3.
 
 ## Scored requirements
 
@@ -86,23 +97,30 @@ Each passes or fails. Weights in brackets; the total is 16.
 
 - **Free to turn [1].** Each mobile, turned through a full turn in 72 steps of 5
   degrees, never intersects the fixed parts by more than 0.01 mm3.
-- **Held [2].** Each mobile, the barrel included, moved 0.3 along +x, -x, +y, -y,
-  +z and -z in turn, intersects everything else (fixed parts and other mobiles)
-  by more than 0.01 mm3 every time. So each mobile can turn but cannot wander.
+- **Held [2].** Each mobile, the barrel included, is moved 0.3 along +x, -x, +y,
+  -y, +z and -z in turn and must intersect what holds it by more than 0.01 mm3
+  every time. For the four sideways moves, anything else counts (fixed parts and
+  other mobiles). For the two moves along z, only the fixed parts and mobiles on
+  the same axis (within 0.01) count: a wheel may not be kept in place by a wheel
+  on a different arbor. So each mobile can turn but cannot wander.
 - **The train runs [3].** No mobile is given two different speeds by the
   declared meshes, each of the three hand mobiles is driven from the barrel, and
-  every declared mesh passes this test: the driver is turned in steps of one
-  eighth of its tooth pitch, the driven mobile turning with it at the speed the
-  tooth counts give, for 8 x max(driver teeth, driven teeth) steps. Then
+  every declared mesh passes this test. Starting from the assembled position,
+  at step i (i = 0, 1, ..., 8 x max(driver teeth, driven teeth) - 1) the driver
+  is turned counter-clockwise (seen from +z) by i x 360 / (8 x driver teeth)
+  degrees about its axis and the driven mobile clockwise by that angle x driver
+  teeth / driven teeth about its own. Then
   - at every step the two mobiles intersect by at most 0.01 mm3 (no jam);
   - at every fourth step the smallest distance between them is at most 0.1
     (they stay engaged);
   - at every eighth step, turning the driver a further quarter of its tooth
-    pitch while the driven mobile is held makes them intersect by more than
-    0.01 mm3 (the teeth really drive).
-- **Nothing else collides [1].** Every pair of mobiles that does not mesh, turned
-  together at their own speeds (144 steps over one turn of the faster, and 144
-  over one turn of one relative to the other), intersects by at most 0.01 mm3.
+    pitch (90 / driver teeth degrees, counter-clockwise) while the driven mobile
+    is held makes them intersect by more than 0.01 mm3 (the teeth really drive).
+- **Nothing else collides [1].** Every pair of mobiles that does not mesh is
+  turned together at the speeds the tooth counts give (a mobile that is not
+  driven stands still): 144 equal steps covering one full turn of the faster of
+  the two, then 144 equal steps covering one full turn of one relative to the
+  other. At every step they intersect by at most 0.01 mm3.
 - **Hour hand [2], minute hand [2], seconds hand [2], hand arrangement [1].** The
   watch must tell the time: the hands must move as the hands of a watch do.
 - **Hands reach [1].** Each hand part reaches at least 5.0 from its axis.
@@ -116,6 +134,73 @@ Each passes or fails. Weights in brackets; the total is 16.
 p     = (weight of scored requirements passed) / 16
 score = 0 if a hard requirement fails, otherwise
 score = 0.5 * p^2 + 0.5 * (1 if every scored requirement passes, else 0)
+```
+
+## Stage 2: add a 24-hour hand
+
+You receive a finished stage-1 movement in `work/` (the same files are in
+`previous/` for reference). Add a **24-hour hand**: a fourth hand that shows day
+and night. Declare it as `"day"` under `hands`.
+
+What is frozen:
+
+- every mobile of the received movement keeps its name and its axis;
+- every part file of those mobiles stays byte-for-byte the same and stays in its
+  mobile (you may add new parts to a mobile);
+- every declared mesh stays, and the hour, minute and seconds entries under
+  `hands` stay.
+
+You may add mobiles, add parts, add meshes, and replace or add fixed parts.
+
+Hard requirements: the two of stage 1, plus the frozen items above.
+
+Scored requirements (total weight 20): all ten of stage 1, still passing with
+their weights, plus
+
+- **24-hour hand [3].** It moves as a 24-hour hand does.
+- **24-hour hand placement [1].** Its axis is at least 6.0 from the hour hand's
+  axis, and the hand part reaches at least 3.0 from its own axis.
+
+Score: the stage-1 formula with p out of 20.
+
+## Stage 3: assemble it
+
+You receive a finished stage-2 movement in `work/` (also in `previous/`).
+`movement.json` and every part file are frozen: byte-for-byte unchanged.
+
+Write `work/assembly.json`:
+
+```
+{"order": ["part_name", ...], "paths": {"part_name": [P, P, ...], ...}}
+```
+
+`order` lists every part named in `movement.json`, and `barrel`, in the order
+they are put in. Each P is a 4x4 matrix as four rows of four numbers that moves
+the part from its assembled position (`world = R * assembled + t`, last row
+`0 0 0 1`); the parts are given in their assembled position, so the last pose of
+every path is the identity.
+
+Rules for a path:
+
+1. Every matrix is finite and a proper rotation plus translation (R^T R = I and
+   det R = +1, within 1e-6); the last pose is the identity within 1e-6.
+2. In the first pose the part's bounding box lies wholly outside the bounding box
+   of the complete movement (all parts and the barrel, assembled) grown by 5.0 on
+   every side.
+3. Between consecutive poses no vertex of the part moves more than 0.2.
+4. At least 2 and at most 1,500 poses.
+5. In every pose the part intersects each part placed before it by at most
+   0.01 mm3. Parts of the same mobile are pressed onto each other and are not
+   tested against one another. The barrel counts as a part of the mobile `barrel`.
+
+A part whose path obeys rules 1 to 5 is installed. A part that breaks a rule is
+not installed, but it still stands in its assembled position for the parts that
+follow.
+
+```
+p     = (parts installed) / (all parts, the barrel included)
+score = 0 if movement.json or a part file was changed, or assembly.json cannot be read
+score = 0.5 * p^2 + 0.5 * (1 if every part is installed, else 0)
 ```
 
 ## Tools

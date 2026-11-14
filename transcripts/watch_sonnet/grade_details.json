@@ -1,0 +1,224 @@
+{
+ "reward": 1.0,
+ "p": 1.0,
+ "gates": {
+  "files": true,
+  "assembled": true
+ },
+ "checks": {
+  "spin": true,
+  "held": true,
+  "train": true,
+  "clear": true,
+  "minute": true,
+  "hour": true,
+  "seconds": true,
+  "coaxial": true,
+  "hands": true,
+  "size": true
+ },
+ "details": {
+  "files": {},
+  "assembled": {
+   "worst_volume": 0.0,
+   "pair": null,
+   "fixed_parts_worst": 0.0,
+   "fixed_pair": null
+  },
+  "spin": {
+   "barrel": {
+    "worst_volume": 0.0,
+    "step": 0,
+    "steps": 72
+   },
+   "mob_A": {
+    "worst_volume": 0.0,
+    "step": 0,
+    "steps": 72
+   },
+   "mob_D": {
+    "worst_volume": 0.0,
+    "step": 0,
+    "steps": 72
+   },
+   "mob_E": {
+    "worst_volume": 0.0,
+    "step": 0,
+    "steps": 72
+   },
+   "mob_B": {
+    "worst_volume": 0.0,
+    "step": 0,
+    "steps": 72
+   },
+   "mob_S": {
+    "worst_volume": 0.0,
+    "step": 0,
+    "steps": 72
+   },
+   "mob_M": {
+    "worst_volume": 0.0,
+    "step": 0,
+    "steps": 72
+   },
+   "mob_H": {
+    "worst_volume": 0.0,
+    "step": 0,
+    "steps": 72
+   }
+  },
+  "held": {
+   "barrel": {
+    "+x": 0.24106062956192745,
+    "-x": 0.5035008688509082,
+    "+y": 0.2949339365394457,
+    "-y": 0.48099324037487257,
+    "+z": 0.6766477108078183,
+    "-z": 15.929314484561843
+   },
+   "mob_A": {
+    "+x": 0.5059707622131847,
+    "-x": 0.6334395724750871,
+    "+y": 0.6943397272301643,
+    "-y": 0.4785313275950339,
+    "+z": 0.6766481662120385,
+    "-z": 1.6282754420525007
+   },
+   "mob_D": {
+    "+x": 0.3800010129664094,
+    "-x": 0.3975436344680955,
+    "+y": 0.5396211608602408,
+    "-y": 0.24025698827235376,
+    "+z": 0.711088788988141,
+    "-z": 0.17542740773069332
+   },
+   "mob_E": {
+    "+x": 0.5212456430850332,
+    "-x": 0.2692784577059758,
+    "+y": 0.4038453225950057,
+    "-y": 0.38533517196137834,
+    "+z": 0.329375756473061,
+    "-z": 5.419834968680372
+   },
+   "mob_B": {
+    "+x": 0.5204521444892363,
+    "-x": 0.22384209044659775,
+    "+y": 0.40787665339904194,
+    "-y": 0.40178827669453865,
+    "+z": 0.7336922153699434,
+    "-z": 0.17542707102106886
+   },
+   "mob_S": {
+    "+x": 0.852888865165989,
+    "-x": 0.9521567039005079,
+    "+y": 0.8087656605331617,
+    "-y": 0.9725550585849457,
+    "+z": 0.1852684851196423,
+    "-z": 0.8413789535977566
+   },
+   "mob_M": {
+    "+x": 1.476414421984757,
+    "-x": 1.3673520419721439,
+    "+y": 1.3476566734662203,
+    "-y": 1.5341467789006533,
+    "+z": 2.3141333506347195,
+    "-z": 0.1852684851196423
+   },
+   "mob_H": {
+    "+x": 0.7231726863868585,
+    "-x": 0.8740939147705965,
+    "+y": 0.8216558216573778,
+    "-y": 0.8250881890451478,
+    "+z": 2.5786434181694733,
+    "-z": 1.8024601628069707
+   }
+  },
+  "train": {
+   "conflicts": [],
+   "meshes": [
+    {
+     "worst_volume": 0.0,
+     "step": 0,
+     "steps": 768,
+     "largest_gap": 0.02732380321383777,
+     "smallest_drive_overlap": 0.07220087056018198,
+     "pair": "barrel/mob_A"
+    },
+    {
+     "worst_volume": 0.0,
+     "step": 0,
+     "steps": 416,
+     "largest_gap": 0.027248339881200137,
+     "smallest_drive_overlap": 0.06404346966106622,
+     "pair": "mob_A/mob_M"
+    },
+    {
+     "worst_volume": 0.0,
+     "step": 0,
+     "steps": 480,
+     "largest_gap": 0.02725987059870896,
+     "smallest_drive_overlap": 0.044191015346756006,
+     "pair": "mob_A/mob_D"
+    },
+    {
+     "worst_volume": 0.0,
+     "step": 0,
+     "steps": 400,
+     "largest_gap": 0.027307274101169482,
+     "smallest_drive_overlap": 0.04299187281446993,
+     "pair": "mob_D/mob_E"
+    },
+    {
+     "worst_volume": 0.0,
+     "step": 0,
+     "steps": 384,
+     "largest_gap": 0.027289432237589062,
+     "smallest_drive_overlap": 0.041931689897396866,
+     "pair": "mob_E/mob_S"
+    },
+    {
+     "worst_volume": 0.0,
+     "step": 0,
+     "steps": 360,
+     "largest_gap": 0.027277566161009955,
+     "smallest_drive_overlap": 0.04211961972502289,
+     "pair": "mob_M/mob_B"
+    },
+    {
+     "worst_volume": 0.0,
+     "step": 0,
+     "steps": 320,
+     "largest_gap": 0.027263047700697565,
+     "smallest_drive_overlap": 0.049281633901732895,
+     "pair": "mob_B/mob_H"
+    }
+   ]
+  },
+  "clear": {
+   "worst_volume": 0.0,
+   "pair": null
+  },
+  "minute": {
+   "clockwise_turns_per_hour": "1"
+  },
+  "hour": {
+   "clockwise_turns_per_hour": "1/12"
+  },
+  "seconds": {
+   "clockwise_turns_per_hour": "60"
+  },
+  "coaxial": {
+   "distance": 0.0
+  },
+  "hands": {
+   "hour": 7.017834259023518,
+   "minute": 10.505831467630895,
+   "seconds": 12.501224714265524
+  },
+  "size": {
+   "radius": 20.448316385696028,
+   "z_min": -1.0,
+   "z_max": 6.599999904632568
+  }
+ }
+}
