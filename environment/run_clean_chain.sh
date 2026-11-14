@@ -1,5 +1,5 @@
 #!/bin/bash
-# Run the three watch stages with clean headless agents, one fresh conversation per stage.
+# Run the four watch stages (design, extend, change, assemble) with clean headless agents, one fresh conversation per stage.
 #   environment/run_clean_chain.sh RUN_DIR MODEL
 # RUN_DIR must be outside the repo (no CLAUDE.md above it). Leaves RUN_DIR/stageN/ and RUN_DIR/stageN.jsonl.
 set -u
@@ -17,7 +17,7 @@ Budget: about 35 minutes of work; you are stopped at 39. Submit early and resubm
 
 When you finish, write a short factual report: what you submitted, how you checked it and against which requirements, the difficulties and dead ends in the order you hit them, and anything in the spec or tools that was ambiguous or broken.'
 prev=""
-for st in 1 2 3; do
+for st in 1 2 3 4; do
   d=$RUN/stage$st
   if [ $st -gt 1 ]; then
     [ -f "$prev/movement.json" ] || { echo "stage $st skipped: no submission from stage $((st-1))" > $RUN/stage$st.skipped; break; }

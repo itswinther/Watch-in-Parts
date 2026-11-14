@@ -3,20 +3,24 @@
 ## The job
 
 Design the gear train of a mechanical wristwatch, as 3D-printable parts. The work
-is done in three stages, each by a different engineer who starts from the frozen
-result of the stage before:
+is done in four stages, each by a different engineer who starts from the result
+of the stage before:
 
 1. **Design** the movement (this document up to "Stage 2").
 2. **Extend** it with a 24-hour hand, without touching the existing wheels.
-3. **Assemble** it: an order and a collision-free path for every part.
+3. **Change** it: the barrel now turns faster; rework the movement for that while
+   keeping as many of the received part files as you can.
+4. **Assemble** it: an order and a collision-free path for every part.
 
 Your instruction file says which stage you are doing. Read the later stages too:
-what you design in stage 1 has to survive them.
+what you design in stage 1 has to survive them, and the size limit is the same
+at every stage.
 
 The mainspring barrel is supplied (`meshes/barrel.stl`). It turns **clockwise,
-once every 8 hours**. Drive the watch's **hour, minute and seconds hands** from
-it. There is no escapement and no winding or setting mechanism in this task: the
-barrel is simply the driver, and the grader turns it at that steady speed.
+once every 8 hours** (at stage 3 it turns once every 6 hours; see "Stage 3").
+Drive the watch's **hour, minute and seconds hands** from it. There is no
+escapement and no winding or setting mechanism in this task: the barrel is simply
+the driver, and the grader turns it at that steady speed.
 
 You make every other part: wheels, pinions, arbors, plates, bridges and the three
 hands.
@@ -124,9 +128,9 @@ Each passes or fails. Weights in brackets; the total is 17.
 - **Hour hand [2], minute hand [2], seconds hand [2], hand arrangement [1].** The
   watch must tell the time: the hands must move as the hands of a watch do.
 - **Hands reach [1].** Each hand part reaches at least 5.0 from its axis.
-- **Size [1].** Everything, as it turns, stays within 23.0 of the vertical line
+- **Size [1].** Everything, as it turns, stays within 20.7 of the vertical line
   through `case_centre`, and the whole movement including the barrel is at most
-  16.0 tall in z.
+  13.4 tall in z. These limits are the same at every stage.
 - **Printable [1].** The smallest printable feature is 0.2. Each of your parts
   (not the barrel) is tested like this: it is turned into voxels on a 0.05 grid,
   a voxel being solid when its centre is inside the part. A solid voxel survives
@@ -173,9 +177,49 @@ their weights, plus
 
 Score: the stage-1 formula with p out of 21.
 
-## Stage 3: assemble it
+## Stage 3: change request, a faster barrel
 
-You receive a finished stage-2 movement in `work/` (also in `previous/`).
+You receive a finished stage-2 movement in `work/` (the same files are in
+`previous/` for reference). The barrel is replaced by one that is identical in
+every way (same `meshes/barrel.stl`, same place, same teeth) except that it turns
+**clockwise once every 6 hours** instead of once every 8. Rework the movement so
+that it meets every requirement of stage 2 with this barrel, and keep as many of
+the received part files as you can.
+
+Nothing is frozen: you may change, add, remove and rename anything. The hard
+requirements are the two of stage 1. The scored requirements are all thirteen of
+stage 2 with their weights (total 21), tested with the barrel turning once every
+6 hours. The hands must still move as the hands of a watch do, and the 24-hour
+hand as a 24-hour hand does.
+
+Kept parts. A received part (a part named in the received `movement.json`) is
+**kept** if its file in your submission is byte-for-byte the same as the received
+file and
+
+- for a received fixed part: it is still listed under `fixed`;
+- for a received part of a mobile: it is still in a mobile of the same name, whose
+  axis is the same as the received mobile's axis, and that mobile is driven from
+  the barrel by the declared meshes.
+
+A received file that is not named in your `movement.json`, that moves to another
+mobile, to a renamed mobile or to `fixed`, or that sits on a mobile nothing drives,
+is not kept.
+
+```
+kept share = (received parts that are kept) / (received parts)
+factor     = min(1, kept share / (15/17))
+p          = (weight of scored requirements passed) / 21
+score      = 0 if a hard requirement fails, otherwise
+score      = (0.5 * p^2 + 0.5 * (1 if every scored requirement passes, else 0)) * factor
+```
+
+15/17 (about 0.882) is the kept share of a reference solution, which keeps 15 of
+the 17 part files it receives. The factor is exactly 1 at a kept share of 15/17
+or more.
+
+## Stage 4: assemble it
+
+You receive a finished stage-3 movement in `work/` (also in `previous/`).
 `movement.json` and every part file are frozen: byte-for-byte unchanged.
 
 Write `work/assembly.json`:

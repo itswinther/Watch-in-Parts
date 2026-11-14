@@ -19,8 +19,11 @@ BARREL_WHEEL_Z = (0.0, 1.0)
 BARREL_ARBOR_Z = (-1.0, 1.6)
 BARREL_ARBOR_R = 0.5
 BARREL_TURNS_PER_HOUR = Fraction(1, 8)          # clockwise
-CASE_RADIUS = 23.0
-CASE_HEIGHT = 16.0
+CASE_RADIUS = 20.7         # reference reaches 20.354 at its largest stage, plus 0.3, rounded up to 0.05
+CASE_HEIGHT = 13.4         # reference is 13.1 tall, plus 0.3
+# stage 3, change request: the supplied barrel (same mesh) turns clockwise once every 6 hours instead of 8
+CHANGED_BARREL_TURNS_PER_HOUR = Fraction(1, 6)
+REF_KEPT_SHARE = Fraction(15, 17)   # the reference keeps 15 of the 17 part files it receives at stage 3
 VOL_TOL = 0.01              # mm3
 SPIN_STEPS = 72             # free-spin test: steps of 5 degrees
 HELD_MOVE = 0.3
@@ -96,6 +99,7 @@ class Movement:
                 out.append(load_stl(n))
             return out
         self.doc = doc
+        self.barrel_speed = BARREL_TURNS_PER_HOUR      # the grader sets CHANGED_BARREL_TURNS_PER_HOUR at stage 3
         fixed_names = doc.get("fixed")
         self.fixed_parts = dict(zip(fixed_names if isinstance(fixed_names, list) else [], parts(fixed_names, "fixed")))
         self.fixed = union(list(self.fixed_parts.values()))
@@ -144,7 +148,7 @@ class Movement:
     def speeds(self):
         """Clockwise turns per hour of every mobile reached from the barrel, as exact fractions.
         Returns (speeds, conflicts). Every declared mesh is external: it reverses direction."""
-        w = {"barrel": BARREL_TURNS_PER_HOUR}
+        w = {"barrel": self.barrel_speed}
         conflicts = []
         changed = True
         while changed:
