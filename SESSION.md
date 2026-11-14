@@ -9,7 +9,7 @@ table. Everything below "Session entries" is append-only, newest at the bottom.
 | ID | Workstream | Owner | Status | Last update |
 | --- | --- | --- | --- | --- |
 | A | Harness wiring | Mikael | session running. No starter kit exists (see 02:20 entry). Docker and Harbor 0.25.0 installed locally; building the Harbor task around B's grader next | 2026-11-14 02:20 |
-| B | Reference script and grader | itswinther | H1 and H2 are both scrapped (no gap). The team is choosing a new challenge; nothing is being built | 2026-11-14 03:05 |
+| B | Reference script and grader | itswinther | NOW: building "Moving Day" (fixed apartment, furniture carried in pose by pose, order matters). Hardest instance first, then clean agent runs | 2026-11-14 03:14 |
 | C | Hold the Line spike | unassigned | not started | |
 | D | Mentor questions, anchors, transcripts | unassigned | not started | |
 | E | Analysis, demo and story | Yoseph | paused: Yoseph is not working overnight | 2026-11-14 01:40 |
@@ -64,6 +64,7 @@ Append one line per decision: time, decision, who agreed.
 - 2026-11-14 02:58 SPEC.md is version 0.2: the judged instance is H2, specified in `environment/public/SPEC_H2.md`. Agreed: itswinther (asked for the four changes).
 - 2026-11-14 02:58 Interface for A (H2): the grader call is `python -I tests/grade_h2.py /abs/base.stl /abs/lid.stl /abs/assembly.json --reward FILE [--details FILE]`; the three artifacts are `base.stl`, `lid.stl`, `assembly.json` (the door is gone). `python environment/make_bundle.py DIR` writes everything the agent may see. B says yes to running the tools inside the agent container: the bundle holds no weights, gate list, check code or reference.
 - 2026-11-14 03:05 Board in a Box is scrapped as the challenge, both H1 and H2. Reason: clean agents score 1.0 on H1 and 0.97 on H2 within five minutes. The team will pick a new idea with a real gap. Decided: itswinther. The code stays in the repo for now; nothing depends on it.
+- 2026-11-14 03:14 New challenge to test: "Moving Day". Fixed apartment mesh and N furniture meshes with given final poses; the agent submits one JSON with the carry-in order and a rigid pose-by-pose path per piece; score 0.5 p^2 + 0.5 [all delivered]. Nothing is designed, so there are no design loopholes. Decided: itswinther (other teammates are testing other ideas in parallel). B builds the hardest instance it can and measures it with clean agents before anything else is built.
 
 ## Proposed spec changes
 
@@ -289,3 +290,11 @@ Template:
 - Files changed: `transcripts/h2_sonnet/`, SESSION.md.
 - Need from others: A, the Harbor wiring is still useful for any new idea, but do not build further around `grade.py` or `grade_h2.py`.
 - Next: wait for the new idea. Lesson to carry over: test any idea with a clean agent run within its first hour.
+
+### 2026-11-14 03:14 | B Moving Day (starting) | itswinther + Claude
+- Did: starting the Moving Day measurement on itswinther's handoff. First instance is the hardest I can author: a corner sofa that must be carried on its back, tipped on end in the right direction under a 258 ceiling and walked round an L-corridor; a 232-tall wardrobe that only tips upright one way under a 238 ceiling; and two pieces whose final poses block the others' routes. Code goes in `geometry/md.py`, `tests/grade_md.py`, `solution/reference_md.py`, `environment/tools_md.py`.
+- Verified by (command and result): nothing yet.
+- Not verified, or assumed: that this produces a gap.
+- Files changed: SESSION.md.
+- Need from others: nothing.
+- Next: reference at 1.0, anchors, then two or three clean agent runs.
