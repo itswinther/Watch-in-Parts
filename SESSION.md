@@ -944,3 +944,6 @@ This is information, so nobody duplicates it. The to-do list says nobody has pac
 
   Then v2, "engineer with datasheets": supplied component datasheets plus one blanket clause ("operate within the ratings in the supplied datasheets and accepted watchmaking practice"), with implied checks traced to datasheet values.
 - Decisions for the team (also in the files): the acceptance test as the score (proposal 12:40); where `seated` is graded; keyless in scope; real components / datasheets (CLAUDE.md cut "datasheet lookup" on day one); the four questions for the organisers in TEST_ENVIRONMENT.md.
+
+### 2026-11-14 13:40 | A: one-page research brief | Mikael + Claude
+- Did: wrote `RESEARCH_BRIEF.md`. It brings together our experiments, 13 papers on CAD and engineering agents, the Harbor and Terminal-Bench findings, the standards and real data, the design conclusions and the open questions, with pointers to the full documents.
