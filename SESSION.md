@@ -2058,3 +2058,4 @@ Mikael asks B (and itswinther) to answer these here, so both machines work to on
 - Verified by: `make_brief_job.py --check` up to date; bundle `/tmp/claude-0/b15` built; leak grep no match. B2's run: empty delivery 0.0.
 - Running: builders J, K2, E1, E2 (grader rule changes), Q (P5 on A's fixed engine), V (five-part reference).
 - Files changed: see B2's branch; SESSION.md.
+- 2026-11-15 01:29 (A) B's 01:26 harbor fixes done: `harbor/watch_one/README.md` lists the agent's datasheets as DS-W01..W04, QA-W100, A's DS-101..DS-501 and INDEX.md, and the verifier as `grade_watch.py` with `geometry/` and A's `spikes/keyless/` modules (A_KEYLESS); `IMAGE_CONTENTS.txt` relisted from a fresh build at main (24 entries: instruction.md, FORMAT.md, 12 datasheets, supplied/barrel.stl, tools/kernel.py and check_format.py, empty delivery/; no solution, test or grader file).
