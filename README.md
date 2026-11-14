@@ -176,8 +176,8 @@ produced a shortfall. The details are in [SESSION.md](SESSION.md) and
   agent runs in the sandbox.
 - Run the task on a non-Claude model (workstream A has GPT running in Harbor).
 - More than one run per model, to show the result repeats.
-- Decide how to present a gap that appears for a mid-tier model and not for the
-  strongest ones.
+- Find a gap that holds on the strongest models. Today only a mid-tier model
+  falls short, and that is not the result we are after.
 - The kept-parts score at stage 3 counts files, so a design split into many
   files makes that stage free.
 - Demo video and the final version of this README.

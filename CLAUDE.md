@@ -6,12 +6,25 @@ for the AfterQuery challenge at Junction 2026. Final submission is Sunday 15 Nov
 other teammates at the same time; who is active is in the Current state table in
 `SESSION.md`. The files below are how you stay in step with them.
 
-## Current focus (updated 14 Nov, 04:50)
+## Current focus (updated 14 Nov, 10:25)
 
 The task named in this file, Board in a Box, is retired: clean agents scored 1.0
-on it. The current task is the staged mechanical watch gear train. Its state and
-the plan for the overnight build are in `HANDOFF_OVERNIGHT.md`. The rules in this
-file still apply to every session.
+on it. The current task is the staged mechanical watch gear train; its state is in
+`SESSION.md` (latest entries) and `README.md`. The rules in this file still apply
+to every session.
+
+**The goal is a real gap on frontier models.** That means the strongest models we
+can run (Fable, Opus and GPT class) consistently scoring below the reference, for
+reasons we can explain. A shortfall that only a mid-tier model shows is evidence
+about the mechanism, not the result we are after.
+
+**Do not limit scope or thinking by the time left.** This applies to every
+session, including the ones that wrote this file. Do not drop, shrink or
+postpone an idea because the deadline is near, do not propose freezing the task
+to be safe, and do not settle for a weaker claim because it is the one we can
+already support. Say what you think would work best and what it takes. The
+deadline (Sunday 15 Nov, 10:00 Helsinki) is a fact to state when asked; what to
+cut, if anything, is the humans' decision.
 
 - `README.md`  what the project is
 - `SPEC.md`    the task, the checks and the score. Single source of truth.
@@ -122,8 +135,8 @@ Raise these with your human before reopening them.
 - The reference run is one parametric script replayed by Harbor's oracle agent.
 - Cut from scope: the design-revision step, the support-free printing rule, the
   datasheet lookup step, the small-model training tiebreaker.
-- Two ideas are spiked in parallel; the choice is made Saturday 09:00 from
-  transcripts. Latest switch is Saturday 16:00.
+- (Superseded on 14 Nov: the old plan to choose between two ideas at Saturday
+  09:00 with a latest switch at 16:00 no longer applies. See "Current focus".)
 
 ## Unknown, do not assume
 
