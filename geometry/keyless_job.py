@@ -61,6 +61,7 @@ BARREL_DIR = (0.0, 0.0, 1.0)
 CROP_MARGIN = 2.0
 SLIDE_REACH = 6.0
 KEYLESS_TIMEOUT_S = 5400    # s, the whole Part 5 run (bounded by the grader's whole-run limit)
+KEYLESS_JOBS = 3          # Part 5 phases in this many spawned interpreters (no fork; A 23:12 proposal, B agreed): wall time about the wind phase
 BODY_KINDS = ("free", "spring")
 DOFS = ("rot", "slide")
 

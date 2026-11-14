@@ -725,7 +725,7 @@ def grade_job(folder):
             g, d = p5["prep"]
             c = {k: False for k in by_id["P5"][4]}
             if g["files"]:
-                c, d["acceptance"] = keyless_run(p5["work"], deadline)
+                c, d["acceptance"] = keyless_run(p5["work"], deadline, jobs=KJ.KEYLESS_JOBS)
             raw["P5"] = (g, c, d)
         try:
             if "prep" in p5:

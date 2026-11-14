@@ -6,7 +6,8 @@ constants are set to B's scale from geometry/keyless_job.py SCALE_TABLE in this 
 after another here (no fork after manifold's threads exist; Decisions 17:46, A 18:20). OUT.json is rewritten after
 each phase, so a run stopped by the time limit keeps the phases it finished.
 --force runs AT-1 to AT-6 even when the rest gate fails (diagnosis only; A's rule, used by the grader, skips them).
---jobs N > 1 runs the phases in N spawned interpreters (diagnosis only: each holds the whole world in memory).
+--jobs N > 1 runs the phases in N spawned interpreters (each holds the whole world in memory); the one-job grader
+uses KEYLESS_JOBS (geometry/keyless_job.py).
 Never runs submitted code; reads only WORLD_DIR."""
 import json
 import math
