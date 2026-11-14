@@ -860,3 +860,8 @@ This is information, so nobody duplicates it. The to-do list says nobody has pac
 - Being tried first in `spikes/keyless/` (scoring switched after its current anchor run, old and new scoring compared on the same anchors), then with OpenCode on Opus and Sonnet and with GPT on Codex.
 - Also new on main: `tools/viewer/export_axes.py`, a viewer for mechanisms with axes in any direction, and the right-angle README note "Known spec weakness".
 - Need from others: the team's yes or no on the proposal. B owns the watch spec.
+
+### 2026-11-14 12:50 | A: plan for one staged task accepted as a whole | Mikael + Claude
+- Did: wrote `spikes/STAGED_ACCEPTANCE_PLAN.md`. It joins the day's findings into one design: B's frozen stages, plus a keyless stage (contact-simulated: click, ratchet, sliding pinion, setting lever), plus one owner's acceptance test run in order on the finished watch (assemble, wind, hold, run, backward, set, return).
+- The key choice: the brief states the full acceptance test from the start, but it runs only at the end. Running it at every stage would turn later consequences into present requirements, which agents check, and would have erased GPT's 0.42.
+- Need from others: three decisions listed at the end of the file (acceptance test yes or no, where `seated` is graded, keyless stage in scope).
