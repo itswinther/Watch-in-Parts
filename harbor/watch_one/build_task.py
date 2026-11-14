@@ -62,19 +62,23 @@ GRADERS = {
         "verifier_timeout_sec": 800.0,                      # 2 x the slowest grading seen (374 s, B, loaded host; 136-165 s here)
         "verifier_memory_mb": 4096,                         # measured peak 1.72 GB (oracle, /usr/bin/time), 2.4x margin
     },
-    # B's 15:44 interface. Bundle: B's updated make_bundle_watch.py OUT (its datasheets/, supplied/,
-    # tools/kernel.py, tools/check_format.py are taken by allowlist); brief: the bundle's instruction.md
-    # or PROMPT.md if it writes one, else "prompt" below. Timeout and memory: replace with B's measurements.
+    # B's 15:44 interface, paths from B's 16:35 answer. Bundle: environment/make_bundle_job.py OUT (no flags)
+    # writes instruction.md (-> the task's instruction.md, not /app), FORMAT.md (-> /app/FORMAT.md),
+    # datasheets/DS-W01..W03, supplied/barrel.stl, tools/kernel.py, tools/check_format.py, delivery/.
+    # Reference: reference_watch.py OUT --job writes the delivery directly at OUT.
+    # Timeout and memory: a guess (about 2x the stage-1 grading) until B posts the measured numbers.
     "one-job": {
         "args": "",
+        "bundle_script": "environment/make_bundle_job.py",
         "bundle_args": [],
         "bundle_map": None,                                 # take the allowlisted layout as B writes it
-        "prompt": os.path.join(REPO, "PROMPT.md"),          # fallback; B to confirm the path
+        "extra_allow": ["FORMAT.md"],
+        "prompt": os.path.join(REPO, "PROMPT.md"),          # fallback only; B's bundle writes instruction.md
         "tests": ["tests/grade_watch.py", "geometry"],
         "solution": ["solution/reference_watch.py", "geometry"],
-        "reference": "PYTHONPATH=/solution python3 reference_watch.py /tmp/reference",
-        "reference_out": "/tmp/reference",                  # B to confirm where the one delivery is written
-        "verifier_timeout_sec": 2400.0,                     # P1 + P3 are two design gradings (~150-370 s each) + P4
+        "reference": "PYTHONPATH=/solution python3 reference_watch.py /app/delivery --job",
+        "reference_out": None,                              # written in place at /app/delivery
+        "verifier_timeout_sec": 2400.0,
         "verifier_memory_mb": 4096,
     },
 }
@@ -138,9 +142,9 @@ SOLVE_SH = """#!/bin/bash
 {canary}# Build the reference by running B's reference script, then place its output as the delivery.
 set -e
 cd /solution
-rm -rf /tmp/reference /app/delivery
+rm -rf /tmp/reference /app/delivery && mkdir -p /app/delivery
 {reference}
-cp -r {reference_out} /app/delivery
+{place}
 ls -R /app/delivery | head -50
 """
 
@@ -200,7 +204,7 @@ PROMPT_NAMES = ("instruction.md", "INSTRUCTION.md", "PROMPT.md")   # a brief B's
 
 
 def allow_patterns(G):
-    extra = [re.escape(v) for v in (G["bundle_map"] or {}).values()]
+    extra = [re.escape(v) for v in list((G["bundle_map"] or {}).values()) + G.get("extra_allow", [])]
     return [re.compile(p + r"\Z") for p in ALLOW + tuple(extra)]
 
 
@@ -209,7 +213,10 @@ def bundle(app, G):
     pats, brief_text = allow_patterns(G), None
     with tempfile.TemporaryDirectory() as tmp:
         b = os.path.join(tmp, "bundle")
-        subprocess.run([sys.executable, "-I", os.path.join(REPO, "environment", "make_bundle_watch.py"), b]
+        script = G.get("bundle_script", "environment/make_bundle_watch.py")
+        if not os.path.isfile(os.path.join(REPO, script)):
+            raise SystemExit("%s is not in this checkout yet (B's bundle builder)" % script)
+        subprocess.run([sys.executable, "-I", os.path.join(REPO, script), b]
                        + G["bundle_args"], check=True, stdout=subprocess.DEVNULL)
         if G["bundle_map"]:
             pairs = list(G["bundle_map"].items())
@@ -369,7 +376,8 @@ def main(argv):
     copy_repo(G["solution"], sol)
     open(os.path.join(sol, ".harborignore"), "w").write("__pycache__/\n")
     open(os.path.join(sol, "solve.sh"), "w").write(SOLVE_SH.format(
-        canary=CANARY_SH, reference=G["reference"], reference_out=G["reference_out"]))
+        canary=CANARY_SH, reference=G["reference"],
+        place=("rm -rf /app/delivery && cp -r %s /app/delivery" % G["reference_out"]) if G["reference_out"] else "# the reference wrote /app/delivery in place"))
     os.chmod(os.path.join(sol, "solve.sh"), 0o755)
     print("task written to %s (agent %s, grader %s, %d files in the agent's /app)" % (out, agent, grader, n))
 

@@ -62,7 +62,7 @@ time. The oracle runs on the same task as the OpenCode runs.
 | | |
 |---|---|
 | Delivery | `/app/delivery`: `movement.json` (8 h barrel), `variant_6h.json` (6 h barrel), `assembly.json`, `parts/<name>.step`, `scripts/` (optional). It starts empty, and the build refuses a pre-filled one. |
-| Agent's `/app` | `datasheets/`, `supplied/barrel.stl`, `tools/kernel.py`, `tools/check_format.py` and an empty `delivery/`. The files are taken by allowlist from whatever `environment/make_bundle_watch.py` writes. |
+| Agent's `/app` | `FORMAT.md`, `datasheets/`, `supplied/barrel.stl`, `tools/kernel.py`, `tools/check_format.py` and an empty `delivery/`. The files are taken by allowlist from whatever B's bundle builder writes (`make_bundle_job.py` for one-job). |
 | Brief | `instruction.md`, with the canary first and HTML comments stripped. It comes from B's bundle builder if it writes `instruction.md` or `PROMPT.md`, or else from the grader entry's `prompt` path. `--prompt FILE` overrides both. |
 | Grader | `tests/test.sh` writes reward 0, then runs `python3 -I /tests/grade_watch.py /app/delivery [--stage 1] --reward … --details …` under `/usr/bin/time -v`. It copies `details.json` to `/logs/verifier/` and overwrites `reward.txt` only if the grader exits 0. The grader and `geometry/` are baked into the verifier image (`tests/Dockerfile`), never into the agent image. |
 | Artifacts | `["/app"]`. This covers `/app/delivery` and anything else the agent left (scripts, renders). |
@@ -115,13 +115,13 @@ mesh.
 **`one-job` (B's 15:44 interface, exactly)**
 
 - **Grader call:** `python3 -I /tests/grade_watch.py /app/delivery --reward F --details F`.
-- **Bundle:** B's builder with no flags, taken by allowlist.
+- **Bundle:** `environment/make_bundle_job.py OUT`, taken by allowlist; its `FORMAT.md` goes to `/app/FORMAT.md`.
 - **Brief:** B's.
-- **Oracle:** delivers `/tmp/reference`.
+- **Oracle:** `reference_watch.py /app/delivery --job` writes the delivery in place.
 - **Verifier timeout:** 2400 s for now.
 
-Built today, `one-job` stops with "B's bundle builder did not produce supplied/barrel.stl", because
-`make_bundle_watch.py` on main still writes the old layout.
+Built today, `one-job` stops with "environment/make_bundle_job.py is not in this checkout yet", because
+B's bundle builder is not on main yet. A dry build against a mock of it gives the 15:44 `/app` plus `FORMAT.md`.
 
 `A_DATASHEETS` adds A's sheets from `spikes/keyless/datasheets` next to B's generated sheets:
 
@@ -133,20 +133,24 @@ The build fails if the same sheet would come from both B and A.
 
 ## What B must provide
 
-These make `GRADER=one-job` run with no other change:
+These make `GRADER=one-job` run with no other change. B gave the paths at 16:35, and the entry
+uses them:
 
-1. **`tests/grade_watch.py`** taking the call above. Also say:
-   - any file it needs beyond `tests/grade_watch.py` and `geometry/` (for example A's keyless engine
-     for P5), which goes into the entry's `tests` list;
-   - its measured time and peak memory. The verifier timeout becomes 2× the time; memory is 4 GB unless
-     the peak is above about 3 GB.
-2. **`environment/make_bundle_watch.py OUT`**, with no flags, writing `datasheets/`,
-   `supplied/barrel.stl`, `tools/kernel.py` and `tools/check_format.py`, plus the brief as
-   `OUT/instruction.md` or `OUT/PROMPT.md`. If you use other flags or another brief path, say which
-   and the entry changes by one line.
-3. **The reference as one delivery.** A command that writes it in the container, and the folder it
-   writes. Today's assumption is that `reference_watch.py /tmp/reference` writes the delivery at
-   `/tmp/reference`.
+- **Bundle:** `environment/make_bundle_job.py OUT`, with no flags. It writes:
+  - `instruction.md`, which becomes the task's `instruction.md` (not copied into `/app`);
+  - `FORMAT.md`, which goes to `/app/FORMAT.md`;
+  - `datasheets/DS-W01..W03`, `supplied/barrel.stl`, `tools/kernel.py` and `tools/check_format.py`;
+  - an empty `delivery/`.
+- **Reference:** `reference_watch.py /app/delivery --job` writes the delivery in place.
+
+Still open with B:
+
+1. **G and R on main:** the one-delivery `tests/grade_watch.py` and `make_bundle_job.py`.
+2. **The grader's measured time and peak memory.** The verifier timeout becomes 2× the time (until
+   then 2400 s), and memory stays 4 GB unless the peak is above about 3 GB.
+3. **Any file the grader needs** beyond `tests/grade_watch.py` and `geometry/`, for example A's
+   keyless engine for P5. It goes into the entry's `tests` list.
+
 
 ## Validation
 
