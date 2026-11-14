@@ -42,14 +42,17 @@ def wheel(bore=True, dx=0.0):
     return w.cut(cyl(0.5 + CLEAR, 0.0, 5.0, AX[0] + dx)) if bore else w
 
 
-def write(folder, arbor, whl):
+def write(folder, arbor, whl, extra=None):
     os.makedirs(os.path.join(folder, "parts"))
+    extra = extra or {}
+    for n, solid in extra.items():
+        core.write_step(os.path.join(folder, "parts", n + ".step"), solid)
     core.write_step(os.path.join(folder, "parts", "arbor.step"), arbor)
     core.write_step(os.path.join(folder, "parts", "wheel.step"), whl)
     core.write_step(os.path.join(folder, "parts", "block.step"),
                     cq.Workplane("XY").box(2, 2, 2).translate((-30, 0, 0)))
     doc = {"case_centre": [0, 0], "fixed": ["block"],
-           "mobiles": {"m": {"axis": list(AX), "parts": ["arbor", "wheel"]}}, "meshes": [],
+           "mobiles": {"m": {"axis": list(AX), "parts": ["arbor", "wheel"] + list(extra)}}, "meshes": [],
            "hands": {h: {"mobile": "m", "part": "wheel"} for h in ("hour", "minute", "seconds")}}
     with open(os.path.join(folder, "movement.json"), "w") as f:
         json.dump(doc, f)
@@ -81,10 +84,10 @@ def check(label, got, want, info=""):
     print("%-4s %-62s got %-5s want %-5s %s" % ("ok" if ok else "FAIL", label, got, want, info), flush=True)
 
 
-def design(arbor, whl):
+def design(arbor, whl, extra=None):
     d = tempfile.mkdtemp()
     shutil.rmtree(d)
-    write(d, arbor, whl)
+    write(d, arbor, whl, extra)
     r = grade_design(d, 1, None, ONLY_SEATED)
     return d, r
 
@@ -115,6 +118,17 @@ def main():
     _, r = design(stepped(), wheel(dx=5.0))
     ns = r["details"]["seated"]["not_seated"]
     check("wheel beside the arbor, not on it: wheel not seated", "wheel" in ns, True, str(ns))
+
+    # the reviewer's case: a ring and a plug that seat on each other, floating 4 mm beside the arbor
+    x = AX[0] + 4.0
+    ring = cyl(2.0, 3.0, 3.5, x).cut(cyl(1.0 + CLEAR, 0.0, 5.0, x))      # above the wheel (z 1.0 to 1.5), clear of it
+    plug = cyl(1.0, 2.5, 3.5, x).union(cyl(1.5, 3.5, 4.0, x))
+    _, r = design(stepped(), wheel(), {"ring": ring, "plug": plug})
+    sd = r["details"]["seated"]
+    check("ring and plug seated on each other only: Assembled", r["gates"]["assembled"], True)
+    check("ring and plug seated on each other only: each part seated", sd.get("not_seated"), [], str(sd.get("pieces")))
+    check("ring and plug seated on each other only: not in one piece", sd.get("not_in_one_piece"), ["plug", "ring"])
+    check("ring and plug seated on each other only: seated fails", r["checks"]["seated"], False)
 
     d, r = design(collared(), wheel())
     check("collars on both sides: Assembled", r["gates"]["assembled"], True, "mobile overlap %.6f" % r["details"]["assembled"]["mobile_parts_worst"])

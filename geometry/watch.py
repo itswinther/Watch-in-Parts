@@ -30,6 +30,7 @@ HELD_MOVE = 0.3
 SAMPLES_PER_TOOTH = 8
 ENGAGE_GAP = 0.1            # mm: meshing gears are never further apart than this
 DRIVE_FRACTION = 0.25       # of the driver's tooth pitch: backlash must be smaller
+SEAT_TOUCH = 0.02           # mm: parts of one mobile closer than this touch; a mobile's parts must form one piece
 MESH_SHIFT = 0.03           # mm: tolerant test, the driven mobile moved this far away from and towards the driver's axis
 MESH_CUT_MARGIN = 1.05      # mm, private speed-up of mesh_run: material further than this from the other mobile's reach
                             # is cut away before stepping (must exceed the 1.0 search length of min_gap in mesh_run)
@@ -249,6 +250,25 @@ class Movement:
             out[pn] = {label: ivol(ps.translate([c * HELD_MOVE for c in d]), rest) for label, d in
                        (("+x", (1, 0, 0)), ("-x", (-1, 0, 0)), ("+y", (0, 1, 0)), ("-y", (0, -1, 0)), ("+z", (0, 0, 1)), ("-z", (0, 0, -1)))}
         return out
+
+    def pieces(self, name):
+        """The parts of a mobile grouped into pieces: part A and part B are in one piece when a chain of
+        parts leads from A to B, each within SEAT_TOUCH of the next. Largest piece first (ties: listing order)."""
+        parts = self.mobiles[name]["parts"]
+        names = list(parts)
+        group = {n: i for i, n in enumerate(names)}
+        for i in range(len(names)):
+            for j in range(i + 1, len(names)):
+                a, b = names[i], names[j]
+                if group[a] != group[b] and parts[a].min_gap(parts[b], 2 * SEAT_TOUCH) <= SEAT_TOUCH:
+                    old, new = group[b], group[a]
+                    for n in names:
+                        if group[n] == old:
+                            group[n] = new
+        out = {}
+        for n in names:
+            out.setdefault(group[n], []).append(n)
+        return sorted(out.values(), key=lambda g: (-len(g), names.index(g[0])))
 
     def all_parts(self):
         """name -> solid, for every part: the supplied barrel, the fixed parts and the parts of every mobile."""

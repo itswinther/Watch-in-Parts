@@ -154,6 +154,9 @@ Each passes or fails. Weights in brackets; the total is 23.
   and moved 0.3 along +z or along -z (at least one of the two) it must intersect
   them by more than 0.01 mm3. So a wheel needs a bore that fits its arbor and a
   shoulder to rest against; a part that floats free of its mobile fails. The
+  parts of each mobile must also form one piece: every part must be linked to
+  every other by a chain of parts of that mobile, each within 0.02 of the next,
+  so a group of parts that hold only each other fails. The
   supplied barrel and mobiles of one part are not tested.
 - **The train runs [3].** No mobile is given two different speeds by the
   declared meshes, each of the three hand mobiles is driven from the barrel, and

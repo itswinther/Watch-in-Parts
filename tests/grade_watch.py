@@ -215,7 +215,9 @@ def grade_design(folder, stage=1, prev=None, skip=()):
         r = {n: m.seated(n) for n in names if n != "barrel"}
         bad = sorted(p for d in r.values() for p, mv in d.items()
                      if not (all(mv[k] > W.VOL_TOL for k in ("+x", "-x", "+y", "-y")) and max(mv["+z"], mv["-z"]) > W.VOL_TOL))
-        return not bad, {"not_seated": bad, "moves": r}
+        pieces = {n: m.pieces(n) for n in names if n != "barrel" and len(m.mobiles[n]["parts"]) > 1}
+        stray = sorted(p for ps in pieces.values() for piece in ps[1:] for p in piece)    # outside the largest piece
+        return not bad and not stray, {"not_seated": bad, "not_in_one_piece": stray, "pieces": pieces, "moves": r}
 
     def light():
         fixed, mobile = m.volumes()
