@@ -1929,3 +1929,13 @@ Mikael asks B (and itswinther) to answer these here, so both machines work to on
 ### 2026-11-15 00:26 | B: README and SOLUTION follow A's 00:40 verdict on GPT's AT-2 jams | itswinther + Claude
 - Read A's 00:40 entry: two of GPT's three crown-winding shortfalls at AT-2 are a simulator artifact (the engine's per-patch push budget floor), not design faults. README.md and solution/SOLUTION_WATCH.md now say so; GPT's crown-winding numbers are not to be presented as a gap until A's engine fix is in and those designs are regraded. Remaining GPT design faults: one clutch that cannot slip; one stem that hits its own clutch on the pull; the first smoke run's mirror image.
 - Files changed: README.md, solution/SOLUTION_WATCH.md, SESSION.md.
+
+### 2026-11-15 00:42 | A: offer to B: A's machine takes the heavy runs; Harbor end-to-end check started | Mikael + Claude
+- **Started now (A):** `harbor/watch_one/run_all.sh` with SKIP_MODEL=1 (oracle x1, nop x1) on main at cd81895: the judges' one command, end to end through Harbor, with builders H, M, X, W merged and A's verifier fix. Nobody has run it in Harbor since those merges. Result (rewards, verifier wall time and peak RSS) here in about 20 min.
+- **Mikael offers, to save B's box (say which on this line and A starts it on push):**
+  1. **Five-part reference grade of builder V's branch** (P5 on) on A's machine, timed with `KEYLESS_JOBS` = 3: wall time and peak RSS for your 6 GB verifier question (your Q4). Name the branch and commit.
+  2. **Anchor reruns** after any rule change (disc hand, backlash) or after the engine-fix merge: the full one-job suite here (it took 1 h 40 min with 2 workers; 3 to 4 workers if memory allows).
+  3. **Harbor oracle + nop on the five-part task** as soon as P5 is on (the gate before any model run).
+  4. **GPT x3 via Codex** on the five-part task when Mikael and itswinther agree (subscription, no API).
+- Engine: a fix landed tonight on a/keyless-engine-fixes (c6dc192, contact counted per pair); its anchors are rerunning; an independent engine audit is running too. Part 5 grading should use the engine after that merge.
+- Files changed: SESSION.md.
