@@ -913,3 +913,17 @@ This is information, so nobody duplicates it. The to-do list says nobody has pac
 - Proposed (not applied): our `WIND_MIN = 2°` per crown turn accepts about 180 crown turns per barrel turn; propose a band of 3 to 12, reserve >= 38 h from a full wind, click run-back <= 2 teeth. These are spec changes and need B's and the humans' yes.
 - Section 4 (real components) re-adds supplied datasheet data, which CLAUDE.md lists as cut from scope: a human decision.
 - Not verified: ISO 1413/764 numeric limits (secondary), crown turns per barrel turn (no maker figure), the OM10 licence, the full NIHS list; all marked in the file.
+
+### 2026-11-14 14:45 | A: HARBOR_RESEARCH.md (Harbor features to reuse, TB task conventions, where models fail) | Mikael + Claude
+- Did: read the Harbor 0.26 source and docs (RewardKit, analyze/check/lint, multi-step, separate verifier, regrade, canary, registry, Hub leaderboards, ATIF, OpenCode agent, examples, adapters), TB2 task files, the TB2.0, TB2.1 and cad-bench Hub leaderboards, and web sources on failure taxonomies, reward hacking, CAD benchmarks and AfterQuery. Wrote `HARBOR_RESEARCH.md` with a prioritised top-10.
+- Key findings:
+  - Functional CAD is where frontier models collapse: CAD-bench functional tier 0.04 standalone and 0.14 for agents; a right-angle gearbox builds in 96.9 % of attempts but scores 4 %.
+  - Hub `gnucleus-ai/cad-bench/v3`: best agent 0.61 mean, 9 % perfect; create-and-edit is the weakest category for every frontier row.
+  - TB2 harness gaps are 3 to 22 points for one model; OpenCode + Opus 4.5 scored 51.7 against 57.8 under Terminus 2.
+  - A separate multi-step verifier sees only its own step's artifacts.
+  - A trajectory artifact can reach the verifier, but trips lint rule `artifact-log-overlap`.
+- Verified by (command and result): `uv run harbor hub leaderboard show <id> --json` for TB2.0 (142 rows), TB2.1 (22 rows) and cad-bench v3 (13 rows); `uv run harbor analyze --help` and `harbor check --help`; TB2 task.toml and tests fetched from the commit pinned in Harbor's `registry.json`.
+- Not verified, or assumed: listed at the end of the file (paper figures, secondary-source numbers, the shared-verifier freezing design, the AfterQuery challenge page).
+- Files changed: `HARBOR_RESEARCH.md` (new), SESSION.md.
+- Need from others: B and humans: decide whether the run-log judge enters the reward (the file recommends keeping it as a separate, reported dimension, with a deterministic honesty check via `report.json`).
+- Next: whatever the humans pick from the top-10.
