@@ -1,0 +1,973 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Watch X-ray Demo</title>
+<style>
+:root {
+  --bg: #f3f2ee; --panel: #ffffff; --ink: #1c1c1a; --muted: #6a6963; --line: #dcdad2;
+  --accent: #2f6fb0; --ok: #2e7d4f; --bad: #b3402e; --warn: #a8731a; --scene: #e7e5de;
+  --chip: #eeece6; --dial: #f4efe2; --dialInk: #23221f; --wire: #1f5e9e;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #151514; --panel: #1e1e1c; --ink: #ecebe6; --muted: #9b998f; --line: #33322e;
+    --accent: #78aee3; --ok: #5bb37f; --bad: #e0705d; --warn: #d9a54a; --scene: #232321;
+    --chip: #2a2a27; --dial: #e9e3d3; --dialInk: #23221f; --wire: #8cc2f5;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #151514; --panel: #1e1e1c; --ink: #ecebe6; --muted: #9b998f; --line: #33322e;
+  --accent: #78aee3; --ok: #5bb37f; --bad: #e0705d; --warn: #d9a54a; --scene: #232321;
+  --chip: #2a2a27; --dial: #e9e3d3; --dialInk: #23221f; --wire: #8cc2f5;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink);
+  font: 13px/1.45 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+header { display: flex; align-items: center; gap: 14px; padding: 8px 16px; border-bottom: 1px solid var(--line);
+  background: var(--panel); flex-wrap: wrap; }
+header h1 { font-size: 15px; margin: 0; }
+header .sub { color: var(--muted); font-size: 12px; }
+.tabs { display: flex; gap: 4px; margin-left: 12px; }
+.tabs button { border-radius: 6px 6px 0 0; }
+.spacer { flex: 1; }
+#app { display: grid; grid-template-columns: 290px minmax(0, 1fr) 310px; height: calc(100vh - 47px); }
+aside { background: var(--panel); border-right: 1px solid var(--line); overflow-y: auto; padding: 12px 16px 20px; }
+aside.right { border-right: 0; border-left: 1px solid var(--line); }
+#view { position: relative; background: var(--scene); min-width: 0; overflow: hidden; }
+#view canvas { display: block; }
+h2 { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 16px 0 6px; font-weight: 600; }
+h2:first-child { margin-top: 2px; }
+label { display: flex; align-items: center; gap: 8px; margin: 5px 0; }
+label span.v { margin-left: auto; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+input[type=range] { flex: 1; min-width: 0; accent-color: var(--accent); }
+select, button { font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line);
+  border-radius: 6px; padding: 4px 9px; }
+button { cursor: pointer; user-select: none; }
+button:hover { border-color: var(--accent); }
+button.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+.row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; }
+.seg button { border: 0; border-radius: 0; background: transparent; }
+.seg button.on { background: var(--accent); color: #fff; }
+.note { color: var(--muted); font-size: 11.5px; margin-top: 6px; }
+.honest { border-left: 3px solid var(--warn); padding: 4px 8px; background: var(--chip); border-radius: 0 6px 6px 0;
+  font-size: 11.5px; margin-top: 8px; }
+.sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; flex: none; }
+.ok { color: var(--ok); } .bad { color: var(--bad); } .warn { color: var(--warn); }
+table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+td, th { padding: 3px 4px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+th { color: var(--muted); font-weight: 500; font-size: 11px; }
+tr.click { cursor: pointer; } tr.click:hover td { background: var(--chip); }
+tr.hl td { background: var(--chip); }
+.mono { font-variant-numeric: tabular-nums; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+#clock { position: absolute; left: 12px; top: 10px; background: var(--panel); border: 1px solid var(--line);
+  border-radius: 10px; padding: 6px 12px; pointer-events: none; }
+#clock .t { font: 600 26px/1.1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .02em; }
+#clock .s { color: var(--muted); font-size: 11.5px; }
+#status { position: absolute; left: 12px; bottom: 12px; background: var(--panel); border: 1px solid var(--line);
+  border-radius: 8px; padding: 5px 10px; font-size: 12px; pointer-events: none; }
+#hint { position: absolute; right: 12px; top: 10px; color: var(--muted); font-size: 12px; pointer-events: none; text-align: right; }
+.lab { font-size: 11px; padding: 1px 6px; border-radius: 9px; background: var(--panel); color: var(--ink);
+  border: 1px solid var(--line); white-space: nowrap; cursor: pointer; pointer-events: auto; opacity: .93; }
+.lab .sw { width: 8px; height: 8px; margin-right: 4px; vertical-align: 0; }
+.lab.dim { opacity: .3; }
+.lab.mesh { font-size: 10.5px; background: var(--chip); border-style: dashed; cursor: default; color: var(--muted); }
+.lab.mesh b { color: var(--ink); font-weight: 600; }
+.lab.num { background: transparent; border: 0; font-weight: 600; color: var(--dialInk); font-size: 13px; cursor: default; pointer-events: none; }
+#info .name { font-size: 15px; font-weight: 600; }
+#info div { margin: 3px 0; }
+.chain { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11.5px; background: var(--chip);
+  border-radius: 6px; padding: 5px 7px; word-break: break-word; }
+#legend div { display: flex; gap: 6px; align-items: baseline; margin: 3px 0; cursor: pointer; }
+#legend div:hover { color: var(--accent); }
+.gauge { height: 10px; border-radius: 5px; background: var(--chip); border: 1px solid var(--line); overflow: hidden; margin: 4px 0; }
+.gauge > i { display: block; height: 100%; background: var(--accent); width: 50%; }
+#knob { touch-action: none; cursor: grab; display: block; margin: 4px auto; }
+#knob:active { cursor: grabbing; }
+#phases span { display: inline-block; padding: 1px 7px; border-radius: 9px; border: 1px solid var(--line); margin: 2px 2px 0 0; font-size: 11.5px; cursor: pointer; }
+#phases span.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+.hidden { display: none !important; }
+@media (max-width: 1100px) {
+  #app { grid-template-columns: 260px minmax(0, 1fr); }
+  aside.right { grid-column: 1 / -1; border-left: 0; border-top: 1px solid var(--line); }
+  #app { height: auto; } #view { height: 70vh; }
+}
+@media (max-width: 720px) {
+  #app { grid-template-columns: 1fr; } #view { height: 60vh; order: -1; }
+}
+</style>
+<script>
+// show script errors on the page (a failed three.js download, for instance) instead of a silent blank view
+addEventListener("error", (e) => {
+  const d = document.createElement("div");
+  d.style.cssText = "position:fixed;left:0;right:0;top:0;z-index:99;background:#b3402e;color:#fff;padding:6px 12px;font:12px ui-monospace,monospace";
+  d.textContent = "Page error: " + (e.message || e.target && e.target.src || "unknown") + (e.lineno ? " (line " + e.lineno + ")" : "");
+  document.body && document.body.appendChild(d);
+}, true);
+</script>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<header>
+  <h1 id="title">Watch movement</h1>
+  <span class="sub" id="source"></span>
+  <div class="tabs" id="tabs">
+    <button class="on" data-tab="main">Movement</button>
+    <button data-tab="keyless" id="tabKeyless" class="hidden">Keyless works: recorded simulation</button>
+  </div>
+  <span class="spacer"></span>
+  <label style="margin:0">Build <select id="movementSel"></select></label>
+  <button id="theme" title="Theme: follows the system, light or dark">Theme: auto</button>
+</header>
+
+<div id="app">
+  <aside id="left">
+    <div id="leftMain">
+      <h2>View</h2>
+      <div class="seg" id="modeSeg"><button data-mode="xray" class="on">X-ray</button><button data-mode="face">Watch face</button></div>
+      <label>Plates, bridge, dial <input type="range" id="opacity" min="0" max="1" step="0.05" value="0.18"><span class="v" id="opacityV"></span></label>
+      <label>Cut from the top <input type="range" id="cut" min="0" max="1" step="0.002" value="1"><span class="v" id="cutV"></span></label>
+      <div class="note" id="cutLayer"></div>
+      <label><input type="checkbox" id="showLabels" checked> Part labels</label>
+      <label><input type="checkbox" id="showMeshes" checked> Gear connections</label>
+      <label><input type="checkbox" id="showEdges"> Outline gear teeth</label>
+      <div class="row" style="margin-top:6px">
+        <button id="camReset">Reset camera</button><button id="camTop">Dial side</button><button id="camBack">Back</button><button id="camSide">Side</button>
+      </div>
+
+      <h2>Running</h2>
+      <div class="row"><button id="play">▶ Run</button><button id="resetTime" title="Back to 10:08:30">Reset time</button></div>
+      <label>Speed <input type="range" id="scale" min="0" max="6" step="1" value="2"><span class="v" id="scaleV"></span></label>
+      <div class="note">Every mobile turns at its exact speed from the tooth counts, so the hands keep time with each other.</div>
+
+      <h2>Crown</h2>
+      <div class="seg" id="crownSeg"><button data-crown="in" class="on">Pushed in: wind</button><button data-crown="out">Pulled out: set hands</button></div>
+      <svg id="knob" width="120" height="120" viewBox="-60 -60 120 120" aria-label="crown: drag sideways to turn"></svg>
+      <div class="row" style="justify-content:center">
+        <button id="turnBack">⟲ turn back</button><button id="turnFwd">turn forward ⟳</button>
+      </div>
+      <div class="note" id="crownHelp" style="text-align:center">Drag the crown sideways or hold a button.</div>
+      <div style="margin-top:8px"><b>Mainspring wound:</b> <span id="woundV" class="mono"></span></div>
+      <div class="gauge"><i id="woundBar"></i></div>
+      <div class="note" id="woundNote"></div>
+      <div class="honest"><b>Illustrative link.</b> The crown-winding mechanism (keyless works) is designed and simulated separately and is
+        not yet joined to this movement. Here the crown's effect is kinematic: pushed in, it turns the barrel arbor;
+        pulled out, it turns the motion work and stops the going train. The crown ratios and the spring capacity are
+        illustrative; the train and hand speeds are exact.</div>
+    </div>
+    <div id="leftKeyless" class="hidden">
+      <h2>Recorded simulation</h2>
+      <div class="row"><button id="kPlay">▶ Play</button><button id="kPrev">◀</button><button id="kNext">▶|</button></div>
+      <label>Frame <input type="range" id="kFrame" min="0" max="0" step="1" value="0"><span class="v" id="kFrameV"></span></label>
+      <label>Speed <input type="range" id="kSpeed" min="1" max="60" step="1" value="12"><span class="v" id="kSpeedV"></span></label>
+      <h2>Phases</h2>
+      <div id="phases"></div>
+      <div class="note" id="kSource"></div>
+      <div class="honest">This tab replays a recorded contact simulation of the keyless works frame by frame: every part is where
+        the simulation put it. Nothing is animated by this page.</div>
+    </div>
+  </aside>
+
+  <main id="view">
+    <div id="clock"><div class="t" id="clockT">10:08:30</div><div class="s" id="clockS"></div></div>
+    <div id="hint">drag to orbit · right-drag to pan · scroll to zoom<br>click a part or label for its power path</div>
+    <div id="status"></div>
+  </main>
+
+  <aside class="right" id="right">
+    <div id="rightMain">
+      <h2>Selected</h2>
+      <div id="info"></div>
+      <h2>Hands</h2>
+      <div id="handsTable"></div>
+      <h2>Gear connections</h2>
+      <div id="meshTable"></div>
+      <h2>Legend</h2>
+      <div id="legend"></div>
+      <div class="note">Grey see-through: plates, bridge and dial (they do not move). Dashed lines join two gears in mesh, at the
+        height where their teeth meet; the label reads driver teeth → driven teeth. The orange flag on the barrel
+        is its arbor, which the crown winds. Speeds are turns per hour, clockwise seen from the dial, computed exactly
+        from the tooth counts as the grader does.</div>
+    </div>
+    <div id="rightKeyless" class="hidden">
+      <h2>Now</h2>
+      <div id="kNow"></div>
+      <h2>Coordinates</h2>
+      <div id="kCoords"></div>
+      <h2>Parts</h2>
+      <div id="kLegend"></div>
+    </div>
+  </aside>
+</div>
+
+<script type="module">
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { CSS2DRenderer, CSS2DObject } from "three/addons/renderers/CSS2DRenderer.js";
+
+const DATA = /*__DATA__*/null;
+const $ = (id) => document.getElementById(id);
+const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const TAU = Math.PI * 2;
+const CAT = ["#4e79a7", "#f28e2b", "#59a14f", "#e15759", "#76b7b2", "#edc948", "#b07aa1", "#ff9da7", "#9c755f", "#86bcb6", "#d37295", "#a0cbe8"];
+const BARREL_COLOR = "#8c5a9e";
+const START_HOURS = 10 + 8 / 60 + 30 / 3600;          // 10:08:30, the hands are fitted to show this at t = 0
+const WIND_PER_CROWN_TURN = 1 / 6;                    // illustrative: arbor turns per crown turn
+const SET_HOURS_PER_CROWN_TURN = 0.25;                // illustrative: 15 minutes of hand travel per crown turn
+const SPRING_FULL = 6;                                // illustrative capacity, turns of the arbor
+const SCALES = [[1, "real time"], [10, "10×"], [60, "1 min / s"], [300, "5 min / s"], [1200, "20 min / s"], [3600, "1 h / s"], [21600, "6 h / s"]];
+
+// ---------- fractions ----------
+const gcd = (a, b) => { a = Math.abs(a); b = Math.abs(b); while (b) [a, b] = [b, a % b]; return a || 1; };
+const fr = (n, d = 1) => { if (d < 0) { n = -n; d = -d; } const g = gcd(n, d); return [n / g, d / g]; };
+const fmul = (a, b) => fr(a[0] * b[0], a[1] * b[1]);
+const fval = (f) => f[0] / f[1];
+const fstr = (f) => f[1] === 1 ? `${f[0]}` : `${f[0]}/${f[1]}`;
+const nice = (x) => Math.abs(x - Math.round(x)) < 1e-9 ? String(Math.round(x)) : x.toPrecision(4).replace(/\.?0+$/, "");
+function periodText(s) {
+  const a = Math.abs(s); if (!a) return "does not turn";
+  const h = 1 / a;
+  if (h >= 1) return `one turn every ${nice(h)} h`;
+  if (h * 60 >= 1) return `one turn every ${nice(h * 60)} min`;
+  return `one turn every ${nice(h * 3600)} s`;
+}
+const dirText = (s) => s > 0 ? "clockwise" : s < 0 ? "anticlockwise" : "";
+
+// ---------- renderer and scenes ----------
+const view = $("view");
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.localClippingEnabled = true;
+view.appendChild(renderer.domElement);
+const labelRenderer = new CSS2DRenderer();
+labelRenderer.domElement.style.cssText = "position:absolute;left:0;top:0;pointer-events:none";
+view.appendChild(labelRenderer.domElement);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 3000);
+camera.up.set(0, 0, 1);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+function lights(sc) {
+  sc.add(new THREE.HemisphereLight(0xffffff, 0x445566, 1.15));
+  const k = new THREE.DirectionalLight(0xffffff, 1.5); k.position.set(30, -40, 70); sc.add(k);
+  const f = new THREE.DirectionalLight(0xffffff, 0.55); f.position.set(-40, 30, -20); sc.add(f);
+}
+lights(scene);
+const clip = new THREE.Plane(new THREE.Vector3(0, 0, -1), 1e6);
+
+function decode(b64, Type) {
+  const bin = atob(b64); const u8 = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+  return new Type(u8.buffer);
+}
+
+// ---------- parts (created once; each movement maps them to mobiles) ----------
+const parts = [];
+const bbox = new THREE.Box3();
+for (const p of DATA.parts) {
+  const g = new THREE.BufferGeometry();
+  const pos = decode(p.pos, Float32Array);
+  g.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+  g.setIndex(new THREE.BufferAttribute(decode(p.idx, Uint32Array), 1));
+  g.computeVertexNormals(); g.computeBoundingBox(); bbox.union(g.boundingBox);
+  const mat = new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 0.3, roughness: 0.45, side: THREE.DoubleSide,
+    clippingPlanes: [clip], polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 });
+  const mesh = new THREE.Mesh(g, mat);
+  const spin = new THREE.Group(); spin.add(mesh); scene.add(spin);
+  const P = { name: p.name, data: p, pos, geo: g, mesh, mat, spin, edges: null };
+  mesh.userData.P = P;
+  parts.push(P);
+}
+const partByName = Object.fromEntries(parts.map(P => [P.name, P]));
+const centre = bbox.getCenter(new THREE.Vector3());
+const span = Math.max(...bbox.getSize(new THREE.Vector3()).toArray());
+
+function ensureEdges(P) {
+  if (P.edges) return P.edges;
+  P.edges = new THREE.LineSegments(new THREE.EdgesGeometry(P.geo, 30),
+    new THREE.LineBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.3, clippingPlanes: [clip] }));
+  P.edges.position.copy(P.mesh.position); P.spin.add(P.edges);
+  return P.edges;
+}
+
+// barrel arbor (what the crown winds) and a schematic crown at 3 o'clock
+const extras = new THREE.Group(); scene.add(extras);
+const B = DATA.barrel;
+const arbor = new THREE.Group(); extras.add(arbor);
+{
+  const m = new THREE.MeshStandardMaterial({ color: "#e07b24", metalness: 0.2, roughness: 0.5, clippingPlanes: [clip] });
+  const c = new THREE.Mesh(new THREE.CylinderGeometry(B.arbor_r * 1.06, B.arbor_r * 1.06, B.arbor_z[1] - B.arbor_z[0], 24), m);
+  c.rotation.x = Math.PI / 2; c.position.z = (B.arbor_z[0] + B.arbor_z[1]) / 2; arbor.add(c);
+  const flag = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.5, 0.35), m);
+  flag.position.set(1.3, 0, B.arbor_z[1] + 0.1); arbor.add(flag);
+}
+const crown = new THREE.Group(); extras.add(crown);
+const crownSpin = new THREE.Group(); crown.add(crownSpin);
+{
+  const m = new THREE.MeshStandardMaterial({ color: "#c9a227", metalness: 0.6, roughness: 0.35 });
+  const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 4, 16), m); stem.rotation.z = Math.PI / 2; stem.position.x = -1; crownSpin.add(stem);
+  const head = new THREE.Mesh(new THREE.CylinderGeometry(2.0, 2.0, 2.2, 20), m); head.rotation.z = Math.PI / 2; head.position.x = 2.1; crownSpin.add(head);
+  const mark = new THREE.Mesh(new THREE.BoxGeometry(2.3, 0.4, 0.5), new THREE.MeshStandardMaterial({ color: "#2f3a4a" }));
+  mark.position.set(2.1, 0, 2.0); crownSpin.add(mark);
+}
+
+// ---------- per-movement state ----------
+let MV = null;          // current movement
+let S = null;           // derived: mobiles, colours, tree, sets
+const objs = { labels: [], meshLines: new THREE.Group(), dial: new THREE.Group(), numerals: [] };
+scene.add(objs.meshLines); scene.add(objs.dial);
+
+function humanName(m) {
+  if (m === "barrel") return "barrel";
+  const n = m.replace(/[_-]+/g, " ");
+  return /wheel|pinion|idler|barrel|arbor|cannon/.test(n) ? n : n + " wheel";
+}
+
+function derive(mv) {
+  const doc = mv.doc;
+  const fixed = new Set(doc.fixed || []);
+  const mobiles = ["barrel", ...Object.keys(doc.mobiles || {})];
+  const color = {}; mobiles.forEach((m, i) => color[m] = m === "barrel" ? BARREL_COLOR : CAT[(i - 1) % CAT.length]);
+  const speed = {}; for (const [k, v] of Object.entries(mv.speeds)) speed[k] = fr(v[0], v[1]);
+  // tree from the barrel, the way the grader walks the meshes (both directions, first reach wins)
+  const parent = { barrel: null }; const queue = ["barrel"];
+  while (queue.length) {
+    const a = queue.shift();
+    for (const m of mv.meshes) {
+      for (const [src, ts, dst, td] of [[m.driver, m.driver_teeth, m.driven, m.driven_teeth], [m.driven, m.driven_teeth, m.driver, m.driver_teeth]]) {
+        if (src === a && !(dst in parent)) { parent[dst] = { from: src, ts, td, mesh: m }; queue.push(dst); }
+      }
+    }
+  }
+  const children = {}; for (const m of mobiles) children[m] = [];
+  for (const [k, v] of Object.entries(parent)) if (v && children[v.from]) children[v.from].push(k);
+  const ancestors = (m) => { const out = []; let n = m; while (n && parent[n]) { out.unshift(parent[n].from); n = parent[n].from; } return out; };
+  const descendants = (m) => { const out = []; const st = [...(children[m] || [])]; while (st.length) { const n = st.pop(); out.push(n); st.push(...(children[n] || [])); } return out; };
+  const hands = doc.hands || {};
+  const handOf = {}; for (const [k, h] of Object.entries(hands)) handOf[h.mobile] = k;
+  const handPart = new Set(Object.values(hands).map(h => h.part));
+  const minuteMob = hands.minute && hands.minute.mobile;
+  const secMob = hands.seconds && hands.seconds.mobile;
+  const going = new Set([...(secMob ? [...ancestors(secMob), secMob] : minuteMob ? [...ancestors(minuteMob), minuteMob] : ["barrel"])]);
+  const motion = new Set(minuteMob ? descendants(minuteMob).filter(m => !going.has(m)) : []);
+  if (minuteMob && !going.has(minuteMob)) motion.add(minuteMob);
+  const bridgeTop = DATA.frame_z.bridge[1];
+  const partMobile = mv.part_mobile;
+  // parts the crown moves when pulled out: the motion work, and the dial-side parts of the minute hand's mobile
+  // (a cannon pinion on its friction fit, and the minute hand); the centre wheel itself stays with the train
+  const setting = new Set();
+  for (const P of parts) {
+    const m = partMobile[P.name]; if (!m) continue;
+    if (motion.has(m) || (m === minuteMob && P.data.zmin >= bridgeTop - 0.05)) setting.add(P.name);
+  }
+  const HAND_WORD = { hour: "hour hand", minute: "minute hand", seconds: "seconds hand", day: "24-hour hand" };
+  const desc = {};
+  for (const m of mobiles) {
+    const kids = (children[m] || []).map(humanName);
+    const from = parent[m] ? humanName(parent[m].from) : null;
+    let d;
+    if (m === "barrel") d = "stores the energy";
+    else if (handOf[m]) d = `carries the ${HAND_WORD[handOf[m]]}`;
+    else if (going.has(m)) d = `going train: passes the energy from the ${from} on to the ${kids.join(" and ") || "train"}, turning faster`;
+    else if (motion.has(m)) d = `motion work: links the ${from} to the ${kids.join(" and ") || "hands"}, stepping the speed down`;
+    else d = from ? `turned by the ${from}` : "not connected to the barrel";
+    desc[m] = d;
+  }
+  return { fixed, mobiles, color, speed, parent, children, ancestors, descendants, hands, handOf, handPart, minuteMob, secMob, going, motion, setting, desc, partMobile };
+}
+
+// ---------- geometry helpers ----------
+function partReach(P, ax) { let r = 0; const a = P.pos; for (let i = 0; i < a.length; i += 3) r = Math.max(r, Math.hypot(a[i] - ax[0], a[i + 1] - ax[1])); return r; }
+function partRestAngle(P, ax) {
+  let sx = 0, sy = 0; const a = P.pos;
+  for (let i = 0; i < a.length; i += 3) { sx += a[i] - ax[0]; sy += a[i + 1] - ax[1]; }
+  return Math.atan2(sy, sx);
+}
+function mobileTop(m) {
+  let z = -Infinity;
+  for (const P of parts) if (S.partMobile[P.name] === m && P.mesh.visible !== false) z = Math.max(z, P.data.zmax);
+  return isFinite(z) ? z : 2;
+}
+
+// ---------- labels and gear connections ----------
+function clearObjs() {
+  for (const l of objs.labels) { l.parent && l.parent.remove(l); l.element.remove(); }
+  objs.labels = [];
+  for (const g of [objs.meshLines, objs.dial]) {
+    for (const c of [...g.children]) { g.remove(c); c.traverse(o => { if (o.isCSS2DObject) o.element.remove(); if (o.geometry) o.geometry.dispose(); }); }
+  }
+  objs.numerals = [];
+}
+function label(html, cls, pos, parentObj) {
+  const el = document.createElement("div"); el.className = "lab " + (cls || ""); el.innerHTML = html;
+  const o = new CSS2DObject(el); o.position.copy(pos); (parentObj || scene).add(o);
+  return o;
+}
+
+function buildMovement(key) {
+  MV = DATA.movements.find(m => m.key === key) || DATA.movements[0];
+  S = derive(MV);
+  clearObjs();
+  const used = new Set([...(MV.doc.fixed || []), ...Object.values(MV.doc.mobiles || {}).flatMap(m => m.parts), "barrel"]);
+  for (const P of parts) {
+    P.used = used.has(P.name);
+    P.mobile = S.partMobile[P.name] || null;
+    P.fixed = S.fixed.has(P.name);
+    const ax = P.mobile ? MV.axes[P.mobile] : [0, 0];
+    P.ax = ax;
+    P.spin.position.set(ax[0], ax[1], 0); P.mesh.position.set(-ax[0], -ax[1], 0);
+    if (P.edges) P.edges.position.copy(P.mesh.position);
+    P.fit = 0; P.handRole = null;
+  }
+  // hands: fitted on their arbors to read 10:08:30 at t = 0, with 12 o'clock towards +y on the dial
+  const read0 = { hour: (START_HOURS % 12) / 12, minute: START_HOURS % 1, seconds: (START_HOURS * 60) % 1, day: (START_HOURS % 24) / 24 };
+  for (const [role, h] of Object.entries(S.hands)) {
+    const P = partByName[h.part]; if (!P) continue;
+    P.handRole = role;
+    P.fit = (Math.PI / 2 - TAU * (read0[role] ?? 0)) - partRestAngle(P, MV.axes[h.mobile]);
+    P.reach = partReach(P, MV.axes[h.mobile]);
+  }
+  const ba = MV.axes.barrel; arbor.position.set(ba[0], ba[1], 0);
+  // mobile labels (coaxial mobiles stacked)
+  const seenAxis = {};
+  for (const m of S.mobiles) {
+    const ax = MV.axes[m]; if (!ax) continue;
+    const k = ax.map(v => v.toFixed(2)).join(","); const idx = seenAxis[k] = (seenAxis[k] ?? -1) + 1;
+    const o = label(`<span class="sw" style="background:${S.color[m]}"></span>${humanName(m)}`, "mob", new THREE.Vector3(ax[0], ax[1], mobileTop(m) + 0.6));
+    o.element.style.marginTop = `${-idx * 20}px`;
+    o.element.onclick = (e) => { e.stopPropagation(); selectMobile(m); };
+    o.userData = { kind: "mobile", mobile: m };
+    objs.labels.push(o);
+  }
+  // gear connections: a line between the two axes at the height where their teeth meet
+  MV.meshes.forEach((mm, i) => {
+    const a = MV.axes[mm.driver], b = MV.axes[mm.driven]; if (!a || !b) return;
+    const z = mm.z ? (mm.z[0] + mm.z[1]) / 2 : 0.5;
+    const g = new THREE.Group(); g.userData = { mesh: mm, z };
+    const pts = [new THREE.Vector3(a[0], a[1], z), new THREE.Vector3(b[0], b[1], z)];
+    const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),
+      new THREE.LineDashedMaterial({ color: css("--wire") || "#1f5e9e", dashSize: 0.6, gapSize: 0.35, depthTest: false, transparent: true, clippingPlanes: [clip] }));
+    line.computeLineDistances(); line.renderOrder = 10; g.add(line);
+    for (const p of pts) {
+      const dot = new THREE.Mesh(new THREE.SphereGeometry(0.28, 12, 8), new THREE.MeshBasicMaterial({ color: css("--wire") || "#1f5e9e", depthTest: false, transparent: true, clippingPlanes: [clip] }));
+      dot.position.copy(p); dot.renderOrder = 11; g.add(dot);
+    }
+    const mid = pts[0].clone().lerp(pts[1], 0.5);
+    const o = label(`${humanName(mm.driver)} <b>${mm.driver_teeth}</b> → ${humanName(mm.driven)} <b>${mm.driven_teeth}</b>`, "mesh", new THREE.Vector3(0, 0, 0), g);
+    o.position.copy(mid); o.userData = { kind: "mesh", mesh: mm, z };
+    objs.labels.push(o);
+    objs.meshLines.add(g);
+  });
+  buildDial();
+  // cut range
+  cutRange = [bbox.min.z - 0.05, bbox.max.z + 0.05];
+  renderTables(); renderLegend(); selectMobile(null); applyLook(); applyCut(); pose();
+}
+
+// ---------- dial markings (drawn on the dial's top face, round the hands' own axes) ----------
+let dialR = 0, dialC = [0, 0];
+function buildDial() {
+  const zTop = DATA.frame_z.dial[1] + 0.01;
+  const ink = new THREE.MeshBasicMaterial({ color: css("--dialInk") || "#23221f", clippingPlanes: [clip] });
+  const dialP = partByName["dial"] || parts.find(P => P.fixed && P.data.zmin >= DATA.frame_z.dial[0] - 0.2);
+  dialC = MV.doc.case_centre || [0, 0];
+  dialR = dialP ? partReach(dialP, dialC) : 18;
+  const subs = [];
+  const tick = (c, ang, r0, r1, w) => {
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(r1 - r0, w), ink);
+    const rm = (r0 + r1) / 2; m.position.set(c[0] + rm * Math.cos(ang), c[1] + rm * Math.sin(ang), zTop); m.rotation.z = ang;
+    objs.dial.add(m);
+  };
+  const clockAng = (frac) => Math.PI / 2 - TAU * frac;
+  for (const role of ["seconds", "day"]) {
+    const h = S.hands[role]; const P = h && partByName[h.part]; if (!P) continue;
+    const c = MV.axes[h.mobile]; const r = P.reach || 3; const n = role === "seconds" ? 60 : 24;
+    subs.push([c, r + 0.6]);
+    for (let i = 0; i < n; i++) {
+      const major = role === "seconds" ? i % 5 === 0 : i % 6 === 0;
+      tick(c, clockAng(i / n), r * (major ? 0.72 : 0.84), r * 0.98, major ? 0.16 : 0.07);
+    }
+    const ring = new THREE.Mesh(new THREE.RingGeometry(r * 1.02, r * 1.02 + 0.08, 64), ink); ring.position.set(c[0], c[1], zTop); objs.dial.add(ring);
+    const nl = label(role === "seconds" ? "60" : "24", "num", new THREE.Vector3(c[0], c[1] + r * 0.55, zTop), objs.dial); objs.numerals.push(nl);
+    if (role === "day") { const l2 = label("12", "num", new THREE.Vector3(c[0], c[1] - r * 0.55, zTop), objs.dial); objs.numerals.push(l2); }
+  }
+  const mh = S.hands.minute && partByName[S.hands.minute.part];
+  if (mh) {
+    const c = MV.axes[S.hands.minute.mobile]; const r = mh.reach || 8;
+    const outside = (x, y) => subs.every(([sc, sr]) => Math.hypot(x - sc[0], y - sc[1]) > sr);
+    for (let i = 0; i < 60; i++) {
+      const a = clockAng(i / 60), major = i % 5 === 0;
+      const r0 = r * (major ? 0.86 : 0.93), r1 = r * 1.02;
+      if (!outside(c[0] + r0 * Math.cos(a), c[1] + r0 * Math.sin(a)) || !outside(c[0] + r1 * Math.cos(a), c[1] + r1 * Math.sin(a))) continue;
+      tick(c, a, r0, r1, major ? 0.28 : 0.08);
+    }
+    for (const [h, txt] of [[0, "12"], [3, "3"], [6, "6"], [9, "9"]]) {
+      const a = clockAng(h / 12), rr = r * 0.74; const x = c[0] + rr * Math.cos(a), y = c[1] + rr * Math.sin(a);
+      if (!outside(x, y)) continue;
+      objs.numerals.push(label(txt, "num", new THREE.Vector3(x, y, zTop), objs.dial));
+    }
+  }
+  // the case: a bezel ring round the dial
+  const bezel = new THREE.Mesh(new THREE.RingGeometry(dialR, Math.max(dialR + 0.8, DATA.case.radius), 128),
+    new THREE.MeshStandardMaterial({ color: "#8a8f96", metalness: 0.7, roughness: 0.35, side: THREE.DoubleSide }));
+  bezel.position.set(dialC[0], dialC[1], zTop); bezel.userData.bezel = true; objs.dial.add(bezel);
+  crown.position.set(dialC[0] + Math.max(dialR + 0.8, DATA.case.radius) - 0.5, dialC[1], (DATA.frame_z.plate[1] + DATA.frame_z.bridge[0]) / 2 + 1);
+}
+
+// ---------- state ----------
+const st = { mode: "xray", running: false, T: 0, Sset: 0, wind: 0, wound: 3, crownOut: false, crownTurns: 0, scale: 60,
+  selected: null, labels: true, meshes: true, edges: false };
+
+function mobileAngle(m, settingDriven) {
+  const s = S.speed[m]; if (!s) return 0;
+  return -TAU * fval(s) * (st.T + (settingDriven ? st.Sset : 0));
+}
+function pose() {
+  for (const P of parts) {
+    if (!P.mobile) { P.spin.rotation.z = 0; continue; }
+    P.spin.rotation.z = P.fit + mobileAngle(P.mobile, S.setting.has(P.name));
+  }
+  arbor.rotation.z = -TAU * st.wind;
+  crownSpin.rotation.x = -TAU * st.crownTurns;
+  crownSpin.position.x = st.crownOut ? 1.4 : 0;
+  updateClock(); updateGauge();
+}
+
+// clock readout: each hand's own angle, read back
+function handReading(role) {
+  const h = S.hands[role]; if (!h || !S.speed[h.mobile]) return null;
+  const P = partByName[h.part];
+  const turns = (P ? 0 : 0) + fval(S.speed[h.mobile]) * (st.T + (S.setting.has(h.part) ? st.Sset : 0));
+  const base = { hour: (START_HOURS % 12) / 12, minute: START_HOURS % 1, seconds: (START_HOURS * 60) % 1, day: (START_HOURS % 24) / 24 }[role] ?? 0;
+  return ((base + turns) % 1 + 1) % 1;            // fraction of the dial, clockwise from 12
+}
+const pad = (n) => String(n).padStart(2, "0");
+function updateClock() {
+  const h = handReading("hour"), m = handReading("minute"), s = handReading("seconds"), d = handReading("day");
+  const H = h == null ? null : Math.floor(h * 12 + 1e-9) || 12;
+  const M = m == null ? null : Math.floor(m * 60 + 1e-9) % 60;
+  const Sx = s == null ? null : Math.floor(s * 60 + 1e-9) % 60;
+  $("clockT").textContent = `${H ?? "--"}:${M == null ? "--" : pad(M)}${Sx == null ? "" : ":" + pad(Sx)}`;
+  const day = d == null ? "" : `24-hour hand: ${(d * 24).toFixed(1)} h (${d * 24 < 6 || d * 24 >= 18 ? "night" : "day"})`;
+  // consistency check: the minute hand should be where the hour hand says
+  let agree = "";
+  if (h != null && m != null) {
+    const diff = Math.abs(((h * 12) % 1) - m); const ok = Math.min(diff, 1 - diff) < 0.01;
+    agree = ok ? "hour and minute hands agree" : "hour and minute hands disagree";
+  }
+  $("clockS").textContent = [day, agree].filter(Boolean).join(" · ");
+}
+
+function updateGauge() {
+  const w = Math.max(0, st.wound);
+  $("woundV").textContent = `${w.toFixed(2)} turns`;
+  $("woundBar").style.width = `${Math.min(100, 100 * w / SPRING_FULL)}%`;
+  const bs = fval(S.speed.barrel || [1, 8]);
+  $("woundNote").textContent = w <= 0 ? "Let down: the watch has stopped. Push the crown in and wind it."
+    : `About ${(w / Math.abs(bs)).toFixed(1)} h of running left (the barrel turns ${fstr(S.speed.barrel)} per hour). Full is ${SPRING_FULL} turns (illustrative).`;
+}
+
+function updateStatus() {
+  let s;
+  if (st.crownOut) s = "Crown pulled out: the going train and seconds are stopped; turning the crown sets the hands.";
+  else if (st.wound <= 0) s = "Mainspring let down: wind the crown.";
+  else if (st.running) s = `Running at ${SCALES[+$("scale").value][1]} · train time ${fmtDur(st.T)}`;
+  else s = "Paused. Press Run, or turn the crown.";
+  $("status").textContent = s;
+}
+function fmtDur(h) { const s = Math.round(h * 3600); return `${Math.floor(s / 3600)} h ${pad(Math.floor(s / 60) % 60)} min ${pad(s % 60)} s`; }
+
+// ---------- crown ----------
+function turnCrown(dTurns) {
+  if (!dTurns) return;
+  st.crownTurns += dTurns;
+  if (!st.crownOut) {
+    if (dTurns > 0) {                                   // forward winds; backward slips past the click
+      const add = dTurns * WIND_PER_CROWN_TURN;
+      const room = Math.max(0, SPRING_FULL - st.wound);
+      const eff = Math.min(add, room);
+      st.wind += eff; st.wound += eff;
+      $("crownHelp").textContent = room <= 0 ? "Fully wound: the spring's bridle slips (illustrative)." : "Winding: the barrel arbor turns, the click holds it.";
+    } else $("crownHelp").textContent = "Turning back: the click lets the ratchet slip, nothing winds.";
+  } else {
+    st.Sset += dTurns * SET_HOURS_PER_CROWN_TURN;
+    $("crownHelp").textContent = "Setting: minute and hour hands move together (hour at 1/12 of the minute).";
+  }
+  drawKnob(); pose(); updateStatus();
+}
+function drawKnob() {
+  const a = st.crownTurns * TAU; let teeth = "";
+  for (let i = 0; i < 24; i++) {
+    const t = a + i / 24 * TAU; const x = Math.cos(t), y = Math.sin(t);
+    teeth += `<line x1="${44 * x}" y1="${44 * y}" x2="${52 * x}" y2="${52 * y}" stroke="var(--muted)" stroke-width="3" stroke-linecap="round"/>`;
+  }
+  $("knob").innerHTML = `<circle r="44" fill="var(--chip)" stroke="var(--line)" stroke-width="2"/>${teeth}
+    <circle r="30" fill="${st.crownOut ? "var(--warn)" : "var(--accent)"}" opacity=".85"/>
+    <line x1="0" y1="0" x2="${28 * Math.cos(a - Math.PI / 2)}" y2="${28 * Math.sin(a - Math.PI / 2)}" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+    <text y="5" text-anchor="middle" font-size="11" fill="#fff" font-weight="600">${st.crownOut ? "SET" : "WIND"}</text>`;
+}
+{
+  let drag = null;
+  const k = $("knob");
+  k.addEventListener("pointerdown", e => { drag = e.clientX; k.setPointerCapture(e.pointerId); });
+  k.addEventListener("pointermove", e => { if (drag == null) return; turnCrown((e.clientX - drag) / 140); drag = e.clientX; });
+  const end = () => drag = null; k.addEventListener("pointerup", end); k.addEventListener("pointercancel", end);
+}
+let holdDir = 0;
+for (const [id, d] of [["turnBack", -1], ["turnFwd", 1]]) {
+  const b = $(id);
+  b.addEventListener("pointerdown", () => holdDir = d);
+  for (const ev of ["pointerup", "pointerleave", "pointercancel"]) b.addEventListener(ev, () => { if (holdDir === d) holdDir = 0; });
+}
+document.querySelectorAll("#crownSeg button").forEach(b => b.onclick = () => {
+  st.crownOut = b.dataset.crown === "out";
+  document.querySelectorAll("#crownSeg button").forEach(x => x.classList.toggle("on", x === b));
+  $("crownHelp").textContent = st.crownOut ? "Pulled out: turn to set the hands. The seconds stop." : "Pushed in: turn forward to wind.";
+  drawKnob(); pose(); updateStatus();
+});
+
+// ---------- look: x-ray / face, selection ----------
+function pathOf(m) { return m ? new Set([...S.ancestors(m), m, ...S.descendants(m)]) : null; }
+function applyLook() {
+  const face = st.mode === "face";
+  const op = +$("opacity").value; $("opacityV").textContent = op.toFixed(2);
+  const path = pathOf(st.selected);
+  const dialZ0 = DATA.frame_z.dial[0] - 0.2;
+  for (const P of parts) {
+    P.spin.visible = !!P.used;
+    if (!P.used) continue;
+    if (P.fixed) {
+      const isDial = P.data.zmin >= dialZ0;
+      const o = face ? (isDial ? 1 : Math.max(op, 0.6)) : op;
+      P.mat.color.set(isDial ? (css("--dial") || "#f4efe2") : "#9fb0c2");
+      P.mat.metalness = isDial ? 0.05 : 0.4; P.mat.roughness = isDial ? 0.7 : 0.4;
+      P.mat.transparent = o < 1; P.mat.opacity = o; P.mat.depthWrite = o >= 1;
+      P.mesh.visible = o > 0;
+      ensureEdges(P).visible = !face && o > 0 && o < 1; P.edges.material.opacity = 0.25;
+      P.mesh.renderOrder = 2;
+    } else {
+      const m = P.mobile;
+      const col = new THREE.Color(P.handRole && face ? "#1d2430" : S.color[m] || "#999");
+      const on = !path || path.has(m);
+      P.mat.color.copy(col);
+      P.mat.transparent = !on; P.mat.opacity = on ? 1 : 0.12; P.mat.depthWrite = on;
+      P.mat.emissive.setHex(path && on ? 0x202020 : 0x000000);
+      P.mesh.visible = true;
+      if (st.edges || P.edges) ensureEdges(P).visible = st.edges && on;
+    }
+  }
+  objs.meshLines.visible = st.meshes && !face;
+  for (const g of objs.meshLines.children) {
+    const mm = g.userData.mesh; const on = !path || (path.has(mm.driver) && path.has(mm.driven));
+    g.traverse(o => { if (o.material) o.material.opacity = on ? 1 : 0.15; });
+  }
+  objs.dial.visible = true;
+  for (const c of objs.dial.children) if (c.userData.bezel) c.visible = face;
+  arbor.visible = !face;
+  for (const o of objs.labels) {
+    const show = !face && st.labels && (o.userData.kind !== "mesh" || st.meshes);
+    o.userData.show = show;
+    if (o.userData.kind === "mobile") o.element.classList.toggle("dim", !!path && !path.has(o.userData.mobile));
+    if (o.userData.kind === "mesh") o.element.classList.toggle("dim", !!path && !(path.has(o.userData.mesh.driver) && path.has(o.userData.mesh.driven)));
+  }
+  for (const o of objs.numerals) o.userData.show = face || op > 0.6;
+  applyLabelVisibility();
+  document.querySelectorAll("#modeSeg button").forEach(b => b.classList.toggle("on", b.dataset.mode === st.mode));
+  document.querySelectorAll("#meshTable tr[data-i]").forEach(tr => {
+    const mm = MV.meshes[+tr.dataset.i]; tr.classList.toggle("hl", !!path && path.has(mm.driver) && path.has(mm.driven));
+  });
+}
+function applyLabelVisibility() {
+  const c = clip.constant;
+  for (const o of [...objs.labels, ...objs.numerals]) {
+    const z = o.getWorldPosition(new THREE.Vector3()).z;
+    o.visible = !!o.userData.show && z <= c + 0.7;
+    o.element.style.display = o.visible ? "" : "none";
+  }
+}
+
+function selectMobile(m) {
+  st.selected = m;
+  if (!m) {
+    $("info").innerHTML = `<div class="note">Click a part, a label or a row below to see where its power comes from and what it drives.</div>`;
+  } else {
+    const s = S.speed[m];
+    const chain = [...S.ancestors(m), m];
+    // exact derivation: barrel speed × (driver teeth / driven teeth) along the path; each mesh reverses
+    let txt = `barrel ${fstr(S.speed.barrel)}`;
+    for (let i = 1; i < chain.length; i++) { const p = S.parent[chain[i]]; txt += ` × (−${p.ts}/${p.td})`; }
+    txt += ` = ${s ? fstr(s) : "?"} turns per hour`;
+    const kids = S.children[m] || [];
+    const drives = kids.map(k => { const p = S.parent[k]; return `<div><span class="sw" style="background:${S.color[k]}"></span>${humanName(k)} <span class="note">(${p.ts} → ${p.td} teeth)</span></div>`; }).join("")
+      || `<div class="note">${S.handOf[m] ? "only its hand" : "nothing further"}</div>`;
+    const parts_ = parts.filter(P => P.used && P.mobile === m).map(P => P.name).join(", ");
+    $("info").innerHTML = `
+      <div class="name"><span class="sw" style="background:${S.color[m]}"></span>${humanName(m)}</div>
+      <div>${S.desc[m]}</div>
+      <div><b>${s ? fstr([Math.abs(s[0]), s[1]]) : "–"} turns per hour</b> ${s ? dirText(fval(s)) : ""} · ${s ? periodText(fval(s)) : "not driven"}</div>
+      <div class="chain">${txt}</div>
+      <div class="note">Power path: ${chain.map(humanName).join(" → ")}${S.descendants(m).length ? " → …" : ""}</div>
+      <div style="margin-top:6px"><b>Drives</b></div>${drives}
+      <div class="note">Parts: ${parts_ || "supplied"}${parts.some(P => P.used && P.mobile === m && S.setting.has(P.name)) ? " · moved by the crown when pulled out" : ""}</div>
+      <div class="row" style="margin-top:6px"><button id="clearSel">Clear selection</button></div>`;
+    $("clearSel").onclick = () => selectMobile(null);
+  }
+  document.querySelectorAll("#legend div[data-m]").forEach(d => d.style.fontWeight = d.dataset.m === m ? "600" : "");
+  applyLook();
+}
+
+// ---------- tables ----------
+const EXPECT = { hour: [1, 12], minute: [1, 1], seconds: [60, 1], day: [1, 24] };
+function renderTables() {
+  const rows = MV.meshes.map((mm, i) => `<tr class="click" data-i="${i}"><td><span class="sw" style="background:${S.color[mm.driver]}"></span>${humanName(mm.driver)} <b>${mm.driver_teeth}</b> → <span class="sw" style="background:${S.color[mm.driven]}"></span>${humanName(mm.driven)} <b>${mm.driven_teeth}</b></td>
+    <td class="mono">${S.speed[mm.driven] ? fstr(S.speed[mm.driven]) : "–"}</td></tr>`).join("");
+  $("meshTable").innerHTML = `<table><tr><th>driver teeth → driven teeth</th><th>driven, t/h</th></tr>${rows}</table>
+    ${MV.conflicts && MV.conflicts.length ? `<div class="bad">Speed conflicts: ${MV.conflicts.map(c => c.join("/")).join(", ")}</div>` : ""}`;
+  $("meshTable").onclick = (e) => { const tr = e.target.closest("tr[data-i]"); if (tr) selectMobile(MV.meshes[+tr.dataset.i].driven); };
+  const hr = Object.entries(S.hands).map(([role, h]) => {
+    const s = S.speed[h.mobile]; const e = EXPECT[role];
+    const ok = s && e && s[0] === e[0] && s[1] === e[1];
+    return `<tr class="click" data-m="${h.mobile}"><td>${role === "day" ? "24-hour" : role}</td><td class="mono">${s ? fstr(s) : "–"}</td><td class="${ok ? "ok" : "bad"}">${ok ? "✓ " : "✗ "}${e ? fstr(e) : ""}</td></tr>`;
+  }).join("");
+  $("handsTable").innerHTML = `<table><tr><th>hand</th><th>turns / h</th><th>needed</th></tr>${hr}</table>`;
+  $("handsTable").onclick = (e) => { const tr = e.target.closest("tr[data-m]"); if (tr) selectMobile(tr.dataset.m); };
+}
+function renderLegend() {
+  $("legend").innerHTML = S.mobiles.map(m => `<div data-m="${m}"><span class="sw" style="background:${S.color[m]}"></span><span><b>${humanName(m)}</b>: ${S.desc[m]}</span></div>`).join("");
+  $("legend").onclick = (e) => { const d = e.target.closest("div[data-m]"); if (d) selectMobile(d.dataset.m); };
+}
+
+// ---------- cut plane ----------
+let cutRange = [0, 1];
+function layerAt(z) {
+  const F = DATA.frame_z;
+  if (z < F.plate[0]) return "nothing";
+  if (z <= F.plate[1]) return "main plate";
+  if (z < F.bridge[0]) return "going train, between plate and bridge";
+  if (z <= F.bridge[1]) return "bridge";
+  if (z < F.dial[0]) return "motion work, under the dial";
+  if (z <= F.dial[1]) return "dial";
+  return "hands";
+}
+function applyCut() {
+  const t = +$("cut").value;
+  if (t >= 1) { clip.constant = 1e6; $("cutV").textContent = "off"; $("cutLayer").textContent = "Slide left to cut the watch away from the dial side down, layer by layer."; }
+  else {
+    const z = cutRange[0] + t * (cutRange[1] - cutRange[0]);
+    clip.constant = z; $("cutV").textContent = `z ${z.toFixed(1)} mm`;
+    $("cutLayer").textContent = `Showing everything below z = ${z.toFixed(2)} mm; the cut is in the ${layerAt(z)}.`;
+  }
+  applyLabelVisibility();
+}
+
+// ---------- camera ----------
+function setCam(kind) {
+  const c = centre.clone(); const d = span * 1.9;
+  controls.target.copy(c);
+  if (kind === "top") { camera.position.set(c.x, c.y - 0.001, c.z + d); }
+  else if (kind === "back") { camera.position.set(c.x, c.y - 0.001, c.z - d); }
+  else if (kind === "side") camera.position.set(c.x, c.y - d, c.z + 0.001);
+  else camera.position.set(c.x + d * 0.35, c.y - d * 0.75, c.z + d * 0.75);
+  controls.update();
+}
+$("camReset").onclick = () => setCam(st.mode === "face" ? "top" : "iso");
+$("camTop").onclick = () => setCam("top"); $("camBack").onclick = () => setCam("back"); $("camSide").onclick = () => setCam("side");
+document.querySelectorAll("#modeSeg button").forEach(b => b.onclick = () => {
+  st.mode = b.dataset.mode; applyLook(); setCam(st.mode === "face" ? "top" : "iso");
+});
+
+// ---------- picking ----------
+const ray = new THREE.Raycaster(); const mouse = new THREE.Vector2(); let down = null;
+renderer.domElement.addEventListener("pointerdown", e => down = [e.clientX, e.clientY]);
+renderer.domElement.addEventListener("pointerup", e => {
+  if (activeTab !== "main" || !down || Math.hypot(e.clientX - down[0], e.clientY - down[1]) > 4) return;
+  const r = renderer.domElement.getBoundingClientRect();
+  mouse.set((e.clientX - r.left) / r.width * 2 - 1, -(e.clientY - r.top) / r.height * 2 + 1);
+  ray.setFromCamera(mouse, camera);
+  const cands = parts.filter(P => P.used && P.mesh.visible && (!P.fixed || P.mat.opacity >= 0.95)).map(P => P.mesh);
+  const hits = ray.intersectObjects(cands, false).filter(h => clip.distanceToPoint(h.point) >= -1e-6);
+  const P = hits.length ? hits[0].object.userData.P : null;
+  selectMobile(P && P.mobile ? P.mobile : null);
+});
+
+// ---------- controls wiring ----------
+$("opacity").addEventListener("input", applyLook);
+$("cut").addEventListener("input", applyCut);
+$("showLabels").addEventListener("input", e => { st.labels = e.target.checked; applyLook(); });
+$("showMeshes").addEventListener("input", e => { st.meshes = e.target.checked; applyLook(); });
+$("showEdges").addEventListener("input", e => { st.edges = e.target.checked; applyLook(); });
+$("scale").addEventListener("input", () => { $("scaleV").textContent = SCALES[+$("scale").value][1]; updateStatus(); });
+$("play").onclick = () => { st.running = !st.running; $("play").classList.toggle("on", st.running); $("play").textContent = st.running ? "❚❚ Pause" : "▶ Run"; updateStatus(); };
+$("resetTime").onclick = () => { st.T = 0; st.Sset = 0; pose(); updateStatus(); };
+$("movementSel").innerHTML = DATA.movements.map(m => `<option value="${m.key}">${m.label} (barrel ${fstr(m.barrel_speed)} turn / h)</option>`).join("");
+$("movementSel").addEventListener("input", e => buildMovement(e.target.value));
+const THEMES = ["auto", "light", "dark"]; let themeI = 0;
+$("theme").onclick = () => {
+  themeI = (themeI + 1) % 3; const t = THEMES[themeI];
+  if (t === "auto") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme", t);
+  $("theme").textContent = "Theme: " + t; themeChanged();
+};
+function themeChanged() {
+  scene.background = new THREE.Color(css("--scene") || "#e7e5de");
+  if (kScene) kScene.background = scene.background;
+  for (const g of objs.meshLines.children) g.traverse(o => { if (o.material && o.material.color) o.material.color.set(css("--wire")); });
+  if (MV) applyLook();
+}
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", themeChanged);
+
+// ---------- keyless tab ----------
+const K = DATA.keyless;
+let kScene = null, kCamera = null, kControls = null, kGroups = {}, kFrame = 0, kPlaying = false, kAcc = 0;
+const PHASE_NAMES = { wind: "Winding", hold: "Let go: the click holds", backward: "Turning back: the ratchet slips",
+  set: "Crown pulled out: setting the hands", return: "Crown pushed back in: winding again" };
+function kRot(point, dir, a) {
+  const d = new THREE.Vector3(...dir).normalize(), P = new THREE.Vector3(...point);
+  return new THREE.Matrix4().makeTranslation(P.x, P.y, P.z).multiply(new THREE.Matrix4().makeRotationAxis(d, a)).multiply(new THREE.Matrix4().makeTranslation(-P.x, -P.y, -P.z));
+}
+function kSlide(dir, s) { const d = new THREE.Vector3(...dir).normalize().multiplyScalar(s); return new THREE.Matrix4().makeTranslation(d.x, d.y, d.z); }
+function buildKeyless() {
+  kScene = new THREE.Scene(); lights(kScene); kScene.background = scene.background;
+  kCamera = new THREE.PerspectiveCamera(35, 1, 0.05, 1000); kCamera.up.set(0, 0, 1);
+  kControls = new OrbitControls(kCamera, renderer.domElement); kControls.enableDamping = true; kControls.enabled = false;
+  const names = Object.keys(K.mobiles);
+  // undeclared points: spread the schematic glyphs along x so they do not sit on each other
+  const spread = names.every(n => (K.mobiles[n].point || [0, 0, 0]).every(v => v === 0));
+  names.forEach((n, i) => { if (spread) K.mobiles[n].point = [i * 4, 0, 0]; });
+  const col = {}; names.forEach((n, i) => col[n] = CAT[i % CAT.length]);
+  for (const n of names) { const g = new THREE.Group(); g.matrixAutoUpdate = false; kScene.add(g); kGroups[n] = g; }
+  const still = new THREE.Group(); kScene.add(still);
+  const box = new THREE.Box3();
+  if (K.parts && K.parts.length) {
+    for (const p of K.parts) {
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute("position", new THREE.BufferAttribute(decode(p.pos, Float32Array), 3));
+      geo.setIndex(new THREE.BufferAttribute(decode(p.idx, Uint32Array), 1)); geo.computeVertexNormals(); geo.computeBoundingBox(); box.union(geo.boundingBox);
+      const mat = new THREE.MeshStandardMaterial({ color: p.mobile ? col[p.mobile] : "#9fb0c2", metalness: 0.3, roughness: 0.5, side: THREE.DoubleSide,
+        transparent: !!p.ghost, opacity: p.ghost ? 0.18 : 1, depthWrite: !p.ghost });
+      (p.mobile && kGroups[p.mobile] ? kGroups[p.mobile] : still).add(new THREE.Mesh(geo, mat));
+    }
+  } else {
+    for (const n of names) {        // schematic: a disc for a turning part, a block for a sliding part, a rod for the stem
+      const m = K.mobiles[n]; const P = new THREE.Vector3(...m.point); const D = new THREE.Vector3(...m.dir).normalize();
+      const mat = new THREE.MeshStandardMaterial({ color: col[n], metalness: 0.3, roughness: 0.5 });
+      const q = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), D);
+      let mesh;
+      if (m.dof === "slide") mesh = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.2, 1.2), mat);
+      else if (m.dof === "stem") mesh = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 6, 16), mat);
+      else mesh = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 0.35, 32), mat);
+      mesh.quaternion.copy(q); mesh.position.copy(P); kGroups[n].add(mesh);
+      if (m.dof !== "slide") {   // a radial marker so the turning shows
+        const mk = new THREE.Mesh(new THREE.BoxGeometry(m.dof === "stem" ? 0.25 : 1.4, 0.4, 0.25), new THREE.MeshStandardMaterial({ color: "#222" }));
+        const perp = new THREE.Vector3(1, 0, 0); if (Math.abs(perp.dot(D)) > 0.9) perp.set(0, 0, 1);
+        perp.sub(D.clone().multiplyScalar(perp.dot(D))).normalize();
+        mk.position.copy(P).addScaledVector(perp, m.dof === "stem" ? 0.45 : 0.8).addScaledVector(D, m.dof === "stem" ? 2.5 : 0.25);
+        mk.quaternion.copy(q); kGroups[n].add(mk);
+      }
+      box.expandByPoint(P.clone().addScalar(2)); box.expandByPoint(P.clone().addScalar(-2));
+      const l = label(n, "", P.clone().addScaledVector(new THREE.Vector3(0, 0, 1), 2.2), kGroups[n]); l.userData.k = true;
+    }
+  }
+  if (box.isEmpty()) box.set(new THREE.Vector3(-5, -5, -5), new THREE.Vector3(5, 5, 5));
+  const c = box.getCenter(new THREE.Vector3()), sp = Math.max(...box.getSize(new THREE.Vector3()).toArray());
+  kControls.target.copy(c); kCamera.position.set(c.x + sp * 0.8, c.y - sp * 1.4, c.z + sp * 1.2); kControls.update();
+  $("kFrame").max = Math.max(0, K.frames.length - 1);
+  const firstOf = {}; K.frames.forEach((f, i) => { if (!(f.phase in firstOf)) firstOf[f.phase] = i; });
+  $("phases").innerHTML = Object.keys(firstOf).map(p => `<span data-p="${p}">${PHASE_NAMES[p] || p}</span>`).join("");
+  $("phases").onclick = (e) => { const s = e.target.closest("span[data-p]"); if (s) kShow(firstOf[s.dataset.p]); };
+  $("kLegend").innerHTML = names.map(n => `<div style="margin:3px 0"><span class="sw" style="background:${col[n]}"></span><b>${n}</b> <span class="note">${K.mobiles[n].dof}${K.mobiles[n].carrier ? ", carried by " + K.mobiles[n].carrier : ""}</span>${K.mobiles[n].role ? "<br>" + K.mobiles[n].role : ""}</div>`).join("");
+  $("kSource").textContent = `Trace: ${K.source} · ${K.frames.length} frames · ${names.length} mobiles${K.parts && K.parts.length ? "" : " · schematic shapes (no part files given)"}`;
+  kShow(0);
+}
+function kShow(f) {
+  if (!K.frames.length) return;
+  kFrame = Math.max(0, Math.min(K.frames.length - 1, f)); $("kFrame").value = kFrame;
+  const F = K.frames[kFrame]; const q = F.q;
+  for (const [n, g] of Object.entries(kGroups)) {
+    const m = K.mobiles[n], v = q[n]; let M = new THREE.Matrix4();
+    if (v) {
+      if (m.dof === "stem") M = kSlide(m.dir, v[1] || 0).multiply(kRot(m.point, m.dir, v[0]));
+      else if (m.dof === "slide") M = kSlide(m.dir, v[0]);
+      else M = kRot(m.point, m.dir, v[0]);
+    }
+    if (m.carrier && q[m.carrier]) { const c = K.mobiles[m.carrier]; M = kRot(c.point, c.dir, q[m.carrier][0]).multiply(M); }
+    g.matrix.copy(M); g.matrixWorldNeedsUpdate = true;
+  }
+  $("kFrameV").textContent = `${kFrame + 1} / ${K.frames.length}`;
+  $("kNow").innerHTML = `<div class="name" style="font-size:14px;font-weight:600">${PHASE_NAMES[F.phase] || F.phase || "–"}</div><div>${F.label || ""}</div><div class="note">t = ${(+F.t).toFixed(3)}</div>`;
+  $("kCoords").innerHTML = `<table><tr><th>mobile</th><th>value</th></tr>${Object.entries(q).map(([n, v]) => {
+    const m = K.mobiles[n] || {}; const parts_ = m.dof === "stem" ? [`${(v[0] * 180 / Math.PI).toFixed(1)}°`, `${(v[1] || 0).toFixed(3)} mm`] : m.dof === "slide" ? [`${v[0].toFixed(3)} mm`] : [`${(v[0] * 180 / Math.PI).toFixed(1)}°`];
+    return `<tr><td>${n}</td><td class="mono">${parts_.join(", ")}</td></tr>`; }).join("")}</table>`;
+  document.querySelectorAll("#phases span").forEach(s => s.classList.toggle("on", s.dataset.p === F.phase));
+}
+let activeTab = "main";
+if (K && K.frames && K.frames.length) {
+  $("tabKeyless").classList.remove("hidden");
+  $("kFrame").addEventListener("input", e => kShow(+e.target.value));
+  $("kPrev").onclick = () => kShow(kFrame - 1); $("kNext").onclick = () => kShow(kFrame + 1);
+  $("kPlay").onclick = () => { kPlaying = !kPlaying; $("kPlay").classList.toggle("on", kPlaying); $("kPlay").textContent = kPlaying ? "❚❚ Pause" : "▶ Play"; if (kPlaying && kFrame >= K.frames.length - 1) kShow(0); };
+  $("kSpeed").addEventListener("input", () => $("kSpeedV").textContent = `${$("kSpeed").value} frames / s`);
+  $("kSpeedV").textContent = `${$("kSpeed").value} frames / s`;
+}
+document.querySelectorAll("#tabs button").forEach(b => b.onclick = () => {
+  activeTab = b.dataset.tab;
+  if (activeTab === "keyless" && !kScene) buildKeyless();
+  document.querySelectorAll("#tabs button").forEach(x => x.classList.toggle("on", x === b));
+  for (const [id, show] of [["leftMain", activeTab === "main"], ["rightMain", activeTab === "main"], ["leftKeyless", activeTab === "keyless"], ["rightKeyless", activeTab === "keyless"],
+    ["clock", activeTab === "main"], ["status", activeTab === "main"]]) $(id).classList.toggle("hidden", !show);
+  controls.enabled = activeTab === "main"; if (kControls) kControls.enabled = activeTab === "keyless";
+  for (const o of objs.labels) o.element.style.visibility = activeTab === "main" ? "" : "hidden";
+  for (const o of objs.numerals) o.element.style.visibility = activeTab === "main" ? "" : "hidden";
+  if (kScene) kScene.traverse(o => { if (o.isCSS2DObject) o.element.style.visibility = activeTab === "keyless" ? "" : "hidden"; });
+  resize();
+});
+
+// ---------- loop ----------
+let last = performance.now();
+function loop(now) {
+  const dt = Math.min(0.1, (now - last) / 1000); last = now;
+  if (activeTab === "main") {
+    let moved = false;
+    if (holdDir) { turnCrown(holdDir * 1.5 * dt); moved = true; }
+    if (st.running && !st.crownOut && st.wound > 0) {
+      const dh = dt * SCALES[+$("scale").value][0] / 3600;
+      const bs = Math.abs(fval(S.speed.barrel || [1, 8]));
+      const use = Math.min(dh, st.wound / bs);
+      st.T += use; st.wound -= use * bs; moved = true;
+      if (st.wound <= 1e-9) { st.wound = 0; }
+    }
+    if (moved) { pose(); updateStatus(); }
+    controls.update(); renderer.render(scene, camera); labelRenderer.render(scene, camera);
+  } else if (kScene) {
+    if (kPlaying) {
+      kAcc += dt * +$("kSpeed").value;
+      while (kAcc >= 1) { kAcc -= 1; if (kFrame >= K.frames.length - 1) { kPlaying = false; $("kPlay").classList.remove("on"); $("kPlay").textContent = "▶ Play"; break; } kShow(kFrame + 1); }
+    }
+    kControls.update(); renderer.render(kScene, kCamera); labelRenderer.render(kScene, kCamera);
+  }
+  requestAnimationFrame(loop);
+}
+function resize() {
+  const w = view.clientWidth, h = view.clientHeight || 500;
+  renderer.setSize(w, h); labelRenderer.setSize(w, h);
+  camera.aspect = w / h; camera.updateProjectionMatrix();
+  if (kCamera) { kCamera.aspect = w / h; kCamera.updateProjectionMatrix(); }
+}
+addEventListener("resize", resize);
+
+// ---------- start ----------
+$("title").textContent = DATA.title;
+$("source").textContent = `delivery: ${DATA.source}`;
+$("scaleV").textContent = SCALES[+$("scale").value][1];
+themeChanged(); resize(); buildMovement(DATA.movements[0].key); drawKnob(); setCam("iso"); updateStatus();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
