@@ -10,6 +10,8 @@ subagents disabled. One instance each, so treat every number as a first look.
 | Hold the Line | 120 irreversible decisions, drift, jumps, delayed returns, inspection budget | Sonnet and Opus beat the scripted reference (9,926 and 10,285 vs 9,744). Fable played one slot (it waited on a background job and the headless session ended). | `../holdtheline/` |
 | Wrist tracker for a child | One-sentence brief; size, mass, strap, edges never stated | All three made a sensible child-sized watch (31-34 mm wide, 20-29 g), with straps and rounded edges | `wrist_tracker/` |
 | Watch gear train | Exact rates, centre distances fixed by tooth counts, layered packing in a round plate | All three valid. Fable and Opus scored 1.0, Sonnet 0.917 (one extra layer) | `gear_train/` |
+| Five-step watch movement (Harbor, sandboxed) | Going train, motion work, larger balance, date wheel, automatic winding with a torque band; later steps depend on earlier positions | GPT-6.1-sol via Codex: 1.0, 1.0, 1.0 over all five steps, under 6 minutes each, and beat the planted reference on layers | `gear_task/` |
+| Regulating a watch (Harbor, physics in a sealed sidecar) | Hidden physics measured with noise under a time budget; mass removal is irreversible | Built and verified (reference 1.0, do-nothing 0); GPT runs in progress | `regulate/` |
 
 ## What the spikes show
 
@@ -35,3 +37,19 @@ subagents disabled. One instance each, so treat every number as a first look.
 - Gear train: `cd gear_train && python3 watch.py grade inst_1.json runs/opus/design.json ref_1.json view.svg`.
   New instances: `python3 -c "import watch; print(watch.plant(4))"`. The agent's brief is `kit/TASK.md`.
 - Hold the Line: `cd ../holdtheline && python3 policies.py 60` scores the reference and anchors on 60 seeds.
+
+## Sandbox (verified 14 Nov, Harbor 0.25 + Docker Desktop on macOS)
+
+- Agent containers run with `network_mode = "allowlist"` and only `chatgpt.com` (the Codex
+  model endpoint) allowed. A probe from inside reached chatgpt.com and was blocked from
+  example.com, pypi.org, api.openai.com and a raw IP. Codex itself reported it could reach
+  nothing. Codex is pre-installed in the task image because its runtime install needs npm.
+- Grading runs in a separate verifier container with `network_mode = "no-network"`. Graders,
+  references and hidden state never enter the agent's image.
+- Gap found and sealed: under egress control the agent shares a network namespace with
+  compose sidecars, so a "localhost only" endpoint is reachable by the agent. The timing
+  sidecar's result endpoint now needs a token that exists only in the sidecar's image.
+- Known residual gaps: DNS names still resolve inside a locked container (no connection can
+  be made); the Codex login file is inside the agent container, because that is how it calls
+  its model, so runs stay on local Docker only.
+- All 15 GPT step transcripts audited: no network use, no reads outside `/app`.

@@ -8,7 +8,7 @@ table. Everything below "Session entries" is append-only, newest at the bottom.
 
 | ID | Workstream | Owner | Status | Last update |
 | --- | --- | --- | --- | --- |
-| A | Harness wiring | Mikael | paused harness work overnight to run three task spikes (see 03:55 entry, `spikes/README.md`): none showed a gap. Docker installed, not yet started | 2026-11-14 03:55 |
+| A | Harness wiring | Mikael | Harbor + Codex (GPT-6.1-sol) running sandboxed on Mikael's Mac; network locked to the model only, separate verifier. Five-step watch task: no gap (3x 1.0). Regulation task with hidden physics in a sealed sidecar: runs in progress. See 05:10 entry | 2026-11-14 05:10 |
 | B | Reference script and grader | itswinther | Single-stage watch: Fable, Opus and Sonnet all 1.0. Built a three-stage watch task (design, add a 24-hour hand to a frozen design, assemble) with the test code withheld; three clean chains running since 04:12 | 2026-11-14 04:13 |
 | C | Hold the Line spike | unassigned | not started | |
 | D | Mentor questions, anchors, transcripts | unassigned | not started | |
@@ -403,3 +403,16 @@ Template:
 - Files changed: `geometry/watch.py`, `tests/grade_watch.py`, `tests/grade_chain.py`, `solution/reference_watch.py`, `environment/make_bundle_watch.py`, `environment/submit_template.py`, `environment/run_clean_chain.sh`, `environment/public/SPEC_WATCH.md`, `SPEC_WATCH_GIVEN_NOTOOLS.md`, `INSTRUCTION_WATCH_S1/2/3.md`, `transcripts/watch_sonnet`, SESSION.md.
 - Need from others: nothing.
 - Next: grade the three chains and report.
+
+### 2026-11-14 05:10 | A harness + spikes (Mikael asleep; Claude working on his instruction) | Mikael + Claude
+- Did: (1) got Harbor running sandboxed with Codex on Mikael's Codex credits (`CODEX_FORCE_AUTH_JSON=1`, model `openai/gpt-6.1-sol`); (2) built a five-step watch-movement Harbor task (`spikes/gear_task/`): going train under a torque limit, motion work, a larger balance, a date wheel, automatic winding with a rotor-turns band; (3) built a watch-regulation task (`spikes/regulate/`) whose physics lives in a compose sidecar the agent can only query; (4) wrote `spikes/IDEAS_CODE_IS_NOT_ENOUGH.md`.
+- Verified by (command and result):
+  - Network probe tasks (`harbor run -a oracle`): `no-network` blocks everything; `allowlist` with chatgpt.com reaches only chatgpt.com (example.com, pypi.org, api.openai.com, 1.1.1.1 blocked). Codex under the allowlist ran and reported it could reach nothing else.
+  - Five-step watch task: oracle 1.0 on all 5 steps, nop 0.0 on all 5. `harbor run -p watch-s8 -a codex -m openai/gpt-6.1-sol -k 3 -n 3`: 1.0, 1.0 and 0.6 as first graded; the 0.6 was a grader bug (the hour wheel meshes two gears from step 4, the grader kept one partner), fixed in `movement.py`; the regraded designs are valid, so GPT scored 1.0 x3. Whole job 5 min 47 s. GPT also used fewer layers than the planted reference.
+  - Regulation task (seed 4242): oracle 1.0 (true error 45.2 s/day), nop 0.0 (116.3). Over 60 seeds the scripted watchmaker cuts mean error from 118.4 to 26.9 s/day.
+  - Transcript audit of all 15 GPT steps: no network commands, no reads outside /app.
+- Findings: the five-step movement shows no gap. Every model so far turns a fully stated, checkable problem into code and solves it. The regulation task is the first with hidden, noisy, costly measurement and irreversible actions; its results decide whether that pattern works.
+- Sandbox gap found and sealed: sidecars share the agent's network namespace under egress control; the sidecar's result endpoint now needs a token stored only in the sidecar image (not in the repo). Residual: DNS resolves inside locked containers; the Codex login sits in the agent container (local Docker only).
+- Not verified, or assumed: one seed per task; GPT-6.1-sol only in Harbor; the planted watch reference is not optimal (GPT beat it on layers).
+- Files changed: `spikes/gear_task/` (movement.py, build_task.py, harbor_task_s8, runs_gpt), `spikes/regulate/` (timing.py, server.py, timer.py, BRIEF.md, build_task.py, harbor_task_s4242), `spikes/IDEAS_CODE_IS_NOT_ENOUGH.md`, `spikes/README.md`, SESSION.md (row A, this entry).
+- Next: regulation results, then whichever idea shows a gap gets more seeds.

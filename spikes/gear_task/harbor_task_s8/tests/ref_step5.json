@@ -1,0 +1,12 @@
+{
+ "valid": true,
+ "violations": [],
+ "power_reserve_h": 41.6,
+ "levels_by_side": {
+  "train": 4,
+  "dial": 2,
+  "wind": 3
+ },
+ "total_levels": 9,
+ "rotor_turns_per_barrel_turn": 88.066
+}

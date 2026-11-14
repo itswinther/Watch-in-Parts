@@ -1,0 +1,14 @@
+{
+ "valid": false,
+ "violations": [
+  "hour_wheel: hits the minute arbor"
+ ],
+ "power_reserve_h": 42.545,
+ "levels_by_side": {
+  "train": 3,
+  "dial": 2,
+  "wind": 0
+ },
+ "total_levels": 5,
+ "score": 0.0
+}

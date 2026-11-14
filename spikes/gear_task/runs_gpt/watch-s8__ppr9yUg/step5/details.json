@@ -1,0 +1,15 @@
+{
+ "valid": false,
+ "violations": [
+  "hour_wheel: hits the minute arbor"
+ ],
+ "power_reserve_h": 42.545,
+ "levels_by_side": {
+  "train": 3,
+  "dial": 2,
+  "wind": 2
+ },
+ "total_levels": 7,
+ "rotor_turns_per_barrel_turn": 86.357,
+ "score": 0.0
+}

@@ -1,0 +1,11 @@
+{
+ "valid": true,
+ "violations": [],
+ "power_reserve_h": 41.6,
+ "levels_by_side": {
+  "train": 4,
+  "dial": 2,
+  "wind": 0
+ },
+ "total_levels": 6
+}

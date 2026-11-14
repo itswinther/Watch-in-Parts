@@ -1,0 +1,36 @@
+{
+ "plate_radius": 12.83,
+ "beats_per_hour": 18000,
+ "power_reserve_target_h": 35,
+ "max_barrel_ratio": 6.55,
+ "fixed_arbors": {
+  "centre": [
+   0.0,
+   0.0
+  ],
+  "fourth": [
+   4.384568,
+   -1.245918
+  ],
+  "escape": [
+   2.837351,
+   -3.38501
+  ]
+ },
+ "escape_wheel": {
+  "radius": 1.9,
+  "teeth": 15
+ },
+ "balance": {
+  "centre": [
+   -3.65784,
+   -7.13501
+  ],
+  "radius": 3.44,
+  "radius_after_change": 4.4
+ },
+ "winding_rotor_turns_per_barrel_turn": [
+  79,
+  105
+ ]
+}
