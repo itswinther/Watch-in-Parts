@@ -108,7 +108,7 @@ def grade_design(folder, stage=1, prev=None, skip=()):
     gates["assembled"], details["assembled"] = _run(assembled)
     if stage == 2:
         gates["locked"], details["locked"] = _run(lambda: locked_design(prev, folder))
-        gates["day_declared"], details["day_declared"] = _run(lambda: ("day" in m.hands, {}))
+        gates["day_declared"], details["day_declared"] = _run(lambda: day_declared(prev, m))
 
     speeds, conflicts = m.speeds()
 
@@ -249,6 +249,19 @@ def locked_design(prev, folder):
         if new.get("hands", {}).get(h) != old["hands"][h]:
             changed.append("hand %s changed" % h)
     return not changed, {"changed": changed}
+
+
+def day_declared(prev, m):
+    """Stage 2: a 24-hour hand is declared, and its part is a new part: its name appears nowhere in the
+    received movement.json (it may sit on an existing mobile)."""
+    if "day" not in m.hands:
+        return False, {"error": "no 'day' hand declared"}
+    if not prev:
+        return False, {"error": "no previous stage given"}
+    old = _doc(prev)
+    received = set(old["fixed"]) | {p for mo in old["mobiles"].values() for p in mo["parts"]}
+    part = m.hands["day"][1]
+    return part not in received, {"part": part, "new_part": part not in received}
 
 
 def kept_parts(prev, folder, speeds):
