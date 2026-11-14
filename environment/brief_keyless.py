@@ -19,7 +19,7 @@ from geometry import watch as W             # noqa: E402
 
 SECTION = "9. Part 5"
 DS401 = "datasheets/DS-401_crown_stem.md"
-TRAVEL_ROW = "Travel from position 1 (winding) to position 2 (setting)"
+TRAVEL_ROW = "Travel from position 1 (winding) to the setting position (0.30 to the date position, then 0.50)"
 WIGGLE_STEP = 1.5           # degrees: the rocking step, a literal in A's grade.py _pull (checked in check())
 BACKWARD_TURN = 360         # degrees: AT-4's backward turn, a literal in A's grade.py worker (checked in check())
 
@@ -178,7 +178,8 @@ Steps. Each passes or fails on its own.
    pulls back. Every {te} steps the rig taps the movement: each free body moves up to {tap} mm (surface travel) in
    the direction it can move furthest, and spring-loaded bodies return towards rest. The arbor runs back at most
    {rb} degrees in all, and over the last {hl} steps it moves at most {hd} degree: it is held.
-3. **AT-3 Run.** Fully wound, the mainspring stores {cap} turns of the arbor; the run-back measured in AT-2 is lost
+3. **AT-3 Run.** Fully wound, the mainspring stores the turns of the arbor that VM-DS-101 gives for the spring the
+   supplied barrel holds (Table 3, var. {spring}, column "N at r = D/6"); the run-back measured in AT-2 is lost
    from that, and while the watch runs the barrel turns at the speed class of the 8-hour build (DS-W01, section 4),
    so the power reserve is (capacity - run-back) x the hours per barrel turn. It is at least {res} hours. The barrel
    is free to run: with the crown in position 1, the arbor is turned in the winding sense by itself through {fr}
@@ -207,7 +208,7 @@ time; a step not finished by then fails.
            chgt=H.cite_case("Inner height along the axis (mm)"), prot=n(sc["STEM_PROTRUDE"]), wt=n(C.WIND_TURNS),
            wlo=n(C.WIND_BAND[0]), whi=n(C.WIND_BAND[1]), still=n(C.STILL_TOL), hs=C.HOLD_STEPS, te=C.TAP_EVERY,
            tap=n(sc["TAP_ARC"]), rb=n(C.CLICK_RUNBACK), hl=C.HELD_LAST_STEPS, hd=n(C.HELD_DRIFT),
-           cap=n(C.CAPACITY_TURNS), res=n(C.RESERVE_MIN), fr=n(C.FREE_RUN_DEG), frs=n(C.FREE_RUN_STEP),
+           spring=KJ.JOB_SPRING, res=n(C.RESERVE_MIN), fr=n(C.FREE_RUN_DEG), frs=n(C.FREE_RUN_STEP),
            ct=n(C.COUPLED_TURN), bt=BACKWARD_TURN, htol=n(C.HOLD_TOL), ns=C.SWEEP_SAMPLES, sw=n(C.SWEEP_TURN),
            st=n(C.SET_TURN), smin=n(C.SET_MIN), rw=n(C.REWIND_TURN), pt=KJ.KEYLESS_TIMEOUT_S)
     return _rewrap(text, H)
@@ -245,9 +246,9 @@ def trace_rows(H):
     n, cell, Q, P = H.num, H.cell, "datasheets/" + H.QA_FILE, SECTION
     k = "keyless "
     return [
-        cell(k + "PULL: 0.80 x S = %s, used as %s (geometry/keyless_job.py); VM-DS-401 prints it to 0.01 mm"
+        cell(k + "PULL: 0.80 x S = %s, used as %s (geometry/keyless_job.py); VM-DS-401 prints it"
              % (n(0.80 * KJ.S), n(sc["PULL"])), sc["PULL"], DS401, "4. Winding stem", TRAVEL_ROW, "This series",
-             [n(round(sc["PULL"], 2))]),
+             [n(sc["PULL"])]),
         cell(k + "TOL x S^3 (A's engine.TOL, rounded)", sc["TOL"], Q, P, "**Touching.**", None, [n(sc["TOL"])]),
         cell(k + "MU_STATIC, MU_SLIDING (A's constants)", (C.MU_STATIC, C.MU_SLIDING), Q, P, "**Friction.**", None,
              [n(C.MU_STATIC), n(C.MU_SLIDING)]),
@@ -265,10 +266,13 @@ def trace_rows(H):
              (C.HOLD_STEPS, C.TAP_EVERY, sc["TAP_ARC"], C.CLICK_RUNBACK, C.HELD_LAST_STEPS, C.HELD_DRIFT), Q, P,
              "2. **AT-2", None, [C.HOLD_STEPS, C.TAP_EVERY, n(sc["TAP_ARC"]), n(C.CLICK_RUNBACK), C.HELD_LAST_STEPS,
                                  n(C.HELD_DRIFT)]),
-        cell(k + "CAPACITY_TURNS, RESERVE_MIN, FREE_RUN_DEG, FREE_RUN_STEP, COUPLED_TURN (BARREL_HOURS_PER_TURN is "
-             "the 8-hour build's speed class, cited)", (C.CAPACITY_TURNS, C.RESERVE_MIN, C.FREE_RUN_DEG,
+        cell(k + "RESERVE_MIN, FREE_RUN_DEG, FREE_RUN_STEP, COUPLED_TURN (BARREL_HOURS_PER_TURN is "
+             "the 8-hour build's speed class, cited; the capacity is cited to VM-DS-101)", (C.RESERVE_MIN, C.FREE_RUN_DEG,
                                                        C.FREE_RUN_STEP, C.COUPLED_TURN), Q, P, "3. **AT-3", None,
-             [n(C.CAPACITY_TURNS), n(C.RESERVE_MIN), n(C.FREE_RUN_DEG), n(C.FREE_RUN_STEP), n(C.COUPLED_TURN)]),
+             [n(C.RESERVE_MIN), n(C.FREE_RUN_DEG), n(C.FREE_RUN_STEP), n(C.COUPLED_TURN)]),
+        cell(k + "CAPACITY_TURNS in the joined job (geometry/keyless_job.capacity_turns: spring %s)" % KJ.JOB_SPRING,
+             KJ.capacity_turns(), "datasheets/DS-101_mainspring_barrel.md", "5. Turns and run time", KJ.JOB_SPRING,
+             "N at r = D/6", [n(KJ.capacity_turns())]),
         cell(k + "AT-4 backward turn (literal 360 in A's grade.worker), HOLD_TOL", (BACKWARD_TURN, C.HOLD_TOL), Q, P,
              "4. **AT-4", None, [BACKWARD_TURN, n(C.HOLD_TOL)]),
         cell(k + "SWEEP_SAMPLES, SWEEP_TURN, SET_TURN, SET_MIN", (C.SWEEP_SAMPLES, C.SWEEP_TURN, C.SET_TURN, C.SET_MIN),

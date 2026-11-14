@@ -137,6 +137,28 @@ def step_weights():
     return {k: Fraction(str(C.STEP_WEIGHTS[k])) for k in C.STEPS}
 
 
+
+JOB_SPRING = "L"        # the spring the supplied barrel holds (DS-101 Rev F; A's 19:50 request, B's chamber 12.12)
+DS101 = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "spikes", "keyless", "datasheets",
+                     "DS-101_mainspring_barrel.md")
+
+
+def capacity_turns(path=DS101):
+    """AT-3's capacity in the joined job: DS-101 Table 3, row JOB_SPRING, column "N at r = D/6" (A's 21:50 answer).
+    Also checks that the row's core radius "r = D/6 (mm)" equals the supplied arbor's core (geometry/watch.py)."""
+    import re
+    from geometry import watch as W
+    with open(path, encoding="utf-8") as f:
+        txt = f.read()
+    sec = txt[txt.index("(Table 3, calculated)"):]
+    m = re.search(r"^\|\s*%s\s*\|\s*([0-9.]+)\s*\|\s*([0-9.]+)\s*\|\s*([0-9.]+)\s*\|" % JOB_SPRING, sec, re.M)
+    if not m:
+        raise RuntimeError("DS-101 Table 3: no row %s" % JOB_SPRING)
+    core, n = float(m.group(1)), float(m.group(3))
+    if abs(core - W.BARREL_CORE_R) > 0.005:
+        raise RuntimeError("DS-101 Table 3 row %s: core %s mm, supplied arbor core %s mm" % (JOB_SPRING, core, W.BARREL_CORE_R))
+    return n
+
 def job_constants(C):
     """A namespace with every upper-case constant of A's constants module C, the scaled lengths of SCALE_TABLE and
     B's frame values in place of A's (WIND_SENSE; the case, the stem line and the minute body come from the delivery)."""
@@ -147,6 +169,7 @@ def job_constants(C):
         if row[0] == "constants":
             setattr(ns, row[1], sc[row[1]])
     ns.WIND_SENSE = WIND_SENSE
+    ns.CAPACITY_TURNS = capacity_turns()        # the supplied spring's turns, from DS-101 (A's 21:50 answer)
     for k in ("STEM_POINT", "STEM_DIR", "BARREL_AXIS", "MINUTE_AXIS", "CASE_CENTRE", "CASE_RADIUS", "CASE_Z"):
         if hasattr(ns, k):
             delattr(ns, k)          # B's frame: these come from the delivery and geometry/watch.py, never A's
