@@ -1227,3 +1227,34 @@ What it means:
 - Files changed: SESSION.md only (row B, Requests, Decisions, this entry).
 - Need from others: A, the Requests line of 15:29 and the Decisions line of 15:29. itswinther: a go, and the open choices (barrel change as a variant, weights, delivery-step format errors, what replaces the volume limits, the honesty term).
 - Next: nothing running. Waiting for itswinther's go before step 1 (the one-delivery grader).
+### 2026-11-14 15:34 | A: datasheets updated with the real data of DATASHEET_GAPS_2 and its addendum | Mikael + Claude
+- Did: DS-101 Rev E, DS-301 Rev D, DS-401 Rev D, DS-501 Rev C, INDEX and TRACEABILITY (sections 4b and 4c). Every new value has a footnote with a URL; derived values say "not published; derived as …". Sellita, the EPFL thesis and ISO are cited as facts only.
+  - **DS-101:** Sellita SW200-1 rev 04 measured torque as an 11½‴ reference (Table 2a); Nivarox US 11,320,786 (unwinding ≥ 80 % of winding); the supplied barrels' core is r = D/6 (Grossmann art. 108 to 111, Saunier art. 517), with a new N / run-time column. At r = D/6 the ETA 2801-size spring gives 41 h against ETA's 42 h, so the 47 h / 28 h ambiguity is settled.
+  - **Correction (DS-101 Note 2):** Rev D called M_el a strict upper bound on torque. The real 11.86 N·mm (slipping up to 16.57) at 1:1 is above M_el of every Table 1 spring (largest 9.1), so that claim is removed. The crown-torque check can now bind for the smallest catalogue crown (Ø 4.85) at i = 3 if the bound is the slipping torque: 70.1/3 = 23.4 > T_rec 20.4 N·mm. Details in TRACEABILITY 4b.
+  - **DS-401:** crown withstand ratings (Table 4); **DS-501:** 42 mN·m no-damage limit as a 1:1 fact, 32 mN·m kept as the comfortable knob maximum, human values stated as not scaled, Omega 10 to 50 mN·m as context; **DS-301:** jewel OD tolerance, press fit and axial hold (Table 2b); load rating still "not published".
+  - PROMPT.md on main does not state a core radius 0.6 / inner radius 1.8, so DS-101 states only the rule (0.6 = 1.8/3 would be consistent).
+- **For B: delta to the 14:20 table** (only new or changed quantities; s = 1.617, s² = 2.615, s³ = 4.229, computed in Docker):
+
+| Name | 1:1 | s = 1.617 | Unit | Source |
+| --- | --- | --- | --- | --- |
+| Mainspring torque ½ turn from full wind (11½‴ reference) | 11.86 | 50.2 | N·mm | Sellita SW200-1 rev 04 p. 3; DS-101 T2a |
+| Mainspring torque after 24 h | 8.83 | 37.3 | N·mm | same |
+| Bridle slipping torque | 12.21 to 16.57 | 51.6 to 70.1 | N·mm | same |
+| Unwinding / winding torque | ≥ 0.80 | ≥ 0.80 | ratio | US 11,320,786 |
+| Barrel core radius / inner radius | 1/3 | 1/3 | ratio | Grossmann art. 108; Saunier art. 517; DS-101 §1 |
+| Mainspring capacity, variant F at r = D/6 (was 6.0 at 16·t) | 6.7 (53 h) | 6.7 (53 h) | turns | DS-101 T3 |
+| Crown pull withstand, running to set | 22.2 ± 1.1 | 58.1 ± 2.9 | N | MIL-W-46374F §3.3.6; DS-401 T4 |
+| Crown side force withstand, 10 min | 5 | 13.1 | N | ISO 6425:2018 §4.7.2; DS-401 T4 |
+| Crown torque withstand, fully wound | 42.4 ± 3.5 | 179.3 ± 14.8 | N·mm | MIL-W-46374F §3.3.7; GG-W-113A §3.9.3; DS-401 T4 |
+| Comfortable knob torque max (human, not scaled) | 32 | 32 | N·mm | MIL-STD-1472H fig. 10; DS-501 |
+| Stem travel position 1 to 2 (was 0.8 to 1.0) | 0.80 | 1.29 | mm | Sellita SW200-1 rev 07; DS-401 T2 |
+| Jewel hole tolerance (was about 0.005 at 1:1) | 5.1 | 8.2 | µm | Bird Precision; DS-301 T2 |
+| Jewel OD tolerance | 0 to +6 | 0 to +9.7 | µm | EPFL thesis 6665 (NIHS 41-02); DS-301 T2b |
+| Jewel press-fit interference | 10 | 16.2 | µm | same |
+| Jewel press-fit axial hold, min | 15 | 39.2 | N | same, Tab. 2.1 |
+| Brass CW614N proof, design minimum (was 230 to 350) | 220 | 220 | MPa | Wieland; DS-201 |
+| Brass allowable (was 115) | 110 | 110 | MPa | DS-201 |
+
+- **Split, as agreed:** A (Mikael) owns the datasheet content; B (itswinther's session) owns the constants in geometry/watch.py and the bundle check against the datasheets. A did not edit geometry/, tests/, solution/, environment/ or any builder.
+- Verified by: all scaled values and the r = D/6 turns computed in `python:3.12-slim` (Docker); Grossmann art. 108, 168 to 169 and Saunier art. 517 checked by grep in `public_domain/`; every footnote reference in the DS sheets has one definition. Not verified: the Omega bracket (fetch summary); the EPFL axial hold is given there for a screw-foot press fit and is applied to jewels by analogy.
+- Files changed: `spikes/keyless/datasheets/` DS-101, DS-301, DS-401, DS-501, INDEX.md, TRACEABILITY.md; SESSION.md (this entry).

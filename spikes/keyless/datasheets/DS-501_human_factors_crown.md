@@ -6,7 +6,7 @@ at the actual crown diameter.
 
 | Document | Revision | Date | Status |
 |---|---|---|---|
-| VM-AN-501 | B | 2026-11-14 | Released |
+| VM-AN-501 | C | 2026-11-14 | Released |
 
 > **About this document.** Valtorre Microtechnique SA is a fictional supplier, used for this exercise
 > only. The measured torques, the pinch strengths, the friction values and the design limit for knobs
@@ -42,8 +42,23 @@ smooth 3.3 mm cylinder.[^imr]
 | Maximum torque resistance, knob Ø ≤ 25 mm | **32 mN·m (32 N·mm)** | [^mil] |
 | Maximum torque resistance, knob Ø > 25 mm | 42 mN·m | [^mil] |
 
-A crown is smaller than the standard's minimum knob, so 32 N·mm is an upper bound on the intended
-operating torque, not a crown rating.
+A crown is smaller than the standard's minimum knob, so 32 N·mm is the maximum torque resistance for
+comfortable operation, not a crown rating.
+
+## 3a. Crown torque the watch withstands, for comparison (Table 2a)
+
+| Quantity | Value at 1:1 | Source |
+|---|---|---|
+| Torque at the crown that a fully wound watch withstands without damage | **42 mN·m** (42.4 ± 3.5 mN·m, 6 ± 0.5 in-oz) | [^mil46374][^gg113] |
+| Torque limits of motorised crown winders, at full wind (supporting context) | typically 10 to 50 mN·m | [^omega] |
+
+- **The human-side values in this note are NOT scaled.** Fingers do not scale with the movement: the
+  32 N·mm knob maximum, the measured finger torques of Table 1, the pinch forces of Table 3 and T_rec
+  of Table 4 apply unchanged to the demonstration-scale series.
+- The 42 mN·m is a withstand limit of a real 1:1 watch, not a comfort level, and it lies above the
+  32 mN·m comfortable knob maximum. The corresponding rating of the demonstration-scale crown and works
+  is a mechanical rating and does scale (VM-DS-401 Table 4: 179.3 N·mm).
+- **A measured comfortable crown winding torque:** not published.
 
 ## 4. Pinch strength and fingertip friction (Table 3)
 
@@ -86,6 +101,9 @@ Table 1 (69 N·mm).[^imr]
 [^imr]: Imrhan S. and Munoz-Vasa M., "Finger pinch loosening and tightening torques on small cylindrical handles among industrial workers", ISER 1(2), 2013, tables 2 and 3, https://westpointpressjournals.westpoint.edu/index.php/iser/article/download/20/Imrhan/112
 [^ozf]: 1 ozf = 0.278 N, so 1 in-oz = 0.278 N × 25.4 mm = 7.06 N·mm, https://en.wikipedia.org/wiki/Ounce-force
 [^mil]: MIL-STD-1472H, Human Engineering (15 Sep 2020), figure 10 "Knobs" (public domain, distribution A), https://everyspec.com/MIL-STD/MIL-STD-1400-1499/download.php?spec=MIL-STD-1472H.057041.pdf
+[^mil46374]: MIL-W-46374F, *Watch, Wrist, General Purpose* (US Army), §3.3.7 (p. 8, test §4.7.12): a fully wound watch is not damaged by 6 ± 0.5 in-oz at the crown (1 in-oz = 7.06 mN·m, [^ozf]). US government work, public domain. https://everyspec.com/MIL-SPECS/MIL-SPECS-MIL-W/download.php?spec=MIL-W-46374F.021322.PDF
+[^gg113]: GG-W-113A (1967), §3.9.3: the same 6 ± ½ oz-in. US government work, public domain. https://everyspec.com/FED_SPECS/G/download.php?spec=GG-W-113A.022400.PDF
+[^omega]: Omega SA, US 9,244,437 B2 (crown-winding device), description: torque limits typically 10 to 50 mN·m at full wind. US patent text, public domain. https://patents.google.com/patent/US9244437B2/en
 [^math]: Mathiowetz V. et al., Arch Phys Med Rehabil 1985; 66(2): 69–74, https://pubmed.ncbi.nlm.nih.gov/3970660/
 [^tes]: Reproduction of the Mathiowetz 1985 pinch tables (lb), https://www.topendsports.com/testing/tests/pinch-grip-strength.htm
 [^lbf]: 1 lbf = 4.448 N, https://en.wikipedia.org/wiki/Pound_(force)

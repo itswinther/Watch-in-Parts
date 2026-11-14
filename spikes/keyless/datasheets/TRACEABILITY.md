@@ -120,7 +120,7 @@ on the v1 pull and on 1.6 rather than 1.617.
   - F: 1.45 mm.
 - At the old 1:1 scale, the same thresholds were 4.229 times smaller (about 0.7 mm for K), so the check
   is now 4.2 times tighter. It is still not a discriminator for sane designs.
-- **Real cross-check:** a 2824-class spring under Grossmann's law gives about 6 to 9 N·mm at 1:1, which
+- **Real cross-check (superseded, see 4b):** a 2824-class spring under Grossmann's law gives about 6 to 9 N·mm at 1:1, which
   is 25 to 38 N·mm at demonstration scale. At the NH35's i ≈ 6.9, that is about 3.7 to 5.5 N·mm at the
   crown, well below T_rec.
 
@@ -147,6 +147,79 @@ The discriminating rows remain 1 (choosing the spring at the right core ratio), 
 | Wieland CuZn39Pb3: R430 Rp0.2 220 MPa; E 96 GPa; density 8.46 g/cm³ | Wieland Z32/Z33 | **Corrected DS-201:** the brass design minimum was 230 MPa (Aalco); it is now 220 MPa, so the allowable is 110 MPa (was 115), and the DS-301 bushing p_max is 110 |
 | Grossmann friction: metal on metal 0.15 to 0.17; metal on stones 0.15 | Grossmann art. 335 (PD) | Added to DS-201 Table 7 and DS-301 §5.2. Consistent with Bird's 0.14 |
 
+## 4b. Revision of 14 Nov, late (DATASHEET_GAPS_2 and its addendum integrated)
+
+Sheets revised: DS-101 Rev E, DS-301 Rev D, DS-401 Rev D, DS-501 Rev C (INDEX updated). DS-201 unchanged.
+All scaled values computed in Docker (`python:3.12-slim`, 1 GB): s = 1.6172, s² = 2.6153, s³ = 4.2294.
+
+| Sheet | Value at 1:1 | Source, page or section | URL | Licence | Scaling | Scaled |
+|---|---|---|---|---|---|---|
+| DS-101 T2a | M½ 11.86 N·mm | Sellita SW200-1 DocTec rev 04 (02.02.2015), p. 3 | https://watch.co.uk/download/sw200-ml-pdf | © Sellita, facts only, link-only | × s³ | 50.2 N·mm |
+| DS-101 T2a | M24 8.83 N·mm (0.745 × M½) | same | same | same | × s³ | 37.3 N·mm |
+| DS-101 T2a | Slipping bridle 12.21 to 16.57 N·mm (1.03 to 1.40 × M½) | same | same | same | × s³ | 51.6 to 70.1 N·mm |
+| DS-101 T2a | Unwinding ≥ 80 % of winding (84 % at ½ turn) | Nivarox-FAR US 11,320,786 B2, summary, claim 7, FIG. 2 | https://patents.google.com/patent/US11320786B2/en | PD (US patent) | ratio, none | same |
+| DS-101 §1, T3 | Hub radius = ⅓ barrel inner radius; hub Ø ≈ 32 t | Grossmann 1905 art. 108 (p. 63), 110 (p. 64), 111 (pp. 64 to 66); Saunier art. 517 | archive.org lessonsinhorolog00gros; https://www.gutenberg.org/ebooks/76850 | PD (verified by grep in `public_domain/`) | ratio, none | r = D/6: 1.89 to 2.83 mm; hub Ø/t 26 to 38 |
+| DS-101 T3 | N and run time at r = D/6 | derived (footnote d6) | — | — | turns unchanged | 5.2 to 8.5 turns, 41 to 68 h |
+| DS-301 T2b | Jewel OD tolerance 0 / +6 µm (NIHS 41-02) | Laurenczy, EPFL thesis 6665 (2015), p. 34, Tab. 3.2 p. 37 | https://infoscience.epfl.ch/record/210616/files/EPFL_TH6665.pdf?version=1 | © (tous droits réservés), facts only | × s | 0 / +9.7 µm |
+| DS-301 T2b | Interference about 10 µm | same, Figs. 6.3 to 6.5, pp. 84 to 87 | same | same | × s | 16.2 µm |
+| DS-301 T2b | Axial hold ≥ 15 N | same, Tab. 2.1, p. 12 (acceptance criterion for watch press fits, given for a screw-foot example; applied to jewels by analogy) | same | same | × s² | ≥ 39.2 N |
+| DS-401 T4 | Crown pull 22.2 ± 1.1 N (5 ± 0.25 lb), running to set | MIL-W-46374F §3.3.6, p. 8 (test §4.7.13) | https://everyspec.com/MIL-SPECS/MIL-SPECS-MIL-W/download.php?spec=MIL-W-46374F.021322.PDF | PD (US government) | × s² | 58.1 ± 2.9 N |
+| DS-401 T4 | Side force 5 N, 10 min | ISO 6425:2018 §4.7.2 | https://www.iso.org/standard/66517.html | © ISO, cite only | × s² | 13.1 N |
+| DS-401 T4 | Crown torque, fully wound, no damage: 42.4 ± 3.5 mN·m (6 ± 0.5 in-oz) | MIL-W-46374F §3.3.7, p. 8 (test §4.7.12); GG-W-113A §3.9.3 | above; https://everyspec.com/FED_SPECS/G/download.php?spec=GG-W-113A.022400.PDF | PD | × s³ | 179.3 ± 14.8 N·mm |
+| DS-501 T2a | 42 mN·m no-damage limit (1:1 watch fact) | as above | as above | PD | **not scaled** (human-side note; the scaled rating is in DS-401) | — |
+| DS-501 T2a | Motorised winder limits 10 to 50 mN·m | Omega US 9,244,437 B2, description (read via a fetch summary) | https://patents.google.com/patent/US9244437B2/en | PD | not scaled (context) | — |
+
+**Corrections:**
+
+- **DS-101 Note 2 (correction).** Rev D said "M_el is a strict upper bound on the torque ... use it for
+  every strength and holding check". The real 11½‴ measurement contradicts this: Sellita's M½ 11.86 and
+  slipping 16.57 N·mm at 1:1 exceed the calculated M_el of every Table 1 spring at 1:1 (largest K,
+  9.11 N·mm; H 4.95; F 4.32). Set springs deliver more than the first-yield torque of a straight strip.
+  Rev E removes the "strict upper bound" claim and states the reference slipping torque, 70.1 N·mm at
+  demonstration scale, as the highest torque the sheet gives for the 11½‴ class. Table 2 (M_el) and
+  Table 4 (frictionless torque gained above let-down) are kept, labelled as calculated. **Effect on
+  checks 2, 3 and 6 (section 3):** a check that bounds the arbor torque by M_el(V) understates the real
+  torque by up to about 2 to 3 times for this class; B decides whether the constants use 70.1 N·mm.
+- **Section 3, row 4, "real cross-check" (correction).** It said a 2824-class spring gives about 6 to
+  9 N·mm at 1:1 (25 to 38 at demonstration scale). Measured: 11.86 N·mm (50.2), bridle up to 16.57
+  (70.1). At i = 3 (bottom of `WIND_BAND`) the slipping torque needs 70.1/3 = 23.4 N·mm at the crown,
+  above T_rec = 20.4 N·mm for the smallest catalogue crown (Ø 4.85 mm). **So the crown-torque check
+  can now bind for the smallest catalogue crown at i = 3**; it does not bind at i ≥ 4 (17.5 N·mm) or
+  for crowns above Ø 5.56 mm (70.1/(3 × 4.20)). At M½ (50.2) it does not bind for any catalogue crown.
+- **Section 3, row 1 (core ratio settled).** With r = D/6, the stated core of the supplied barrels, K
+  (ETA 2801 size) gives 41 h against ETA's 42 h, and every variant gives ≥ 41 h, so all pass the 38 h
+  minimum. The 12·t / 16·t columns stay in DS-101 for comparison.
+- **Keyless brief check:** `spikes/keyless/docs/PROMPT.md` on main (6d3dd6b) does **not** state a core
+  radius 0.6 or an inner radius 1.8 (grep for core / one third / 1.8 finds none); `supplied.py` has an
+  arbor cylinder of radius 0.6, which is not described as the spring core. So DS-101 states only the
+  general rule r = D/6, not a 0.6 mm value. If the brief later states core radius 0.6 of inner radius
+  1.8, that is consistent with the rule (0.6 = 1.8/3).
+- **DS-501:** the 32 mN·m MIL-STD-1472H knob maximum is kept as the comfortable maximum; 42 mN·m is
+  added as a 1:1 withstand fact. Not a contradiction: different quantities. Note that MIL-STD-1472H's own
+  "42 mN·m for knobs > 25 mm" (Table 2) is a different value from the same number in MIL-W-46374F.
+- **DS-301:** "Outside-diameter tolerance: not published" (Rev C) is replaced by the EPFL/NIHS value.
+  The load rating remains "not published"; §5.3 remains calculated.
+
+## 4c. Realism check only, never for the agent
+
+Grossmann 1905, art. 168 (pp. 112 to 113, Fig. 36) and art. 169 (pp. 113 to 114, Fig. 37), PD,
+verified by grep in `public_domain/grossmann_lessons_1905_djvu.txt` (lines 8149 to 8215). Worked
+textbook examples, not a named calibre. Never in the DS sheets, PROMPT.md or anything in /app.
+
+| Part | Teeth |
+|---|---|
+| Sliding pinion (setting side) | 16 |
+| Main setting wheel | 27 |
+| Small setting wheel | 18 |
+| Minute wheel | 30 |
+| Cannon pinion | 12 leaves |
+| Ratchet wheel | 44 |
+| Crown wheel (spur teeth, to ratchet) | 42 (38 crown teeth on the lower side) |
+| Winding pinion | 18 |
+
+Art. 169: 3 ratchet turns need 6.63 stem turns, about 2.2 stem turns per barrel turn (a pocket-watch
+value; modern NH35 about 6.9).
+
 ## 5. Sources and licensing
 
 - **Every URL** used is in the footnotes of the DS sheets. The full list of the previous revision is
@@ -159,8 +232,8 @@ The discriminating rows remain 1 (choosing the spring at the right core ratio), 
 - **Suppliers:** fictional (Valtorre Microtechnique SA, Aciers Duval SA, Rubis Lumen SA).
 - **Sellita:** its numbers are cited as facts with a link. The document is not reproduced, quoted or
   shipped.
-- **Public domain:** Grossmann and MIL-STD-1472H.
-- **Link-only:** Imrhan, ETA, TMI and Sellita.
+- **Public domain:** Grossmann, Saunier, MIL-STD-1472H, MIL-W-46374F, GG-W-113A, US 11,320,786 and US 9,244,437.
+- **Link-only:** Imrhan, ETA, TMI, Sellita (rev 04 and rev 07), the EPFL thesis 6665 and ISO 6425 (cite only).
 
 This is our reading, not legal advice.
 

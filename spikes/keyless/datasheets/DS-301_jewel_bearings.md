@@ -4,7 +4,7 @@
 
 | Document | Revision | Date | Status |
 |---|---|---|---|
-| RL-DS-301 | C | 2026-11-14 | Released |
+| RL-DS-301 | D | 2026-11-14 | Released |
 
 > **About this document.** Rubis Lumen SA is a fictional supplier, used for this exercise only.
 >
@@ -58,9 +58,19 @@ with the part.[^s]
 | Hole-to-OD concentricity | down to 0.0002″ TIR (5.1 µm) | 8.2 µm |
 | Concentricity after mounting | 0.0005″ TIR (12.7 µm) | 20.5 µm |
 
-**Outside-diameter tolerance:** not published. Fit the jewel so that it seats without force and with
-almost no free play,[^wrt3] in a straight plate hole slightly smaller than the jewel's largest outside
-diameter.[^wrt2]
+**Outside diameter and press fit (Table 2b):** the 1:1 values are those of the Swiss watch-industry
+practice reported in an EPFL thesis;[^epfl] lengths scale with s, forces with s².[^d3]
+
+| Feature | 1:1 value | **This series**[^d3] |
+|---|---|---|
+| Outside-diameter tolerance (NIHS 41-02) | 0 to +6 µm | **0 to +9.7 µm** |
+| Typical interference (press fit) in the plate hole | about 10 µm | **about 16.2 µm** |
+| Axial retention of a watch press fit, acceptance minimum | ≥ 15 N | **≥ 39.2 N** |
+
+The jewel is held by friction in a straight plate hole slightly smaller than its outside
+diameter.[^epfl][^wrt2]
+
+**Load rating:** not published by any maker or standard we found. Section 5.3 is calculated.
 
 ## 4. RL-B brass friction bushings (Table 3)
 
@@ -146,5 +156,7 @@ friction.[^bird]
 [^wrt2]: https://watchrepairtalk.com/topic/30199-sizing-a-jewel-from-the-jewel-setting
 [^wrt3]: https://watchrepairtalk.com/topic/14596-jewel-replace-size-question
 [^ee]: Engineers Edge, journal bearing load on the projected area, https://engineersedge.com/calculators/journal_bearing_lubrication_15314.htm
+[^epfl]: Laurenczy C., EPFL thesis no. 6665 (2015): jewel outside-diameter tolerance 0 to +0.006 mm "prescribed by NIHS 41-02" (p. 34, Tab. 3.2 p. 37); typical interference 0.010 mm (Figs. 6.3 to 6.5, pp. 84 to 87); acceptance criterion for watch press fits, axial hold ≥ 15 N (Tab. 2.1, p. 12). Copyrighted: cited as facts only. https://infoscience.epfl.ch/record/210616/files/EPFL_TH6665.pdf?version=1
+[^d3]: Not published at this scale; derived as the 1:1 value from [^epfl] × s = 1.617 for lengths and × s² = 2.615 for forces (geometric similarity: the contact pressure of the fit is unchanged).
 [^d1]: Not published; calculated as 2700 MPa (https://makeitfrom.com/material-properties/Synthetic-Sapphire) / S = 3. S is the upper end of the brittle tier at https://danotes.mech.uwa.edu.au/SSS/safety/safety.html, applied to ultimate strength as https://engineersedge.com/analysis/factor-of-safety-review.htm prescribes.
 [^d2]: Not published; calculated as 220 MPa / S = 2. The 220 MPa is the lowest published CW614N proof stress, https://www.wieland.com/da/content/download/9842/file/Z32-Z33_EX_EN.pdf. S is from https://danotes.mech.uwa.edu.au/SSS/safety/safety.html. The bushings' brass grade is not stated by the source and is assumed here.
