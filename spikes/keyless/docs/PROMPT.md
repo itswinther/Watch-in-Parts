@@ -214,7 +214,8 @@ AT-4, AT-5 and AT-6 each start from the state at the end of AT-2: crown let go, 
    furthest, while spring-loaded parts return towards rest. The arbor runs back at most $RUNBACK
    degrees in all, and over the last $HELD_LAST_STEPS steps it moves at most $HELD_DRIFT degree: it is
    held.
-3. **AT-3 Run.**
+3. **AT-3 Run.** AT-3 starts from AT-2's end state and also requires AT-2's hold limits (run-back at
+   most $RUNBACK degrees and drift at most $HELD_DRIFT degrees).
    - **Reserve.** Fully wound, the mainspring stores $CAPACITY arbor turns. The run-back measured in
      AT-2 is lost from that. While the watch runs, the barrel turns once every $HOURS_PER_TURN hours,
      so the power reserve is (capacity − run-back) × $HOURS_PER_TURN hours. It must be at least
