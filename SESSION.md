@@ -8,7 +8,7 @@ table. Everything below "Session entries" is append-only, newest at the bottom.
 
 | ID | Workstream | Owner | Status | Last update |
 | --- | --- | --- | --- | --- |
-| A | Harness wiring | Mikael | Harbor + Codex (GPT-6.1-sol) running sandboxed on Mikael's Mac; network locked to the model only, separate verifier. Five-step watch task: no gap (3x 1.0). Regulation task with hidden physics in a sealed sidecar: runs in progress. See 05:10 entry | 2026-11-14 05:10 |
+| A | Harness wiring | Mikael | Harbor + Codex sandbox works (see 05:10). Five-step watch: GPT 1.0 x3. Watch regulation with hidden physics: GPT 1.0 x3, beat the reference. No gap found in either; waiting for Mikael | 2026-11-14 05:30 |
 | B | Reference script and grader | itswinther | Staged watch chains done: Fable 1.0/1.0/1.0, Opus 1.0/1.0/1.0, Sonnet 1.0/1.0/0.44 (its own stage-1 design cannot be assembled). Thickness check now scored. Docker and Harbor 0.26.0 work in this cloud session; preparing real sandboxed runs | 2026-11-14 04:34 |
 | C | Hold the Line spike | unassigned | not started | |
 | D | Mentor questions, anchors, transcripts | unassigned | not started | |
@@ -436,3 +436,11 @@ Template:
 - Files changed: `tests/grade_watch.py`, `tests/grade_chain.py`, `tests/test_anchors_watch.py`, `geometry/watch.py`, `solution/reference_watch.py`, `environment/public/SPEC_WATCH.md`, the three instruction files, `transcripts/watch_chain_*`, SESSION.md.
 - Need from others: A, do you already have a Harbor task skeleton that runs (`oracle`, `nop`)? If so push it; I can run Harbor here too. A model API key is needed for sandboxed agent runs.
 - Next: confirm the reference at 1.0 with the thickness check, rerun the anchors, package the stages as Harbor tasks.
+
+### 2026-11-14 05:30 | A regulation results | Mikael + Claude
+- Did: ran GPT-6.1-sol via Codex three times on the watch-regulation task (`spikes/regulate/harbor_task_s4242`), sandboxed (allowlist chatgpt.com only, separate no-network verifier, sealed sidecar).
+- Verified by (command and result): `harbor run -p regulate-s4242 -a codex -m openai/gpt-6.1-sol -k 3 -n 3`: rewards 1.0, 1.0, 1.0, job 2 min 6 s. Final true error 18.15 s/day in all three (untouched 116.27, scripted reference 45.22). Each measured all 12 conditions, fitted R, K_iso, H, u, A0, dV, dW by least squares (scipy), added all four washers to fix poise, set the regulator to -1. Same final error because the remaining error is the dial-up/down and isochronism terms that no adjustment can change, and the regulator slop draw came after the same 12 measurements in every run (replayed and checked).
+- Findings: no gap. With the formula's structure stated, hidden numbers plus noise plus a budget is a fitting problem the model solves. The scripted reference is also weak (it ignores washers and isochronism). This instance's watch also runs fast beyond the adjustment range, which puts a floor under everyone.
+- Transcript audit: every command was the timer CLI, local Python, or file writes in /app; no network attempt, no reads of other paths. All three final messages said they used only the brief, /app and the timing machine.
+- Files changed: `spikes/regulate/runs_gpt/`, `spikes/README.md`, `spikes/IDEAS_CODE_IS_NOT_ENOUGH.md`, SESSION.md.
+- Next: needs a human decision (see the ideas file): the only levers left that I can see reduce what the agent is told (unstated model structure, scarcer measurements).

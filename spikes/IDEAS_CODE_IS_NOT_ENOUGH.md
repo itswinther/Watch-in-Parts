@@ -32,3 +32,15 @@ everything the agent needs is either stated or measurable.
 - The brief states every rule and every formula's structure that a professional would know;
   only per-instance numbers are hidden, and they are measurable.
 - A scripted reference that a human can explain, plus do-nothing and stop-early anchors.
+
+## Results so far (14 Nov, GPT-6.1-sol via Codex in Harbor, sandboxed)
+
+- Idea 2, five-step movement: 1.0, 1.0, 1.0. No gap.
+- Idea 1, regulation with hidden physics in a sidecar: 1.0, 1.0, 1.0, beating the scripted
+  watchmaker. Stating the formula's structure turned it into a least-squares fit, which the
+  agent wrote in one go. Measurement noise and the time budget were not binding.
+
+What this suggests: the hidden-measurement pattern only bites if the agent must also find the
+model's structure, or if measurements are scarce enough that the order of experiments
+matters. Both move toward "less information", which the brief for these ideas ruled out, so
+that trade-off needs a team decision.

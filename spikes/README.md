@@ -11,9 +11,13 @@ subagents disabled. One instance each, so treat every number as a first look.
 | Wrist tracker for a child | One-sentence brief; size, mass, strap, edges never stated | All three made a sensible child-sized watch (31-34 mm wide, 20-29 g), with straps and rounded edges | `wrist_tracker/` |
 | Watch gear train | Exact rates, centre distances fixed by tooth counts, layered packing in a round plate | All three valid. Fable and Opus scored 1.0, Sonnet 0.917 (one extra layer) | `gear_train/` |
 | Five-step watch movement (Harbor, sandboxed) | Going train, motion work, larger balance, date wheel, automatic winding with a torque band; later steps depend on earlier positions | GPT-6.1-sol via Codex: 1.0, 1.0, 1.0 over all five steps, under 6 minutes each, and beat the planted reference on layers | `gear_task/` |
-| Regulating a watch (Harbor, physics in a sealed sidecar) | Hidden physics measured with noise under a time budget; mass removal is irreversible | Built and verified (reference 1.0, do-nothing 0); GPT runs in progress | `regulate/` |
+| Regulating a watch (Harbor, physics in a sealed sidecar) | Hidden physics measured with noise under a time budget; mass removal is irreversible | GPT-6.1-sol: 1.0, 1.0, 1.0 in about 2 minutes. True error 18.1 s/day against the scripted watchmaker's 45.2 and the untouched 116.3: it fitted the stated formula by least squares | `regulate/` |
 
 ## What the spikes show
+
+- **Hidden numbers behind noisy, costly measurement are not enough either** (regulation task):
+  when the formula's structure is stated, GPT measured every condition once, fitted the
+  unknowns by least squares and corrected the watch better than the scripted reference.
 
 - **Anything fully specified and checkable gets turned into a program.** In Hold the Line and
   the gear train every agent wrote its own simulator or exhaustive search, then submitted the
