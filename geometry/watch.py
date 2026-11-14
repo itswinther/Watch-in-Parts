@@ -23,13 +23,21 @@ CASE_RADIUS = 20.7         # reference reaches 20.354 at its largest stage, plus
 CASE_HEIGHT = 13.4         # reference is 13.1 tall, plus 0.3
 # stage 3, change request: the supplied barrel (same mesh) turns clockwise once every 6 hours instead of 8
 CHANGED_BARREL_TURNS_PER_HOUR = Fraction(1, 6)
-REF_KEPT_SHARE = Fraction(15, 17)   # the reference keeps 15 of the 17 part files it receives at stage 3
+REF_KEPT_VOLUME_SHARE = 0.626   # stage 3: the reference keeps 0.6267 of the mobile volume and all of the fixed volume it receives (rounded down)
 VOL_TOL = 0.01              # mm3
 SPIN_STEPS = 72             # free-spin test: steps of 5 degrees
 HELD_MOVE = 0.3
 SAMPLES_PER_TOOTH = 8
 ENGAGE_GAP = 0.1            # mm: meshing gears are never further apart than this
 DRIVE_FRACTION = 0.25       # of the driver's tooth pitch: backlash must be smaller
+MESH_OFFGRID = (Fraction(1, 3), Fraction(1, 5))   # extra no-jam poses after every eighth step, as fractions of a step
+DRIVE_MIN_VOLUME = 0.001    # mm3: and that extra overlap is at least this (meshing noise is far below it)
+DRIVE_AREA_RATIO = 0.5      # drive test: overlap / (its height in z) must exceed this x the mesh's module squared
+                            # (module = 2 x axis distance / (driver teeth + driven teeth))
+FRAME_JOIN = 0.01           # mm: two fixed parts this close are joined; the fixed parts must form one frame
+HAND_CENTRE_MIN = 0.5       # mm: a hand part's centre of volume is at least this far from its axis
+THIN_SLAB = 32              # layers per slab of the thickness test (memory only; the result does not depend on it)
+THIN_DEV_CAP_VOX = 8        # the thickness test's deviation is exact up to this many voxels (limit THIN_DEV is 4)
 SEAT_TOUCH = 0.02           # mm: parts of one mobile closer than this touch; a mobile's parts must form one piece
 MESH_SHIFT = 0.03           # mm: tolerant test, the driven mobile moved this far away from and towards the driver's axis
 MESH_CUT_MARGIN = 1.05      # mm, private speed-up of mesh_run: material further than this from the other mobile's reach
@@ -49,7 +57,7 @@ THIN_ERODE_VOX = 1.5        # ball radius 0.1 on the 0.05 grid, less half a voxe
 THIN_DILATE_VOX = 1.0
 THIN_DEV = 0.2              # no point of a part may be further than this from what survives the opening
 # mass budget, the same at every stage
-FIXED_VOLUME_MAX = 346.0    # mm3, the volume of the union of the fixed parts
+FIXED_VOLUME_MAX = 355.0    # union of the fixed parts: the reference at its largest stage (322.4) plus 10 percent, rounded up
 MOBILE_VOLUME_MAX = 278.0   # mm3, the sum of the volumes of every part of every mobile, the supplied barrel not counted
 MAX_PARTS = 60
 MAX_TRIANGLES = 200_000
@@ -198,19 +206,70 @@ class Movement:
                 worst = (v, i)
         return {"worst_volume": worst[0], "step": worst[1], "steps": SPIN_STEPS}
 
-    def held(self, name):
-        """Overlap after moving the mobile HELD_MOVE along each axis direction. Sideways moves are
-        tested against everything else; up and down only against the fixed parts and mobiles that
-        share this mobile's axis (two wheels on different axes must not rest on each other)."""
-        ax = self.mobiles[name]["axis"]
-        side = union([self.fixed] + [m["solid"] for k, m in self.mobiles.items() if k != name])
-        coax = [m["solid"] for k, m in self.mobiles.items()
-                if k != name and math.hypot(m["axis"][0] - ax[0], m["axis"][1] - ax[1]) <= COAX_TOL]
-        updown = union([self.fixed] + coax)
-        out = {}
-        for label, d in (("+x", (1, 0, 0)), ("-x", (-1, 0, 0)), ("+y", (0, 1, 0)), ("-y", (0, -1, 0)), ("+z", (0, 0, 1)), ("-z", (0, 0, -1))):
-            out[label] = ivol(self.posed(name).translate([c * HELD_MOVE for c in d]), updown if d[2] else side)
+    DIRECTIONS = (("+x", (1, 0, 0)), ("-x", (-1, 0, 0)), ("+y", (0, 1, 0)), ("-y", (0, -1, 0)),
+                  ("+z", (0, 0, 1)), ("-z", (0, 0, -1)))
+
+    def held_all(self):
+        """Only the frame holds. For each of the six moves of HELD_MOVE, a mobile is held when, moved, it
+        intersects the fixed parts, or a mobile on the same axis (within COAX_TOL) that is itself held in
+        that direction, by more than VOL_TOL; worked out to a fixed point. Mobiles on another axis never
+        count, so two wheels cannot hold each other in mid-air.
+        Returns {mobile: {move: {"held": bool, "fixed_volume": overlap with the fixed parts, "via": mobile or None}}}."""
+        out = {k: {} for k in self.mobiles}
+        for label, d in self.DIRECTIONS:
+            moved = {k: mo["solid"].translate([c * HELD_MOVE for c in d]) for k, mo in self.mobiles.items()}
+            fv = {k: ivol(moved[k], self.fixed) for k in self.mobiles}
+            held = {k: None for k in self.mobiles if fv[k] > VOL_TOL}
+            changed = True
+            while changed:
+                changed = False
+                for k, mo in self.mobiles.items():
+                    if k in held:
+                        continue
+                    for j in list(held):
+                        aj = self.mobiles[j]["axis"]
+                        if math.hypot(aj[0] - mo["axis"][0], aj[1] - mo["axis"][1]) <= COAX_TOL \
+                                and ivol(moved[k], self.mobiles[j]["solid"]) > VOL_TOL:
+                            held[k] = j
+                            changed = True
+                            break
+            for k in self.mobiles:
+                out[k][label] = {"held": k in held, "fixed_volume": fv[k], "via": held.get(k)}
         return out
+
+    def held(self, name):
+        """Per move: overlap of the moved mobile with what can hold it under held_all's rule (the fixed parts,
+        and the mobiles on its axis that are held in that direction)."""
+        hall, out = self.held_all(), {}
+        ax = self.mobiles[name]["axis"]
+        for label, d in self.DIRECTIONS:
+            co = [mo["solid"] for k, mo in self.mobiles.items() if k != name and hall[k][label]["held"]
+                  and math.hypot(mo["axis"][0] - ax[0], mo["axis"][1] - ax[1]) <= COAX_TOL]
+            out[label] = ivol(self.posed(name).translate([c * HELD_MOVE for c in d]), union([self.fixed] + co))
+        return out
+
+    def frame(self):
+        """The fixed parts form one frame: two are joined when their smallest distance is at most FRAME_JOIN.
+        Returns (connected, groups of part names, the smallest distance from each group to the rest)."""
+        names = list(self.fixed_parts)
+        parent = {n: n for n in names}
+
+        def find(x):
+            while parent[x] != x:
+                parent[x] = parent[parent[x]]
+                x = parent[x]
+            return x
+        for i in range(len(names)):
+            for j in range(i + 1, len(names)):
+                a, b = self.fixed_parts[names[i]], self.fixed_parts[names[j]]
+                if find(names[i]) != find(names[j]) and core.bbox_overlap(a, b, FRAME_JOIN) \
+                        and float(a.min_gap(b, FRAME_JOIN * 2)) <= FRAME_JOIN:
+                    parent[find(names[i])] = find(names[j])
+        groups = {}
+        for n in names:
+            groups.setdefault(find(n), []).append(n)
+        groups = sorted(groups.values(), key=len, reverse=True)
+        return len(groups) <= 1, groups
 
     def fixed_overlap(self):
         """Largest overlap between two fixed parts."""
@@ -321,12 +380,16 @@ class Movement:
 
     def mesh_run(self, a, ta, b, tb, speeds=None, shift=0.0, cut=True):
         """Turn a declared mesh through max(ta, tb) tooth pitches of the driver. Reports the largest
-        overlap, the largest gap, and the smallest overlap produced by pushing the driver
-        DRIVE_FRACTION of a tooth pitch further with the driven gear held.
+        overlap (grid steps, plus MESH_OFFGRID poses after every eighth step), the largest gap, and the
+        drive test: pushing the driver DRIVE_FRACTION of a tooth pitch further with the driven gear held,
+        the intersection that the push creates (the part of the pushed driver's intersection with the driven
+        mobile that the driver did not already occupy before the push), alone and divided by (its height in z
+        x module squared).
         shift: the driven mobile (and its axis) is first moved this far straight away from the driver's
         axis (negative: towards it); same steps and angles. cut=False skips the speed-up (same results)."""
         A, ax_a = self.mobiles[a]["solid"], self.mobiles[a]["axis"]
         B, ax_b = self.mobiles[b]["solid"], self.mobiles[b]["axis"]
+        module = 2.0 * math.hypot(ax_b[0] - ax_a[0], ax_b[1] - ax_a[1]) / (ta + tb)   # drawn position
         if shift:
             dx, dy = ax_b[0] - ax_a[0], ax_b[1] - ax_a[1]
             d = math.hypot(dx, dy)
@@ -342,7 +405,7 @@ class Movement:
         n = SAMPLES_PER_TOOTH * max(ta, tb)
         da = 360.0 / (SAMPLES_PER_TOOTH * ta)                 # driver turns counter-clockwise here; the sign is irrelevant
         db = -da * ta / tb
-        worst, gap, drive = (0.0, 0), 0.0, float("inf")
+        worst, gap, drive, ratio = (0.0, 0), 0.0, float("inf"), float("inf")
         push = DRIVE_FRACTION * 360.0 / ta
         for i in range(n):
             Ai, Bi = pa(da * i), pb(db * i)
@@ -353,8 +416,30 @@ class Movement:
                 g = Ai.min_gap(Bi, MESH_GAP_SEARCH)       # exact below the short search length, and much faster
                 gap = max(gap, float(g if g < MESH_GAP_SEARCH else Ai.min_gap(Bi, 1.0)))
             if i % 8 == 0:
-                drive = min(drive, ivol(pa(da * i + push), Bi))
-        return {"worst_volume": worst[0], "step": worst[1], "steps": n, "largest_gap": gap, "smallest_drive_overlap": drive}
+                for f in MESH_OFFGRID:                    # off the grid: false tooth counts cannot line up here
+                    vf = ivol(pa(da * (i + float(f))), pb(db * (i + float(f))))
+                    if vf > worst[0]:
+                        worst = (vf, i + float(f))
+                P = pa(da * i + push)
+                extra, r = 0.0, 0.0
+                if core.bbox_overlap(P, Bi):
+                    N = (P ^ Bi) - Ai              # intersection the push creates: not already there before it
+                    extra = float(N.volume()) if not N.is_empty() else 0.0
+                    if not math.isfinite(extra):
+                        raise ArithmeticError("non-finite volume")
+                    if extra > 0.0:
+                        zb = N.bounding_box()
+                        hz = zb[5] - zb[2]
+                        r = extra / (hz * module * module) if hz > 1e-9 and module > 1e-9 else 0.0
+                drive, ratio = min(drive, extra), min(ratio, r)
+        return {"worst_volume": worst[0], "step": worst[1], "steps": n, "largest_gap": gap,
+                "smallest_drive_overlap": drive, "smallest_drive_ratio": ratio, "module": module}
+
+    @staticmethod
+    def mesh_passes(x):
+        """The three conditions of the mesh test on a mesh_run result: no jam, engaged, the teeth drive."""
+        return x["worst_volume"] <= VOL_TOL and x["largest_gap"] <= ENGAGE_GAP \
+            and x["smallest_drive_overlap"] >= DRIVE_MIN_VOLUME and x["smallest_drive_ratio"] > DRIVE_AREA_RATIO
 
     def clear_run(self, a, b, wa, wb):
         """Two mobiles that do not mesh, turned together at their own speeds: largest overlap."""
@@ -394,6 +479,21 @@ class Movement:
             rmax = max(rmax, r + math.hypot(m["axis"][0] - self.case_centre[0], m["axis"][1] - self.case_centre[1]))
             zlo, zhi = min(zlo, float(V[:, 2].min())), max(zhi, float(V[:, 2].max()))
         return {"radius": rmax, "z_min": zlo, "z_max": zhi}
+
+    def hand_shape(self, hand):
+        """A hand points and sits above the frame: (lowest z of the hand part - highest z of any fixed part,
+        distance of the hand part's centre of volume from its mobile's axis)."""
+        mob, part = self.hands[hand]
+        p = self.mobiles[mob]["parts"][part]
+        ax = self.mobiles[mob]["axis"]
+        mesh = p.to_mesh()
+        vp = np.asarray(mesh.vert_properties, dtype=np.float64)[:, :3]
+        tv = np.asarray(mesh.tri_verts, dtype=np.int64)
+        a, b, c = vp[tv[:, 0]], vp[tv[:, 1]], vp[tv[:, 2]]
+        v6 = np.einsum("ij,ij->i", a, np.cross(b, c))
+        cen = ((a + b + c) * v6[:, None]).sum(axis=0) / (4.0 * v6.sum())
+        above = float(vp[:, 2].min() - core.verts(self.fixed)[:, 2].max())
+        return above, float(math.hypot(cen[0] - ax[0], cen[1] - ax[1]))
 
     def hand_reach(self, hand):
         mob, part = self.hands[hand]
@@ -540,7 +640,9 @@ def thin(part):
     bb = np.array(part.bounding_box())
     lo = np.floor(bb[:3] / h).astype(int) - 2
     hi = np.ceil(bb[3:] / h).astype(int) + 2
-    solid = core.voxelize(part, lo * h - 0.0137, tuple(int(v) for v in hi - lo), h)
-    n, dev = core.opening_test(solid, THIN_ERODE_VOX, THIN_DILATE_VOX)
+    # in slabs along z: memory does not grow with the part's height; same result as
+    # core.opening_test(core.voxelize(...)) (deviation exact up to THIN_DEV_CAP_VOX voxels)
+    n, dev = core.opening_test_slabs(part, lo * h - 0.0137, tuple(int(v) for v in hi - lo), h,
+                                     THIN_ERODE_VOX, THIN_DILATE_VOX, THIN_DEV_CAP_VOX, THIN_SLAB)
     return n, (dev * h if np.isfinite(dev) else 1e9)
 

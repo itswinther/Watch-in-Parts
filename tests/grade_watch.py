@@ -105,8 +105,10 @@ def grade_design(folder, stage=1, prev=None, skip=()):
                     worst, pair = v, solids[i][0] + "/" + solids[j][0]
         fw, fp = m.fixed_overlap()
         mw, mp = m.mobile_overlap()          # parts of one mobile touch but do not overlap
-        return worst <= W.VOL_TOL and fw <= W.VOL_TOL and mw <= W.VOL_TOL, \
-            {"worst_volume": worst, "pair": pair, "fixed_parts_worst": fw, "fixed_pair": fp, "mobile_parts_worst": mw, "mobile_pair": mp}
+        one_frame, groups = m.frame()        # the fixed parts form one frame
+        return worst <= W.VOL_TOL and fw <= W.VOL_TOL and mw <= W.VOL_TOL and one_frame, \
+            {"worst_volume": worst, "pair": pair, "fixed_parts_worst": fw, "fixed_pair": fp, "mobile_parts_worst": mw, "mobile_pair": mp,
+             "one_frame": one_frame, "frame_groups": groups}
     gates["assembled"], details["assembled"] = _run(assembled)
     if stage == 2:
         gates["locked"], details["locked"] = _run(lambda: locked_design(prev, folder))
@@ -120,7 +122,7 @@ def grade_design(folder, stage=1, prev=None, skip=()):
         for a, ta, b, tb in m.meshes:
             x = m.mesh_run(a, ta, b, tb)
             x["pair"] = "%s/%s" % (a, b)
-            x["passes"] = x["worst_volume"] <= W.VOL_TOL and x["largest_gap"] <= W.ENGAGE_GAP and x["smallest_drive_overlap"] > W.VOL_TOL
+            x["passes"] = W.Movement.mesh_passes(x)
             out.append(x)
         st["mesh_runs"] = out
         return True, {}
@@ -139,15 +141,17 @@ def grade_design(folder, stage=1, prev=None, skip=()):
         return all(v["worst_volume"] <= W.VOL_TOL for v in r.values()), r
 
     def held():
-        r = {n: m.held(n) for n in names}
-        return all(v > W.VOL_TOL for d in r.values() for v in d.values()), r
+        r = m.held_all()
+        bad = sorted("%s %s" % (n, mv) for n, d in r.items() for mv, x in d.items() if not x["held"])
+        return not bad, {"not_held": bad, "moves": r}
 
     def train():
         if runs is None:
             return False, {"error": "the mesh test did not run to the end"}
         r = {"conflicts": conflicts, "meshes": runs}
         ok = not conflicts and bool(m.meshes) and all(m.hands[h][0] in speeds for h in HAND_SPEED)
-        return ok and all(x["passes"] for x in runs), r
+        r["not_driven"] = sorted(n for n in names if n not in driven)     # every mobile turns, through passing meshes
+        return ok and all(x["passes"] for x in runs) and not r["not_driven"], r
 
     def tolerant():
         """Every declared mesh passes the train test again with the driven mobile moved MESH_SHIFT away
@@ -157,7 +161,7 @@ def grade_design(folder, stage=1, prev=None, skip=()):
             for label, s in (("away", W.MESH_SHIFT), ("towards", -W.MESH_SHIFT)):
                 x = m.mesh_run(a, ta, b, tb, shift=s)
                 x.update(pair="%s/%s" % (a, b), position=label, shift=s)
-                x["passes"] = x["worst_volume"] <= W.VOL_TOL and x["largest_gap"] <= W.ENGAGE_GAP and x["smallest_drive_overlap"] > W.VOL_TOL
+                x["passes"] = W.Movement.mesh_passes(x)
                 ok = ok and x["passes"]
                 r.append(x)
         return ok, {"meshes": r}
@@ -185,9 +189,15 @@ def grade_design(folder, stage=1, prev=None, skip=()):
         d = math.hypot(a[0] - b[0], a[1] - b[1])
         return d <= W.COAX_TOL, {"distance": d}
 
+    def hand_ok(h, reach):
+        above, centre = m.hand_shape(h)
+        r = m.hand_reach(h)
+        return r >= reach and above >= 0.0 and centre >= W.HAND_CENTRE_MIN, \
+            {"reach": r, "above_fixed": above, "centre_from_axis": centre}
+
     def hands():
-        r = {h: m.hand_reach(h) for h in HAND_SPEED}
-        return all(v >= W.HAND_REACH for v in r.values()), r
+        r = {h: hand_ok(h, W.HAND_REACH) for h in HAND_SPEED}
+        return all(v[0] for v in r.values()), {h: v[1] for h, v in r.items()}
 
     def size():
         e = m.extent()
@@ -203,8 +213,9 @@ def grade_design(folder, stage=1, prev=None, skip=()):
         if "day" not in m.hands:
             return False, {"error": "no 'day' hand declared"}
         a, b = m.mobiles[m.hands["day"][0]]["axis"], m.mobiles[m.hands["hour"][0]]["axis"]
-        d, reach = math.hypot(a[0] - b[0], a[1] - b[1]), m.hand_reach("day")
-        return d >= W.DAY_HAND_OFFSET and reach >= W.DAY_HAND_REACH, {"axis_distance": d, "reach": reach}
+        d = math.hypot(a[0] - b[0], a[1] - b[1])
+        ok, info = hand_ok("day", W.DAY_HAND_REACH)
+        return d >= W.DAY_HAND_OFFSET and ok, dict(info, axis_distance=d)
 
     def printable():
         r = {n: W.thin(solid) for n, solid in m.all_parts().items() if n != "barrel"}
@@ -292,17 +303,24 @@ def day_declared(prev, m):
 
 
 def kept_parts(prev, folder, speeds):
-    """Stage 3: share of the received part files kept. A received fixed part counts if it is still under
-    'fixed' and byte-identical. A received part of a mobile counts if it is byte-identical and still in a
-    mobile of the same name, on the same axis, that is driven from the barrel."""
+    """Stage 3: share of the received material kept, by volume, worked out separately for the fixed parts
+    and for the parts of mobiles; the smaller of the two shares counts. A received fixed part is kept if it
+    is still under 'fixed' and byte-identical. A received part of a mobile is kept if it is byte-identical
+    and still in a mobile of the same name, on the same axis, that is driven from the barrel. Volumes are
+    those of the received part files, each part on its own."""
     from geometry import watch as W
     if not prev:
         return False, {"error": "no previous stage given", "factor": 0.0}
     old, new = _doc(prev), _doc(folder)
     new_mob = new.get("mobiles", {})
+    vol = lambda part: float(W.load_part_file(_part_file(prev, part)).volume())
     kept, lost = [], []
+    tot = {"fixed": [0.0, 0.0], "mobile": [0.0, 0.0]}      # [kept volume, received volume]
     for part in old["fixed"]:
         ok = part in new.get("fixed", []) and _same_file(_part_file(prev, part), _part_file(folder, part))
+        v = vol(part)
+        tot["fixed"][1] += v
+        tot["fixed"][0] += v if ok else 0.0
         (kept if ok else lost).append(part)
     for name, mo in old["mobiles"].items():
         n = new_mob.get(name)
@@ -310,10 +328,15 @@ def kept_parts(prev, folder, speeds):
         for part in mo["parts"]:
             ok = same_axis and name in speeds and part in n.get("parts", []) \
                 and _same_file(_part_file(prev, part), _part_file(folder, part))
+            v = vol(part)
+            tot["mobile"][1] += v
+            tot["mobile"][0] += v if ok else 0.0
             (kept if ok else lost).append(part)
-    share = Fraction(len(kept), len(kept) + len(lost))
-    factor = float(min(Fraction(1), share / W.REF_KEPT_SHARE))
-    return True, {"kept": kept, "not_kept": lost, "share": str(share), "reference_share": str(W.REF_KEPT_SHARE), "factor": factor}
+    shares = {k: (a / b if b > 0 else 1.0) for k, (a, b) in tot.items()}
+    share = min(shares.values())
+    factor = min(1.0, share / W.REF_KEPT_VOLUME_SHARE)
+    return True, {"kept": kept, "not_kept": lost, "fixed_share": shares["fixed"], "mobile_share": shares["mobile"],
+                  "share": share, "reference_share": W.REF_KEPT_VOLUME_SHARE, "factor": factor}
 
 
 def locked_all(prev, folder):

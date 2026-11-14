@@ -173,7 +173,8 @@ def frame(P, with_day):
     BAR = 1.0
     pb = [(0.0, 0.0, 1.3)] + [(a[0], a[1], 1.0) for a in (I, T, C, S)] + [(x, y, 0.85) for x, y in spots]
     plate = union([GC.skeleton(PLATE[0], PLATE[1], pb, BAR)[0]] + [cyl(x, y, PLATE[1] - 0.1, BRIDGE[0], 0.75) for x, y in spots])
-    bb = [(a[0], a[1], 1.0) for a in (I, T, Mw)] + [(C[0], C[1], 1.4), (S[0], S[1], 1.2)] + [(x, y, 0.85) for x, y in spots]
+    bb = [(a[0], a[1], 1.0) for a in (I, T, Mw)] + [(C[0], C[1], 1.4), (S[0], S[1], 1.2)] + [(x, y, 0.85) for x, y in spots] \
+        + [(0.0, 0.0, 0.8)]          # over the barrel: the barrel cock's post stands on it, so the fixed parts are one frame
     db = [(Mw[0], Mw[1], 1.0), (C[0], C[1], 1.8), (S[0], S[1], 1.2)] + [(x, y, 0.85) for x, y in spots]
     if with_day:
         bb += [(Id[0], Id[1], 1.0), (D[0], D[1], 1.0)]
@@ -189,7 +190,7 @@ def frame(P, with_day):
         bh += [cyl(a[0], a[1], BRIDGE[1] - 0.7, BRIDGE[1] + 1, 0.4) for a in (Id, D)]
         dh += [cyl(Id[0], Id[1], DIAL[0] - 1, DIAL[0] + 0.45, 0.4), cyl(D[0], D[1], DIAL[0] - 1, DIAL[1] + 1, 0.6)]
     return {"main_plate": minus(plate, ph), "bridge": minus(bridge, bh), "dial": minus(dial, dh),
-            "barrel_cock": minus(cyl(0, 0, 1.15, 2.45, 1.6), cyl(0, 0, 1.0, 1.7, 0.6))}
+            "barrel_cock": minus(union([cyl(0, 0, 1.15, 2.45, 1.6), cyl(0, 0, 2.4, BRIDGE[0], 0.6)]), cyl(0, 0, 1.0, 1.7, 0.6))}
 
 
 def centre_arbor(C, lo, hi, pinion, wheel):
