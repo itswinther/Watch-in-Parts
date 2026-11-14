@@ -26,7 +26,7 @@ HAND_SPEED = {"hour": Fraction(1, 12), "minute": Fraction(1), "seconds": Fractio
 DAY_SPEED = Fraction(1, 24)
 WEIGHTS_2 = {"day_hand": 3, "day_place": 1}
 WEIGHTS = {"spin": 1, "held": 2, "train": 3, "clear": 1, "minute": 2, "hour": 2, "seconds": 2,
-           "coaxial": 1, "hands": 1, "size": 1, "printable": 1, "tolerant": 2, "seated": 2}
+           "coaxial": 1, "hands": 1, "size": 1, "printable": 1, "tolerant": 2, "seated": 2, "light": 2}
 GATES = ("files", "assembled")
 TIMEOUT_S = 600
 
@@ -217,7 +217,11 @@ def grade_design(folder, stage=1, prev=None, skip=()):
                      if not (all(mv[k] > W.VOL_TOL for k in ("+x", "-x", "+y", "-y")) and max(mv["+z"], mv["-z"]) > W.VOL_TOL))
         return not bad, {"not_seated": bad, "moves": r}
 
-    table = {"seated": seated, "printable": printable, "day_hand": day_hand, "day_place": day_place, "spin": spin, "held": held, "train": train, "clear": clear, "minute": hand("minute"), "hour": hand("hour"),
+    def light():
+        fixed, mobile = m.volumes()
+        return fixed <= W.FIXED_VOLUME_MAX and mobile <= W.MOBILE_VOLUME_MAX, {"fixed_volume": fixed, "mobile_volume": mobile}
+
+    table = {"seated": seated, "light": light, "printable": printable, "day_hand": day_hand, "day_place": day_place, "spin": spin, "held": held, "train": train, "clear": clear, "minute": hand("minute"), "hour": hand("hour"),
              "seconds": hand("seconds"), "coaxial": coaxial, "hands": hands, "size": size, "tolerant": tolerant}
     for k in weights:
         checks[k], details[k] = _run(table[k])

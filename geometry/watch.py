@@ -47,6 +47,10 @@ THIN_VOXEL = 0.05
 THIN_ERODE_VOX = 1.5        # ball radius 0.1 on the 0.05 grid, less half a voxel of margin
 THIN_DILATE_VOX = 1.0
 THIN_DEV = 0.2              # no point of a part may be further than this from what survives the opening
+# mass budget, mm3. PLACEHOLDERS: 50 % of the current reference's fixed volume (4233.68, stage 1) and 60 % of its
+# mobile volume (853.19, stage 2); builder REF replaces them with the reworked reference's values plus 10 %.
+FIXED_VOLUME_MAX = 2117.0   # union of the fixed parts
+MOBILE_VOLUME_MAX = 512.0   # sum of the volumes of every part of every mobile, the supplied barrel not counted
 MAX_PARTS = 60
 MAX_TRIANGLES = 200_000
 MAX_STL_BYTES = 32 * 1024 * 1024
@@ -255,6 +259,12 @@ class Movement:
             for n, p in m["parts"].items():
                 out[n] = (p, "mobile:" + k)
         return out
+
+    def volumes(self):
+        """(volume of the union of the fixed parts, sum of the volumes of every part of every mobile
+        except the supplied barrel), in mm3, of the solids built from the part files."""
+        mobile = sum(p.volume() for k, mo in self.mobiles.items() if k != "barrel" for p in mo["parts"].values())
+        return float(self.fixed.volume()), float(mobile)
 
     def assembly_box(self):
         lo, hi = np.full(3, np.inf), np.full(3, -np.inf)
@@ -516,3 +526,25 @@ def thin(part):
     solid = core.voxelize(part, lo * h - 0.0137, tuple(int(v) for v in hi - lo), h)
     n, dev = core.opening_test(solid, THIN_ERODE_VOX, THIN_DILATE_VOX)
     return n, (dev * h if np.isfinite(dev) else 1e9)
+
+
+CORNER_ERODE_VOX = 1.5      # study only, not a requirement: the opening of `thin`, applied to the empty space
+CORNER_DILATE_VOX = 1.0
+CORNER_MARGIN_VOX = 4       # empty voxels kept around the part's bounding box
+
+
+def corners(part, offset=(0.0137, 0.0137, 0.0137)):
+    """Dual of `thin`, unused by the grader: open the empty space around the part on a THIN_VOXEL grid.
+    Returns (largest distance in mm from an empty voxel to the opened empty space, number of empty
+    voxels the opening removes). Sharp concave corners and gaps narrower than the ball are removed."""
+    h = THIN_VOXEL
+    bb = np.array(part.bounding_box())
+    lo = np.floor(bb[:3] / h).astype(int) - CORNER_MARGIN_VOX
+    hi = np.ceil(bb[3:] / h).astype(int) + CORNER_MARGIN_VOX
+    solid = core.voxelize(part, lo * h - np.asarray(offset), tuple(int(v) for v in hi - lo), h)
+    empty = ~solid                      # the grid's border counts as empty space that goes on (edt sees no zero there)
+    keep = core.edt(empty) >= CORNER_ERODE_VOX
+    opened = (core.edt(~keep) <= CORNER_DILATE_VOX) & empty
+    removed = empty & ~opened
+    dev = core.edt(~opened)[empty].max() if removed.any() else 0.0
+    return float(dev * h), int(removed.sum())
