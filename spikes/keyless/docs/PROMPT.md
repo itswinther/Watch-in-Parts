@@ -41,21 +41,22 @@ stated direction.
   the stem moved $PULL towards +x.
 - **Directions:** forward is turning the crown clockwise as seen from outside the case looking in
   (from +x towards -x), that is a negative rotation about +x. Backward is the opposite.
-- **Case:** a cylinder of radius $CASE_RADIUS about the vertical line through x = $CASE_CX,
+- **Case:** a cylinder of radius $CASE_RADIUS about the line parallel to z through x = $CASE_CX,
   y = $CASE_CY, from z = $CASE_Z0 to z = $CASE_Z1.
 
 ## Given parts (`/app/supplied/*.stl`, binary STL; do not modify)
 
 - `main_plate` and `dial_plate`: fixed plates, at z 2.6 to 3.2 and z -3.2 to -2.6.
-- `barrel_arbor`: the arbor of the mainspring barrel. It turns about the vertical line through
-  x = $BARREL_X, y = $BARREL_Y. Winding turns it anticlockwise as seen from +z (positive about +z). The
+- `barrel_arbor`: the arbor of the mainspring barrel. It turns about the line parallel to z through
+  x = $BARREL_X, y = $BARREL_Y. Winding turns it positive about +z: anticlockwise to an eye on the +z side
+  looking towards −z. The
   mainspring always urges it the other way (see the test rig).
   Its core, the hub the mainspring's inner coil winds onto, has radius 0.6, one third of the barrel's
   inner radius of 1.8, following the usual proportion (Grossmann, *Lessons in Horology*, 1905, art.
   108–111; Saunier, *Treatise on Modern Horology*, art. 517). The mainspring stores $CAPACITY turns of the
   arbor when fully wound.
 - `minute_wheel`: 36 teeth, module 0.2, z -2.4 to -1.9, on the fixed `minute_post`. It stands in for
-  the motion work and turns freely about the vertical line through x = $MINUTE_X, y = $MINUTE_Y.
+  the motion work and turns freely about the line parallel to z through x = $MINUTE_X, y = $MINUTE_Y.
   Setting the hands means turning it.
 
 ## What you deliver
@@ -63,7 +64,8 @@ stated direction.
 `/app/submission/keyless.json`, one binary STL per part in `/app/submission/parts/<name>.stl`, and
 `/app/submission/report.json`, your own account of how your design does in the acceptance test.
 
-- **Parts:** each part is one closed manifold solid with positive volume, in position 1 and at rest.
+- **Parts:** each part is one closed manifold solid with positive volume. Each part is submitted in
+  position 1, with every spring mobile at coordinate zero.
 - **Names:** letters, digits, `_` and `-`, 1 to 40 characters. The given part names and `fixed` are
   reserved, also as mobile names (with `minute_wheel`).
 - **Limits:** at most 40 parts, and at most $MAX_TRIANGLES triangles per file.
@@ -76,10 +78,12 @@ stated direction.
   - `dof` (`free` and `spring` only): `"rot"` (turns about a line) or `"slide"` (moves along a direction).
   - `point` (`rot` only): three numbers, a point on the axis.
   - `direction` (`free` and `spring`): three numbers, the axis or slide direction (any length > 0).
-  - `rest` (`spring` only): `1` or `-1`, the sign of the mobile's own coordinate that its spring urges
-    it towards.
+  - `rest` (`spring` only): `1` or `-1`. A mobile's own coordinate is zero as submitted. For `slide` it
+    is the displacement along the declared `direction` vector; for `rot` it is the angle about
+    `direction` by the right-hand rule. The spring urges the coordinate towards the sign given by `rest`.
   - `on_stem` (optional, `slide` along the x axis only): `true` if the mobile also turns with the stem;
-    its own coordinate is then its slide.
+    its own coordinate is then its slide, measured along its declared `direction` (which is `[1, 0, 0]`
+    or `[-1, 0, 0]`).
 - `fixed`: a list of part names that never move.
 
 Example of the format only (one wheel turning on a bracket; not a keyless design):
@@ -160,11 +164,11 @@ only if every step passes.
 
 - **Files:** everything loads as described above.
 - **Rest:** at rest, as submitted, no two bodies overlap by more than $TOL mm³.
-- **Held:** every `free` and `spring` mobile, moved $HOLD_SHIFT across its axis in either of two
-  perpendicular directions, overlaps some other body by more than $TOL mm³. For `rot` mobiles this
-  also applies along the axis, either way.
+- **Held:** every `free` and `spring` mobile is shifted $HOLD_SHIFT in each of the four directions ±u,
+  ±v, where u and v are two perpendicular directions normal to its axis; `rot` mobiles are also shifted
+  ±$HOLD_SHIFT along the axis. Each shift must overlap some other body by more than $TOL mm³.
 - **Bounds:** every part is inside the case. The stem may leave the case cylinder sideways, and some
-  stem material must reach at least $STEM_PROTRUDE outside the case radius.
+  stem material at the +x end must reach at least $STEM_PROTRUDE outside the case radius.
 
 ### AT-1 to AT-6
 
@@ -189,14 +193,14 @@ AT-4, AT-5 and AT-6 each start from the state at the end of AT-2: crown let go, 
      so the power reserve is (capacity − run-back) × $HOURS_PER_TURN hours. It must be at least
      $RESERVE_MIN hours.
    - **Barrel free to run.** The going train is supplied, and your works must leave the barrel free
-     to run. With the crown in position 1, the arbor is turned forward (the winding direction) by
+     to run. With the crown in position 1, the arbor is turned in the winding direction (positive about +z) by
      itself through $FREE_RUN_DEG degrees, in steps of $FREE_RUN_STEP. No step may be blocked.
    - **Still coupled.** Then the crown is turned forward $COUPLED_TURN degrees: never blocked, and the
      arbor winds by more than $STILL_TOL degree.
 4. **AT-4 Backward.** The crown, in position 1, is turned backward 360 degrees.
    - It is never blocked.
-   - Nothing winds: the arbor moves at most $STILL_TOL degree forwards and loses at most $HOLD_TOL
-     degrees.
+   - Nothing winds: the arbor turns at most $STILL_TOL degree positive about +z and at most $HOLD_TOL
+     degrees negative about +z.
    - The minute wheel moves at most $STILL_TOL degree.
    - **Still coupled.** Then the crown is turned forward $COUPLED_TURN degrees: never blocked, and the
      arbor winds by more than $STILL_TOL degree.
