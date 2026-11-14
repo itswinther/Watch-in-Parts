@@ -52,6 +52,7 @@ hand speeds and directions, and the weights of the checks.
 | DRIVE_FRACTION (and 360 x DRIVE_FRACTION degrees) | 0.25 | `datasheets/QA-W100_inspection.md` | 5. Part 1 | *Mesh test.* | statement |
 | DRIVE_MIN_VOLUME | 0.001 | `datasheets/QA-W100_inspection.md` | 5. Part 1 | *Mesh test.* | statement |
 | DRIVE_AREA_RATIO | 0.5 | `datasheets/QA-W100_inspection.md` | 5. Part 1 | *Mesh test.* | statement |
+| DRIVE_CONTACT_SCAN, DRIVE_CONTACT_HALVINGS (and the resolution, 1 / (SCAN x 2^HALVINGS) of a pitch) | (32, 7) | `datasheets/QA-W100_inspection.md` | 5. Part 1 | *Mesh test.* | statement |
 | MESH_SHIFT | 0.03 | `datasheets/QA-W100_inspection.md` | 5. Part 1 | **The train runs with | statement |
 | CLEAR_STEPS | 144 | `datasheets/QA-W100_inspection.md` | 5. Part 1 | **Nothing else collides.** | statement |
 | HAND_REACH | 5.0 | `datasheets/QA-W100_inspection.md` | 5. Part 1 | **Hands.** | statement |

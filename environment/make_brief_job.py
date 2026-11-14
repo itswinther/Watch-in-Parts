@@ -107,6 +107,11 @@ def grader_timeout_s():
     return int(m.group(1)), int(j.group(1))
 
 
+def drive_contact_resolution():
+    """The drive test's contact search resolves 1/this of a pitch (geometry.watch.drive_contact)."""
+    return W.DRIVE_CONTACT_SCAN * 2 ** W.DRIVE_CONTACT_HALVINGS
+
+
 def _literals():
     """Numbers of the tests that are literals in geometry/watch.py; fail if the source no longer has them."""
     src_mesh = inspect.getsource(W.Movement.mesh_run)
@@ -330,12 +335,20 @@ Checks. Each passes or fails.
      above, for i = 0, {pe}, {pe2}, ...), D and N intersect by at most {vt};
    - engaged: at every {ge}th step (i = 0, {ge}, {ge2}, ...) at which their intersection is empty, their smallest
      distance is at most {gap} mm;
-   - the teeth drive: at every {pe}th step (i = 0, {pe}, {pe2}, ...), D is turned a further {frac} of its tooth pitch
-     ({push} / {zd} degrees, counter-clockwise) while N stays where it is. V is the volume of the region that the
-     turned D shares with N and that D did not occupy before this extra turn; H is the z extent of that region (its highest point minus its lowest);
+   - the teeth drive: at every {pe}th step (i = 0, {pe}, {pe2}, ...), N stays where it is while D is turned further
+     counter-clockwise, first to contact and from there a further {frac} of its tooth pitch ({push} / {zd} degrees).
+     The contact position is reached by the smallest further turn, up to one tooth pitch of D (360 / {zd} degrees),
+     after which D and N intersect by more than 0 mm3 (no turn if they already intersect). It is searched in
+     {scan} equal steps of one pitch; the interval between the first step after which they intersect and the step
+     before it is then halved {hv} times, each time keeping the half in which they start to intersect, and the end of
+     the last interval is the contact position (so it lies within 1/{res} of a pitch past the first contact). If no
+     turn up to one pitch makes them intersect, this step fails. V is the volume of the region that the turned D
+     shares with N and that D did not occupy at the contact position; H is the z extent of that region (its highest
+     point minus its lowest);
      m = 2 x (distance between the two axes in the assembled positions) / ({zd} + {zn}) is the mesh's module. V is
      at least {dmin} mm3 and V / H is more than {ratio} x m x m, at every one of these steps. (V / H is the area that
-     the extra turn cuts into N's teeth.)
+     the extra turn cuts into N's teeth. Because the push starts from contact, it does not matter where in
+     its backlash N is delivered.)
 5. **The train runs with its arbors slightly out of place.** Every declared mesh also passes the mesh test with
    the driven mobile N moved {shift} mm straight away from D's axis, and with N moved {shift} mm straight towards
    D's axis (N then turns about its moved axis; if the two axes coincide, "away" is +x and "towards" is -x). The
@@ -362,7 +375,8 @@ Checks. Each passes or fails.
            spt=W.SAMPLES_PER_TOOTH, pe=L["push_every"], pe2=2 * L["push_every"], ge=L["gap_every"],
            ge2=2 * L["gap_every"], f1=str(W.MESH_OFFGRID[0]), f2=str(W.MESH_OFFGRID[1]), gap=num(W.ENGAGE_GAP),
            frac=num(W.DRIVE_FRACTION), push=num(W.DRIVE_FRACTION * 360), dmin=num(W.DRIVE_MIN_VOLUME),
-           ratio=num(W.DRIVE_AREA_RATIO), shift=num(W.MESH_SHIFT), cs=W.CLEAR_STEPS, reach=num(W.HAND_REACH),
+           ratio=num(W.DRIVE_AREA_RATIO), scan=W.DRIVE_CONTACT_SCAN, hv=W.DRIVE_CONTACT_HALVINGS,
+           res=drive_contact_resolution(), shift=num(W.MESH_SHIFT), cs=W.CLEAR_STEPS, reach=num(W.HAND_REACH),
            hcm=num(W.HAND_CENTRE_MIN), speed=SPEED_CITE,
            fits=wrap("12. **Fits the case.** Everything stays within the inner radius of the case named in the work "
                      "order (%s) of the vertical line through `case_centre` as it turns: every point of every fixed "
@@ -1095,6 +1109,9 @@ def traceability_rows(L, B, S=None):
              [num(W.DRIVE_FRACTION), num(W.DRIVE_FRACTION * 360)]),
         cell("DRIVE_MIN_VOLUME", W.DRIVE_MIN_VOLUME, Q, p1, "*Mesh test.*", None, [num(W.DRIVE_MIN_VOLUME)]),
         cell("DRIVE_AREA_RATIO", W.DRIVE_AREA_RATIO, Q, p1, "*Mesh test.*", None, [num(W.DRIVE_AREA_RATIO)]),
+        cell("DRIVE_CONTACT_SCAN, DRIVE_CONTACT_HALVINGS (and the resolution, 1 / (SCAN x 2^HALVINGS) of a pitch)",
+             (W.DRIVE_CONTACT_SCAN, W.DRIVE_CONTACT_HALVINGS), Q, p1, "*Mesh test.*", None,
+             [W.DRIVE_CONTACT_SCAN, W.DRIVE_CONTACT_HALVINGS, "1/%d" % drive_contact_resolution()]),
         cell("MESH_SHIFT", W.MESH_SHIFT, Q, p1, "**The train runs with", None, [num(W.MESH_SHIFT)]),
         cell("CLEAR_STEPS", W.CLEAR_STEPS, Q, p1, "**Nothing else collides.**", None, [W.CLEAR_STEPS]),
         cell("HAND_REACH", W.HAND_REACH, Q, p1, "**Hands.**", None, [num(W.HAND_REACH)]),

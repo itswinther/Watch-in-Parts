@@ -118,12 +118,20 @@ Checks. Each passes or fails.
      above, for i = 0, 8, 16, ...), D and N intersect by at most 0.01 mm3;
    - engaged: at every 4th step (i = 0, 4, 8, ...) at which their intersection is empty, their smallest
      distance is at most 0.1 mm;
-   - the teeth drive: at every 8th step (i = 0, 8, 16, ...), D is turned a further 0.25 of its tooth pitch
-     (90 / z_D degrees, counter-clockwise) while N stays where it is. V is the volume of the region that the
-     turned D shares with N and that D did not occupy before this extra turn; H is the z extent of that region (its highest point minus its lowest);
+   - the teeth drive: at every 8th step (i = 0, 8, 16, ...), N stays where it is while D is turned further
+     counter-clockwise, first to contact and from there a further 0.25 of its tooth pitch (90 / z_D degrees).
+     The contact position is reached by the smallest further turn, up to one tooth pitch of D (360 / z_D degrees),
+     after which D and N intersect by more than 0 mm3 (no turn if they already intersect). It is searched in
+     32 equal steps of one pitch; the interval between the first step after which they intersect and the step
+     before it is then halved 7 times, each time keeping the half in which they start to intersect, and the end of
+     the last interval is the contact position (so it lies within 1/4096 of a pitch past the first contact). If no
+     turn up to one pitch makes them intersect, this step fails. V is the volume of the region that the turned D
+     shares with N and that D did not occupy at the contact position; H is the z extent of that region (its highest
+     point minus its lowest);
      m = 2 x (distance between the two axes in the assembled positions) / (z_D + z_N) is the mesh's module. V is
      at least 0.001 mm3 and V / H is more than 0.5 x m x m, at every one of these steps. (V / H is the area that
-     the extra turn cuts into N's teeth.)
+     the extra turn cuts into N's teeth. Because the push starts from contact, it does not matter where in
+     its backlash N is delivered.)
 5. **The train runs with its arbors slightly out of place.** Every declared mesh also passes the mesh test with
    the driven mobile N moved 0.03 mm straight away from D's axis, and with N moved 0.03 mm straight towards
    D's axis (N then turns about its moved axis; if the two axes coincide, "away" is +x and "towards" is -x). The
