@@ -24,9 +24,9 @@ Values that belong to a supplied item are taken from that item's supplier docume
 | DS-W02 | the case: inner radius and inner height (section 2) |
 | DS-W03 | the printability test (section 3) |
 | `/app/FORMAT.md` | the file formats, and how a part file becomes the solid that is measured |
-| DS-W04 | Part 1, check 14 |
-| VM-DS-101 | Part 1, check 14 |
-| AD-DS-201 | Part 1, check 14 |
+| DS-W04 | Parts 1 and 3, check 14 |
+| VM-DS-101 | Parts 1 and 3, check 14 |
+| AD-DS-201 | Parts 1 and 3, check 14 |
 
 ## 3. Acceptance
 
@@ -101,7 +101,7 @@ Checks. Each passes or fails.
      distance is at most 0.1 mm;
    - the teeth drive: at every 8th step (i = 0, 8, 16, ...), D is turned a further 0.25 of its tooth pitch
      (90 / z_D degrees, counter-clockwise) while N stays where it is. V is the volume of the region that the
-     turned D shares with N and that D did not occupy before this extra turn; H is the height in z of that region;
+     turned D shares with N and that D did not occupy before this extra turn; H is the z extent of that region (its highest point minus its lowest);
      m = 2 x (distance between the two axes in the assembled positions) / (z_D + z_N) is the mesh's module. V is
      at least 0.001 mm3 and V / H is more than 0.5 x m x m, at every one of these steps. (V / H is the area that
      the extra turn cuts into N's teeth.)
@@ -133,16 +133,19 @@ Checks. Each passes or fails.
     named in the work order (DS-W03, section 3).
 14. **Gear strength.** The gears of the going train are strong enough in tooth bending.
 
-    *Load case.* The barrel delivers the highest torque that the mainspring sheet states for this calibre class:
-    T_barrel is the upper end of the bridle's slipping torque, DS-101, Table 2a, row "Slipping torque of the
-    bridle", column for this series (N·mm). The going train is stalled at its end, so each of its meshes carries
-    the full torque that reaches it.
+    *Load case.* This calibre is the base of a family that includes an automatic version, whose barrel has a
+    slipping bridle; the going train is rated for that version's barrel load. T_barrel is the upper end of the
+    bridle's slipping torque, DS-101, Table 2a, row "Slipping torque of the bridle (min. to max.)", column for
+    this series (N·mm), whatever mainspring the barrel of this build holds. The going train is stalled at its end,
+    so each of its meshes carries the full torque that reaches it.
 
     *Meshes rated.* The going train: the declared meshes on the path from the barrel to the mobile that carries
-    the seconds hand, through declared meshes that pass the mesh test (check 4). The motion work, and any other
-    mesh off that path, is not rated. If the seconds hand's mobile is not reached from the barrel that way, this
-    check fails. For each rated mesh, with D the mobile that the declaration names as `driver`, N the one it names
-    as `driven`, and z_D and z_N their declared tooth counts:
+    the seconds hand, through declared meshes that pass the mesh test (check 4); where there is more than one such
+    path, the one a breadth-first search from the barrel finds first when it takes the meshes in their declared
+    order (so the one with the fewest meshes). The motion work, and any other mesh off that path, is not rated. If
+    the seconds hand's mobile is not reached from the barrel that way, this check fails. For each rated mesh, with
+    D the mobile that the declaration names as `driver`, N the one it names as `driven`, and z_D and z_N their
+    declared tooth counts:
 
     - torque at D: T_D = T_barrel x |n_barrel / n_D| (N·mm), with n the turns per hour that the declared tooth
       counts give through meshes that pass the mesh test (the same speeds as the hand checks);

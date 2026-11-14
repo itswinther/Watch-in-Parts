@@ -330,7 +330,7 @@ Checks. Each passes or fails.
      distance is at most {gap} mm;
    - the teeth drive: at every {pe}th step (i = 0, {pe}, {pe2}, ...), D is turned a further {frac} of its tooth pitch
      ({push} / {zd} degrees, counter-clockwise) while N stays where it is. V is the volume of the region that the
-     turned D shares with N and that D did not occupy before this extra turn; H is the height in z of that region;
+     turned D shares with N and that D did not occupy before this extra turn; H is the z extent of that region (its highest point minus its lowest);
      m = 2 x (distance between the two axes in the assembled positions) / ({zd} + {zn}) is the mesh's module. V is
      at least {dmin} mm3 and V / H is more than {ratio} x m x m, at every one of these steps. (V / H is the area that
      the extra turn cuts into N's teeth.)
@@ -455,7 +455,7 @@ def qa_w100(L, S=None):
             ("`/app/FORMAT.md`", "the file formats, and how a part file becomes the solid that is measured")]
     if S is not None:
         f, d, t = ds_w04_entry(S)
-        docs += [(d, "Part 1, check 14"), ("VM-DS-101", "Part 1, check 14"), ("AD-DS-201", "Part 1, check 14")]
+        docs += [(d, "Parts 1 and 3, check 14"), ("VM-DS-101", "Parts 1 and 3, check 14"), ("AD-DS-201", "Parts 1 and 3, check 14")]
     doc_rows = "".join("| %s | %s |\n" % r for r in docs)
     return head(QA, "Inspection procedure: movement design deliveries, demonstration-scale calibre",
                 "the manufacturer's quality department", "inspection procedure") + """
@@ -508,7 +508,9 @@ def prompt(L, S=None):
     materials = ""
     if S is not None:
         materials = ("| Materials | each mobile's material is chosen from the design allowables of AD-DS-201 "
-                     "(`DS-201_materials.md`, section 8) |\n")
+                     "(`DS-201_materials.md`, section 8) |\n"
+                     "| Going-train rating | this calibre is the base of a family that includes an automatic version; "
+                     "the going train is rated for that version's barrel load (QA-W100, gear strength) |\n")
     return """# Work order: movement design, going train and hands, a 6-hour variant and an assembly plan
 
 You are a movement designer at a watch manufacturer. The calibre is a demonstration-scale model, about {scale}

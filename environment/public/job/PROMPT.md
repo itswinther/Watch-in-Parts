@@ -25,6 +25,7 @@ in the order.
 | 8-hour build (`movement.json`) | barrel BR-096-20, speed class D (DS-W01) |
 | 6-hour variant (`variant_6h.json`) | the same barrel BR-096-20, in the same place, speed class B (DS-W01) |
 | Materials | each mobile's material is chosen from the design allowables of AD-DS-201 (`DS-201_materials.md`, section 8) |
+| Going-train rating | this calibre is the base of a family that includes an automatic version; the going train is rated for that version's barrel load (QA-W100, gear strength) |
 
 ## Deliverables
 
