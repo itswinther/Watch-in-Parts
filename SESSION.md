@@ -9,12 +9,12 @@ table. Everything below "Session entries" is append-only, newest at the bottom.
 | ID | Workstream | Owner | Status | Last update |
 | --- | --- | --- | --- | --- |
 | A | Harness wiring | Mikael | session running. No starter kit exists (see 02:20 entry). Docker and Harbor 0.25.0 installed locally; building the Harbor task around B's grader next | 2026-11-14 02:20 |
-| B | Reference script and grader | itswinther | H1 has no gap (6 of 6 agents scored 1.0). NOW: building instance H2 (agent places four bodies, picks the assembly order, score is continuous on enclosure volume against a reference) | 2026-11-14 02:49 |
+| B | Reference script and grader | itswinther | instance H2 built: reference scores 1.0, 13 anchors as expected, agent bundle builds. No agent has run on H2 yet; waiting for itswinther to say go | 2026-11-14 02:58 |
 | C | Hold the Line spike | unassigned | not started | |
 | D | Mentor questions, anchors, transcripts | unassigned | not started | |
 | E | Analysis, demo and story | Yoseph | paused: Yoseph is not working overnight | 2026-11-14 01:40 |
 
-Spec version in use: 0.1
+Spec version in use: 0.2 (instance H2; H1 kept as regression)
 
 ## Deadlines (Helsinki time)
 
@@ -61,6 +61,8 @@ Append one line per decision: time, decision, who agreed.
 - 2026-11-14 00:50 Working plan is the second review, updated version. SPEC.md 0.1 is taken from it.
 - 2026-11-14 02:20 Organiser contract replaces the "starter kit wins" rule: the environment is a plain Harbor task (`instruction.md`, `task.toml`, `environment/Dockerfile`, `tests/`, `solution/`), run as `harbor run -p ./my-task -a opencode -m provider/model`, reward is one number 0..1 in `/logs/verifier/reward.txt`. Submission also needs at least one Harbor run log with its score and a short README. Source: organiser message relayed by Mikael.
 - 2026-11-14 02:49 H1 is retired as the judged instance: six agent attempts, three models, all scored 1.0. itswinther asked B to build instance H2 with four changes: continuous score against an optimised reference, agent-chosen placement of several bodies, agent-chosen assembly order, and the H1 loopholes closed. Agreed: itswinther.
+- 2026-11-14 02:58 SPEC.md is version 0.2: the judged instance is H2, specified in `environment/public/SPEC_H2.md`. Agreed: itswinther (asked for the four changes).
+- 2026-11-14 02:58 Interface for A (H2): the grader call is `python -I tests/grade_h2.py /abs/base.stl /abs/lid.stl /abs/assembly.json --reward FILE [--details FILE]`; the three artifacts are `base.stl`, `lid.stl`, `assembly.json` (the door is gone). `python environment/make_bundle.py DIR` writes everything the agent may see. B says yes to running the tools inside the agent container: the bundle holds no weights, gate list, check code or reference.
 
 ## Proposed spec changes
 
@@ -256,3 +258,22 @@ Template:
 - Files changed: SESSION.md.
 - Need from others: nothing.
 - Next: report when the reference and anchors pass.
+
+### 2026-11-14 02:58 | B instance H2 (built) | itswinther + Claude
+- Did: built instance H2. Supplied bodies: board A (unchanged), board B (38 x 27.5 PCB with shield, card slot J3 and inductor), battery, speaker. The agent chooses every final pose and the insertion order, and makes `base.stl` and a flat 2.0 `lid.stl`. Four gates (files, final pose, path format, enclosed) and 17 checks (weight 20). Score: 0 if a gate fails; 0.3 p^2 if a check fails; otherwise 0.3 + 0.7 x size, where size falls linearly from 1 at the reference bounding-box volume (81,343.3 mm3) to 0 at 95,000 mm3. H1 loopholes closed: the second part must be a flat plate, so the base needs a floor and closed windows; every body must rest on something; the door is gone.
+- New files: `geometry/h2_public.py` (bodies, public numbers, measurements), `geometry/h2_checks.py` (grader only), `tests/grade_h2.py`, `tests/test_anchors_h2.py`, `solution/reference_h2.py`, `environment/tools_h2.py`, `environment/make_bundle.py`, `environment/public/SPEC_H2.md`, `environment/public/INSTRUCTION_H2.md`. SPEC.md header now points to H2.
+- Verified by (command and result):
+  - `python3 solution/reference_h2.py OUT` printed `bounding box [74.85, 48.3, 22.5], volume 81343.2 mm3; poses {'B': 130, 'speaker': 126, 'A': 280, 'battery': 114, 'lid': 89}`.
+  - `cd tests && python3 -I grade_h2.py OUT/base.stl OUT/lid.stl OUT/assembly.json --reward R` printed reward 1.0, p 1.0, size_term 1.0, all gates and checks true.
+  - `python3 tests/test_anchors_h2.py`: 13 of 13 as expected. Reference 1.0; do nothing 0; lid smaller than the opening 0 (enclosed); lid not a plate 0 (files); oversize J1 window 0 (enclosed); no J3 window 0 (final pose); teleporting path 0; valid with floor 3 lower 0.444; valid with floor 12 lower 0.300; wrong order 0.217; floating battery 0.271; blocked J1 keep-out 0; no pegs 0.271.
+  - `python environment/make_bundle.py DIR`, then in DIR `python3 tools/tools_h2.py bbox` and `submit` on the reference files: bbox volume 81343.2, "accepted". `grep` for WEIGHTS, REFERENCE, SESSION, solution, h2_checks in the bundle's tools found nothing.
+  - `python3 tests/test_anchors.py` (H1) still 14 of 14.
+- Reference layout: B and the speaker on the floor under board A (the space under A is exactly B's height, 6.8), A on four posts, battery on top of A, order B, speaker, A, battery, lid. Board A uses the H1 tilt path.
+- Not verified, or assumed:
+  - Whether H2 produces a gap. No agent has run on it.
+  - That the reference is close to the smallest possible. I argued by hand that no layout gives a lower height; I did not search. If an agent finds a smaller valid design it scores 1.0 and the reference volume must be lowered to match.
+  - The 95,000 zero point is my choice, set so that a careful but conventional layout lands near 0.5.
+  - Nothing has run in Harbor.
+- Files changed: those listed, plus SPEC.md and SESSION.md.
+- Need from others: A, see the interface line under Decisions; artifacts changed from `door.stl` to `lid.stl`.
+- Next: run clean agents on H2 when itswinther says go.

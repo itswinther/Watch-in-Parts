@@ -1,7 +1,21 @@
 # SPEC.md
 
-Version: 0.1 (2026-11-14). Checked by hand only. Feasibility is unconfirmed
-until the reference script passes every gate and check.
+Version: 0.2 (2026-11-14).
+
+**The judged instance is now H2 ("Pack in a Box").** Its full specification,
+exactly as the agent sees it, is `environment/public/SPEC_H2.md`; that file is the
+source of truth for H2's bodies, rules, checks and score. Grader-only values
+(weights, gate list) are in `geometry/h2_checks.py`; public numbers are in
+`geometry/h2_public.py`. Reference: `solution/reference_h2.py`, bounding box
+81,343.2 mm3, score 1.0.
+
+Everything below this line is instance H1 (spec 0.1). H1 is retired as the judged
+instance because six agent attempts all scored 1.0; its grader, reference and
+anchors are kept as regression tests.
+
+---
+
+H1, version 0.1. The reference passes every gate and check.
 
 This file is the single source of truth for instance H1, the assembly contract,
 the checks and the score. Changes go through "Proposed spec changes" in
