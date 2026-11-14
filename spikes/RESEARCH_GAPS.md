@@ -37,3 +37,40 @@ rule. That combination produced all of last night's 1.0 scores.
    Together with B's result, this is the lever that leaves the information untouched.
 4. **Hidden requirements (LMBuild's affordances).** These work, but they restrict
    information, which the brief for this work ruled out.
+
+---
+
+# Second round: the six CAD papers from B's 09:44 entry, read in full (14 Nov, 11:00)
+
+B's session could see only search summaries. All six were read in full here, appendices included,
+and the summaries were checked against the papers.
+
+| Paper | What the summary said | What the paper says | Could the agent run code? |
+|---|---|---|---|
+| **CAD-bench** (github.com/CAD-bench/cad-bench, anonymous, "submitted to NeurIPS 2026"; the ICML-workshop claim is unconfirmed) | Agents fail often on interfaces and mechanisms | 17 tasks. Agents (Codex and Pi harnesses, GPT-5.4 and 5.4-mini) score 90.6 easy, 84.9 medium, 76.1 hard, **14.1 functional**. **Right-angle gearbox 0.040 mean with 96.9% built**; threaded pair 0.071 with 93.8% built; compound gearbox 0.138; two-gear transmission 0.316. Kinematics are checked by rigid-body simulation in Blender | **Yes**, agent harnesses with tool feedback. Whether they could run the simulation themselves is not stated |
+| **Parametric CAD Bench v3** (2611.02659) | Opus 5.5 low 40s on edit, over 80 on drawings | Correct: Claude Code + Opus 5.5 scores 50.9 creation, **39.7 create-and-edit**, 84.7 drawing-to-CAD. All 5 tasks that every system scored 0 on are edit tasks. But the "edit" regenerates both versions from scratch, and part of the difficulty is a hidden parameter check on the feature tree | Yes (Harbor 0.23, Claude Code, Codex and others) |
+| **Done Is Not Correct** (2611.10063) | 98% claim done, 14.1% silently wrong; measure-then-claim brings it to 3.2% | Correct, but for Haiku 4.5, Sonnet 4.6, DeepSeek and Qwen, with no shell and 4 turns. Sonnet 4.6 with tool feedback: 100% success, 0% silent failure. Silent errors concentrate in **internal features** (bore depth, counterbores, holes off the main axis), and 13 of 31 came from one task whose spec had two readings | No (the harness ran the code and returned measurements) |
+| **CADEngBench** (2608.09296) | 1,030 of 2,400 run, 432 of those pass the next level; coupled edits and face grounding hard | Correct. **Edits that join or cut existing bodies pass 40-46%; edits that add a separate body pass 247/248.** Assembly end-to-end 11.5%; pin-slot 0/6 for all models | No (one response, GPT-5.2 and Sonnet 4.5 era) |
+| **RealCADBench** (2609.03773) | All 25 assembly tasks executed; surface overlap 0.10-0.12 | Partly wrong. Only Codex + GPT-5.5 executed all 25; Claude Code + Opus 4.8 executed 88%. Surface overlap 0.116 and 0.086. The agent loop fixes execution, but fine detail and placement stay wrong | Yes (Codex, Claude Code) |
+| **Text2CAD-Bench** (2605.18430) | Big drop on sweep, loft and shell | Correct (68-92% invalid at L3), but with 3 retries and no agent. The failures are mostly kernel errors that an agent loop would likely repair | Partly (error and 3 retries) |
+
+## What this adds
+
+1. **The strongest evidence with agents that run code is CAD-bench's functional tier**, especially
+   the **right-angle gearbox**: 97% of attempts build, and they average 4% once kinematics are
+   simulated. That is B's proposal 3 (a winding stem at right angles, with crown or bevel teeth). It is the one
+   proposal with published evidence of a gap for code-running agents. Caveat: GPT-5.4 is older than
+   GPT-6.1-sol, and CAD-bench's grader had blind spots (a narrowed tooth still scored 0.943, a 5% lead
+   error 0.971). Our tooth and mesh checks must be exact.
+2. **Edits coupled to existing geometry** (cut into or join a frozen part) are the second lead: 40-46% in
+   CADEngBench and about 40 for Opus 5.5 in Parametric v3. Neither paper is a clean test with a strong
+   agent, because one has no execution and the other hides its checks. In our task this would be a stage
+   that hands the agent a frozen STEP part to *modify* (a new bore, counterbore or jewel seat), graded
+   on the new feature plus untouched faces identical to the original. This is B's proposal 6 in a
+   stricter form.
+3. **Internal features are where silent errors live** (Done Is Not Correct, RealCADBench). Check bore
+   depths, counterbores and off-axis holes per feature, never by volume or IoU alone.
+4. **Ambiguity produces fake gaps.** One spec with two readings gave 13 of 31 silent failures. Every new
+   rule needs a reference solution and a read by someone else before release.
+5. **Do not use** IoU, Chamfer distance or an LLM judge as the main score (they reward near misses, and
+   judges don't repeat). Do not count execution or "builds" as difficulty: agent loops saturate them.
