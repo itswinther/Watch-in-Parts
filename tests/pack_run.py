@@ -1,5 +1,6 @@
 """Pack one clean-agent chain run into a self-contained trajectory record.
     python3 tests/pack_run.py RUN_DIR OUT_DIR [--harness TEXT]
+    python3 tests/pack_run.py --unpack PACK_DIR OUT_DIR    # rebuild every stageN/submission/parts/ byte for byte
 
 RUN_DIR is what environment/run_clean_chain.sh leaves (stages are discovered by what exists,
 not by a fixed count):
@@ -10,16 +11,22 @@ not by a fixed count):
     chain.log          lines "stage N exit CODE" (124 = killed by the time limit)
     stageN.reward, stageN.details.json   grader outputs (after tests/grade_chain.py)
 
-OUT_DIR schema (version "watch-chain-pack/1"):
+OUT_DIR schema (version "watch-chain-pack/2"):
     manifest.json
+    parts_store/<sha256>.<ext>.gz                  each distinct submitted part file once (by SHA-256 of its
+                                                   bytes), gzip with mtime 0 and no file name: deterministic
     stageN/INSTRUCTION.md, stageN/SPEC_WATCH.md   what the agent was given
     stageN/transcript.jsonl                        the transcript
     stageN/scripts/                                the agent's scripts (stageN/scripts in RUN_DIR)
-    stageN/submission/                             movement.json, assembly.json, parts/*, scripts/ as submitted
+    stageN/submission/                             movement.json, assembly.json, scripts/ as submitted, and
+                                                   parts.json {"<name>.step": {"sha256": ..., "bytes": N}} in place
+                                                   of parts/ (the part files are in parts_store/)
     stageN/details.json, stageN/reward.txt         grader outputs
 
 manifest.json:
-    schema           "watch-chain-pack/1"
+    schema           "watch-chain-pack/2"
+    parts_store      {"files": distinct part files stored, "stored_bytes": total gz bytes, "raw_bytes": total
+                      bytes of those distinct files, "references": part files over all stages}
     run              name of RUN_DIR (its basename only)
     model            model named in the first transcript's init event (or null)
     harness          --harness, else "claude-code <version> headless (claude -p, stream-json)"
@@ -38,7 +45,11 @@ the transcript and the grader outputs above (never tools/, work/, previous/). Ev
 text files (transcripts included) is rewritten: the stage folder (and the cwd the transcript's init event
 names) becomes ".", RUN_DIR (and that cwd's parent) becomes "RUN", and
 any other path under /home, /tmp, /root, /Users, /private, /var, /mnt or /workspace becomes "<host>/<basename>".
-Binary files are copied unchanged; text part files (STEP) are rewritten like any text."""
+Binary files are copied unchanged. Part files (submission/parts/*) are never rewritten: they are stored
+byte for byte (STEP headers written by the task's write_step carry only the base name, no host path), so an
+unpacked part is exactly the submitted file and its SHA-256 is checked on unpack."""
+import gzip
+import hashlib
 import json
 import os
 import re
@@ -83,17 +94,74 @@ def copy_file(src, dst, scrub):
     return True
 
 
-def copy_tree(src, dst, scrub):
+def copy_tree(src, dst, scrub, skip_top=()):
     if not os.path.isdir(src) or os.path.islink(src):
         return 0
     n = 0
     for root, dirs, files in os.walk(src):
-        dirs[:] = sorted(d for d in dirs if d != "__pycache__" and not os.path.islink(os.path.join(root, d)))
+        dirs[:] = sorted(d for d in dirs if d != "__pycache__" and not os.path.islink(os.path.join(root, d))
+                         and not (root == src and d in skip_top))
         for f in sorted(files):
             if f.endswith(".pyc"):
                 continue
             n += copy_file(os.path.join(root, f), os.path.join(dst, os.path.relpath(os.path.join(root, f), src)), scrub)
     return n
+
+
+def store_parts(src, out, stats):
+    """submission/parts/* -> parts_store/<sha256>.<ext>.gz (once each) and the parts.json mapping."""
+    table = {}
+    if not os.path.isdir(src) or os.path.islink(src):
+        return table
+    os.makedirs(os.path.join(out, "parts_store"), exist_ok=True)
+    for f in sorted(os.listdir(src)):
+        p = os.path.join(src, f)
+        if os.path.islink(p) or not os.path.isfile(p) or os.path.getsize(p) > MAX_FILE_BYTES:
+            continue
+        with open(p, "rb") as fh:
+            data = fh.read()
+        h = hashlib.sha256(data).hexdigest()
+        ext = os.path.splitext(f)[1].lstrip(".").lower() or "bin"
+        dst = os.path.join(out, "parts_store", "%s.%s.gz" % (h, ext))
+        if not os.path.isfile(dst):
+            with open(dst, "wb") as raw:
+                with gzip.GzipFile(filename="", mode="wb", fileobj=raw, mtime=0, compresslevel=9) as gz:
+                    gz.write(data)
+            stats["files"] += 1
+            stats["raw_bytes"] += len(data)
+            stats["stored_bytes"] += os.path.getsize(dst)
+        stats["references"] += 1
+        table[f] = {"sha256": h, "bytes": len(data)}
+    return table
+
+
+def unpack(pack, out):
+    """Rebuild PACK_DIR as a plain folder with every stageN/submission/parts/ restored, hashes checked."""
+    if os.path.isdir(out):
+        shutil.rmtree(out)
+    shutil.copytree(pack, out, ignore=shutil.ignore_patterns("parts_store"))
+    n = 0
+    for st in sorted(os.listdir(out)):
+        pj = os.path.join(out, st, "submission", "parts.json")
+        if not os.path.isfile(pj):
+            continue
+        with open(pj) as f:
+            table = json.load(f)
+        pd = os.path.join(out, st, "submission", "parts")
+        os.makedirs(pd, exist_ok=True)
+        for name, e in table.items():
+            if os.path.basename(name) != name or name.startswith("."):
+                raise SystemExit("bad part name in %s: %r" % (pj, name))
+            ext = os.path.splitext(name)[1].lstrip(".").lower() or "bin"
+            with gzip.open(os.path.join(pack, "parts_store", "%s.%s.gz" % (e["sha256"], ext)), "rb") as gz:
+                data = gz.read()
+            if hashlib.sha256(data).hexdigest() != e["sha256"] or len(data) != e["bytes"]:
+                raise SystemExit("hash mismatch for %s/%s" % (st, name))
+            with open(os.path.join(pd, name), "wb") as f:
+                f.write(data)
+            n += 1
+        os.remove(pj)
+    print("unpacked %d part files into %s, every SHA-256 checked" % (n, os.path.basename(out)))
 
 
 def read_num(path):
@@ -139,8 +207,13 @@ def discover(run):
 
 
 def main(argv):
+    if argv and argv[0] == "--unpack":
+        if len(argv) != 3:
+            raise SystemExit(__doc__.split("\n\n")[0])
+        return unpack(os.path.abspath(argv[1]), os.path.abspath(argv[2]))
     if len(argv) < 2:
         raise SystemExit(__doc__.split("\n\n")[0])
+    stats = {"files": 0, "stored_bytes": 0, "raw_bytes": 0, "references": 0}
     run, out = os.path.abspath(argv[0]), os.path.abspath(argv[1])
     harness = argv[argv.index("--harness") + 1] if "--harness" in argv else None
     if os.path.isdir(out):
@@ -167,7 +240,13 @@ def main(argv):
             copy_file(os.path.join(sd, f), os.path.join(od, f), scrub)
         copy_file(tr, os.path.join(od, "transcript.jsonl"), scrub)
         n_scripts = copy_tree(os.path.join(sd, "scripts"), os.path.join(od, "scripts"), scrub)
-        n_sub = copy_tree(os.path.join(sd, "submission"), os.path.join(od, "submission"), scrub)
+        n_sub = copy_tree(os.path.join(sd, "submission"), os.path.join(od, "submission"), scrub, skip_top=("parts",))
+        table = store_parts(os.path.join(sd, "submission", "parts"), out, stats)
+        if table:
+            os.makedirs(os.path.join(od, "submission"), exist_ok=True)
+            with open(os.path.join(od, "submission", "parts.json"), "w") as f:
+                json.dump(table, f, indent=1, sort_keys=True)
+        n_sub += len(table)
         copy_file(os.path.join(run, "stage%d.details.json" % st), os.path.join(od, "details.json"), scrub)
         copy_file(os.path.join(run, "stage%d.reward" % st), os.path.join(od, "reward.txt"), scrub)
         model = model or facts["model"]
@@ -204,7 +283,7 @@ def main(argv):
                        "inherited_failures": inherited, "new_failures": new,
                        "files": {"scripts": n_scripts, "submission": n_sub}})
         prev_failed = set(failed) if details else None
-    manifest = {"schema": "watch-chain-pack/1", "run": os.path.basename(run.rstrip("/")), "model": model,
+    manifest = {"schema": "watch-chain-pack/2", "parts_store": stats, "run": os.path.basename(run.rstrip("/")), "model": model,
                 "harness": harness or ("claude-code %s headless (claude -p, stream-json)" % version if version else None),
                 "chain_score": None if ungraded or not stages else chain,
                 "stages_run": sum(s["ran"] for s in stages),
