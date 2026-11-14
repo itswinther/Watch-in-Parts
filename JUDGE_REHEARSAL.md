@@ -123,7 +123,7 @@ Why these matter more than their score: frontier agents already score 1.0, so no
 a judge will see is a grader that cannot tell a watch that works from one that does not. Attempt 2 is a
 natural mistake too: putting the minute and seconds hands in one layer is something a model can do by
 accident, and the grader would pass it. Attempt 1 brings back the same class of hit, false tooth counts,
-that the earlier red team found and closed for the speeds (`HANDOFF_EXPLOITS.md`, hit 1), this time through
+that the earlier red team found and closed for the speeds (`docs/history/HANDOFF_EXPLOITS.md`, hit 1), this time through
 the strength check, which was added after that fix. All three rules are stated in QA-W100 exactly as the code
 runs them. So an agent that reads the procedure can find each hole. That is fair to the agent, and not what
 the check is for.
