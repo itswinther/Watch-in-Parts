@@ -400,6 +400,8 @@ def b_day_too_close(d):
                           c(x, y, z1 - 0.01, 10.3, 0.5), c(x, y, 10.29, 10.7, 0.3), gear_solid])
     ref.place_day, ref.hand, ref.hand_arbor = (lambda P: Dn), hand, hand_arbor
     ref.main_job(d, split=False)     # the one-part layout the suite is written for (B, after builder M)
+    if os.path.exists(os.path.join(d, "report.json")):
+        os.remove(os.path.join(d, "report.json"))   # main_job writes a report; the anchors run without one
     # the day wheel now lies under the hour wheel's rim (5.96 < 5.0 + 3.36), so it goes in before the hour wheel
     # (measured: in the reference's order it is the one part not installed, blocked by the hour wheel)
     order = [n for n in ORDER_8H if n != "day"]
