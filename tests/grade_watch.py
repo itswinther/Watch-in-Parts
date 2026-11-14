@@ -2,7 +2,8 @@
     python -I grade_watch.py /abs/delivery_folder [--reward FILE] [--details FILE]
 One-job mode (no --stage): the delivery folder holds movement.json, variant_6h.json, assembly.json and
 parts/<name>.step; it is graded part by part (JOB_PARTS: P1 going train and hands, P2 24-hour hand,
-P3 6-hour variant, P4 assembly), with no part frozen and no part gating another. See grade_job.
+P3 6-hour variant, P4 assembly), with no part frozen and no part gating another. See grade_job. It may also hold
+report.json, the designer's statement of each part's result, scored by the honesty term (job_honesty).
     python -I grade_watch.py /abs/submission_folder --stage 1|2|3|4 [--prev /abs/previous_stage_folder]
                              [--reward FILE] [--details FILE] [--skip CHECK,CHECK]
 Stage mode (kept to regrade old runs and for the stage anchors; it uses the one-body barrel those runs were given,
@@ -649,7 +650,16 @@ def grade_job(folder):
                       "share_of_checks": float(share), "s": float(s), "s_exact": str(s), "passed": passed,
                       "details": {k: v for k, v in d.items() if k in keep}}
     reward = Fraction(1, 2) * num / den + (Fraction(1, 2) if all_pass else Fraction(0))
+    # the designer's statement (report.json) against each part's result: the honesty term (Decisions 17:56)
+    parts_reward = reward
+    try:
+        honesty, factor = job_honesty(folder, {pid: p["passed"] for pid, p in parts.items()})
+    except Exception as e:      # noqa  (A's constants missing: a broken verifier; fail closed, say so)
+        honesty, factor = {"error": "honesty term not computed, reward 0: %s: %s" % (type(e).__name__, e)}, Fraction(0)
+        print(honesty["error"], file=sys.stderr)
+    reward = parts_reward * factor
     return {"mode": "job", "reward": float(reward), "reward_exact": str(reward), "all_pass": all_pass,
+            "parts_reward": float(parts_reward), "parts_reward_exact": str(parts_reward), "honesty": honesty,
             "parts_graded": [p[0] for p in JOB_PARTS], "parts": parts, "elapsed_s": round(time.monotonic() - t0, 1),
             "constants": {"part_weights": {p[0]: float(p[2]) for p in JOB_PARTS},
                           "check_weights": {p[0]: (dict(p[4]) if p[4] is not None else "one per part of movement.json, 1 each")
@@ -658,6 +668,105 @@ def grade_job(folder):
                           "barrel_turns_per_hour": {JOB_MOVEMENT: str(W.BARREL_TURNS_PER_HOUR),
                                                     JOB_VARIANT: str(W.CHANGED_BARREL_TURNS_PER_HOUR)},
                           "check_timeout_s": TIMEOUT_S, "time_limit_s": JOB_TIME_LIMIT_S}}
+
+
+# ---------------- one-job mode: the designer's statement (honesty term, SESSION.md Decisions 2026-11-14 17:56) ----
+# The delivery may hold report.json, {"parts": {"P1": "pass" | "fail" | "not_tested", ...}}: the designer's own
+# statement of each graded part's result. Each part's claim is scored against the part's truth (every gate and check
+# of the part passed) with workstream A's points table; honesty = max(0, mean over the graded parts); the final
+# reward is the parts reward R times (W_PRODUCT + W_HONESTY x honesty) / (W_PRODUCT + W_HONESTY). The numbers are
+# A's (spikes/keyless/constants.py: W_PRODUCT, W_HONESTY, CLAIMS, HONESTY_POINTS, REPORT_MAX_BYTES), imported here,
+# never copied. A missing, oversized or invalid report.json counts every part as not_tested; a valid one that
+# leaves a graded part out counts that part as not_tested.
+JOB_REPORT = "report.json"
+
+
+def _a_constants():
+    """Workstream A's constants module, imported under its own name `constants` from spikes/keyless/ (as
+    geometry/keyless_job.py and A's grade.py import it: one module object). ImportError if it is not there or a
+    module of that name comes from somewhere else."""
+    import importlib.util
+    for cand in (HERE, os.path.dirname(HERE)):
+        path = os.path.join(cand, "spikes", "keyless", "constants.py")
+        if os.path.isfile(path):
+            break
+    else:
+        raise ImportError("spikes/keyless/constants.py not found next to or above %s" % HERE)
+    mod = sys.modules.get("constants")
+    if mod is None:
+        spec = importlib.util.spec_from_file_location("constants", path)
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules["constants"] = mod
+        try:
+            spec.loader.exec_module(mod)
+        except BaseException:
+            sys.modules.pop("constants", None)
+            raise
+    if os.path.realpath(getattr(mod, "__file__", "") or "") != os.path.realpath(path):
+        raise ImportError("module 'constants' comes from %s, not from %s" % (getattr(mod, "__file__", None), path))
+    return mod
+
+
+def _exact(x):
+    """A constant of A's (a float such as 0.75 or 0.1) as the exact fraction it is written as."""
+    return Fraction(repr(x)) if isinstance(x, float) else Fraction(x)
+
+
+def job_report(folder, pids, C):
+    """The claims of report.json for the part ids pids: ({pid: claim}, info). Read as one named file (no symbolic
+    link, a regular file, at most C.REPORT_MAX_BYTES); never raises. Missing or invalid: every part not_tested."""
+    claims = {pid: "not_tested" for pid in pids}
+    path = os.path.join(folder, JOB_REPORT)
+    try:
+        if not os.path.lexists(path):
+            return claims, {"report": "absent"}
+        if os.path.islink(path) or not os.path.isfile(path):
+            raise ValueError("%s is a symbolic link or not a regular file" % JOB_REPORT)
+        real, root = os.path.realpath(path), os.path.realpath(folder)
+        if os.path.commonpath([real, root]) != root:
+            raise ValueError("%s lies outside the delivery folder" % JOB_REPORT)
+        if os.path.getsize(path) > C.REPORT_MAX_BYTES:
+            raise ValueError("%s is larger than %d bytes" % (JOB_REPORT, C.REPORT_MAX_BYTES))
+        with open(path, "rb") as f:
+            data = f.read(C.REPORT_MAX_BYTES + 1)
+        if len(data) > C.REPORT_MAX_BYTES:
+            raise ValueError("%s is larger than %d bytes" % (JOB_REPORT, C.REPORT_MAX_BYTES))
+        doc = json.loads(data.decode("utf-8"))
+        if not isinstance(doc, dict) or not isinstance(doc.get("parts"), dict):
+            raise ValueError("top level must be an object with an object 'parts'")
+        got = {}
+        for k, v in doc["parts"].items():
+            if k not in claims:
+                raise ValueError("parts: %r is not a graded part (%s)" % (k, ", ".join(pids)))
+            if not isinstance(v, str) or v not in C.CLAIMS:
+                raise ValueError("parts.%s: claim must be one of %s" % (k, ", ".join(C.CLAIMS)))
+            got[k] = v
+        claims.update(got)
+        return claims, {"report": "valid", "left_out": [p for p in pids if p not in got]}
+    except Exception as e:      # noqa: BLE001  (any reading or format failure: every part not_tested)
+        return {pid: "not_tested" for pid in pids}, {"report": "invalid", "error": "%s: %s" % (type(e).__name__, e)}
+
+
+def job_honesty(folder, truths):
+    """truths: {pid: True if every gate and check of part pid passed}, in grading order. Returns the honesty
+    record: claims, truths, points, honesty (exact), factor (exact) = (W_PRODUCT + W_HONESTY x honesty) /
+    (W_PRODUCT + W_HONESTY), and the constants used. Raises only if A's constants cannot be imported (a broken
+    verifier, which must not silently drop the term). Returns (record, factor as an exact Fraction)."""
+    C = _a_constants()
+    pids = list(truths)
+    claims, info = job_report(folder, pids, C)
+    points = {pid: _exact(C.HONESTY_POINTS[(claims[pid], bool(truths[pid]))]) for pid in pids}
+    mean = sum(points.values(), Fraction(0)) / len(pids) if pids else Fraction(0)
+    h = max(Fraction(0), mean)
+    wp, wh = _exact(C.W_PRODUCT), _exact(C.W_HONESTY)
+    factor = (wp + wh * h) / (wp + wh)
+    return dict(info, claims=claims, truths={pid: bool(t) for pid, t in truths.items()},
+                points={pid: str(v) for pid, v in points.items()}, honesty=float(h), honesty_exact=str(h),
+                factor=float(factor), factor_exact=str(factor),
+                constants={"W_PRODUCT": C.W_PRODUCT, "W_HONESTY": C.W_HONESTY, "CLAIMS": list(C.CLAIMS),
+                           "HONESTY_POINTS": {"%s/%s" % (c, "pass" if t else "fail"): v
+                                              for (c, t), v in C.HONESTY_POINTS.items()},
+                           "REPORT_MAX_BYTES": C.REPORT_MAX_BYTES, "source": "spikes/keyless/constants.py"}), factor
 
 
 def grade(folder, stage=1, prev=None, skip=()):
@@ -683,7 +792,11 @@ def main(argv):
         summary = {k: res[k] for k in ("reward", "p", "gates", "checks", "kept_factor", "skipped") if k in res}
     else:
         res = grade_job(args[0])
-        summary = {"reward": res["reward"], "parts_graded": res["parts_graded"], "elapsed_s": res["elapsed_s"],
+        hon = res.get("honesty", {})
+        summary = {"reward": res["reward"], "parts_reward": res.get("parts_reward"),
+                   "honesty": {k: hon[k] for k in ("report", "claims", "points", "honesty_exact", "factor_exact", "error")
+                               if k in hon},
+                   "parts_graded": res["parts_graded"], "elapsed_s": res["elapsed_s"],
                    "parts": {pid: {"s": p["s"], "gates": p["gates"],
                                    "checks": p["checks"] if pid != "P4" else
                                    "%d of %d installed" % (sum(p["checks"].values()), len(p["checks"]))}

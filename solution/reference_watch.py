@@ -402,6 +402,9 @@ def with_materials(doc):
     return doc
 
 
+REPORT_PARTS = ("P1", "P2", "P3", "P4")      # the parts of the one-job inspection (QA-W100 Parts 1 to 4)
+
+
 def main_job(out):
     """One delivery folder: the 8-hour movement with its 24-hour hand, the 6-hour variant on the same frame,
     the assembly plan for the 8-hour movement, and one parts/ folder. A part name used by both movements is
@@ -437,6 +440,10 @@ def main_job(out):
         json.dump(doc3, f, indent=1)
     with open(os.path.join(out, "assembly.json"), "w") as f:
         json.dump(build_assembly(out, ORDER_8H), f)
+    # the designer's statement (FORMAT.md, report.json): truthful, since every part passes (the honesty term,
+    # SESSION.md Decisions 17:56). When Part 5 (crown winding) is graded, its claim joins this list.
+    with open(os.path.join(out, "report.json"), "w") as f:
+        json.dump({"parts": {pid: "pass" for pid in REPORT_PARTS}}, f, indent=1)
     print("job folder", out, "parts", len(solids), "movement", len(names(doc2)), "variant", len(names(doc3)),
           "only in variant", sorted(set(names(doc3)) - set(names(doc2))), "only in movement", sorted(set(names(doc2)) - set(names(doc3))))
 
