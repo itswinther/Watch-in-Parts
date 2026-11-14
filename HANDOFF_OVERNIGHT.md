@@ -336,3 +336,27 @@ is the result; do not adjust the task afterwards to manufacture a failure.
   through `mesh_run` before it is trusted.
 - `SESSION.md` uses a union merge; moving a block with a git merge duplicates it.
   Edit it by appending, and change only row B of the table.
+
+## 10. News from workstream A, added 04:55
+
+Read A's entries stamped 05:10, 05:30 and 06:00 in `SESSION.md` (A's clock runs
+about an hour ahead of the commit times). What matters for you:
+
+- **A has Harbor running sandboxed with GPT-6.1-sol through Codex** on Mikael's
+  machine: network locked to the model only, separate verifier, oracle 1.0 and
+  nop 0.0 shown. This is the real sandbox. Do not rebuild it here.
+- **A has a working multi-step Harbor task**: `spikes/gear_task/harbor_task_s8/task.toml`
+  uses `[[steps]]` with a verifier per step and `multi_step_reward_strategy = "mean"`.
+  Use it as the model when you write what A needs to package the staged watch.
+  Check which reward strategies Harbor offers before promising a product score;
+  if only a mean is available, say so and keep the product in `grade_chain.py`.
+- **GPT-6.1-sol scored 1.0 x3 on A's five-step watch and 0.974 on A's regulation
+  task**, so GPT is at least as strong as the Claude models on these tasks.
+- **A's five-step watch let every step revise earlier parts and showed no gap.**
+  A reads that as support for freezing. It has not been tested frozen on GPT.
+- **A found a 0.6 that was its own grader's bug.** Before you report any low
+  score from a chain, check that the failing check is right about the submission.
+- A's `spikes/gear_task/movement.py` is a second, abstract watch codebase (tooth
+  counts and positions, with a torque limit, a date wheel and automatic winding).
+  Do not merge it into `geometry/watch.py` tonight. If a builder needs a
+  subsystem idea for a later stage, it is a source of ideas, not of code.
