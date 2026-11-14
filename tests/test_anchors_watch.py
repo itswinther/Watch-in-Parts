@@ -364,10 +364,18 @@ def run_one(args):
 
 
 def main():
+    TIMEOUT_S = 1500        # per anchor; each anchor runs in a fresh interpreter (no threads inherited through fork)
+    import subprocess
+    from concurrent.futures import ThreadPoolExecutor
     args = sys.argv[1:]
     opt = lambda k: args[args.index(k) + 1] if k in args and args.index(k) + 1 < len(args) else None
     only, base = opt("--only"), opt("--base")
-    pos = [a for i, a in enumerate(args) if not a.startswith("--") and (i == 0 or args[i - 1] not in ("--only", "--base"))]
+    timeout = float(opt("--timeout") or TIMEOUT_S)
+    if opt("--one") is not None:        # child: one anchor, its output line, exit 1 when it is off
+        ok, line = run_one((int(opt("--one")), base))
+        print(line, flush=True)
+        return 0 if ok else 1
+    pos = [a for i, a in enumerate(args) if not a.startswith("--") and (i == 0 or args[i - 1] not in ("--only", "--base", "--timeout"))]
     workers = int(pos[0]) if pos else 3
     pick = list(range(len(ANCHORS)))
     if only:
@@ -380,13 +388,26 @@ def main():
     if base is None:
         base = tempfile.mkdtemp()
         ref.main(base)
+    base = os.path.abspath(base)
+
+    def one(i):
+        name = ANCHORS[i][0]
+        try:
+            r = subprocess.run([sys.executable, os.path.abspath(__file__), "--one", str(i), "--base", base],
+                               stdin=subprocess.DEVNULL, capture_output=True, text=True, timeout=timeout)
+        except subprocess.TimeoutExpired:
+            return False, "%-4s %-46s timed out after %g s" % ("OFF", name, timeout)
+        lines = [l for l in r.stdout.splitlines() if l.startswith(("ok ", "OFF "))]
+        if lines:
+            return r.returncode == 0 and lines[-1].startswith("ok "), lines[-1]
+        err = (r.stderr.strip().splitlines() or ["no output"])[-1]
+        return False, "%-4s %-46s crashed (exit %d): %s" % ("OFF", name, r.returncode, err)
     bad = 0
-    with Pool(workers) as pool:
-        for ok, line in pool.imap(run_one, [(i, base) for i in pick]):
+    with ThreadPoolExecutor(workers) as pool:
+        for ok, line in pool.map(one, pick):
             bad += not ok
             print(line, flush=True)
     return 1 if bad else 0
-
 
 if __name__ == "__main__":
     sys.exit(main())
