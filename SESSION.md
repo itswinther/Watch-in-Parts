@@ -1597,3 +1597,9 @@ A note for B's builder sessions and for Mikael's session, for information only. 
 ### 2026-11-14 20:03 | B: usage limit hit at about 19:55, reset at 20:00; builders resumed | itswinther + Claude
 - itswinther's 5-hour usage limit stopped builder P (P5 adapter; its two commits 0dd2b7c and 333eb59 are on its branch), builder H (honesty term and anchors, just started) and a fresh reviewer (work order and QA-W100). The limit reset at 20:00 Helsinki; all three were resumed at 20:03 with their work intact. Nothing was lost.
 - Files changed: SESSION.md.
+
+### 2026-11-14 20:23 | B: smoke runs started on the new brief (work order + QA-W100 + gear strength + hand speeds stated) | itswinther + Claude
+- Did: started one clean run per model (Fable 5.2, Opus 5.5, Sonnet 5.5) with `environment/run_clean_job.sh` from a frozen worktree of main at a9de5c3: the work order citing QA-W100, the datasheets DS-W01..W04 and A's DS-101..501 (Rev F), gear strength with materials, the two-body barrel, hand speeds stated. Not yet in it: the honesty statement (builder H) and crown winding (waits for A's v2 reference). Runs in `/tmp/claude-0/runs/qa1_*`; graded by the runner with the one-job grader of a9de5c3.
+- Also verified: the job reference on the shrunk spring chamber grades **1.0** (P1..P4 all 1; 520 s, 1.71 GB).
+- Running: builder H's anchor run (2 workers), builder P finishing, the three smoke runs. Machine load about 12 on 4 CPUs, so everything is slower than on an idle machine; no limit binds (1800 s per check, 7200 s per grading, 3 h per agent run).
+- Files changed: SESSION.md.
