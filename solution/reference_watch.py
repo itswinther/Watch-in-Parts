@@ -42,8 +42,9 @@ DAY_TEETH = (10, 40)
 DAY_CD = M_DAY * sum(DAY_TEETH) / 2.0                    # 4.0
 Z_DAY = (6.2, 7.2)        # the day pair is 1.0 thick (layer E lowered by 0.2) for a larger drive overlap
 FIT = 0.005               # radial clearance of every bore on its shaft
-SPOKE = dict(rim=0.5, spokes=5, width=0.6, fillet=0.15)  # crossed-out wheels
-Z = {"A": (0.1, 0.9), "B": (1.4, 2.2), "C": (2.6, 3.4), "D": (3.8, 4.6), "E": (6.4, 7.2), "F": (7.6, 8.4)}
+SPOKE = dict(rim=0.4, spokes=5, width=0.45, fillet=0.15)  # crossed-out wheels
+# gear layers; B, C and D are only as thick as their drive margin needs (drawn drive overlap >= 0.03)
+Z = {"A": (0.1, 0.9), "B": (1.4, 1.85), "C": (2.6, 3.2), "D": (3.8, 4.4), "E": (6.4, 7.2), "F": (7.6, 8.4)}
 PLATE, BRIDGE, DIAL = (-1.7, -0.3), (5.0, 6.0), (8.8, 9.6)
 PLATE_MARGIN = 0.1        # plate rim beyond the farthest swept wheel or hand
 PILLAR_R, PILLAR_GAP = 0.75, 0.15
@@ -123,7 +124,7 @@ def hand(axis, z0, z1, length, hub_r, bore_r):
     return minus(h, cyl(x, y, z0 - 1, z1 + 1, bore_r))
 
 
-def wheel_at(axis, teeth, module, z, toward, partner=None, hub_r=1.3):
+def wheel_at(axis, teeth, module, z, toward, partner=None, hub_r=1.1):
     """gear_at, crossed out to a rim, five spokes and a hub of hub_r."""
     g, phase = gear_at(axis, teeth, module, z, toward, partner)
     pocket = GC.spoke_cutters(axis[0], axis[1], z[0], z[1], hub_r, module * teeth / 2.0 - 1.25 * module - SPOKE["rim"],
@@ -195,14 +196,14 @@ def centre_arbor(C, lo, hi, pinion, wheel):
     """Centre arbor, stepped so the cannon (on the 0.6 -> 0.5 step at 6.4) and the minute hand (on the
     0.5 -> 0.35 step at 10.7) slide down onto it."""
     cx, cy = C
-    return union([cyl(cx, cy, lo, hi, 0.8), cyl(cx, cy, lo - 0.7, lo + 0.01, 0.3), cyl(cx, cy, hi - 0.01, 6.4, 0.6),
+    return union([cyl(cx, cy, lo, 6.4, 0.6), cyl(cx, cy, lo - 0.7, lo + 0.01, 0.3),
                   cyl(cx, cy, 6.39, 10.7, 0.5), cyl(cx, cy, 10.69, 11.4, 0.35), pinion, wheel])
 
 
 def hand_arbor(A, z0, z1, gear_solid):
-    """Seconds or day arbor: shaft 0.8, top 0.5, and a 0.3 tip for the hand from 9.9 to 10.3."""
+    """Seconds or day arbor: shaft 0.6, top 0.5, and a 0.3 tip for the hand from 9.9 to 10.3."""
     x, y = A
-    return union([cyl(x, y, z0, z1, 0.8), cyl(x, y, z0 - 0.7, z0 + 0.01, 0.3), cyl(x, y, z1 - 0.01, 9.9, 0.5),
+    return union([cyl(x, y, z0, z1, 0.6), cyl(x, y, z0 - 0.7, z0 + 0.01, 0.3), cyl(x, y, z1 - 0.01, 9.9, 0.5),
                   cyl(x, y, 9.89, 10.3, 0.3), gear_solid])
 
 
@@ -217,8 +218,8 @@ def build_stage1():
     p1, _ = gear_at(I, 24, M_A, Z["A"], ang(I, B), (96, 0.0))
     w1, ph_w1 = wheel_at(I, 60, M_B, Z["B"], ang(I, C))
     parts["third"] = union([arbor(I, lo, hi), p1, w1])
-    p2, _ = gear_at(C, 30, M_B, Z["B"], ang(C, I), (60, ph_w1))
-    w2, ph_w2 = wheel_at(C, 90, M_C, Z["C"], ang(C, T), hub_r=1.6)
+    p2, _ = wheel_at(C, 30, M_B, Z["B"], ang(C, I), (60, ph_w1), hub_r=1.2)
+    w2, ph_w2 = wheel_at(C, 90, M_C, Z["C"], ang(C, T), hub_r=1.2)
     parts["centre"] = centre_arbor(C, lo, hi, p2, w2)
     can, ph_can = gear_at(C, 12, M_E, Z["E"], ang(C, Mw))
     parts["cannon"] = minus(can, cyl(cx, cy, Z["E"][0] - 1, Z["E"][1] + 1, 0.5 + FIT))
@@ -271,7 +272,7 @@ def build_stage2(doc, parts, P, phase):
     ga, _ = gear_at(Id, 24, M_F, Z["F"], ang(Id, C), (48, phase["hour"]))
     gb, ph_gb = gear_at(Id, DAY_TEETH[0], M_DAY, Z_DAY, ang(Id, D))
     parts["day_idler"] = union([arbor(Id, BRIDGE[1] + 0.1, DIAL[0] - 0.1, top=0.4), ga, gb])
-    dw, _ = gear_at(D, DAY_TEETH[1], M_DAY, Z_DAY, ang(D, Id), (DAY_TEETH[0], ph_gb))
+    dw, _ = wheel_at(D, DAY_TEETH[1], M_DAY, Z_DAY, ang(D, Id), (DAY_TEETH[0], ph_gb), hub_r=1.2)
     z0, z1 = BRIDGE[1] + 0.1, DIAL[0] - 0.1
     parts["day"] = hand_arbor(D, z0, z1, dw)
     parts["day_hand"] = hand(D, 9.9, 10.2, 3.2, 0.9, 0.3 + FIT)
@@ -295,8 +296,8 @@ def build_stage3(doc, parts, P):
     p1, _ = gear_at(I, 24, M_A, Z["A"], ang(I, B), (96, 0.0))
     w1, ph_w1 = wheel_at(I, 54, M_B, Z["B"], ang(I, C))
     parts["third_54"] = union([arbor(I, lo, hi), p1, w1])
-    p2, _ = gear_at(C, 36, M_B, Z["B"], ang(C, I), (54, ph_w1))
-    w2, _ = wheel_at(C, 90, M_C, Z["C"], ang(C, T), hub_r=1.6)
+    p2, _ = wheel_at(C, 36, M_B, Z["B"], ang(C, I), (54, ph_w1), hub_r=1.2)
+    w2, _ = wheel_at(C, 90, M_C, Z["C"], ang(C, T), hub_r=1.2)
     parts["centre_36"] = centre_arbor(C, lo, hi, p2, w2)
     doc["mobiles"]["third"]["parts"] = ["third_54"]
     doc["mobiles"]["centre"]["parts"] = ["centre_36" if n == "centre" else n for n in doc["mobiles"]["centre"]["parts"]]
