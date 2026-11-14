@@ -1,0 +1,41 @@
+{
+ "reward": 1.0,
+ "p": 1.0,
+ "delivered": [
+  "sofa",
+  "bookcase",
+  "wardrobe",
+  "chest"
+ ],
+ "pieces": {
+  "sofa": {
+   "format_messages": [],
+   "worst_volume": 0.0,
+   "pose_index": -1,
+   "hit": null,
+   "poses": 1096
+  },
+  "bookcase": {
+   "format_messages": [],
+   "worst_volume": 0.0,
+   "pose_index": -1,
+   "hit": null,
+   "poses": 147
+  },
+  "wardrobe": {
+   "format_messages": [],
+   "worst_volume": 0.0,
+   "pose_index": -1,
+   "hit": null,
+   "poses": 1129
+  },
+  "chest": {
+   "format_messages": [],
+   "worst_volume": 0.0,
+   "pose_index": -1,
+   "hit": null,
+   "poses": 108
+  }
+ },
+ "notes": []
+}

@@ -9,7 +9,7 @@ table. Everything below "Session entries" is append-only, newest at the bottom.
 | ID | Workstream | Owner | Status | Last update |
 | --- | --- | --- | --- | --- |
 | A | Harness wiring | Mikael | session running. No starter kit exists (see 02:20 entry). Docker and Harbor 0.25.0 installed locally; building the Harbor task around B's grader next | 2026-11-14 02:20 |
-| B | Reference script and grader | itswinther | Moving Day flat-1 built: reference 1.0, 17 anchors as expected. Three clean agents (Fable, Opus, Sonnet) running on it now | 2026-11-14 03:22 |
+| B | Reference script and grader | itswinther | Moving Day flat-1 measured: Fable 1.0 (3.5 min), Opus 1.0 (9 min), Sonnet 0 (stopped without submitting). No gap for the two strongest models. Stopped, waiting for a human decision | 2026-11-14 03:31 |
 | C | Hold the Line spike | unassigned | not started | |
 | D | Mentor questions, anchors, transcripts | unassigned | not started | |
 | E | Analysis, demo and story | Yoseph | paused: Yoseph is not working overnight | 2026-11-14 01:40 |
@@ -317,3 +317,21 @@ Template:
 - Files changed: those listed, SPEC.md, SESSION.md.
 - Need from others: A, see the interface line under Decisions (one artifact now).
 - Next: grade the three agent runs and report.
+
+### 2026-11-14 03:31 | B Moving Day flat-1 agent results | itswinther + Claude
+- Did: ran three clean agents on flat-1 at once with `claude -p` from fresh bundle folders outside the repo (probe agent answered `NONE` for pre-loaded context; no CLAUDE.md up the tree; empty work and submission folders). Graded each `submission/plan.json` with `python3 -I tests/grade_md.py`.
+
+  | Model | Score | Time | Tool calls | Submissions | Cost |
+  | --- | --- | --- | --- | --- | --- |
+  | Fable 5.2 | 1.0 | 3 min 27 s | 6 | 1 | $1.36 |
+  | Opus 5.5 | 1.0 | 8 min 52 s | 20 | 3 | $1.79 |
+  | Sonnet 5.5 | 0 (no submission) | 8 min 25 s | 15 | 0 | $0.40 |
+
+  No tool call in any run touched a path outside its own folder.
+- What they did: Fable and Opus both found the two order traps from the numbers, carried the sofa on its side, stood it on end in the one direction that fits (both quote 256.3 under 258, and 288 for the other way), wrote their own position-and-angle grid search for the corner, and stood the wardrobe up about its 45 edge (236.3 under 238). Opus hit two dead ends first (a wall strike leaving the south corridor, and a corner turn 0.4 cm into a wall because its search area ended at the wall) and went through bookcase and chest, then sofa, then all four. Sonnet started two background path searches and ended its turn saying it would continue when they reported; a headless run is never woken, so it submitted nothing.
+- Finding: no gap for Fable or Opus on the hardest instance I could author. The task did cost Opus and Sonnet much more work than H1 or H2 (20 and 15 tool calls against 12 or fewer). Sonnet's zero is partly an artifact of running headless and should not be read as a clean failure.
+- Also recorded: the last two H2 runs finished earlier. Fable 1.0 (bounding box 80,804) and Opus 1.0 (77,770), both smaller than my H2 reference (81,343).
+- Not verified, or assumed: a rerun of Sonnet told not to stop while searches run; any non-Claude model; anything in Harbor or OpenCode.
+- Files changed: `transcripts/md_fable`, `md_opus`, `md_sonnet`, `h2_fable`, `h2_opus`, SESSION.md.
+- Need from others: a human decision. Per the handoff's own rule (clean agents at 1.0 on the hardest instance means stop and report) I have stopped building.
+- Next: nothing until told.
