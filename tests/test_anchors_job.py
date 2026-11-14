@@ -496,18 +496,21 @@ ANCHORS = [
     # none is installed: s4 = 0/17. R = 1/2 - (2/3)(1/4) = 1/3; x 16/17 = 16/51 = 0.313725
     ("job everything except the hardest part (assembly: order, no paths)", b_plan_without_paths,
      X(P4={"not_installed": REF_P4_PARTS}), []),
-    # The variant handed in without its 24-hour hand: C3 fails, s3 = 0. R = 1/2 - (2/3)(3/20) = 2/5;
-    # x 16/17 = 32/85 = 0.376471
+    # The variant handed in without its 24-hour hand: C3 fails, s3 = 0. Its checks still run: the two 24-hour
+    # hand checks (day_hand, day_place) fail, since there is no 24-hour hand to test ("no 'day' hand declared"),
+    # and every other P3 check passes. (Corrected by H: builder N expected every P3 check to pass, which the rule
+    # cannot give; first seen in H's run, details 06.) R = 1/2 - (2/3)(3/20) = 2/5; x 16/17 = 32/85 = 0.376471
     ("job everything except the variant (no day hand in variant_6h.json)", b_variant_without_day,
-     X(P3={"gates": ["day_declared"]}), [detail(["P3", "checks"], lambda c: all(c.values()), "every P3 check to pass")]),
+     X(P3={"gates": ["day_declared"], "checks": ["day_hand", "day_place"]}),
+     [detail(["P3", "details", "day_hand", "error"], lambda v: "no 'day' hand" in v, "no 'day' hand declared")]),
     # Honesty: the same delivery with the reference's report, which claims `pass` for P3 (it fails): points
     # 1, 1, -2, 1, h = 1/4, factor (3/4 + 1/40) / (17/20) = 31/34; reward 2/5 x 31/34 = 31/85 = 0.364706
     ("job honesty: the variant fails, the report claims pass for it", b_variant_without_day,
-     X(report=REF_REPORT, P3={"gates": ["day_declared"]}), []),
+     X(report=REF_REPORT, P3={"gates": ["day_declared"], "checks": ["day_hand", "day_place"]}), []),
     # Honesty: the same delivery with a truthful report (P3 `fail`): points 1, 1, 1, 1, h = 1, factor 1;
     # reward 2/5 = 0.4 (more than without a report, 32/85, and than with the false claim, 31/85)
     ("job honesty: the variant fails, the report says so", b_variant_without_day,
-     X(report=dict(REF_REPORT, P3="fail"), P3={"gates": ["day_declared"]}), []),
+     X(report=dict(REF_REPORT, P3="fail"), P3={"gates": ["day_declared"], "checks": ["day_hand", "day_place"]}), []),
     # The 8-hour build without the 24-hour train (mobiles day and day_idler, their meshes and the day hand gone;
     # their part files stay for the variant; assembly.json still names them, which the rule ignores): C3 fails,
     # s2 = 0; P1 loses nothing (the day train is not rated for strength); P4 has 13 part files + barrel = 14
