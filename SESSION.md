@@ -1603,3 +1603,28 @@ A note for B's builder sessions and for Mikael's session, for information only. 
 - Also verified: the job reference on the shrunk spring chamber grades **1.0** (P1..P4 all 1; 520 s, 1.71 GB).
 - Running: builder H's anchor run (2 workers), builder P finishing, the three smoke runs. Machine load about 12 on 4 CPUs, so everything is slower than on an idle machine; no limit binds (1800 s per check, 7200 s per grading, 3 h per agent run).
 - Files changed: SESSION.md.
+
+### 2026-11-14 21:05 | A: independent rubric review and datasheet audit; fixes pushed; five points for B | Mikael + Claude
+- **Did:** two independent read-only reviews of origin/main (a9de5c3): one against the judging rubric, one auditing DS-101..501 (about 400 derived cells recomputed, sources fetched). Rubric estimate about 45/100 today: gap 8/30, difficulty 15/30, reward integrity 16/25, craft 7/15. Main reasons:
+  - no gap yet on the judged harness (OpenCode); the GPT 0.024 was through Codex, on the brief before the "+z" wording fix;
+  - the real-watch fairness check (ml01) still fails on simulator limits;
+  - stale docs.
+- **Fixed by A (1d651e8):**
+  - (a) **Allowlist:** opencode and oracle tasks now allow `api.anthropic.com`, `api.openai.com`, `generativelanguage.googleapis.com` and `openrouter.ai` (before: Anthropic only, so a judge's `-m openai/...` or `google/...` run could not reach its model). Codex gets `chatgpt.com` and `api.openai.com`. Applies to harbor/watch_one and spikes/keyless; README updated; verifier timeout in watch_one/README corrected to 7800 s.
+  - (b) **Keyless brief:** says what the rig does not model (bending, a mobile carried on another, a spring acting beyond its own mobile), so those are not trick failures.
+  - (c) **Datasheets:** Table 2a values are now labelled as Sellita's specification limits (max/min), not measurements; three Table 4 cells fixed; INDEX says Rev F; a leftover duplicate section deleted; DS-501 pinch and DS-401 travel wording corrected. Logged in TRACEABILITY.
+- **Correction:** A's handoff said the keyless anchors "all score low". The committed log (docs/anchors_independent.log, old engine) has 28 of 37 anchors and 5 FAIL, including "click declared free" 0.325 against a bound of 0.175. The full rerun is on `a/keyless-engine-fixes` now. anchors.py exits 1 on any FAIL; the committed log predates that.
+- [ ] **to B (itswinther), from A, 21:05. Five points; (1) and (2) touch your grader, so your call:**
+  - (1) **70.1 N·mm load case against spring L.** The auditor's point: 70.1 is the slipping bridle of an *automatic* 11½‴ SW200-1, but the chamber now holds spring L (manual, fixed end; M_el 8.4, full wind 4.5 N·mm at s). An engineer would rate the train 4 to 8 times lower. Used at geometry/watch.py:97, tests/test_strength.py and QA-W100 check 14 (environment/brief_strength.py). A's suggestion, smallest change: keep 70.1, but have QA-W100 / the work order state it as the train's *design load* ("rate the going train for 70.1 N·mm at the barrel arbor, the slipping torque of the reference bridle"), so it is a stated requirement, not a value the engineer must infer from a spring it does not match. The alternative (derive a load for L) changes your tests.
+  - (2) **Corundum allowable.** DS-201 §8 and DS-301 give 2700/3 = 900 MPa. The cited UWA page (item 9) says to roughly double the factors for brittle materials rated on ultimate strength, which gives S ≈ 6, about 450 MPa. geometry/watch.py:105 uses 900. If you agree, say so and A changes DS-201/DS-301 to S = 6 (450) in the same push as your constant, or we keep 900 and A cites a source for S = 3.
+  - (3) **Stale docs a judge reads first:**
+    - README.md:1-13 and 40-42 (four stages, "not packaged", hidden hand speeds);
+    - SPEC.md has a v0.7 header over a v0.6 body;
+    - CLAUDE.md:10-13 names the staged watch as current.
+  - (4) **FYI:** watch_one's allowlist changed as above. Rebuild the task before the next Harbor run; your running smoke runs are unaffected.
+  - (5) **Submission framing (A's proposal, for agreement):** keyless is the headline, since it is the only track with a gap signal; your four-part job is the control (frontier models do gear-train CAD at 6/6 = 1.0; the difficulty is in contact behaviour). Once P5 is on, the joined job is the full task.
+- **Running (A):**
+  - keyless v2 reference in your frame (on your shrunk chamber);
+  - engine-fix branch: ml01 run and full anchor rerun;
+  - 3 GPT repeats via Codex on the corrected brief.
+- **Files changed:** spikes/keyless/build_task.py, README_RUN.md, docs/PROMPT.md, datasheets/DS-101/301/401/501, INDEX.md, TRACEABILITY.md; harbor/watch_one/build_task.py, README.md; SESSION.md.
