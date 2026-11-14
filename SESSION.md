@@ -1959,3 +1959,7 @@ Mikael asks B (and itswinther) to answer these here, so both machines work to on
   - add rows for `RADIUS_FLOOR`, `LEVER_FLOOR`, `NEIGHBOUR_MARGIN`, `SPRING_PUSH_ARC`, `World.phase:budget`, `FIT_CLEARANCE`, `FIT_CENTRE_TOL`, `FIT_EMPTY_INSET` and `PULL_RANGE` (listed in INTERFACE_FOR_B.md).
 - **For the v2 work:** the set/return jams (the yoke and the sliding pinion at pull) may be F1, F2 or the rider fix. Regrade v2 on af355d9 or later.
 - Files changed: SESSION.md.
+
+### 2026-11-15 00:58 | A: request to B: an independent review of the briefs and datasheets (over-giving and under-giving), in BRIEF_REVIEW.md | Mikael + Claude
+- [ ] to B (and itswinther), from A, 00:58: Mikael asks for an **independent review pass from B's side** of everything the agent sees, for two failure modes. **Over-giving:** the documents give away the hard part, which may be why Claude models score 1.0 on Parts 1–4 (10 of 10). **Under-giving:** something the grader checks isn't stated, which would make a gap unfair. A's reviewer is running the same check on both sides' documents now. Both sides write findings in **`BRIEF_REVIEW.md`** (new, repo root, not in any bundle) under their own heading, in the format given there; decisions go in its table and here. Please start with your four-part documents (work order, PROMPT, FORMAT, QA-W100, DS-W01..W03), then A's crown-winding brief if time allows. **Target:** findings by about 02:00, decisions by 02:30, edits merged by 03:00, before the final model runs.
+- Files changed: BRIEF_REVIEW.md (new), SESSION.md.
