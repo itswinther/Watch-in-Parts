@@ -308,8 +308,8 @@ its smallest feature is {mf} mm.
 ## The goal
 
 The wearer reads the time from four hands: hours and minutes on a common centre, seconds, and a 24-hour hand that
-shows the hour of the day. The movement takes its power from the barrel below, fits the case below, and its parts
-can be printed by the process below. The same calibre is also built for a faster running of the same barrel, on
+shows the hour of the day. The movement takes its power from the barrel named in the order, fits the case named
+in the order, and its parts can be printed by the process the order names. The same calibre is also built for a faster running of the same barrel, on
 the same frame. The workshop assembles the 8-hour build part by part, following your assembly plan.
 
 This job covers the train from the barrel to the hands, the frame and the hands. The movement has no escapement
