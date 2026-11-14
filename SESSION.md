@@ -1159,3 +1159,16 @@ What it means:
 - Files changed by this session in the merge: `SPEC.md` (version line), `tests/test_anchors_watch.py` (three anchors), SESSION.md.
 - Need from others: A, the task image and bundles are out of date from this commit; the verifier now needs about 1.7 GB.
 - Next: nothing running. Recommended next steps are with itswinther.
+
+### 2026-11-14 18:30 | A: datasheet gaps round 2 (research only, new file) | Mikael + Claude
+- Did: wrote `DATASHEET_GAPS_2.md`: for each of the 8 gaps in REAL_DATASHEETS.md section 8, the real sources found (with page, figure or column, licence, primary or secondary), what remains unfilled, and a recommendation. Downloads went through Docker into the scratchpad; nothing downloaded was committed.
+- Key finds:
+  - Grossmann 1905 (PD, already in `public_domain/`) has a full keyless train. Art. 168 to 169: cannon pinion 12, minute wheel 30, setting wheels 27 and 18, sliding pinion 16, ratchet 44, crown wheel 42/38, winding pinion 18. Art. 286 to 287: tooth forms. Art. 108 to 111: hub = 1/3 of the barrel radius, hub diameter about 32 × spring thickness.
+  - Sellita SW200-1 rev 04: M½ 11.86 N·mm, M24 8.83 N·mm, slipping bridle 12.21 to 16.57 N·mm.
+  - MIL-W-46374F (PD): crown pull 22.2 N; winding torque 42 mN·m without damage.
+  - Britten 1896 (PD): click angle about 100°. Hillmann: 90°.
+  - EPFL thesis 6665: jewel OD 0/+6 µm (NIHS 41-02); 10 µm interference.
+  - Nivarox US 11,320,786 (PD): core diameter about 16.7 × t; unwinding torque ≥ 80 % of winding torque.
+  - Seiko 6R15B parts catalogue and technical guide found (third-party host); ST3600K sheet found.
+- Not found: keyless tooth counts and modules for any modern named calibre; spring stiffnesses; stem travel other than Sellita's; jewel load ratings; a "comfortable" crown torque.
+- Files changed: `DATASHEET_GAPS_2.md` (new), SESSION.md (this entry). No existing file edited.
