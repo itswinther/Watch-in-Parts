@@ -112,8 +112,8 @@ below uses:
 - `fixed`: parts that do not move (plates, bridges, pillars, cocks). Fixed parts
   must not overlap one another.
 - `mobiles`: each mobile is a set of parts that turn together as one rigid body
-  about the vertical line through `axis`. Parts of one mobile may overlap each
-  other. Do not list `barrel`; it already exists.
+  about the vertical line through `axis`. Parts of one mobile touch but must not
+  overlap each other (see "Assembled"). Do not list `barrel`; it already exists.
 - `meshes`: every pair of gears that drive one another, with the tooth count of
   the gear on each mobile. All meshes are external (the two mobiles turn in
   opposite directions). Speeds are worked out from these tooth counts as exact
@@ -128,12 +128,16 @@ If either fails the score is 0.
 
 - Files: `movement.json` and every part it names are valid as described above.
 - Assembled: in the positions given, the fixed parts taken together and each
-  mobile (the barrel included) intersect one another by at most 0.01 mm3, and no
-  two fixed parts intersect each other by more than 0.01 mm3.
+  mobile (the barrel included) intersect one another by at most 0.01 mm3, no
+  two fixed parts intersect each other by more than 0.01 mm3, and no two parts
+  of the same mobile intersect each other by more than 0.01 mm3 (they may touch,
+  like a wheel on its arbor). Because curved surfaces are meshed to within 0.001
+  of the true surface, a bore and a shaft drawn with the same radius can overlap
+  by slivers; a fit needs a small radial clearance.
 
 ## Scored requirements
 
-Each passes or fails. Weights in brackets; the total is 17.
+Each passes or fails. Weights in brackets; the total is 23.
 
 - **Free to turn [1].** Each mobile, turned through a full turn in 72 steps of 5
   degrees, never intersects the fixed parts by more than 0.01 mm3.
@@ -143,6 +147,13 @@ Each passes or fails. Weights in brackets; the total is 17.
   other mobiles). For the two moves along z, only the fixed parts and mobiles on
   the same axis (within 0.01) count: a wheel may not be kept in place by a wheel
   on a different arbor. So each mobile can turn but cannot wander.
+- **Seated [2].** Every part of a mobile that has more than one part is seated
+  on the rest of its mobile: moved 0.3 along +x, -x, +y and -y in turn it must
+  intersect the other parts of the same mobile by more than 0.01 mm3 every time,
+  and moved 0.3 along +z or along -z (at least one of the two) it must intersect
+  them by more than 0.01 mm3. So a wheel needs a bore that fits its arbor and a
+  shoulder to rest against; a part that floats free of its mobile fails. The
+  supplied barrel and mobiles of one part are not tested.
 - **The train runs [3].** No mobile is given two different speeds by the
   declared meshes, each of the three hand mobiles is driven from the barrel, and
   every declared mesh passes this test. Starting from the assembled position,
@@ -156,6 +167,14 @@ Each passes or fails. Weights in brackets; the total is 17.
   - at every eighth step, turning the driver a further quarter of its tooth
     pitch (90 / driver teeth degrees, counter-clockwise) while the driven mobile
     is held makes them intersect by more than 0.01 mm3 (the teeth really drive).
+- **The train runs with its arbors slightly out of place [2].** Arbors are never
+  exactly where they were drawn. Every declared mesh must also pass the test of
+  "The train runs" twice more: with the driven mobile moved 0.03 straight away
+  from the driver's axis, and with it moved 0.03 straight towards the driver's
+  axis (in both cases it turns about its moved axis). In both positions the same
+  three conditions must hold, with the same steps and the same turning angles as
+  in the drawn position. This requirement does not change which meshes drive the
+  hands: that is decided in the drawn position only.
 - **Nothing else collides [1].** Every pair of mobiles that does not mesh is
   turned together at the speeds the tooth counts give (a mobile that is not
   driven stands still): 144 equal steps covering one full turn of the faster of
@@ -181,11 +200,17 @@ Each passes or fails. Weights in brackets; the total is 17.
   body. Ordinary gear teeth of module 0.12 or more pass; a wall, web or roof 0.2
   thick or less does not. How the grid lines up with your part is not fixed, so
   leave a little margin.
+- **Light [2].** The fixed parts together have a volume of at most 346 mm3,
+  and all parts of your mobiles together (the supplied barrel not counted) at
+  most 278 mm3. The limits are the same at every stage. Volumes are those
+  of the solids the grader builds from your part files: for the fixed parts, the
+  volume of their union; for the mobiles, the sum of the volumes of every part
+  of every mobile, each part counted on its own.
 
 ## Score
 
 ```
-p     = (weight of scored requirements passed) / 17
+p     = (weight of scored requirements passed) / 23
 score = 0 if a hard requirement fails, otherwise
 score = 0.5 * p^2 + 0.5 * (1 if every scored requirement passes, else 0)
 ```
@@ -211,14 +236,14 @@ Hard requirements: the two of stage 1, the frozen items above, and a 24-hour
 hand is declared (`hands.day` names a mobile and one of that mobile's parts,
 and that part is a new part, not one of the received parts).
 
-Scored requirements (total weight 21): all eleven of stage 1, still passing with
+Scored requirements (total weight 27): all fourteen of stage 1, still passing with
 their weights, plus
 
 - **24-hour hand [3].** It moves as a 24-hour hand does.
 - **24-hour hand placement [1].** Its axis is at least 6.0 from the hour hand's
   axis, and the hand part reaches at least 3.0 from its own axis.
 
-Score: the stage-1 formula with p out of 21.
+Score: the stage-1 formula with p out of 27.
 
 ## Stage 3: change request, a faster barrel
 
@@ -232,8 +257,8 @@ the received part files as you can.
 Nothing is frozen: you may change, add, remove and rename anything. The hard
 requirements are the two of stage 1, plus: **the change request is met**, that
 is, the hour hand, minute hand, seconds hand and 24-hour hand requirements all
-pass with the barrel turning once every 6 hours. The scored requirements are all thirteen of
-stage 2 with their weights (total 21), tested with the barrel turning once every
+pass with the barrel turning once every 6 hours. The scored requirements are all sixteen of
+stage 2 with their weights (total 27), tested with the barrel turning once every
 6 hours. The hands must still move as the hands of a watch do, and the 24-hour
 hand as a 24-hour hand does.
 
@@ -254,7 +279,7 @@ is not kept.
 ```
 kept share = (received part files that are kept) / (received part files)
 factor     = min(1, kept share / (15/17))
-p          = (weight of scored requirements passed) / 21
+p          = (weight of scored requirements passed) / 27
 score      = 0 if a hard requirement fails, otherwise
 score      = (0.5 * p^2 + 0.5 * (1 if every scored requirement passes, else 0)) * factor
 ```
@@ -294,8 +319,8 @@ Rules for a path:
 3. Between consecutive poses no vertex of the part moves more than 0.2.
 4. At least 2 and at most 1,500 poses.
 5. In every pose the part intersects each part placed before it by at most
-   0.01 mm3. Parts of the same mobile are pressed onto each other and are not
-   tested against one another. The barrel counts as a part of the mobile `barrel`.
+   0.01 mm3, parts of its own mobile included: every part has to slide into
+   place past the parts already there.
 
 A part whose path obeys rules 1 to 5 is installed. A part that breaks a rule is
 not installed, but it still stands in its assembled position for the parts that
