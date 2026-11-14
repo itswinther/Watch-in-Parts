@@ -213,6 +213,8 @@ Append one line per decision: time, decision, who agreed.
 
 - 2026-11-14 21:43 (B) itswinther (21:43): from `REAL_WATCH_WORK.md` (research session, ead0a79), build its items 1 and 2 now; the rest stays in reserve. **Item 1, fairness test:** Lang's ml01 going train (real professional CAD, no licence: local testing only, nothing committed or put in an image) scaled x1.2 and run through B's Part 1 with the barrel and speed overridden as constants (like A's `realcad/grade_real.py`); every adjustment logged as a finding about the grader, never a rule tuned to pass it. **Item 2, material per part (spec change, itswinther's yes):** old: one `material` per mobile, all its parts in it. New: a mobile may also give `part_materials` (`{part: designation}`) overriding `material` for those parts, so a brass wheel on a steel pinion is expressible; in the strength check each gear is rated in the material of the part of its mobile that holds its teeth, defined as the part holding the largest volume of that mesh's drive-test overlap with the other mobile (stated in QA-W100 check 14 and FORMAT.md). Rules on which designations qualify are unchanged. The reference becomes brass wheels on steel pinions where a watchmaker would, and must still grade 1.0. A: nothing in P5 or your engine changes (P5 treats the going train as one fixed body).
 
+- 2026-11-14 22:30 (B) Decided by itswinther: B's local smoke runs (Claude Code, outside Harbor) use Sonnet 5.5 only from now on; Fable and Opus are run only if Sonnet shows a gap. Reason: speed and usage; on every brief so far all three scored the same (1.0).
+
 ## Proposed spec changes
 
 Append here. A human has to say yes before SPEC.md changes.
@@ -1779,3 +1781,8 @@ A note for B's builder sessions and for Mikael's session, for information only. 
 - B's 22:02 request (one-job anchor suite here): accepted; starts when memory allows (several A jobs are using ~8 GB now); results posted here.
 - Files changed: harbor/watch_one/build_task.py, SESSION.md.
 - 2026-11-14 22:35 (A) Mikael: one-job anchor suite running here at 82c5678 (reference built with `--one-part-mobiles`, 2 workers because A's own jobs use ~10 GB; Docker, no network, image Python 3.12.16, cadquery 2.8.0, manifold3d 3.5.5, numpy 2.5.4 vs your pin 2.5.3, scipy 1.18.1). Expect the table about 00:30 to 01:00; DETAILS kept. If you meant a different commit, say so on line 94 and A restarts. **B (22:12): correct commit and flag, thank you; the hold is lifted. B is grading `job gold` on the same layout here as a cross-check.**
+
+### 2026-11-14 22:30 | B: Sonnet-only smoke policy; Sonnet run on the latest brief started | itswinther + Claude
+- Started one clean Sonnet 5.5 run (`environment/run_clean_job.sh`, `/tmp/claude-0/runs/qa2_sonnet`) from a frozen worktree of main at 22193c1: the work order with QA-W100, gear strength with per-part materials and the 70.1 platform load, the honesty statement (report.json), hand speeds stated. Graded by the runner. Fable and Opus only if Sonnet falls short (Decisions 22:30).
+- Running: A's anchor suite (A's machine, 2 workers, table about 00:30 to 01:00); B's `job gold` cross-check and the full grade of the delivered reference (brass wheels on steel pinions); builder F (ml01 fairness test).
+- Files changed: SESSION.md.
