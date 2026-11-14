@@ -1,0 +1,31 @@
+{
+ "seed": 1,
+ "plate_radius": 13.22,
+ "beats_per_hour": 18000,
+ "power_reserve_target_h": 39,
+ "fixed_arbors": {
+  "centre": [
+   0.0,
+   0.0
+  ],
+  "fourth": [
+   7.115353,
+   -1.883471
+  ],
+  "escape": [
+   7.314327,
+   -5.397843
+  ]
+ },
+ "escape_wheel": {
+  "radius": 1.9,
+  "teeth": 15
+ },
+ "balance": {
+  "centre": [
+   1.000002,
+   -7.839603
+  ],
+  "radius": 3.67
+ }
+}

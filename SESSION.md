@@ -8,7 +8,7 @@ table. Everything below "Session entries" is append-only, newest at the bottom.
 
 | ID | Workstream | Owner | Status | Last update |
 | --- | --- | --- | --- | --- |
-| A | Harness wiring | Mikael | session running. No starter kit exists (see 02:20 entry). Docker and Harbor 0.25.0 installed locally; building the Harbor task around B's grader next | 2026-11-14 02:20 |
+| A | Harness wiring | Mikael | paused harness work overnight to run three task spikes (see 03:55 entry, `spikes/README.md`): none showed a gap. Docker installed, not yet started | 2026-11-14 03:55 |
 | B | Reference script and grader | itswinther | NOW: building a first runnable version of the mechanical watch task (barrel mesh, grader, tools, a reference movement to prove the grader) and then running clean agents on it | 2026-11-14 03:42 |
 | C | Hold the Line spike | unassigned | not started | |
 | D | Mentor questions, anchors, transcripts | unassigned | not started | |
@@ -339,3 +339,15 @@ Template:
 - Files changed: `transcripts/md_fable`, `md_opus`, `md_sonnet`, `h2_fable`, `h2_opus`, SESSION.md.
 - Need from others: a human decision. Per the handoff's own rule (clean agents at 1.0 on the hardest instance means stop and report) I have stopped building.
 - Next: nothing until told.
+
+### 2026-11-14 03:55 | A (spikes) | Mikael + Claude
+- Did: after B's six 1.0 runs, tested three other task shapes on Fable 5.2, Sonnet and Opus via headless `claude -p` in clean folders outside the repo (no web, no subagents). Code, instances, agent outputs and transcripts are in `spikes/` and `holdtheline/`. Summary in `spikes/README.md`.
+- Verified by (command and result):
+  - Hold the Line (`holdtheline/`, workstream C folder, which had no owner): `python3 policies.py 60` gives the scripted reference a mean of 9,849; do-nothing 0, ship-blind, never-ship, sort-all, over-adjust and stop-early all score 0 to 0.12 on average. On one hidden seed the agents scored: Sonnet 9,926 and Opus 10,285 (both above the reference 9,744), Fable 97 (played one slot, then the headless session ended while it waited on its own background job; not a real result).
+  - Wrist tracker for children 6 to 10 (`spikes/wrist_tracker/`): one-sentence brief plus a parts list. All three returned a sensible child-sized device: 31 to 34 mm wide, 13 to 14 mm thick, 20 to 29 g, straps, rounded edges, display on top, charge contacts on the skin side. Sizes and masses measured from the STLs; the rest from the agents' own reports and renders.
+  - Watch gear train (`spikes/gear_train/`): `python3 watch.py grade inst_1.json runs/<model>/design.json ref_1.json` gives Fable 1.0 (11 min 36 s, $0.87), Opus 1.0 (10 min 10 s, $0.43), Sonnet 0.917 (1 min 53 s, $0.20; one extra layer). All three wrote an exhaustive search.
+- Findings: every fully specified, checkable task was turned into a program by the agent. Unstated common sense (child wrist size) was inferred unprompted. No spike shows a gap against these models.
+- Not verified, or assumed: one instance per spike, Claude models only; nothing ran in Harbor or OpenCode. The gear-train reference is a random planted movement, not an optimum. The gear train's power-reserve objective is trivially maxed (no torque limit), so its score is half meaningless.
+- Files changed: new `spikes/` (README, gear_train, wrist_tracker), `holdtheline/` (sim, policies, server, agent kit, results); SESSION.md (row A, this entry). No existing files of other workstreams touched.
+- Need from others: the team decision under Open questions is still open, and these results bear on it.
+- Next: harness work (Harbor task around B's grader) whichever idea wins.

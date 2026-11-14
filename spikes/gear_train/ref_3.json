@@ -1,0 +1,9 @@
+{
+ "valid": true,
+ "violations": [],
+ "power_reserve_h": 45.5,
+ "train_levels": 3,
+ "dial_levels": 2,
+ "total_levels": 5,
+ "score": 0.0
+}

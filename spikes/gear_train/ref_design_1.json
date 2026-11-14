@@ -1,0 +1,79 @@
+{
+ "arbors": {
+  "barrel": [
+   -4.449015,
+   -0.230847
+  ],
+  "third": [
+   4.079673,
+   0.051639
+  ],
+  "minute": [
+   1.34127,
+   2.227329
+  ]
+ },
+ "gears": {
+  "barrel_wheel": {
+   "teeth": 71,
+   "module": 0.11,
+   "level": 0
+  },
+  "centre_pinion": {
+   "teeth": 10,
+   "module": 0.11,
+   "level": 0
+  },
+  "centre_wheel": {
+   "teeth": 90,
+   "module": 0.08,
+   "level": 2
+  },
+  "third_pinion": {
+   "teeth": 12,
+   "module": 0.08,
+   "level": 2
+  },
+  "third_wheel": {
+   "teeth": 64,
+   "module": 0.1,
+   "level": 0
+  },
+  "fourth_pinion": {
+   "teeth": 8,
+   "module": 0.1,
+   "level": 0
+  },
+  "fourth_wheel": {
+   "teeth": 80,
+   "module": 0.08,
+   "level": 1
+  },
+  "escape_pinion": {
+   "teeth": 8,
+   "module": 0.08,
+   "level": 1
+  },
+  "cannon_pinion": {
+   "teeth": 13,
+   "module": 0.08,
+   "dial_level": 0
+  },
+  "minute_wheel": {
+   "teeth": 52,
+   "module": 0.08,
+   "dial_level": 0
+  },
+  "minute_pinion": {
+   "teeth": 13,
+   "module": 0.1,
+   "dial_level": 1
+  },
+  "hour_wheel": {
+   "teeth": 39,
+   "module": 0.1,
+   "dial_level": 1
+  }
+ },
+ "escape_wheel_level": 0
+}
