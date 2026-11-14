@@ -11,6 +11,10 @@ the extracted solids, the converted parts or anything derived from them.
     python3 -I ml01_train.py probe WORK                 fast measurements with the grader's engine (no mesh runs)
     python3 -I ml01_train.py phase WORK OUT.json        find the phase of every driven mobile (rest overlap)
 
+Sequence used for REAL_ML01_FAIRNESS.md: fetch; build; phase WORK phases1.json; build --phases phases1.json;
+fairness_ml01.py WORK (run 1); then phases2.json = phases1 with the centre turned +4.0 degrees and the mobiles it
+drives turned with it (run 2); build --phases phases2.json; fairness_ml01.py WORK (run 2).
+
 Frame: CAD point p -> 1.2 p + SHIFT. The movement centre (CAD origin) goes to case_centre; barrel II's axis
 (CAD -6.2, 8.1) goes to (0, 0), because the engine puts the barrel mobile on (0, 0). +z is the dial side in the
 CAD and in the grader. The wrapper fairness_ml01.py supplies barrel II as the barrel and its speed (3/20 turn per
@@ -55,7 +59,7 @@ FIXED = {
     "scr_pallet_a": [117], "scr_pallet_b": [118],
     "scr_cap_a": [209], "scr_cap_b": [210],
 }
-# mobile: (CAD axis, {part: ids or a hand name}, the mobile's material for the all-steel run)
+# mobile: (CAD axis, {part: CAD ids, or the name of a hand built here}); every mobile is declared AD-C100-HT (steel)
 MOBILES = {
     "intermediate": ((-2.6791, 0.9722), {"inter_wheel": [11, 64]}),     # wheel + the screw threaded into its arbor
     "centre": ((0.0, 0.0), {"centre_pinion": [8], "centre_wheel": [9], "seconds_bush": [10], "cannon": [59],
