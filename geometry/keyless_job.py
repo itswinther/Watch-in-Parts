@@ -38,7 +38,7 @@ SCALE_TABLE = (
     ("constants", "HOLD_SHIFT", 0.3, 0.3, 1, None, "AT-0 held: the shift that must hit something"),
     ("constants", "STEM_PROTRUDE", 0.5, 0.5, 1, None, "AT-0 bounds: stem material at least this far outside the case"),
     ("constants", "MAIN_TRY", 0.02, 0.02, 1, None, "mainspring's try per step (A's constants; the engine default below)"),
-    ("engine", "TOL", 2e-4, 2e-4, 3, None, "overlap two bodies may have and still only touch (mm3, x S^3)"),
+    ("engine", "TOL", 2e-4, 2e-4, 3, 7, "overlap two bodies may have and still only touch (mm3, x S^3)"),
     ("engine", "RELAX_MAX", 0.25, 0.25, 1, None, "a spring's return per step"),
     ("engine", "SCAN_ARC", 0.002, 0.002, 1, None, "search step for the clearing position"),
     ("engine", "MAX_STEP_TRAVEL", 0.06, 0.06, 1, None, "a step moving any surface further is split"),

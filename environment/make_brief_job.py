@@ -422,13 +422,35 @@ when every part is installed.
 """.format(tol=L["pose_tol"], clear=num(W.ASM_CLEAR), step=num(W.ASM_STEP), maxp=num(W.ASM_MAX_POSES), vt=vt())
 
 
-# The parts of the job, in order. The crown-winding part joins here as a fifth entry (workstream A).
+# The parts of the job, in order. The crown-winding part (Part 5) joins as a fifth entry when KEYLESS is set.
 PARTS = [part1, part2, part3, part4]
+# environment/brief_keyless.py while Part 5 is in the documents (documents(keyless=...): geometry/keyless_job.py
+# KEYLESS_IN_JOB by default, or --keyless OUT); None otherwise, and then no document mentions crown winding.
+KEYLESS = None
+
+
+def keyless_module():
+    path = os.path.join(ROOT, "environment", "brief_keyless.py")
+    spec = importlib.util.spec_from_file_location("brief_keyless", path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    errors = mod.check() or []
+    if errors:
+        raise SystemExit("environment/brief_keyless.py check() failed:\n" + "\n".join(errors))
+    return mod
+
+
+def part5(L, S=None):
+    return KEYLESS.qa_part5(sys.modules[__name__])
+
+
+def all_parts():
+    return PARTS + ([part5] if KEYLESS is not None else [])
 
 
 def qa_w100(L, S=None):
     """The manufacturer's inspection procedure: the acceptance test. Supplier facts are cited, not restated."""
-    n = len(PARTS)
+    n = len(all_parts())
     words = {4: "four", 5: "five"}
     lead = "- **Frame and units.** "
     frame = wrap(lead + frame_text(), "  ")[len(lead):]
@@ -442,7 +464,27 @@ def qa_w100(L, S=None):
     if S is not None:
         f, d, t = ds_w04_entry(S)
         docs += [(d, "Part 1, check 14"), ("VM-DS-101", "Part 1, check 14"), ("AD-DS-201", "Part 1, check 14")]
+    if KEYLESS is not None:
+        docs += KEYLESS.docs_rows()
     doc_rows = "".join("| %s | %s |\n" % r for r in docs)
+    acceptance = """The inspection has {nw} parts. Each part is judged on its own, even when another part fails. Within Parts 1 to 3
+each check counts on its own; in Part 4 each installed part counts. The delivery as a whole is accepted only when
+every condition and every check of all {nw} parts passes: everything must work.""".format(nw=words[n])
+    speeds = """- **Speeds** are worked out from the tooth counts declared under `meshes`, as exact fractions, starting from the
+  barrel at the speed, and in the running sense, of the speed class that the work order gives for the build
+  being judged ({speed}). Every declared mesh is external: its two mobiles turn in opposite directions.""".format(
+        speed=SPEED_CITE)
+    if KEYLESS is not None:
+        acceptance = wrap("The inspection has %s parts. Each part is judged on its own, even when another part fails. "
+                          "Within Parts 1 to 3 each check counts on its own; in Part 4 each installed part counts; in "
+                          "Part 5 each step counts on its own. The delivery as a whole is accepted only when every "
+                          "condition and every check and step of all %s parts passes: everything must work."
+                          % (words[n], words[n]))
+        speeds = wrap("- **Speeds** are worked out from the tooth counts declared under `meshes`, as exact fractions, "
+                      "starting from the barrel at the speed, and in the running sense, of the speed class that the "
+                      "work order gives for the build being judged (%s). Every declared mesh is external: its two "
+                      "mobiles turn in opposite directions. A mobile declared `friction_on` turns with the mobile it "
+                      "names, at the same speed (`/app/FORMAT.md`)." % SPEED_CITE, "  ")
     return head(QA, "Inspection procedure: movement design deliveries, demonstration-scale calibre",
                 "the manufacturer's quality department", "inspection procedure") + """
 ## 1. Scope
@@ -461,9 +503,7 @@ Values that belong to a supplied item are taken from that item's supplier docume
 {doc_rows}
 ## 3. Acceptance
 
-The inspection has {nw} parts. Each part is judged on its own, even when another part fails. Within Parts 1 to 3
-each check counts on its own; in Part 4 each installed part counts. The delivery as a whole is accepted only when
-every condition and every check of all {nw} parts passes: everything must work.
+{acceptance}
 
 ## 4. Terms
 
@@ -475,16 +515,14 @@ every condition and every check of all {nw} parts passes: everything must work.
 - **A mobile** is a set of parts that turn together as one rigid body about the vertical line through its axis.
   The barrel is the mobile `barrel` (its drum and its arbor together, as one solid); its axis is the axis of the
   barrel as supplied (DS-W01, section 3).
-- **Speeds** are worked out from the tooth counts declared under `meshes`, as exact fractions, starting from the
-  barrel at the speed, and in the running sense, of the speed class that the work order gives for the build
-  being judged ({speed}). Every declared mesh is external: its two mobiles turn in opposite directions.
+{speeds}
 - **Computing time.** Each condition and each check has up to {tout} s of elapsed (wall-clock) time on the
   inspection machine, and the whole inspection has up to {jtout} s; a condition or check that runs out of time, or
   that would start after the whole inspection's time has run out, fails.
 
-{parts}""".format(nw=words[n], frame=frame, vt=vt(), speed=SPEED_CITE, doc_rows=doc_rows,
+{parts}""".format(nw=words[n], frame=frame, vt=vt(), speeds=speeds, doc_rows=doc_rows, acceptance=acceptance,
                   tout=grader_timeout_s()[0], jtout=grader_timeout_s()[1],
-                  parts="\n".join(p(L, S) for p in PARTS))
+                  parts="\n".join(p(L, S) for p in all_parts()))
 
 
 # ------------------------------------------------------------------ the work order (PROMPT.md -> instruction.md)
@@ -495,7 +533,17 @@ def prompt(L, S=None):
     if S is not None:
         materials = ("| Materials | each mobile's material is chosen from the design allowables of AD-DS-201 "
                      "(`DS-201_materials.md`, section 8) |\n")
-    return """# Work order: movement design, going train and hands, a 6-hour variant and an assembly plan
+    title = "going train and hands, a 6-hour variant and an assembly plan"
+    covers = """This job covers the train from the barrel to the hands, the frame and the hands. The movement has no escapement
+and no winding or setting works: the barrel is the driver and turns at the steady speed of the speed class given
+in the order."""
+    movement_line = "the 8-hour build, with hour, minute, seconds and 24-hour hands"
+    if KEYLESS is not None:
+        title = "going train and hands, crown winding, a 6-hour variant and an assembly plan"
+        covers = wrap(KEYLESS.work_order_goal())
+        materials += KEYLESS.work_order_rows()
+        movement_line += ", and its crown-winding works (`keyless`)"
+    return """# Work order: movement design, {title}
 
 You are a movement designer at a watch manufacturer. The calibre is a demonstration-scale model, about {scale}
 times the size of a {real} mm (11 1/2-ligne class) movement, to be made by 3D printing or a similar process.
@@ -508,9 +556,7 @@ in the order, and its parts can be printed by the process the order names. The s
 faster running of the same barrel, on the same frame. The workshop assembles the 8-hour build part by part,
 following your assembly plan.
 
-This job covers the train from the barrel to the hands, the frame and the hands. The movement has no escapement
-and no winding or setting works: the barrel is the driver and turns at the steady speed of the speed class given
-in the order.
+{covers}
 
 ## Order
 
@@ -528,7 +574,7 @@ Everything goes into the folder `/app/delivery/`. What is in it when you finish 
 
 | Path | Content |
 |---|---|
-| `/app/delivery/movement.json` | the 8-hour build, with hour, minute, seconds and 24-hour hands |
+| `/app/delivery/movement.json` | {movement_line} |
 | `/app/delivery/variant_6h.json` | the 6-hour variant: the same calibre on the same frame, with hour, minute, seconds and 24-hour hands |
 | `/app/delivery/assembly.json` | the order in which the parts of `movement.json` are put in, and the path of each |
 | `/app/delivery/parts/<name>.step` | every part of both movements, one STEP file per part; a part used in both movements is one file |
@@ -565,7 +611,8 @@ You work alone and unattended; nobody answers questions during the job. The job 
 
 Report what you did and whether you reached anything outside this container.
 """.format(scale=num(round(scale, 3)), real=num(REAL_CALIBRE_DIAMETER_MM), bn=supplied_barrel_no(),
-           cn=ordered_case_no(), s8=s8, s6=s6, materials=materials, qa=QA,
+           cn=ordered_case_no(), s8=s8, s6=s6, materials=materials, qa=QA, title=title, covers=covers,
+           movement_line=movement_line,
            acceptance=wrap("The delivery is inspected after hand-over per %s rev %s (`/app/datasheets/%s`); each part of "
                            "%s is judged on its own, and the delivery is accepted only when every part passes "
                            "everything." % (QA, REVISION, QA_FILE, QA)))
@@ -626,13 +673,13 @@ Each is at most {jb} bytes and names at most {mp} parts.
   "fixed": ["part_name", ...],
   "mobiles": {{
     "mobile_name": {{"axis": [x, y], "parts": ["part_name", ...]}},
-    ...
+{fmob}    ...
   }},
   "meshes": [
     {{"driver": "barrel", "driver_teeth": n, "driven": "mobile_name", "driven_teeth": n}},
     ...
   ],
-  "hands": {{
+{kblock}  "hands": {{
     "hour":    {{"mobile": "mobile_name", "part": "part_name"}},
     "minute":  {{"mobile": "mobile_name", "part": "part_name"}},
     "seconds": {{"mobile": "mobile_name", "part": "part_name"}},
@@ -652,7 +699,7 @@ Each is at most {jb} bytes and names at most {mp} parts.
   Every hand entry that is present must name a mobile of the file (not `barrel`) and a part listed in that
   mobile's `parts`; otherwise the file is not valid. A `day` entry that is left out, or that is `null`, counts
   as no 24-hour hand.
-- In one file a part is named only once (under `fixed` or in one mobile).
+{kbullets}- In one file a part is named only once ({once}).
 
 ## `assembly.json`
 
@@ -671,7 +718,12 @@ last row 0 0 0 1.
            tout=W.STEP_TIMEOUT_S, mem=num(W.STEP_MEMORY_MB), lin=num(W.STEP_LINEAR_DEFLECTION),
            ang=num(W.STEP_ANGULAR_DEFLECTION), tris=num(W.MAX_TRIANGLES), su=num(W.SELF_UNION_TOL * 100),
            jb=num(W.MAX_JSON_BYTES), mp=W.MAX_PARTS, hreq=hands_required_text(),
-           mint=W.MIN_TEETH, maxt=W.MAX_TEETH, ab=num(W.MAX_ASSEMBLY_BYTES), material=material)
+           mint=W.MIN_TEETH, maxt=W.MAX_TEETH, ab=num(W.MAX_ASSEMBLY_BYTES), material=material,
+           fmob=KEYLESS.format_mobile_line() if KEYLESS is not None else "",
+           kblock=KEYLESS.format_keyless_block() if KEYLESS is not None else "",
+           kbullets=KEYLESS.format_text(sys.modules[__name__]) if KEYLESS is not None else "",
+           once="under `fixed`, in one mobile, or in the `keyless` section" if KEYLESS is not None
+           else "under `fixed` or in one mobile")
 
 
 def head(doc, title, issuer, kind):
@@ -1057,6 +1109,8 @@ def traceability_rows(L, B, S=None):
     ]
     if S is not None:
         rows += list(S.trace_rows())
+    if KEYLESS is not None:
+        rows += list(KEYLESS.trace_rows(sys.modules[__name__]))
     names = [r["constant"] for r in rows]
     if len(set(names)) != len(names):
         raise SystemExit("a constant has two home cells: %s" % sorted({n for n in names if names.count(n) > 1}))
@@ -1258,8 +1312,14 @@ Numbers the scan cannot tell apart (a document's own number equal to a supplier 
 """ + (co or "- none\n")
 
 
-def documents():
-    """{relative path under environment/public/job: text}"""
+def documents(keyless=None):
+    """{relative path under environment/public/job: text}. keyless: include Part 5 (crown winding); default
+    geometry/keyless_job.py KEYLESS_IN_JOB."""
+    global KEYLESS
+    from geometry import keyless_job as KJ
+    KEYLESS = keyless_module() if (KJ.KEYLESS_IN_JOB if keyless is None else keyless) else None
+    if KEYLESS is not None:
+        LITERALS["FORMAT.md"].setdefault("-1", "a spring's rest side, 1 or -1")
     _hands_rule()
     L = _literals()
     B = barrel_facts()
@@ -1312,9 +1372,12 @@ def main(argv):
             return 1
         print("up to date")
         return 0
-    docs = documents()
+    out = OUT
+    if "--keyless" in argv:         # the documents with Part 5, into another folder (the committed ones follow the switch)
+        out = os.path.abspath(argv[argv.index("--keyless") + 1])
+    docs = documents(keyless=True if "--keyless" in argv else None)
     for rel, text in docs.items():
-        p = os.path.join(OUT, rel)
+        p = os.path.join(out, rel)
         os.makedirs(os.path.dirname(p), exist_ok=True)
         with open(p, "w", encoding="utf-8") as f:
             f.write(text)
