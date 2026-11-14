@@ -400,7 +400,7 @@ def part4(L, S=None):
 Conditions: C1 of Part 1 for `movement.json`, and `assembly.json` is valid JSON with a list `order` and an object
 `paths` (`/app/FORMAT.md`).
 
-The parts of `movement.json` and the barrel are put in one at a time, in the order of `order`. A name in `order`
+{keyless}The parts of `movement.json` and the barrel are put in one at a time, in the order of `order`. A name in `order`
 that is not one of these parts is ignored; a name that appears more than once counts at its first place only. A
 part that is not in `order` is not installed and stands in its assembled position from the start, so every part
 in `order` is tested against it. Each part moves along its path. A part is installed when its path obeys all of
@@ -419,7 +419,8 @@ these rules:
 A part that breaks a rule is not installed, but it still stands in its assembled position for the parts that
 follow. Part 4 is judged by the share of the parts (the barrel included) that are installed; it passes in full
 when every part is installed.
-""".format(tol=L["pose_tol"], clear=num(W.ASM_CLEAR), step=num(W.ASM_STEP), maxp=num(W.ASM_MAX_POSES), vt=vt())
+""".format(tol=L["pose_tol"], clear=num(W.ASM_CLEAR), step=num(W.ASM_STEP), maxp=num(W.ASM_MAX_POSES), vt=vt(),
+           keyless=wrap(KEYLESS.part4_text()) + "\n\n" if KEYLESS is not None else "")
 
 
 # The parts of the job, in order. The crown-winding part (Part 5) joins as a fifth entry when KEYLESS is set.
@@ -709,7 +710,7 @@ At most {ab} bytes.
 {{"order": ["part_name", ...], "paths": {{"part_name": [P, P, ...], ...}}}}
 ```
 
-`order` lists the part names of `movement.json`, and `barrel`, in the order they are put in. Each P is a 4x4
+{korder}`order` lists the part names of `movement.json`, and `barrel`, in the order they are put in. Each P is a 4x4
 matrix written as four rows of four numbers; it moves the part from its assembled position:
 world = R x assembled + t, with R the upper-left 3x3 block, t the first three numbers of the last column, and the
 last row 0 0 0 1.
@@ -721,6 +722,7 @@ last row 0 0 0 1.
            mint=W.MIN_TEETH, maxt=W.MAX_TEETH, ab=num(W.MAX_ASSEMBLY_BYTES), material=material,
            fmob=KEYLESS.format_mobile_line() if KEYLESS is not None else "",
            kblock=KEYLESS.format_keyless_block() if KEYLESS is not None else "",
+           korder=wrap(KEYLESS.format_assembly_text()) + "\n" if KEYLESS is not None else "",
            kbullets=KEYLESS.format_text(sys.modules[__name__]) if KEYLESS is not None else "",
            once="under `fixed`, in one mobile, or in the `keyless` section" if KEYLESS is not None
            else "under `fixed` or in one mobile")

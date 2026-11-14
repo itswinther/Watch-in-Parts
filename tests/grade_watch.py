@@ -570,6 +570,11 @@ def _job_assembly(folder, m, run):
         details["plan"] = {"error": "not run: %s did not load" % JOB_MOVEMENT}
         return gates, {}, details
     names = list(m.all_parts())
+    if KJ.KEYLESS_IN_JOB and m.keyless_names:
+        # with Part 5 graded, the keyless section's parts are parts of movement.json for the assembly too (A's request
+        # 21:20, agreed by B): installed under the same rules. If one does not load, they all count as not installed.
+        names += list(m.keyless_names)
+        details["keyless_parts"] = run(lambda: (bool(m.attach_keyless()) or True, {"parts": list(m.keyless_names)}))[1]
     checks = {n: False for n in names}
     st = {}
 
@@ -741,7 +746,7 @@ def grade_job(folder):
         all_pass = all_pass and passed
         num += w * s
         den += w
-        keep = set(gate_names) | set(checks) | ({"parts"} if cw is None else set()) | {"error", "acceptance"}
+        keep = set(gate_names) | set(checks) | ({"parts"} if cw is None else set()) | {"error", "acceptance", "keyless_parts"}
         parts[pid] = {"name": what, "weight": float(w), "gates": gates, "checks": checks, "check_weights": weights,
                       "share_of_checks": float(share), "s": float(s), "s_exact": str(s), "passed": passed,
                       "details": {k: v for k, v in d.items() if k in keep}}

@@ -256,6 +256,7 @@ class Movement:
         # its part files, are read by geometry/keyless_job.py when Part 5 runs
         from .keyless_job import keyless_part_names
         self.keyless_names = keyless_part_names(doc.get("keyless"))
+        self.keyless_solids = {}        # filled by attach_keyless() (Part 4 when Part 5 is graded)
         for n in self.keyless_names:
             reserve(n, "keyless")
         self.hands = {}
@@ -431,13 +432,24 @@ class Movement:
             out.setdefault(group[n], []).append(n)
         return sorted(out.values(), key=lambda g: (-len(g), names.index(g[0])))
 
-    def all_parts(self):
-        """name -> solid, for every part: the supplied barrel, the fixed parts and the parts of every mobile."""
+    def all_parts(self, keyless=False):
+        """name -> solid, for every part: the supplied barrel, the fixed parts and the parts of every mobile.
+        keyless: also the parts of the keyless section that attach_keyless() has read (none until then); the
+        assembly (Part 4) uses them when the crown-winding part is graded (A's request 21:20, agreed by B)."""
         out = {"barrel": self.mobiles["barrel"]["solid"]}
         out.update(self.fixed_parts)
         for m in self.mobiles.values():
             out.update(m["parts"])
+        if keyless:
+            out.update(self.keyless_solids)
         return out
+
+    def attach_keyless(self):
+        """Read the keyless section's part files (through the movement's own loader) so that the assembly includes
+        them. FormatError if one does not load; then none is attached."""
+        solids = {n: self.load_part(n) for n in self.keyless_names}
+        self.keyless_solids = solids
+        return solids
 
     def volumes(self):
         """(volume of the union of the fixed parts, sum of the volumes of every part of every mobile
@@ -447,7 +459,7 @@ class Movement:
 
     def assembly_box(self):
         lo, hi = np.full(3, np.inf), np.full(3, -np.inf)
-        for solid in self.all_parts().values():
+        for solid in self.all_parts(keyless=True).values():
             bb = np.array(solid.bounding_box())
             lo, hi = np.minimum(lo, bb[:3]), np.maximum(hi, bb[3:])
         return lo - ASM_CLEAR, hi + ASM_CLEAR
@@ -455,8 +467,9 @@ class Movement:
     def assembly_replay(self, order, paths):
         """Put the parts in one at a time. Returns per-part results and the list installed cleanly.
         A part is tested against every part placed before it, parts of its own mobile included.
-        A part missing from `order` stands in its assembled position from the start and is not installed."""
-        parts = self.all_parts()
+        A part missing from `order` stands in its assembled position from the start and is not installed.
+        The keyless section's parts take part once attach_keyless() has read them (Part 5 graded)."""
+        parts = self.all_parts(keyless=True)
         lo, hi = self.assembly_box()
         placed = [(n, solid) for n, solid in parts.items() if n not in order]
         results, installed = {n: {"not_in_order": True} for n, _ in placed}, []
@@ -753,7 +766,7 @@ def load_assembly(folder, movement):
             raise FormatError("assembly.json is not valid JSON") from e
     if not isinstance(doc, dict) or not isinstance(doc.get("order"), list) or not isinstance(doc.get("paths"), dict):
         raise FormatError("assembly.json: needs a list 'order' and an object 'paths'")
-    names = set(movement.all_parts())
+    names = set(movement.all_parts(keyless=True))     # keyless parts only once attach_keyless() has read them
     order = []
     for n in doc["order"]:
         if n in names and n not in order:

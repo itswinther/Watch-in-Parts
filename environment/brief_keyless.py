@@ -62,6 +62,19 @@ def work_order_rows():
     return "| Winding stem | series VM-DS-401 (`DS-401_crown_stem.md`), with its travel to the setting position |\n"
 
 
+def part4_text():
+    """QA-W100 Part 4: the keyless section's parts are assembled like every other part (A's request 21:20, agreed
+    by B)."""
+    return ("The parts of `movement.json` include every part of its `keyless` section (Part 5), the stem's parts "
+            "among them: each is put in, tested and counted below exactly as any other part, and one left out of "
+            "`order` stands in its assembled position from the start.")
+
+
+def format_assembly_text():
+    return ("The part names of `movement.json` include those of its `keyless` section; they are put in like every "
+            "other part.")
+
+
 def format_mobile_line():
     return '    "mobile_name": {"axis": [x, y], "parts": ["part_name", ...], "friction_on": "mobile_name"},\n'
 

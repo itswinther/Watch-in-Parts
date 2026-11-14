@@ -21,6 +21,7 @@ Quick cases for crown winding (Part 5's format, geometry/keyless_job.py; graded 
   keyless_format  a `keyless` section loads and its parts are read; a part used twice (keyless and a mobile, keyless
                   and fixed, twice in keyless) is a format error; the section's own rules; no section: as before
   friction_on     a friction_on mobile turns at its carrier's speed; bad carriers are format errors; P5's split
+  keyless_assembly with P5 on, the keyless parts are parts of Part 4 (checks, replay, standing in place)
   keyless_switch  the P5 row follows KEYLESS_IN_JOB; the scaled table agrees with A's files"""
 import json
 import os
@@ -270,6 +271,37 @@ def case_friction_on(job, tmp):
     return "cannon turns at %s like centre; free bodies %s; errors: %s" % (sp["cannon"], free, msgs)
 
 
+def case_keyless_assembly(job, tmp):
+    """With Part 5 graded, the keyless section's parts are parts of movement.json for Part 4: they are in P4's
+    checks, in the replay (a part in `order` is replayed, one left out stands in place) and in the bounding box.
+    KEYLESS_IN_JOB is set True for this case only. Without it, P4's parts are those of the reference."""
+    from geometry import watch as W
+    from geometry import keyless_job as KJ
+    folder = _keyless_folder(job, tmp, "keyless_asm")
+    far = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 500.0], [0, 0, 0, 1]]
+    eye = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
+    with open(os.path.join(folder, G.JOB_ASSEMBLY), "w") as f:
+        json.dump({"order": ["k_stem"], "paths": {"k_stem": [far, eye]}}, f)
+    m = W.load_movement(folder, cache=CACHE)
+    old = KJ.KEYLESS_IN_JOB
+    try:
+        KJ.KEYLESS_IN_JOB = True
+        gates, checks, det = G._job_assembly(folder, m, G._run)
+    finally:
+        KJ.KEYLESS_IN_JOB = old
+    assert gates == {"files": True, "plan": True}, (gates, det.get("plan"))
+    assert set(m.keyless_names) <= set(checks) and len(checks) == len(m.all_parts()) + len(m.keyless_names), checks
+    res = det["parts"]
+    assert res["k_stem"]["format_messages"] and "moves" in res["k_stem"]["format_messages"][0], res["k_stem"]
+    assert all(res[n].get("not_in_order") for n in ("k_ratchet", "k_wheel", "k_slide")), {n: res[n] for n in m.keyless_names}
+    assert not any(checks[n] for n in m.keyless_names)
+    m2 = W.load_movement(folder, cache=CACHE)          # P5 off: no keyless part in Part 4
+    _, checks2, _ = G._job_assembly(folder, m2, G._run) if not old else (None, {}, None)
+    assert old or not set(m2.keyless_names) & set(checks2), checks2
+    return "P4 with P5 on: %d checks (%d keyless); k_stem replayed: %s; the other keyless parts stand in place" % (
+        len(checks), len(m.keyless_names), res["k_stem"]["format_messages"][0])
+
+
 def case_keyless_switch(job, tmp):
     """KEYLESS_IN_JOB is False on this branch: no P5 row; the scaled table agrees with A's files."""
     from geometry import keyless_job as KJ
@@ -361,7 +393,7 @@ def case_f(job, tmp):
 
 QUICK = [("a", case_a), ("frame_gate", case_frame_gate), ("day_gate", case_day_gate), ("cache", case_cache), ("deadline", case_deadline),
          ("reward_formula", case_reward_formula), ("keyless_format", case_keyless_format), ("friction_on", case_friction_on),
-         ("keyless_switch", case_keyless_switch)]
+         ("keyless_assembly", case_keyless_assembly), ("keyless_switch", case_keyless_switch)]
 SLOW = [("b", case_b), ("c", case_c), ("d", case_d), ("e", case_e), ("f", case_f)]
 
 
