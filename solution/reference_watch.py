@@ -40,6 +40,7 @@ M_E, M_F = 0.25, 0.2                                     # motion work
 M_DAY = 0.16                                             # day pair: idler pinion 10 -> day wheel 40
 DAY_TEETH = (10, 40)
 DAY_CD = M_DAY * sum(DAY_TEETH) / 2.0                    # 4.0
+Z_DAY = (6.2, 7.2)        # the day pair is 1.0 thick (layer E lowered by 0.2) for a larger drive overlap
 FIT = 0.005               # radial clearance of every bore on its shaft
 SPOKE = dict(rim=0.5, spokes=5, width=0.6, fillet=0.15)  # crossed-out wheels
 Z = {"A": (0.1, 0.9), "B": (1.4, 2.2), "C": (2.6, 3.4), "D": (3.8, 4.6), "E": (6.4, 7.2), "F": (7.6, 8.4)}
@@ -169,10 +170,10 @@ def frame(P, with_day):
     (cx, cy), R_PLATE, spots = P["case"]
     lo, hi = PLATE[1] + 0.1, BRIDGE[0] - 0.1
     BAR = 1.0
-    pb = [(0.0, 0.0, 1.3)] + [(a[0], a[1], 1.0) for a in (I, T, C, S)] + [(x, y, 1.2) for x, y in spots]
+    pb = [(0.0, 0.0, 1.3)] + [(a[0], a[1], 1.0) for a in (I, T, C, S)] + [(x, y, 0.85) for x, y in spots]
     plate = union([GC.skeleton(PLATE[0], PLATE[1], pb, BAR)[0]] + [cyl(x, y, PLATE[1] - 0.1, BRIDGE[0], 0.75) for x, y in spots])
-    bb = [(a[0], a[1], 1.0) for a in (I, T, Mw)] + [(C[0], C[1], 1.4), (S[0], S[1], 1.2)] + [(x, y, 1.2) for x, y in spots]
-    db = [(Mw[0], Mw[1], 1.0), (C[0], C[1], 1.8), (S[0], S[1], 1.2)] + [(x, y, 1.2) for x, y in spots]
+    bb = [(a[0], a[1], 1.0) for a in (I, T, Mw)] + [(C[0], C[1], 1.4), (S[0], S[1], 1.2)] + [(x, y, 0.85) for x, y in spots]
+    db = [(Mw[0], Mw[1], 1.0), (C[0], C[1], 1.8), (S[0], S[1], 1.2)] + [(x, y, 0.85) for x, y in spots]
     if with_day:
         bb += [(Id[0], Id[1], 1.0), (D[0], D[1], 1.0)]
         db += [(Id[0], Id[1], 1.0), (D[0], D[1], 1.2)]
@@ -268,9 +269,9 @@ def build_stage2(doc, parts, P, phase):
     parts = dict(parts)
     C, Id, D = P["centre"], P["day_idler"], P["day"]
     ga, _ = gear_at(Id, 24, M_F, Z["F"], ang(Id, C), (48, phase["hour"]))
-    gb, ph_gb = gear_at(Id, DAY_TEETH[0], M_DAY, Z["E"], ang(Id, D))
+    gb, ph_gb = gear_at(Id, DAY_TEETH[0], M_DAY, Z_DAY, ang(Id, D))
     parts["day_idler"] = union([arbor(Id, BRIDGE[1] + 0.1, DIAL[0] - 0.1, top=0.4), ga, gb])
-    dw, _ = gear_at(D, DAY_TEETH[1], M_DAY, Z["E"], ang(D, Id), (DAY_TEETH[0], ph_gb))
+    dw, _ = gear_at(D, DAY_TEETH[1], M_DAY, Z_DAY, ang(D, Id), (DAY_TEETH[0], ph_gb))
     z0, z1 = BRIDGE[1] + 0.1, DIAL[0] - 0.1
     parts["day"] = hand_arbor(D, z0, z1, dw)
     parts["day_hand"] = hand(D, 9.9, 10.2, 3.2, 0.9, 0.3 + FIT)
