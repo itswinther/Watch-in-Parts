@@ -200,7 +200,7 @@ def grade_design(folder, stage=1, prev=None, skip=()):
         fixed, mobile = m.volumes()
         return fixed <= W.FIXED_VOLUME_MAX and mobile <= W.MOBILE_VOLUME_MAX, {"fixed_volume": fixed, "mobile_volume": mobile}
 
-    table = {"light": light, "printable": printable,"day_hand": day_hand, "day_place": day_place, "spin": spin, "held": held, "train": train, "clear": clear, "minute": hand("minute"), "hour": hand("hour"),
+    table = {"light": light, "printable": printable, "day_hand": day_hand, "day_place": day_place, "spin": spin, "held": held, "train": train, "clear": clear, "minute": hand("minute"), "hour": hand("hour"),
              "seconds": hand("seconds"), "coaxial": coaxial, "hands": hands, "size": size}
     for k in weights:
         checks[k], details[k] = _run(table[k])
