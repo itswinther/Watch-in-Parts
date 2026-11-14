@@ -156,6 +156,14 @@ Each passes or fails. Weights in brackets; the total is 17.
   - at every eighth step, turning the driver a further quarter of its tooth
     pitch (90 / driver teeth degrees, counter-clockwise) while the driven mobile
     is held makes them intersect by more than 0.01 mm3 (the teeth really drive).
+- **The train runs with its arbors slightly out of place [2].** Arbors are never
+  exactly where they were drawn. Every declared mesh must also pass the test of
+  "The train runs" twice more: with the driven mobile moved 0.03 straight away
+  from the driver's axis, and with it moved 0.03 straight towards the driver's
+  axis (in both cases it turns about its moved axis). In both positions the same
+  three conditions must hold, with the same steps and the same turning angles as
+  in the drawn position. This requirement does not change which meshes drive the
+  hands: that is decided in the drawn position only.
 - **Nothing else collides [1].** Every pair of mobiles that does not mesh is
   turned together at the speeds the tooth counts give (a mobile that is not
   driven stands still): 144 equal steps covering one full turn of the faster of
