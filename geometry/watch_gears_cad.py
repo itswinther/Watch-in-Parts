@@ -93,3 +93,57 @@ def _one_solid(shape):
 def export(path, solid):
     from .core import write_step
     write_step(path, solid)
+
+
+def _vertical_edges(solid):
+    return cq.Workplane().add(solid).edges("|Z").vals()
+
+
+def spoke_cutters(x, y, z0, z1, hub_r, rim_r, spokes, width, phase_deg=0.0, fillet=0.15):
+    """The pockets between `spokes` straight spokes of `width` from a hub of radius hub_r to a rim whose inside
+    radius is rim_r, as separate solids reaching 0.5 beyond z0..z1. Their vertical edges are rounded by
+    `fillet`, so the wheel's inside corners are rounded."""
+    ann = cyl(x, y, z0 - 0.5, z1 + 0.5, rim_r).cut(cyl(x, y, z0 - 1, z1 + 1, hub_r))
+    bars = []
+    for k in range(spokes):
+        b = cq.Solid.makeBox(rim_r + 1.0, width, z1 - z0 + 3.0, cq.Vector(x, y - width / 2.0, z0 - 1.5))
+        bars.append(b.rotate(cq.Vector(x, y, 0), cq.Vector(x, y, 1), phase_deg + 360.0 * k / spokes))
+    out = []
+    for p in ann.cut(*bars).Solids():
+        if fillet:
+            try:
+                p = p.fillet(fillet, _vertical_edges(p))
+            except Exception:
+                pass
+        out.append(p)
+    return out
+
+
+def spoked_gear(teeth, module, z0, z1, phase_deg=0.0, x=0.0, y=0.0, hub_r=1.3, rim=0.5, spokes=5, width=0.6,
+                fillet=0.15, **kw):
+    """gear() with the web cut away to a rim (`rim` mm inside the root circle), `spokes` spokes and a hub."""
+    g = gear(teeth, module, z0, z1, phase_deg=phase_deg, x=x, y=y, **kw)
+    rf = module * teeth / 2.0 - kw.get("dedendum", 1.25) * module
+    rim_r = rf - rim
+    if rim_r - hub_r < 0.8:
+        return g
+    return cut(g, *spoke_cutters(x, y, z0, z1, hub_r, rim_r, spokes, width, phase_deg, fillet))
+
+
+def skeleton(z0, z1, bosses, bar_width):
+    """A frame plate: a disc for each boss (x, y, r) joined by straight bars of bar_width along a minimum
+    spanning tree of the boss centres; one solid from z0 to z1."""
+    n = len(bosses)
+    d = lambda i, j: math.hypot(bosses[i][0] - bosses[j][0], bosses[i][1] - bosses[j][1])
+    inside, edges = {0}, []
+    while len(inside) < n:
+        i, j = min(((i, j) for i in inside for j in range(n) if j not in inside), key=lambda e: d(*e))
+        edges.append((i, j))
+        inside.add(j)
+    parts = [cyl(x, y, z0, z1, r) for x, y, r in bosses]
+    for i, j in edges:
+        (xa, ya, _), (xb, yb, _) = bosses[i], bosses[j]
+        L = d(i, j)
+        b = cq.Solid.makeBox(L, bar_width, z1 - z0, cq.Vector(xa, ya - bar_width / 2.0, z0))
+        parts.append(b.rotate(cq.Vector(xa, ya, 0), cq.Vector(xa, ya, 1), math.degrees(math.atan2(yb - ya, xb - xa))))
+    return union(parts), edges

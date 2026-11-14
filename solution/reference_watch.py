@@ -37,7 +37,11 @@ def minus(a, b):
 
 M_A, M_B, M_C, M_D = 0.2, 0.25, 21.6 / 102, 0.2        # modules of the four train layers
 M_E, M_F = 0.25, 0.2                                     # motion work
-M_DAY = 0.12
+M_DAY = 0.16                                             # day pair: idler pinion 10 -> day wheel 40
+DAY_TEETH = (10, 40)
+DAY_CD = M_DAY * sum(DAY_TEETH) / 2.0                    # 4.0
+FIT = 0.005               # radial clearance of every bore on its shaft
+SPOKE = dict(rim=0.5, spokes=5, width=0.6, fillet=0.15)  # crossed-out wheels
 Z = {"A": (0.1, 0.9), "B": (1.4, 2.2), "C": (2.6, 3.4), "D": (3.8, 4.6), "E": (6.4, 7.2), "F": (7.6, 8.4)}
 PLATE, BRIDGE, DIAL = (-1.7, -0.3), (5.0, 6.0), (8.8, 9.6)
 PLATE_MARGIN = 0.1        # plate rim beyond the farthest swept wheel or hand
@@ -70,8 +74,25 @@ def place(seed=1):
         D = on(Id, 3.6, rnd.uniform(0, 2 * math.pi))                      # stage 2: day wheel
         if dist(D, C) < 9.6 or dist(D, Mw) < 8.2 or dist(D, S) < 8.8 or dist(D, C) > 12.5:
             continue
-        return {"barrel": B, "third": I, "centre": C, "fourth": T, "seconds": S, "minute_wheel": Mw, "day_idler": Id, "day": D}
+        P = {"barrel": B, "third": I, "centre": C, "fourth": T, "seconds": S, "minute_wheel": Mw, "day_idler": Id, "day": D}
+        P["day"] = place_day(P)
+        return P
     raise RuntimeError("no placement found")
+
+
+def place_day(P):
+    """The day wheel on a circle of DAY_CD round the day idler, clear of the centre, minute wheel and seconds
+    (wheel radius 3.36), as close to the centre axis as those clearances allow."""
+    C, Mw, S, Id = P["centre"], P["minute_wheel"], P["seconds"], P["day_idler"]
+    best = None
+    for k in range(720):
+        D = on(Id, DAY_CD, math.radians(k / 2.0))
+        if 9.6 <= dist(D, C) <= 12.5 and dist(D, Mw) >= 8.6 and dist(D, S) >= 8.8:
+            if best is None or dist(D, C) < dist(best, C):
+                best = D
+    if best is None:
+        raise RuntimeError("no place for the day wheel")
+    return (round(best[0], 4), round(best[1], 4))
 
 
 def gear_at(axis, teeth, module, z, toward, partner=None):
@@ -94,15 +115,24 @@ def arbor(axis, z0, z1, r=0.5, pivot=0.3, plen=0.7, top=None):
     return union([cyl(x, y, z0, z1, r), cyl(x, y, z0 - plen, z0 + 0.01, pivot), cyl(x, y, z1 - 0.01, z1 + top, pivot)])
 
 
-def hand(axis, z0, z1, length, hub_r, hole_r):
+def hand(axis, z0, z1, length, hub_r, bore_r):
+    """A hand with a bore of bore_r (its shaft's radius plus FIT): it slides down onto a stepped shaft."""
     x, y = axis
     h = union([cyl(x, y, z0, z1, hub_r), box((x, y - 0.3, z0), (x + length, y + 0.3, z1))])
-    return minus(h, cyl(x, y, z0 - 1, z1 + 1, hole_r)) if hole_r else h
+    return minus(h, cyl(x, y, z0 - 1, z1 + 1, bore_r))
+
+
+def wheel_at(axis, teeth, module, z, toward, partner=None, hub_r=1.3):
+    """gear_at, crossed out to a rim, five spokes and a hub of hub_r."""
+    g, phase = gear_at(axis, teeth, module, z, toward, partner)
+    pocket = GC.spoke_cutters(axis[0], axis[1], z[0], z[1], hub_r, module * teeth / 2.0 - 1.25 * module - SPOKE["rim"],
+                              SPOKE["spokes"], SPOKE["width"], phase, SPOKE["fillet"])
+    return minus(g, pocket), phase
 
 
 # swept radius of each mobile of the largest stage, below the dial (wheels) and with the hands
 SWEEP = {"barrel": (9.8, 9.8), "third": (7.75, 7.75), "centre": (9.75, 9.75), "fourth": (9.8, 9.8), "seconds": (1.4, 5.01),
-         "minute_wheel": (4.75, 4.75), "hour_wheel": (5.0, 6.01), "day_idler": (2.6, 2.6), "day": (3.0, 3.22)}
+         "minute_wheel": (4.75, 4.75), "hour_wheel": (5.0, 6.01), "day_idler": (2.6, 2.6), "day": (3.36, 3.36)}
 
 
 def case_geometry(P):
@@ -134,21 +164,45 @@ def case_geometry(P):
 
 
 def frame(P, with_day):
+    """Plate, bridge and dial cut down to skeletons: a boss round every hole and pillar, joined by bars."""
     C, I, T, S, Mw, Id, D = (P[k] for k in ("centre", "third", "fourth", "seconds", "minute_wheel", "day_idler", "day"))
     (cx, cy), R_PLATE, spots = P["case"]
     lo, hi = PLATE[1] + 0.1, BRIDGE[0] - 0.1
-    plate = union([cyl(cx, cy, PLATE[0], PLATE[1], R_PLATE, 96)] + [cyl(x, y, PLATE[1] - 0.1, BRIDGE[0], 0.75) for x, y in spots])
-    bridge = union([cyl(cx, cy, BRIDGE[0], BRIDGE[1], R_PLATE, 96)] + [cyl(x, y, BRIDGE[1] - 0.1, DIAL[0], 0.75) for x, y in spots])
-    dial = cyl(cx, cy, DIAL[0], DIAL[1], R_PLATE, 96)
+    BAR = 1.0
+    pb = [(0.0, 0.0, 1.3)] + [(a[0], a[1], 1.0) for a in (I, T, C, S)] + [(x, y, 1.2) for x, y in spots]
+    plate = union([GC.skeleton(PLATE[0], PLATE[1], pb, BAR)[0]] + [cyl(x, y, PLATE[1] - 0.1, BRIDGE[0], 0.75) for x, y in spots])
+    bb = [(a[0], a[1], 1.0) for a in (I, T, Mw)] + [(C[0], C[1], 1.4), (S[0], S[1], 1.2)] + [(x, y, 1.2) for x, y in spots]
+    db = [(Mw[0], Mw[1], 1.0), (C[0], C[1], 1.8), (S[0], S[1], 1.2)] + [(x, y, 1.2) for x, y in spots]
+    if with_day:
+        bb += [(Id[0], Id[1], 1.0), (D[0], D[1], 1.0)]
+        db += [(Id[0], Id[1], 1.0), (D[0], D[1], 1.2)]
+    bridge = union([GC.skeleton(BRIDGE[0], BRIDGE[1], bb, BAR)[0]] + [cyl(x, y, BRIDGE[1] - 0.1, DIAL[0], 0.75) for x, y in spots])
+    dial = GC.skeleton(DIAL[0], DIAL[1], db, BAR)[0]
     ph = [cyl(0, 0, -1.1, PLATE[1] + 1, 0.6)] + [cyl(a[0], a[1], lo - 0.8, PLATE[1] + 1, 0.4) for a in (I, T, C, S)]
-    bh = [cyl(a[0], a[1], BRIDGE[0] - 1, hi + 0.8, 0.4) for a in (I, T)] + [cyl(a[0], a[1], BRIDGE[0] - 1, BRIDGE[1] + 1, 0.6) for a in (C, S)]
+    bh = [cyl(a[0], a[1], BRIDGE[0] - 1, hi + 0.8, 0.4) for a in (I, T)] + [cyl(C[0], C[1], BRIDGE[0] - 1, BRIDGE[1] + 1, 0.7),
+                                                                          cyl(S[0], S[1], BRIDGE[0] - 1, BRIDGE[1] + 1, 0.6)]
     bh += [cyl(Mw[0], Mw[1], BRIDGE[1] - 0.7, BRIDGE[1] + 1, 0.4)]
     dh = [cyl(Mw[0], Mw[1], DIAL[0] - 1, DIAL[0] + 0.45, 0.4), cyl(C[0], C[1], DIAL[0] - 1, DIAL[1] + 1, 1.15), cyl(S[0], S[1], DIAL[0] - 1, DIAL[1] + 1, 0.6)]
     if with_day:
         bh += [cyl(a[0], a[1], BRIDGE[1] - 0.7, BRIDGE[1] + 1, 0.4) for a in (Id, D)]
         dh += [cyl(Id[0], Id[1], DIAL[0] - 1, DIAL[0] + 0.45, 0.4), cyl(D[0], D[1], DIAL[0] - 1, DIAL[1] + 1, 0.6)]
     return {"main_plate": minus(plate, ph), "bridge": minus(bridge, bh), "dial": minus(dial, dh),
-            "barrel_cock": minus(cyl(0, 0, 1.15, 2.45, 3.0), cyl(0, 0, 1.0, 1.7, 0.6))}
+            "barrel_cock": minus(cyl(0, 0, 1.15, 2.45, 1.6), cyl(0, 0, 1.0, 1.7, 0.6))}
+
+
+def centre_arbor(C, lo, hi, pinion, wheel):
+    """Centre arbor, stepped so the cannon (on the 0.6 -> 0.5 step at 6.4) and the minute hand (on the
+    0.5 -> 0.35 step at 10.7) slide down onto it."""
+    cx, cy = C
+    return union([cyl(cx, cy, lo, hi, 0.8), cyl(cx, cy, lo - 0.7, lo + 0.01, 0.3), cyl(cx, cy, hi - 0.01, 6.4, 0.6),
+                  cyl(cx, cy, 6.39, 10.7, 0.5), cyl(cx, cy, 10.69, 11.4, 0.35), pinion, wheel])
+
+
+def hand_arbor(A, z0, z1, gear_solid):
+    """Seconds or day arbor: shaft 0.8, top 0.5, and a 0.3 tip for the hand from 9.9 to 10.3."""
+    x, y = A
+    return union([cyl(x, y, z0, z1, 0.8), cyl(x, y, z0 - 0.7, z0 + 0.01, 0.3), cyl(x, y, z1 - 0.01, 9.9, 0.5),
+                  cyl(x, y, 9.89, 10.3, 0.3), gear_solid])
 
 
 def build_stage1():
@@ -160,25 +214,27 @@ def build_stage1():
     sx, sy = S
     parts, phase = {}, {}
     p1, _ = gear_at(I, 24, M_A, Z["A"], ang(I, B), (96, 0.0))
-    w1, ph_w1 = gear_at(I, 60, M_B, Z["B"], ang(I, C))
+    w1, ph_w1 = wheel_at(I, 60, M_B, Z["B"], ang(I, C))
     parts["third"] = union([arbor(I, lo, hi), p1, w1])
     p2, _ = gear_at(C, 30, M_B, Z["B"], ang(C, I), (60, ph_w1))
-    w2, ph_w2 = gear_at(C, 90, M_C, Z["C"], ang(C, T))
-    parts["centre"] = union([cyl(cx, cy, lo, hi, 0.8), cyl(cx, cy, lo - 0.7, lo + 0.01, 0.3), cyl(cx, cy, hi - 0.01, 11.4, 0.5), p2, w2])
-    parts["cannon"], ph_can = gear_at(C, 12, M_E, Z["E"], ang(C, Mw))
+    w2, ph_w2 = wheel_at(C, 90, M_C, Z["C"], ang(C, T), hub_r=1.6)
+    parts["centre"] = centre_arbor(C, lo, hi, p2, w2)
+    can, ph_can = gear_at(C, 12, M_E, Z["E"], ang(C, Mw))
+    parts["cannon"] = minus(can, cyl(cx, cy, Z["E"][0] - 1, Z["E"][1] + 1, 0.5 + FIT))
     p3, _ = gear_at(T, 12, M_C, Z["C"], ang(T, C), (90, ph_w2))
-    w3, ph_w3 = gear_at(T, 96, M_D, Z["D"], ang(T, S))
+    w3, ph_w3 = wheel_at(T, 96, M_D, Z["D"], ang(T, S))
     parts["fourth"] = union([arbor(T, lo, hi), p3, w3])
     p4, _ = gear_at(S, 12, M_D, Z["D"], ang(S, T), (96, ph_w3))
-    parts["seconds"] = union([cyl(sx, sy, lo, hi, 0.8), cyl(sx, sy, lo - 0.7, lo + 0.01, 0.3), cyl(sx, sy, hi - 0.01, 10.3, 0.5), p4])
-    w5, _ = gear_at(Mw, 36, M_E, Z["E"], ang(Mw, C), (12, ph_can))
+    parts["seconds"] = hand_arbor(S, lo, hi, p4)
+    w5, _ = wheel_at(Mw, 36, M_E, Z["E"], ang(Mw, C), (12, ph_can))
     p5, ph_p5 = gear_at(Mw, 12, M_F, Z["F"], ang(Mw, C))
     parts["minute_wheel"] = union([arbor(Mw, BRIDGE[1] + 0.1, DIAL[0] - 0.1, top=0.4), w5, p5])
-    w6, phase["hour"] = gear_at(C, 48, M_F, Z["F"], ang(C, Mw), (12, ph_p5))
-    parts["hour_wheel"] = minus(union([cyl(cx, cy, 7.4, 10.3, 1.0), cyl(cx, cy, 8.4, 8.65, 1.6), w6]), cyl(cx, cy, 7.0, 10.6, 0.7))
-    parts["hour_hand"] = hand(C, 9.9, 10.2, 6.0, 1.3, 0.85)
-    parts["minute_hand"] = hand(C, 10.7, 11.0, 9.0, 1.0, 0.0)
-    parts["seconds_hand"] = hand(S, 9.9, 10.2, 5.0, 0.9, 0.0)
+    w6, phase["hour"] = wheel_at(C, 48, M_F, Z["F"], ang(C, Mw), (12, ph_p5), hub_r=1.6)
+    parts["hour_wheel"] = minus(union([cyl(cx, cy, 7.4, 9.9, 1.0), cyl(cx, cy, 9.89, 10.3, 0.9), cyl(cx, cy, 8.4, 8.65, 1.6), w6]),
+                                cyl(cx, cy, 7.0, 10.6, 0.6))
+    parts["hour_hand"] = hand(C, 9.9, 10.2, 6.0, 1.3, 0.9 + FIT)
+    parts["minute_hand"] = hand(C, 10.7, 11.0, 9.0, 1.0, 0.35 + FIT)
+    parts["seconds_hand"] = hand(S, 9.9, 10.2, 5.0, 0.9, 0.3 + FIT)
     parts.update(frame(P, with_day=False))
     doc = {
         "case_centre": list(P["case"][0]),
@@ -212,18 +268,17 @@ def build_stage2(doc, parts, P, phase):
     parts = dict(parts)
     C, Id, D = P["centre"], P["day_idler"], P["day"]
     ga, _ = gear_at(Id, 24, M_F, Z["F"], ang(Id, C), (48, phase["hour"]))
-    gb, ph_gb = gear_at(Id, 12, M_DAY, Z["E"], ang(Id, D))
+    gb, ph_gb = gear_at(Id, DAY_TEETH[0], M_DAY, Z["E"], ang(Id, D))
     parts["day_idler"] = union([arbor(Id, BRIDGE[1] + 0.1, DIAL[0] - 0.1, top=0.4), ga, gb])
-    dw, _ = gear_at(D, 48, M_DAY, Z["E"], ang(D, Id), (12, ph_gb))
-    dx, dy = D
+    dw, _ = gear_at(D, DAY_TEETH[1], M_DAY, Z["E"], ang(D, Id), (DAY_TEETH[0], ph_gb))
     z0, z1 = BRIDGE[1] + 0.1, DIAL[0] - 0.1
-    parts["day"] = union([cyl(dx, dy, z0, z1, 0.8), cyl(dx, dy, z0 - 0.7, z0 + 0.01, 0.3), cyl(dx, dy, z1 - 0.01, 10.3, 0.5), dw])
-    parts["day_hand"] = hand(D, 9.9, 10.2, 3.2, 0.9, 0.0)
+    parts["day"] = hand_arbor(D, z0, z1, dw)
+    parts["day_hand"] = hand(D, 9.9, 10.2, 3.2, 0.9, 0.3 + FIT)
     parts.update(frame(P, with_day=True))
     doc["mobiles"]["day_idler"] = {"axis": list(Id), "parts": ["day_idler"]}
     doc["mobiles"]["day"] = {"axis": list(D), "parts": ["day", "day_hand"]}
     doc["meshes"] += [{"driver": "hour_wheel", "driver_teeth": 48, "driven": "day_idler", "driven_teeth": 24},
-                      {"driver": "day_idler", "driver_teeth": 12, "driven": "day", "driven_teeth": 48}]
+                      {"driver": "day_idler", "driver_teeth": DAY_TEETH[0], "driven": "day", "driven_teeth": DAY_TEETH[1]}]
     doc["hands"]["day"] = {"mobile": "day", "part": "day_hand"}
     return doc, parts
 
@@ -237,11 +292,11 @@ def build_stage3(doc, parts, P):
     lo, hi = PLATE[1] + 0.1, BRIDGE[0] - 0.1
     cx, cy = C
     p1, _ = gear_at(I, 24, M_A, Z["A"], ang(I, B), (96, 0.0))
-    w1, ph_w1 = gear_at(I, 54, M_B, Z["B"], ang(I, C))
+    w1, ph_w1 = wheel_at(I, 54, M_B, Z["B"], ang(I, C))
     parts["third_54"] = union([arbor(I, lo, hi), p1, w1])
     p2, _ = gear_at(C, 36, M_B, Z["B"], ang(C, I), (54, ph_w1))
-    w2, _ = gear_at(C, 90, M_C, Z["C"], ang(C, T))
-    parts["centre_36"] = union([cyl(cx, cy, lo, hi, 0.8), cyl(cx, cy, lo - 0.7, lo + 0.01, 0.3), cyl(cx, cy, hi - 0.01, 11.4, 0.5), p2, w2])
+    w2, _ = wheel_at(C, 90, M_C, Z["C"], ang(C, T), hub_r=1.6)
+    parts["centre_36"] = centre_arbor(C, lo, hi, p2, w2)
     doc["mobiles"]["third"]["parts"] = ["third_54"]
     doc["mobiles"]["centre"]["parts"] = ["centre_36" if n == "centre" else n for n in doc["mobiles"]["centre"]["parts"]]
     for e in doc["meshes"]:
