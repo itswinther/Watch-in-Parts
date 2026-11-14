@@ -53,7 +53,8 @@ def fill_check_format():
     s = s.replace("__NAME_RE__", W.NAME_RE.pattern)
     for k in ("MAX_PARTS", "MAX_TRIANGLES", "MAX_STEP_BYTES", "STEP_LINEAR_DEFLECTION", "STEP_ANGULAR_DEFLECTION",
               "STEP_MAX_TRIANGLE_FACES", "STEP_TIMEOUT_S", "STEP_MEMORY_MB", "SELF_UNION_TOL", "MAX_SCRIPTS_BYTES",
-              "MAX_SCRIPT_FILES", "MAX_JSON_BYTES", "MAX_ASSEMBLY_BYTES", "MIN_TEETH", "MAX_TEETH", "MAX_NAME_LEN"):
+              "MAX_SCRIPT_FILES", "MAX_JSON_BYTES", "MAX_ASSEMBLY_BYTES", "MIN_TEETH", "MAX_TEETH", "MAX_NAME_LEN",
+              "MATERIAL_DESIGNATIONS"):
         s = s.replace("__%s__" % k, repr(getattr(W, k)))
     if "{1,%d}" % W.MAX_NAME_LEN not in W.NAME_RE.pattern:
         raise SystemExit("NAME_RE and MAX_NAME_LEN disagree")
