@@ -1,6 +1,6 @@
 # SPEC.md
 
-Version: 0.4 (2026-11-14).
+Version: 0.5 (2026-11-14): the staged watch with B's light, seated and tolerant checks and the seven exploit fixes of HANDOFF_EXPLOITS.md (see Decisions in SESSION.md).
 
 **The task under test is the staged mechanical watch gear train.** Its
 specification, exactly as the agent sees it, is `environment/public/SPEC_WATCH.md`
