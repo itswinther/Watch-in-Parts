@@ -1,0 +1,201 @@
+{
+ "reward": 1.0,
+ "p": 1.0,
+ "gates": {
+  "files": true,
+  "assembled": true
+ },
+ "checks": {
+  "spin": true,
+  "held": true,
+  "train": true,
+  "clear": true,
+  "minute": true,
+  "hour": true,
+  "seconds": true,
+  "coaxial": true,
+  "hands": true,
+  "size": true
+ },
+ "details": {
+  "files": {},
+  "assembled": {
+   "worst_volume": 0.0,
+   "pair": null
+  },
+  "spin": {
+   "barrel": {
+    "worst_volume": 0.0,
+    "step": 0,
+    "steps": 72
+   },
+   "idler": {
+    "worst_volume": 0.0,
+    "step": 0,
+    "steps": 72
+   },
+   "minute": {
+    "worst_volume": 0.0,
+    "step": 0,
+    "steps": 72
+   },
+   "third": {
+    "worst_volume": 0.0,
+    "step": 0,
+    "steps": 72
+   },
+   "seconds": {
+    "worst_volume": 0.0,
+    "step": 0,
+    "steps": 72
+   },
+   "motion": {
+    "worst_volume": 0.0,
+    "step": 0,
+    "steps": 72
+   },
+   "hour": {
+    "worst_volume": 0.0,
+    "step": 0,
+    "steps": 72
+   }
+  },
+  "held": {
+   "barrel": {
+    "+x": 0.5635203927595701,
+    "-x": 0.2737518077611428,
+    "+y": 0.44014030404436477,
+    "-y": 0.44014030404436477,
+    "+z": 3.25209565594393,
+    "-z": 1.2004198566769853
+   },
+   "idler": {
+    "+x": 0.2782814308904795,
+    "-x": 0.3735415608728437,
+    "+y": 0.35501943235190864,
+    "-y": 0.35501943235190864,
+    "+z": 2.449680869495197,
+    "-z": 0.1352479349655164
+   },
+   "minute": {
+    "+x": 1.6363902526780485,
+    "-x": 1.8308985312726005,
+    "+y": 1.7708554118385609,
+    "-y": 1.7661354992433376,
+    "+z": 32.814990563003235,
+    "-z": 5.812124503585687
+   },
+   "third": {
+    "+x": 0.28087977427634975,
+    "-x": 0.2808797962235834,
+    "+y": 0.16754598346649507,
+    "-y": 0.5297387698775066,
+    "+z": 0.38988775030441164,
+    "-z": 31.86923833039307
+   },
+   "seconds": {
+    "+x": 0.8134260478036647,
+    "-x": 0.8134267284007504,
+    "+y": 0.9340359743985729,
+    "-y": 0.7501636539039018,
+    "+z": 0.33316418985714014,
+    "-z": 0.7465253391764882
+   },
+   "motion": {
+    "+x": 0.2889234623513123,
+    "-x": 0.28892349447306725,
+    "+y": 0.47516412860980467,
+    "-y": 0.13164326216479463,
+    "+z": 2.4895554374184927,
+    "-z": 7.962703804608035
+   },
+   "hour": {
+    "+x": 0.9070539904210959,
+    "-x": 0.9070536081239972,
+    "+y": 0.8484153044074842,
+    "-y": 1.018335552978532,
+    "+z": 8.90865242864519,
+    "-z": 2.5563570736574
+   }
+  },
+  "train": {
+   "conflicts": [],
+   "meshes": [
+    {
+     "worst_volume": 0.0,
+     "step": 0,
+     "steps": 768,
+     "largest_gap": 0.018248115674557103,
+     "smallest_drive_overlap": 0.08737738320524843,
+     "pair": "barrel/idler"
+    },
+    {
+     "worst_volume": 0.0,
+     "step": 0,
+     "steps": 160,
+     "largest_gap": 0.009635158915381014,
+     "smallest_drive_overlap": 0.056299535818433805,
+     "pair": "idler/minute"
+    },
+    {
+     "worst_volume": 0.0,
+     "step": 0,
+     "steps": 768,
+     "largest_gap": 0.009249558754135015,
+     "smallest_drive_overlap": 0.033927837962258824,
+     "pair": "minute/third"
+    },
+    {
+     "worst_volume": 0.0,
+     "step": 0,
+     "steps": 720,
+     "largest_gap": 0.009257504277341868,
+     "smallest_drive_overlap": 0.037354299873862476,
+     "pair": "third/seconds"
+    },
+    {
+     "worst_volume": 0.0,
+     "step": 0,
+     "steps": 288,
+     "largest_gap": 0.009302358074129683,
+     "smallest_drive_overlap": 0.05716992674157879,
+     "pair": "minute/motion"
+    },
+    {
+     "worst_volume": 0.0,
+     "step": 0,
+     "steps": 384,
+     "largest_gap": 0.009274497901562173,
+     "smallest_drive_overlap": 0.0366875113499008,
+     "pair": "motion/hour"
+    }
+   ]
+  },
+  "clear": {
+   "worst_volume": 0.0,
+   "pair": null
+  },
+  "minute": {
+   "clockwise_turns_per_hour": "1"
+  },
+  "hour": {
+   "clockwise_turns_per_hour": "1/12"
+  },
+  "seconds": {
+   "clockwise_turns_per_hour": "60"
+  },
+  "coaxial": {
+   "distance": 0.0
+  },
+  "hands": {
+   "hour": 5.999000072479251,
+   "minute": 8.498999595642092,
+   "seconds": 9.199000358581545
+  },
+  "size": {
+   "radius": 19.381745994361616,
+   "z_min": -2.4000000953674316,
+   "z_max": 7.300000190734863
+  }
+ }
+}

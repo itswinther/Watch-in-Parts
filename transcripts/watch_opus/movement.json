@@ -1,0 +1,120 @@
+{
+ "case_centre": [
+  2.6268,
+  7.9716
+ ],
+ "fixed": [
+  "frame"
+ ],
+ "mobiles": {
+  "second": {
+   "axis": [
+    10.8,
+    0.0
+   ],
+   "parts": [
+    "s_body"
+   ]
+  },
+  "third": {
+   "axis": [
+    5.086398731647174,
+    17.687270285497906
+   ],
+   "parts": [
+    "t_body"
+   ]
+  },
+  "minutewheel": {
+   "axis": [
+    11.56892718922126,
+    14.185624068862865
+   ],
+   "parts": [
+    "m_body"
+   ]
+  },
+  "seconds": {
+   "axis": [
+    8.178742750557216,
+    9.235204948036813
+   ],
+   "parts": [
+    "sec_body",
+    "sec_hand"
+   ]
+  },
+  "minute": {
+   "axis": [
+    8.178742750557216,
+    9.235204948036813
+   ],
+   "parts": [
+    "min_body",
+    "min_hand"
+   ]
+  },
+  "hour": {
+   "axis": [
+    8.178742750557216,
+    9.235204948036813
+   ],
+   "parts": [
+    "hr_body",
+    "hr_hand"
+   ]
+  }
+ },
+ "meshes": [
+  {
+   "driver": "barrel",
+   "driver_teeth": 96,
+   "driven": "second",
+   "driven_teeth": 12
+  },
+  {
+   "driver": "second",
+   "driver_teeth": 48,
+   "driven": "minute",
+   "driven_teeth": 48
+  },
+  {
+   "driver": "minute",
+   "driver_teeth": 90,
+   "driven": "third",
+   "driven_teeth": 12
+  },
+  {
+   "driver": "third",
+   "driver_teeth": 96,
+   "driven": "seconds",
+   "driven_teeth": 12
+  },
+  {
+   "driver": "minute",
+   "driver_teeth": 12,
+   "driven": "minutewheel",
+   "driven_teeth": 36
+  },
+  {
+   "driver": "minutewheel",
+   "driver_teeth": 12,
+   "driven": "hour",
+   "driven_teeth": 48
+  }
+ ],
+ "hands": {
+  "hour": {
+   "mobile": "hour",
+   "part": "hr_hand"
+  },
+  "minute": {
+   "mobile": "minute",
+   "part": "min_hand"
+  },
+  "seconds": {
+   "mobile": "seconds",
+   "part": "sec_hand"
+  }
+ }
+}

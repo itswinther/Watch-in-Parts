@@ -1,0 +1,201 @@
+{
+ "reward": 1.0,
+ "p": 1.0,
+ "gates": {
+  "files": true,
+  "assembled": true
+ },
+ "checks": {
+  "spin": true,
+  "held": true,
+  "train": true,
+  "clear": true,
+  "minute": true,
+  "hour": true,
+  "seconds": true,
+  "coaxial": true,
+  "hands": true,
+  "size": true
+ },
+ "details": {
+  "files": {},
+  "assembled": {
+   "worst_volume": 0.0,
+   "pair": null
+  },
+  "spin": {
+   "barrel": {
+    "worst_volume": 0.0,
+    "step": 0,
+    "steps": 72
+   },
+   "second": {
+    "worst_volume": 0.0,
+    "step": 0,
+    "steps": 72
+   },
+   "third": {
+    "worst_volume": 0.0,
+    "step": 0,
+    "steps": 72
+   },
+   "minutewheel": {
+    "worst_volume": 0.0,
+    "step": 0,
+    "steps": 72
+   },
+   "seconds": {
+    "worst_volume": 0.0,
+    "step": 0,
+    "steps": 72
+   },
+   "minute": {
+    "worst_volume": 0.0,
+    "step": 0,
+    "steps": 72
+   },
+   "hour": {
+    "worst_volume": 0.0,
+    "step": 0,
+    "steps": 72
+   }
+  },
+  "held": {
+   "barrel": {
+    "+x": 0.5376060807404617,
+    "-x": 0.3072886004865489,
+    "+y": 0.43052331133857336,
+    "-y": 0.43052331133857336,
+    "+z": 5.764783771989652,
+    "-z": 57.33131194314299
+   },
+   "second": {
+    "+x": 0.37359070635187086,
+    "-x": 0.7356068662129763,
+    "+y": 0.6899470446950446,
+    "-y": 0.3937539712184284,
+    "+z": 2.7973796135799867,
+    "-z": 3.877990348397384
+   },
+   "third": {
+    "+x": 0.563571120050362,
+    "-x": 0.34899497562739273,
+    "+y": 0.2705193120712663,
+    "-y": 0.6694208239618223,
+    "+z": 3.607734715978966,
+    "-z": 39.85985117276321
+   },
+   "minutewheel": {
+    "+x": 0.1638740723493118,
+    "-x": 0.5147965724227076,
+    "+y": 0.10586067591348909,
+    "-y": 0.4997445600410318,
+    "+z": 2.910255203808375,
+    "-z": 6.675093853656078
+   },
+   "seconds": {
+    "+x": 0.8985064954747551,
+    "-x": 1.0122963038013346,
+    "+y": 1.079218169958608,
+    "-y": 0.8578392296400142,
+    "+z": 0.3789221294865934,
+    "-z": 1.0702318182763473
+   },
+   "minute": {
+    "+x": 1.8047839743429748,
+    "-x": 1.5893820677375254,
+    "+y": 1.694382825121511,
+    "-y": 1.6096690762784691,
+    "+z": 8.030327125894427,
+    "-z": 8.42359315976721
+   },
+   "hour": {
+    "+x": 1.1011834275549452,
+    "-x": 0.9347503406902389,
+    "+y": 1.1014762942230063,
+    "-y": 0.9109765146682466,
+    "+z": 11.057383671484281,
+    "-z": 3.9856075919491043
+   }
+  },
+  "train": {
+   "conflicts": [],
+   "meshes": [
+    {
+     "worst_volume": 0.0,
+     "step": 0,
+     "steps": 768,
+     "largest_gap": 0.02277374087747683,
+     "smallest_drive_overlap": 0.06740234006538391,
+     "pair": "barrel/second"
+    },
+    {
+     "worst_volume": 0.0,
+     "step": 0,
+     "steps": 384,
+     "largest_gap": 0.018182649060516472,
+     "smallest_drive_overlap": 0.08881159832480663,
+     "pair": "second/minute"
+    },
+    {
+     "worst_volume": 0.0,
+     "step": 0,
+     "steps": 720,
+     "largest_gap": 0.01820563135034606,
+     "smallest_drive_overlap": 0.041255883276657024,
+     "pair": "minute/third"
+    },
+    {
+     "worst_volume": 0.0,
+     "step": 0,
+     "steps": 768,
+     "largest_gap": 0.01821288069360837,
+     "smallest_drive_overlap": 0.04558513843428659,
+     "pair": "third/seconds"
+    },
+    {
+     "worst_volume": 0.0,
+     "step": 0,
+     "steps": 288,
+     "largest_gap": 0.018389246723618646,
+     "smallest_drive_overlap": 0.08638219007129695,
+     "pair": "minute/minutewheel"
+    },
+    {
+     "worst_volume": 0.0,
+     "step": 0,
+     "steps": 384,
+     "largest_gap": 0.018303913622414528,
+     "smallest_drive_overlap": 0.054586579770121366,
+     "pair": "minutewheel/hour"
+    }
+   ]
+  },
+  "clear": {
+   "worst_volume": 0.0,
+   "pair": null
+  },
+  "minute": {
+   "clockwise_turns_per_hour": "1"
+  },
+  "hour": {
+   "clockwise_turns_per_hour": "1/12"
+  },
+  "seconds": {
+   "clockwise_turns_per_hour": "60"
+  },
+  "coaxial": {
+   "distance": 0.0
+  },
+  "hands": {
+   "hour": 5.514526037577757,
+   "minute": 7.0044626070200655,
+   "seconds": 7.501041348688079
+  },
+  "size": {
+   "radius": 19.000000921391628,
+   "z_min": -1.5,
+   "z_max": 7.099999904632568
+  }
+ }
+}

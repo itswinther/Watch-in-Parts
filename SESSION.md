@@ -9,7 +9,7 @@ table. Everything below "Session entries" is append-only, newest at the bottom.
 | ID | Workstream | Owner | Status | Last update |
 | --- | --- | --- | --- | --- |
 | A | Harness wiring | Mikael | paused harness work overnight to run three task spikes (see 03:55 entry, `spikes/README.md`): none showed a gap. Docker installed, not yet started | 2026-11-14 03:55 |
-| B | Reference script and grader | itswinther | Watch task runnable: reference movement scores 1.0, grading takes 35 s. Three clean agents (Fable, Opus, Sonnet) running on it now | 2026-11-14 03:51 |
+| B | Reference script and grader | itswinther | Watch task measured: Fable 1.0 (4.5 min), Opus 1.0 (7.6 min), Sonnet still running. No gap for the two strongest models. Stopped building, waiting for a human decision | 2026-11-14 03:58 |
 | C | Hold the Line spike | unassigned | not started | |
 | D | Mentor questions, anchors, transcripts | unassigned | not started | |
 | E | Analysis, demo and story | Yoseph | paused: Yoseph is not working overnight | 2026-11-14 01:40 |
@@ -366,3 +366,21 @@ Template:
 - Files changed: those listed, SESSION.md.
 - Need from others: Abhishek, see the choices listed under Decisions and say if any is wrong.
 - Next: grade the three agent runs and report.
+
+### 2026-11-14 03:58 | B watch task, agent results | itswinther + Claude
+- Did: ran three clean agents on the watch task with `claude -p` from fresh bundle folders outside the repo (probe agent answered `NONE` for pre-loaded context; no CLAUDE.md up the tree; empty work and submission folders; the bundle holds no hand speeds, gear maker, grader or reference). Graded each submission folder with `python3 -I tests/grade_watch.py`. The anchor script also finished: `python3 tests/test_anchors_watch.py` gave 7 of 7 as expected (gold 1.0; nothing 0; missing part 0; barrel not held 0.383; hands swapped 0.281; seconds mesh undeclared 0.195; one tooth count wrong 0.096), in 2 min 50 s while the agents were using the machine.
+
+  | Model | Score | Time | Tool calls | Cost |
+  | --- | --- | --- | --- | --- |
+  | Fable 5.2 | 1.0 | 4 min 27 s | 5 | $1.66 |
+  | Opus 5.5 | 1.0 | 7 min 38 s | 10 | $1.22 |
+  | Sonnet 5.5 | still running at the time of writing (21 tool calls, nothing submitted yet) | | | |
+
+  No tool call in the two finished runs touched a path outside its own folder.
+- What they did: both inferred the unstated requirements (hour 1/12, minute 1, seconds 60 clockwise turns per hour, hour and minute on one axis) without comment, both noticed that one mesh from the barrel would turn the minute hand anticlockwise and added a reversing stage, both wrote their own involute gear generator, and both chose a centre seconds hand with its arbor through a hollow minute tube inside the hour tube, matching centre distances by using different modules. Fable's first build passed every check. Largest mesh gap 0.018 to 0.023 against the 0.1 limit.
+- Finding: the two things A's spike had not tested (an unstated brief, and real gears turned by the grader) do not create a gap for Fable or Opus.
+- Defects the agents found in the bundle: the docstring of `geometry/watch.py` mentioned a gear maker that is not shipped (fixed in this commit); the `clear` tool returns step -1 both when it skips a pair on bounding boxes and when it finds no overlap (not fixed).
+- Not verified, or assumed: Sonnet's result; any non-Claude model; anything in Harbor or OpenCode; a printability check does not exist.
+- Files changed: `transcripts/watch_fable`, `transcripts/watch_opus`, `geometry/watch.py` (docstring), SESSION.md.
+- Need from others: a human decision on what to try next.
+- Next: add Sonnet's result when it finishes; nothing else until told.

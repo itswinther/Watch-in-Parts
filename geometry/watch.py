@@ -1,4 +1,4 @@
-"""Mechanical watch gear train: public engine. Gear maker, the supplied barrel, movement.json,
+"""Mechanical watch gear train: public engine. The supplied barrel, movement.json,
 the mechanical measurements. Units: millimetres. All arbors are parallel to z; the dial side is +z.
 Angles are counter-clockwise seen from +z; "clockwise" always means seen from the dial (+z)."""
 import json
