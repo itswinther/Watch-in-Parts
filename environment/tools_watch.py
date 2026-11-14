@@ -92,7 +92,7 @@ def t_held(a):
 
 
 def t_mesh(a):
-    m = W.load_movement(WORK, barrel_solid=W.barrel_stage())
+    m = W.load_movement(WORK, barrel_solid=W.barrel_stage(), drive_from_contact=False)   # stage mode: the old drive test
     for x, tx, y, ty in m.meshes:
         if (x, y) == (a.driver, a.driven):
             return m.mesh_run(x, tx, y, ty)

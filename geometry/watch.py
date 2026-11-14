@@ -199,12 +199,16 @@ def drive_contact(pa, B, base, pitch, v0=None):
 class Movement:
     """A parsed movement: fixed solid, mobiles (name -> solid, axis), meshes, hands."""
 
-    def __init__(self, doc, load_stl, barrel_solid=None, materials=False):
+    def __init__(self, doc, load_stl, barrel_solid=None, materials=False, drive_from_contact=True):
         """materials: one-job mode; every mobile must declare "material", a key of MATERIAL_ALLOWABLE_MPA (a format
         error otherwise, C1), and may declare "part_materials", {part of that mobile: such a key}, overriding
         "material" for those parts (a format error if a key is not a part of the mobile or a value does not
         qualify). mobiles[name]["part_materials"] then gives every part its material. Without it (stage mode)
-        neither field is read."""
+        neither field is read.
+        drive_from_contact: the drive test of mesh_run and drive_parts turns the driver to its first contact
+        before the push (the one-job rule since SESSION.md Decisions 15 Nov 00:50, part 2). False: the push starts
+        from the stepped angle, as before that decision (stage mode: its spec and its anchors are the old rule)."""
+        self.drive_from_contact = bool(drive_from_contact)
         if not isinstance(doc, dict):
             raise FormatError("movement.json: top level must be an object")
         cc = doc.get("case_centre")
@@ -555,7 +559,8 @@ class Movement:
         A step with no contact within one pitch creates no overlap (V 0: the drive test fails).
         largest_drive_contact: the largest contact turn over the steps, as a fraction of the driver's pitch;
         drive_steps_without_contact: how many steps found none. So the drive test does not depend on where in
-        its backlash the driven mobile is delivered.
+        its backlash the driven mobile is delivered. With self.drive_from_contact False (stage mode) there is no
+        contact search: the push starts from the stepped angle (contact 0 at every step).
         shift: the driven mobile (and its axis) is first moved this far straight away from the driver's
         axis (negative: towards it); same steps and angles. cut=False skips the speed-up (same results)."""
         A, ax_a = self.mobiles[a]["solid"], self.mobiles[a]["axis"]
@@ -594,7 +599,7 @@ class Movement:
                     vf = ivol(pa(da * (i + float(f))), pb(db * (i + float(f))))
                     if vf > worst[0]:
                         worst = (vf, i + float(f))
-                c = drive_contact(pa, Bi, da * i, pitch, v0=v)   # first contact in the push's sense, N held
+                c = drive_contact(pa, Bi, da * i, pitch, v0=v) if self.drive_from_contact else 0.0
                 extra, r, hz = 0.0, 0.0, 0.0
                 if c is None:
                     missing += 1
@@ -647,7 +652,7 @@ class Movement:
         pa = lambda deg: rot(A0, ax_a, deg)
         for i in range(0, n, 8):
             Bi = rot(B0, ax_b, db * i)
-            c = drive_contact(pa, Bi, da * i, pitch)
+            c = drive_contact(pa, Bi, da * i, pitch) if self.drive_from_contact else 0.0
             if c is None:
                 continue
             Ac, P = pa(da * i + c), pa(da * i + c + push)
@@ -765,13 +770,15 @@ def _near_cut(S, ax, O, ax_o):
     return S ^ keep
 
 
-def load_movement(folder, name="movement.json", cache=None, barrel_solid=None, materials=False):
+def load_movement(folder, name="movement.json", cache=None, barrel_solid=None, materials=False,
+                  drive_from_contact=True):
     """folder holds movement.json and parts/<name>.step. Opens only the files movement.json names.
     name: the movement file in folder to read instead of movement.json (a plain file name, e.g. variant_6h.json).
     cache: an optional dict shared between calls; a part file whose name and bytes were loaded before is
     taken from it instead of being read again (the same solid; the result does not depend on the cache).
     barrel_solid: the supplied barrel's solid (default barrel(); the stage mode passes barrel_stage()).
-    materials: one-job mode, every mobile declares a material (see Movement)."""
+    materials: one-job mode, every mobile declares a material (see Movement).
+    drive_from_contact: see Movement (the stage mode passes False)."""
     if not isinstance(name, str) or os.path.basename(name) != name or not name.endswith(".json"):
         raise FormatError("bad movement file name %r" % (name,))
     path = inside(folder, os.path.join(folder, name))
@@ -808,7 +815,7 @@ def load_movement(folder, name="movement.json", cache=None, barrel_solid=None, m
         if key is not None:
             cache[key] = solid
         return solid
-    return Movement(doc, load, barrel_solid, materials=materials)
+    return Movement(doc, load, barrel_solid, materials=materials, drive_from_contact=drive_from_contact)
 
 
 def inside(folder, path):

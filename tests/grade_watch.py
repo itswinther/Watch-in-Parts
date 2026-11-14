@@ -285,7 +285,8 @@ def grade_design(folder, stage=1, prev=None, skip=()):
         return out
 
     def load():
-        st["m"] = W.load_movement(folder, barrel_solid=W.barrel_stage())     # stage mode: the one-body barrel of old runs
+        st["m"] = W.load_movement(folder, barrel_solid=W.barrel_stage(),     # stage mode: the one-body barrel of old runs
+                                  drive_from_contact=False)                  # and the old drive test (push from the stepped angle)
         return True, {}
     gates["files"], details["files"] = _run(load)
     if not gates["files"]:
@@ -435,7 +436,7 @@ def grade_assembly(folder, prev):
     out = {"reward": 0.0, "p": 0.0, "gates": gates, "checks": {}, "details": details}
 
     def load():
-        st["m"] = W.load_movement(folder, barrel_solid=W.barrel_stage())
+        st["m"] = W.load_movement(folder, barrel_solid=W.barrel_stage(), drive_from_contact=False)
         return True, {}
     gates["files"], details["files"] = _run(load)
     gates["locked"], details["locked"] = _run(lambda: locked_all(prev, folder))
