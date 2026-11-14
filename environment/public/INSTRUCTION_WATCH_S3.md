@@ -1,12 +1,14 @@
-# Task: stage 3 of 3, assemble the movement
+# Task: stage 3 of 4, rework for a faster barrel
 
 `work/` holds a finished watch movement designed by other engineers (a copy is in
-`previous/`). Nothing in it may change. Work out how to put it together: write
-`work/assembly.json` with an order and a path for every part, following "Stage 3"
-in `SPEC_WATCH.md`.
+`previous/`). The barrel now turns clockwise once every 6 hours instead of once
+every 8. Rework the movement so that it meets every requirement again with this
+barrel, and keep as many of the received part files byte-for-byte unchanged as
+you can, following "Stage 3" in `SPEC_WATCH.md`. The spec says exactly how kept
+parts are counted and how they enter the score.
 
-Submit as the spec describes. Only the last accepted submission is graded, by a
-separate program. You have about 35 minutes.
+Write the result into `work/` and submit as the spec describes. Only the last
+accepted submission is graded, by a separate program. You have about 35 minutes.
 
 ## How you are run
 

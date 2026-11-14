@@ -1,12 +1,13 @@
-"""Reference for the three-stage watch task.
+"""Reference for the four-stage watch task.
     python solution/reference_watch.py OUT_DIR
-writes OUT_DIR/stage1, OUT_DIR/stage2 and OUT_DIR/stage3, each with movement.json and parts/*.stl
-(stage3 also assembly.json).
+writes OUT_DIR/stage1 .. OUT_DIR/stage4, each with movement.json and parts/*.stl (stage4 also assembly.json).
 
 Stage 1 train: barrel 96 -> 24 ("third"), 60 -> 30 (centre, minute hand), 90 -> 12 ("fourth"),
 96 -> 12 (seconds). Motion work on the dial side: cannon 12 -> 36 (minute wheel), 12 -> 48 (hour wheel,
 a tube round the centre arbor). Stage 2 adds the 24-hour hand: hour wheel 48 -> 24 (day idler),
-its 12 -> 48 (day wheel). Stage 3 drops every part in from above in an order the layers allow."""
+its 12 -> 48 (day wheel). Stage 3 (barrel at 1/6 turn per hour) swaps the third wheel and the centre pinion
+from 60/30 to 54/36. Stage 4 drops every part in from above in an order the layers allow.
+The case centre and plate radius are the smallest disc round everything that turns (case_geometry)."""
 import json
 import math
 import os
@@ -25,7 +26,8 @@ M_E, M_F = 0.25, 0.2                                     # motion work
 M_DAY = 0.12
 Z = {"A": (0.1, 0.9), "B": (1.4, 2.2), "C": (2.6, 3.4), "D": (3.8, 4.6), "E": (6.4, 7.2), "F": (7.6, 8.4)}
 PLATE, BRIDGE, DIAL = (-1.7, -0.3), (5.0, 6.0), (8.8, 9.6)
-R_PLATE, R_PILLAR = 22.9, 22.1
+PLATE_MARGIN = 0.1        # plate rim beyond the farthest swept wheel or hand
+PILLAR_R, PILLAR_GAP = 0.75, 0.15
 dist = lambda p, q: math.hypot(p[0] - q[0], p[1] - q[1])
 on = lambda c, r, a: (c[0] + r * math.cos(a), c[1] + r * math.sin(a))
 ang = lambda p, q: math.atan2(q[1] - p[1], q[0] - p[0])
@@ -84,19 +86,50 @@ def hand(axis, z0, z1, length, hub_r, hole_r):
     return h - W.cyl(x, y, z0 - 1, z1 + 1, hole_r) if hole_r else h
 
 
+# swept radius of each mobile of the largest stage, below the dial (wheels) and with the hands
+SWEEP = {"barrel": (9.8, 9.8), "third": (7.75, 7.75), "centre": (9.75, 9.75), "fourth": (9.8, 9.8), "seconds": (1.4, 5.01),
+         "minute_wheel": (4.75, 4.75), "hour_wheel": (5.0, 6.01), "day_idler": (2.6, 2.6), "day": (3.0, 3.22)}
+
+
+def case_geometry(P):
+    """Case centre and plate radius: the smallest disc round every swept wheel and hand of the largest stage
+    (plus PLATE_MARGIN), and three pillar spots inside it that clear every swept wheel."""
+    from scipy.optimize import minimize
+    P = dict(P, hour_wheel=P["centre"])
+    reach = lambda c: max(dist(c, P[k]) + r[1] for k, r in SWEEP.items())
+    best = min((minimize(lambda v: reach(v), x0, method="Nelder-Mead", options={"xatol": 1e-6, "fatol": 1e-7}) for x0 in
+                [P["centre"], (0.0, -8.0), (3.0, -10.0)]), key=lambda r: r.fun)
+    cc = (round(float(best.x[0]), 4), round(float(best.x[1]), 4))
+    rp = round(reach(cc) + PLATE_MARGIN, 3)
+    ok = lambda p: all(dist(p, P[k]) >= r[0] + PILLAR_R + PILLAR_GAP for k, r in SWEEP.items()) \
+        and dist(p, cc) <= rp - PILLAR_R - 0.1
+    cands = []
+    for a in range(0, 360, 3):
+        for rr in np.arange(rp - PILLAR_R - 0.1, rp - 8, -0.1):
+            if ok(on(cc, rr, math.radians(a))):
+                cands.append(on(cc, rr, math.radians(a)))
+                break
+    best3, score = None, -1
+    for i in range(len(cands)):
+        for j in range(i + 1, len(cands)):
+            for k in range(j + 1, len(cands)):
+                s = min(dist(cands[i], cands[j]), dist(cands[j], cands[k]), dist(cands[i], cands[k]))
+                if s > score:
+                    best3, score = (cands[i], cands[j], cands[k]), s
+    return cc, rp, tuple((float(x), float(y)) for x, y in best3)
+
+
 def frame(P, with_day):
     C, I, T, S, Mw, Id, D = (P[k] for k in ("centre", "third", "fourth", "seconds", "minute_wheel", "day_idler", "day"))
-    cx, cy = C
+    (cx, cy), R_PLATE, spots = P["case"]
     lo, hi = PLATE[1] + 0.1, BRIDGE[0] - 0.1
-    base = ang(C, P["barrel"])
-    spots = [on(C, R_PILLAR, base + math.pi / 3 + k * 2 * math.pi / 3) for k in range(3)]
     plate = union([W.cyl(cx, cy, PLATE[0], PLATE[1], R_PLATE, 96)] + [W.cyl(x, y, PLATE[1] - 0.1, BRIDGE[0], 0.75) for x, y in spots])
     bridge = union([W.cyl(cx, cy, BRIDGE[0], BRIDGE[1], R_PLATE, 96)] + [W.cyl(x, y, BRIDGE[1] - 0.1, DIAL[0], 0.75) for x, y in spots])
     dial = W.cyl(cx, cy, DIAL[0], DIAL[1], R_PLATE, 96)
     ph = [W.cyl(0, 0, -1.1, PLATE[1] + 1, 0.6)] + [W.cyl(a[0], a[1], lo - 0.8, PLATE[1] + 1, 0.4) for a in (I, T, C, S)]
     bh = [W.cyl(a[0], a[1], BRIDGE[0] - 1, hi + 0.8, 0.4) for a in (I, T)] + [W.cyl(a[0], a[1], BRIDGE[0] - 1, BRIDGE[1] + 1, 0.6) for a in (C, S)]
     bh += [W.cyl(Mw[0], Mw[1], BRIDGE[1] - 0.7, BRIDGE[1] + 1, 0.4)]
-    dh = [W.cyl(Mw[0], Mw[1], DIAL[0] - 1, DIAL[0] + 0.45, 0.4), W.cyl(cx, cy, DIAL[0] - 1, DIAL[1] + 1, 1.15), W.cyl(S[0], S[1], DIAL[0] - 1, DIAL[1] + 1, 0.6)]
+    dh = [W.cyl(Mw[0], Mw[1], DIAL[0] - 1, DIAL[0] + 0.45, 0.4), W.cyl(C[0], C[1], DIAL[0] - 1, DIAL[1] + 1, 1.15), W.cyl(S[0], S[1], DIAL[0] - 1, DIAL[1] + 1, 0.6)]
     if with_day:
         bh += [W.cyl(a[0], a[1], BRIDGE[1] - 0.7, BRIDGE[1] + 1, 0.4) for a in (Id, D)]
         dh += [W.cyl(Id[0], Id[1], DIAL[0] - 1, DIAL[0] + 0.45, 0.4), W.cyl(D[0], D[1], DIAL[0] - 1, DIAL[1] + 1, 0.6)]
@@ -106,6 +139,7 @@ def frame(P, with_day):
 
 def build_stage1():
     P = place()
+    P["case"] = case_geometry(P)
     B, I, C, T, S, Mw = (P[k] for k in ("barrel", "third", "centre", "fourth", "seconds", "minute_wheel"))
     lo, hi = PLATE[1] + 0.1, BRIDGE[0] - 0.1
     cx, cy = C
@@ -133,7 +167,7 @@ def build_stage1():
     parts["seconds_hand"] = hand(S, 9.9, 10.2, 5.0, 0.9, 0.0)
     parts.update(frame(P, with_day=False))
     doc = {
-        "case_centre": [cx, cy],
+        "case_centre": list(P["case"][0]),
         "fixed": ["main_plate", "bridge", "dial", "barrel_cock"],
         "mobiles": {
             "third": {"axis": list(I), "parts": ["third"]},
@@ -180,7 +214,29 @@ def build_stage2(doc, parts, P, phase):
     return doc, parts
 
 
-ORDER = ["main_plate", "barrel", "barrel_cock", "third", "centre", "fourth", "seconds", "bridge", "cannon",
+def build_stage3(doc, parts, P):
+    """Change request: the barrel turns once every 6 hours instead of 8. The third wheel and the centre pinion
+    go from 60/30 to 54/36 (same module, same centre distance 11.25); every other part file is kept."""
+    doc = json.loads(json.dumps(doc))
+    parts = dict(parts)
+    B, I, C, T = P["barrel"], P["third"], P["centre"], P["fourth"]
+    lo, hi = PLATE[1] + 0.1, BRIDGE[0] - 0.1
+    cx, cy = C
+    p1, _ = gear_at(I, 24, M_A, Z["A"], ang(I, B), (96, 0.0))
+    w1, ph_w1 = gear_at(I, 54, M_B, Z["B"], ang(I, C))
+    parts["third_54"] = union([arbor(I, lo, hi), p1, w1])
+    p2, _ = gear_at(C, 36, M_B, Z["B"], ang(C, I), (54, ph_w1))
+    w2, _ = gear_at(C, 90, M_C, Z["C"], ang(C, T))
+    parts["centre_36"] = union([W.cyl(cx, cy, lo, hi, 0.8), W.cyl(cx, cy, lo - 0.7, lo + 0.01, 0.3), W.cyl(cx, cy, hi - 0.01, 11.4, 0.5), p2, w2])
+    doc["mobiles"]["third"]["parts"] = ["third_54"]
+    doc["mobiles"]["centre"]["parts"] = ["centre_36" if n == "centre" else n for n in doc["mobiles"]["centre"]["parts"]]
+    for e in doc["meshes"]:
+        if e["driver"] == "third" and e["driven"] == "centre":
+            e["driver_teeth"], e["driven_teeth"] = 54, 36
+    return doc, parts
+
+
+ORDER = ["main_plate", "barrel", "barrel_cock", "third_54", "centre_36", "fourth", "seconds", "bridge", "cannon",
          "minute_wheel", "hour_wheel", "day", "day_idler", "dial", "hour_hand", "seconds_hand", "day_hand", "minute_hand"]
 
 
@@ -219,13 +275,15 @@ def main(out):
     write(os.path.join(out, "stage1"), doc1, parts1)
     doc2, parts2 = build_stage2(doc1, parts1, P, phase)
     write(os.path.join(out, "stage2"), doc2, parts2)
-    s3 = os.path.join(out, "stage3")
-    if os.path.isdir(s3):
-        shutil.rmtree(s3)
-    shutil.copytree(os.path.join(out, "stage2"), s3)
-    with open(os.path.join(s3, "assembly.json"), "w") as f:
-        json.dump(build_assembly(s3), f)
-    print("stage1 parts", len(parts1), "stage2 parts", len(parts2), "axes", {k: [round(v, 2) for v in a] for k, a in P.items()})
+    doc3, parts3 = build_stage3(doc2, parts2, P)
+    write(os.path.join(out, "stage3"), doc3, parts3)
+    s4 = os.path.join(out, "stage4")
+    if os.path.isdir(s4):
+        shutil.rmtree(s4)
+    shutil.copytree(os.path.join(out, "stage3"), s4)
+    with open(os.path.join(s4, "assembly.json"), "w") as f:
+        json.dump(build_assembly(s4), f)
+    print("stage1 parts", len(parts1), "stage2 parts", len(parts2), "axes", {k: [round(v, 2) for v in a] for k, a in P.items() if k != "case"}, "case", P["case"])
 
 
 if __name__ == "__main__":

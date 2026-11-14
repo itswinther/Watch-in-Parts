@@ -1,9 +1,11 @@
 """Grader for the mechanical watch task. Run from this directory as:
-    python -I grade_watch.py /abs/submission_folder [--stage 1|2|3] [--prev /abs/previous_stage_folder]
+    python -I grade_watch.py /abs/submission_folder [--stage 1|2|3|4] [--prev /abs/previous_stage_folder]
                              [--reward FILE] [--details FILE]
 Stage 1: design the movement. Stage 2: add a 24-hour hand to a frozen stage-1 movement (--prev).
-Stage 3: give an assembly order and paths for a frozen stage-2 movement (--prev).
-The folder holds movement.json and parts/<name>.stl; only files named in movement.json are opened.
+Stage 3: change request: the barrel turns once every 6 hours; every design check again, times a
+kept-parts factor against the stage-2 movement (--prev).
+Stage 4: give an assembly order and paths for a frozen stage-3 movement (--prev).
+The folder holds movement.json and parts/<name>.step or .stl; only files named in movement.json are opened.
 Never runs submitted code. Writes reward 0 first."""
 import json
 import os
@@ -48,31 +50,43 @@ def _run(fn):
         signal.signal(signal.SIGALRM, old)
 
 
+def stage_weights(stage):
+    return dict(WEIGHTS, **(WEIGHTS_2 if stage in (2, 3) else {}))
+
+
 def grade_design(folder, stage=1, prev=None):
     import math
     from geometry import watch as W
     from geometry.core import ivol
-    weights = dict(WEIGHTS, **(WEIGHTS_2 if stage == 2 else {}))
+    weights = stage_weights(stage)
     for k in os.environ.get("WATCH_SKIP", "").split(","):      # only for grading runs made before a check existed
         weights.pop(k, None)
     gates = {g: False for g in GATES + (("locked",) if stage == 2 else ())}
     checks = {k: False for k in weights}
     details = {}
-    st = {}
+    st = {"factor": 1.0}
 
     def result():
         G = all(gates.values())
         p = sum(w for k, w in weights.items() if checks[k]) / sum(weights.values())
         S = (0.5 * p * p + 0.5 * (1.0 if all(checks.values()) else 0.0)) if G else 0.0
-        return {"reward": S, "p": p, "gates": gates, "checks": checks, "details": details}
+        out = {"reward": S, "p": p, "gates": gates, "checks": checks, "details": details}
+        if stage == 3:
+            out["reward"] = S * st["factor"]
+            out["kept_factor"] = st["factor"]
+        return out
 
     def load():
         st["m"] = W.load_movement(folder)
         return True, {}
     gates["files"], details["files"] = _run(load)
     if not gates["files"]:
+        if stage == 3:
+            st["factor"] = 0.0
         return result()
     m = st["m"]
+    if stage == 3:
+        m.barrel_speed = W.CHANGED_BARREL_TURNS_PER_HOUR
     names = list(m.mobiles)
 
     def assembled():
@@ -90,6 +104,9 @@ def grade_design(folder, stage=1, prev=None):
         gates["locked"], details["locked"] = _run(lambda: locked_design(prev, folder))
 
     speeds, conflicts = m.speeds()
+    if stage == 3:
+        ok, details["kept"] = _run(lambda: kept_parts(prev, folder, speeds))
+        st["factor"] = details["kept"].get("factor", 0.0) if ok else 0.0
 
     def spin():
         r = {n: m.spin(n) for n in names}
@@ -165,6 +182,12 @@ def grade_design(folder, stage=1, prev=None):
     return result()
 
 
+def _part_file(folder, name):
+    """The file of part `name`: parts/<name>.step if it exists, otherwise parts/<name>.stl."""
+    step = os.path.join(folder, "parts", name + ".step")
+    return step if os.path.isfile(step) else os.path.join(folder, "parts", name + ".stl")
+
+
 def _same_file(a, b):
     if not (os.path.isfile(a) and os.path.isfile(b)):
         return False
@@ -190,7 +213,7 @@ def locked_design(prev, folder):
             changed.append("mobile %s: missing or axis moved" % name)
             continue
         for part in m["parts"]:
-            if part not in n.get("parts", []) or not _same_file(os.path.join(prev, "parts", part + ".stl"), os.path.join(folder, "parts", part + ".stl")):
+            if part not in n.get("parts", []) or not _same_file(_part_file(prev, part), _part_file(folder, part)):
                 changed.append("part %s: missing from its mobile or file changed" % part)
     for e in old["meshes"]:
         if e not in new.get("meshes", []):
@@ -201,8 +224,33 @@ def locked_design(prev, folder):
     return not changed, {"changed": changed}
 
 
+def kept_parts(prev, folder, speeds):
+    """Stage 3: share of the received part files kept. A received fixed part counts if it is still under
+    'fixed' and byte-identical. A received part of a mobile counts if it is byte-identical and still in a
+    mobile of the same name, on the same axis, that is driven from the barrel."""
+    from geometry import watch as W
+    if not prev:
+        return False, {"error": "no previous stage given", "factor": 0.0}
+    old, new = _doc(prev), _doc(folder)
+    new_mob = new.get("mobiles", {})
+    kept, lost = [], []
+    for part in old["fixed"]:
+        ok = part in new.get("fixed", []) and _same_file(_part_file(prev, part), _part_file(folder, part))
+        (kept if ok else lost).append(part)
+    for name, mo in old["mobiles"].items():
+        n = new_mob.get(name)
+        same_axis = bool(n) and [float(v) for v in n.get("axis", [])] == [float(v) for v in mo["axis"]]
+        for part in mo["parts"]:
+            ok = same_axis and name in speeds and part in n.get("parts", []) \
+                and _same_file(_part_file(prev, part), _part_file(folder, part))
+            (kept if ok else lost).append(part)
+    share = Fraction(len(kept), len(kept) + len(lost))
+    factor = float(min(Fraction(1), share / W.REF_KEPT_SHARE))
+    return True, {"kept": kept, "not_kept": lost, "share": str(share), "reference_share": str(W.REF_KEPT_SHARE), "factor": factor}
+
+
 def locked_all(prev, folder):
-    """Stage 3: movement.json and every part it names are byte-identical to the previous stage."""
+    """Stage 4: movement.json and every part it names are byte-identical to the previous stage."""
     if not prev:
         return False, {"error": "no previous stage given"}
     changed = []
@@ -210,7 +258,7 @@ def locked_all(prev, folder):
         changed.append("movement.json")
     old = _doc(prev)
     for part in list(old["fixed"]) + [p for m in old["mobiles"].values() for p in m["parts"]]:
-        if not _same_file(os.path.join(prev, "parts", part + ".stl"), os.path.join(folder, "parts", part + ".stl")):
+        if not _same_file(_part_file(prev, part), _part_file(folder, part)):
             changed.append(part)
     return not changed, {"changed": changed}
 
@@ -251,7 +299,7 @@ def grade_assembly(folder, prev):
 
 
 def grade(folder, stage=1, prev=None):
-    if stage == 3:
+    if stage == 4:
         return grade_assembly(folder, prev)
     return grade_design(folder, stage, prev)
 
@@ -272,7 +320,7 @@ def main(argv):
             json.dump(res, f, indent=1, default=str)
     with open(reward_file, "w") as f:
         f.write("%.6f\n" % res["reward"])
-    print(json.dumps({k: res[k] for k in ("reward", "p", "gates", "checks")}))
+    print(json.dumps({k: res[k] for k in ("reward", "p", "gates", "checks", "kept_factor") if k in res}))
     return 0
 
 

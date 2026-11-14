@@ -1,4 +1,4 @@
-# Task: stage 2 of 3, add a 24-hour hand
+# Task: stage 2 of 4, add a 24-hour hand
 
 `work/` holds a finished watch movement designed by another engineer (a copy is
 in `previous/`). Add a 24-hour hand to it, following "Stage 2" in
