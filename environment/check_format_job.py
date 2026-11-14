@@ -100,6 +100,15 @@ def movement_names(doc, rel):
         if not isinstance(m.get("material"), str) or m["material"] not in MATERIALS:
             raise Bad("%s: mobile '%s': 'material' must be the designation of a material with a bending (tensile) "
                       "design allowable in DS-201 section 8" % (rel, k))
+        pm = m.get("part_materials", {})
+        if not isinstance(pm, dict):
+            raise Bad("%s: mobile '%s': 'part_materials' must be an object {part name: designation}" % (rel, k))
+        for pn, pmat in pm.items():
+            if pn not in m["parts"]:
+                raise Bad("%s: mobile '%s': 'part_materials' names %r, which is not a part of this mobile" % (rel, k, pn))
+            if not isinstance(pmat, str) or pmat not in MATERIALS:
+                raise Bad("%s: mobile '%s': 'part_materials' of part '%s' must be the designation of a material with a "
+                          "bending (tensile) design allowable in DS-201 section 8" % (rel, k, pn))
     if len(names) > MAX_PARTS:
         raise Bad("%s: more than %d parts" % (rel, MAX_PARTS))
     known = set(mob) | {"barrel"}

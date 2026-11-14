@@ -1,6 +1,6 @@
 """Quick tests of the gear strength check (one-job mode, check `strength`, SESSION.md Decisions 17:56 option 2).
     python3 tests/test_strength.py [--write-lewis]
-Run from the repository root; about a minute (one real mesh run of the barrel and a 12-tooth pinion, twice).
+Run from the repository root; a few minutes (real mesh runs of the barrel and 12-tooth pinions).
 --write-lewis rebuilds geometry/data/lewis_y.json from geometry.watch.lewis_form_factor and exits.
 Cases:
   sheets     the constants equal their supplier-sheet cells (DS-101 Table 2a, DS-201 sections 2 and 8)
@@ -11,6 +11,12 @@ Cases:
   material   a mobile without "material", or with one that has no tensile allowable, is a format error in
              one-job mode (the grader's C1 gate "files" fails) and is ignored in stage mode
   barrel     the supplied barrel drives a real 12-tooth CAD pinion 0.8 thick: steel passes, brass fails
+  part_materials  "part_materials" with a designation that does not qualify, a part not in that mobile, or not an
+             object, is a format error in one-job mode (also through the grader's C1) and is ignored in stage mode
+  per_part   a mobile of two CAD parts, a steel pinion ("pin", driven by the barrel) and a brass wheel ("wheel",
+             driving a 12-tooth pinion on mobile q): the barrel mesh picks "pin" and rates it in steel, the q mesh
+             picks "wheel" and rates it in brass (drive overlap by part, sigma by hand); without part_materials
+             the brass mobile fails at its pinion
   weights    P1 totals 23 and P3 27"""
 import json
 import os
@@ -182,6 +188,143 @@ def case_barrel():
         shutil.rmtree(tmp)
 
 
+def _doc2(part_materials, material="AD-CW614N"):
+    """One mobile p of two parts (pin, wheel), its material and part_materials as given (None: no field)."""
+    mob = {"axis": [5.0, 0.0], "parts": ["pin", "wheel"], "material": material}
+    if part_materials is not None:
+        mob["part_materials"] = part_materials
+    return {"case_centre": [0, 0], "fixed": ["plate"], "mobiles": {"p": mob},
+            "meshes": [{"driver": "barrel", "driver_teeth": 96, "driven": "p", "driven_teeth": 12}],
+            "hands": {h: {"mobile": "p", "part": "wheel"} for h in ("hour", "minute", "seconds")}}
+
+
+def case_part_materials():
+    solids = {"pin": core.box((4, -1, 0), (6, 1, 1)), "wheel": core.box((4, -1, 1), (6, 1, 1.5)),
+              "plate": core.box((-12, -12, -3.0), (16, 12, -2.5))}
+    load = lambda n: solids[n]
+    out = []
+    bad = ({"pin": "AD-AL2O3"}, {"pin": "AD-C100S"}, {"wheel": "brass"}, {"pin": 7}, {"plate": "AD-C100-HT"},
+           {"barrel": "AD-C100-HT"}, {"nope": "AD-C100-HT"}, ["pin", "AD-C100-HT"], "AD-C100-HT")
+    for pm in bad:
+        try:
+            W.Movement(_doc2(pm), load, materials=True)
+            raise AssertionError("part_materials %r accepted" % (pm,))
+        except FormatError as e:
+            out.append("%r: %s" % (pm, e))
+        W.Movement(_doc2(pm), load)                     # stage mode: not read
+    # the material is still required with part_materials
+    try:
+        W.Movement(_doc2({"pin": "AD-C100-HT", "wheel": "AD-CW614N"}, material=None), load, materials=True)
+        raise AssertionError("part_materials without material accepted")
+    except FormatError as e:
+        out.append("no material: %s" % e)
+    for pm, want in ((None, {"pin": "AD-CW614N", "wheel": "AD-CW614N"}), ({}, {"pin": "AD-CW614N", "wheel": "AD-CW614N"}),
+                     ({"pin": "AD-C100-HT"}, {"pin": "AD-C100-HT", "wheel": "AD-CW614N"}),
+                     ({"pin": "AD-C100-HT", "wheel": "AD-C100-HT"}, {"pin": "AD-C100-HT", "wheel": "AD-C100-HT"})):
+        got = W.Movement(_doc2(pm), load, materials=True).mobiles["p"]["part_materials"]
+        assert got == want, (pm, got)
+    # through the grader: the one-job loader's format gate (C1, "files") fails
+    import grade_watch as G
+    from geometry import watch_gears_cad as GC
+    tmp = tempfile.mkdtemp()
+    try:
+        os.makedirs(os.path.join(tmp, "parts"))
+        GC.export(os.path.join(tmp, "parts", "plate.step"), GC.box((-12, -12, -3.0), (16, 12, -2.5)))
+        GC.export(os.path.join(tmp, "parts", "pin.step"), GC.box((4, -1, 0), (6, 1, 1)))
+        GC.export(os.path.join(tmp, "parts", "wheel.step"), GC.box((4, -1, 1), (6, 1, 1.5)))
+        for pm in ({"wheel": "AD-AL2O3"}, {"third": "AD-C100-HT"}):
+            with open(os.path.join(tmp, "movement.json"), "w") as f:
+                json.dump(_doc2(pm), f)
+            m, gates, checks, details = G._job_movement(tmp, "movement.json", W.BARREL_TURNS_PER_HOUR, {"strength": 2},
+                                                        {}, G._run, {}, {})
+            assert m is None and gates["files"] is False and "part_materials" in details["files"]["error"], details
+            out.append("grader C1: %s" % details["files"]["error"])
+    finally:
+        shutil.rmtree(tmp)
+    return "\n    ".join(out)
+
+
+def case_per_part():
+    """The barrel (96, module 0.2) drives the steel pinion part "pin" (12 teeth, z 0.1 to 0.9, with its arbor) of
+    mobile p; p's brass wheel part "wheel" (36 teeth, module 0.2, z 1.5 to 2.0, bored for the arbor) drives a
+    12-tooth one-part steel pinion q (z 1.5 to 2.0), which carries the seconds hand. p's material is brass and
+    part_materials makes "pin" steel."""
+    import test_tolerant as TT
+    from geometry import watch_gears_cad as GC
+    from test_cad_gears import phase_for
+    tmp = tempfile.mkdtemp()
+    try:
+        mod = W.BARREL_MODULE
+        cd = mod * (W.BARREL_TEETH + 12) / 2.0                  # 10.8
+        cq_ = mod * (36 + 12) / 2.0                             # 4.8
+        px, qx = cd, cd + cq_
+        pin = GC.union([GC.gear(12, mod, 0.1, 0.9, phase_deg=phase_for(12, W.BARREL_TEETH, 0.0, 180.0), x=px, y=0.0),
+                        GC.cyl(px, 0.0, 0.1, 2.0, 0.4)])
+        wheel = GC.cut(GC.gear(36, mod, 1.5, 2.0, phase_deg=0.0, x=px, y=0.0), GC.cyl(px, 0.0, 1.0, 2.5, 0.4))
+        qpin = GC.gear(12, mod, 1.5, 2.0, phase_deg=phase_for(12, 36, 0.0, 180.0), x=qx, y=0.0)
+        solids = {}
+        for n, sol in (("pin", pin), ("wheel", wheel), ("q", qpin)):
+            path = os.path.join(tmp, n + ".step")
+            GC.export(path, sol)
+            solids[n] = W.load_part_file(path)
+        solids["plate"] = core.box((-12, -12, -3.0), (22, 12, -2.5))
+
+        def movement(pm, material="AD-CW614N"):
+            mob = {"axis": [px, 0.0], "parts": ["pin", "wheel"], "material": material}
+            if pm is not None:
+                mob["part_materials"] = pm
+            doc = {"case_centre": [0, 0], "fixed": ["plate"],
+                   "mobiles": {"p": mob, "q": {"axis": [qx, 0.0], "parts": ["q"], "material": "AD-C100-HT"}},
+                   "meshes": [{"driver": "barrel", "driver_teeth": W.BARREL_TEETH, "driven": "p", "driven_teeth": 12},
+                              {"driver": "p", "driver_teeth": 36, "driven": "q", "driven_teeth": 12}],
+                   "hands": {h: {"mobile": "q", "part": "q"} for h in ("hour", "minute", "seconds")}}
+            return W.Movement(doc, lambda n: solids[n], materials=True)
+        m = movement({"pin": "AD-C100-HT"})
+        runs = [m.mesh_run(a, ta, b, tb) for a, ta, b, tb in m.meshes]
+        assert all(TT.passes(x) for x in runs), runs
+        driven, _ = m.speeds()
+        ok, d = W.strength_run(m, runs, driven)
+        assert d["going_train"] == ["barrel/p", "p/q"], d
+        g1, g2 = d["meshes"][0]["gears"]["p"], d["meshes"][1]["gears"]["p"]
+        # which part holds the teeth: all of the barrel mesh's drive overlap is in the pinion, all of the q mesh's
+        # in the wheel
+        assert g1["part"] == "pin" and g1["material"] == "AD-C100-HT" and g1["allowable_mpa"] == 725.0, g1
+        assert g1["drive_overlap_by_part"]["pin"] > 0 and g1["drive_overlap_by_part"]["wheel"] == 0.0, g1
+        assert g2["part"] == "wheel" and g2["material"] == "AD-CW614N" and g2["allowable_mpa"] == 110.0, g2
+        assert g2["drive_overlap_by_part"]["wheel"] > 0 and g2["drive_overlap_by_part"]["pin"] == 0.0, g2
+        gq = d["meshes"][1]["gears"]["q"]
+        assert gq["part"] == "q" and gq["material"] == "AD-C100-HT" and "drive_overlap_by_part" not in gq, gq
+        # sigma by hand: mesh 1, T = 70.1 at the barrel, F = 70.1 / (0.2 x 96 / 2); mesh 2, p turns 96/12 x 1/8 = 1
+        # per hour, T = 70.1 x (1/8) / 1 = 8.7625 N·mm at p, F = 8.7625 / (0.2 x 36 / 2) = 2.434028 N
+        F1, F2 = 70.1 / 9.6, 8.7625 / 3.6
+        b1, b2 = d["meshes"][0]["face_width"], d["meshes"][1]["face_width"]
+        assert 0.75 <= b1 <= 0.8 + 1e-6 and 0.45 <= b2 <= 0.5 + 1e-6, (b1, b2)
+        want = {"pin": F1 / (b1 * mod * W.LEWIS_Y[12]), "wheel": F2 / (b2 * mod * W.LEWIS_Y[36]),
+                "q": F2 / (b2 * mod * W.LEWIS_Y[12])}
+        for got, k in ((g1, "pin"), (g2, "wheel"), (gq, "q")):
+            assert abs(got["sigma_mpa"] - want[k]) < 1e-6 * want[k], (k, got, want[k])
+        assert abs(d["meshes"][1]["torque_nmm"] - 8.7625) < 1e-9 and abs(d["meshes"][1]["force_n"] - F2) < 1e-9
+        assert ok and g1["margin"] > 0 and g2["margin"] > 0, d
+        # the same mobile all in brass (no part_materials): the pinion is rated in brass and fails
+        m2 = movement(None)
+        ok2, d2 = W.strength_run(m2, runs, driven)
+        h1 = d2["meshes"][0]["gears"]["p"]
+        assert not ok2 and h1["part"] == "pin" and h1["material"] == "AD-CW614N" and h1["margin"] < 0, d2
+        # steel by default with a brass wheel part: the same ratings as the first case
+        m3 = movement({"wheel": "AD-CW614N"}, material="AD-C100-HT")
+        ok3, d3 = W.strength_run(m3, runs, driven)
+        assert ok3 and [(e["gears"]["p"]["part"], e["gears"]["p"]["material"]) for e in d3["meshes"]] == \
+            [("pin", "AD-C100-HT"), ("wheel", "AD-CW614N")], d3
+        return ("barrel/p: part pin (overlap by part %s) steel, b %.4f, sigma %.2f MPa, margin %.3f; p/q: part wheel "
+                "(overlap by part %s) brass, b %.4f, sigma %.2f MPa, margin %.3f; q pinion steel sigma %.2f; all brass: "
+                "pin margin %.3f, fails" % (
+                    {k: round(v, 5) for k, v in g1["drive_overlap_by_part"].items()}, b1, g1["sigma_mpa"], g1["margin"],
+                    {k: round(v, 5) for k, v in g2["drive_overlap_by_part"].items()}, b2, g2["sigma_mpa"], g2["margin"],
+                    gq["sigma_mpa"], h1["margin"]))
+    finally:
+        shutil.rmtree(tmp)
+
+
 def case_weights():
     import grade_watch as G
     w = {p[0]: p[4] for p in G.JOB_PARTS}
@@ -201,7 +344,8 @@ def main(argv):
         return 0
     fails = 0
     for name, fn in (("sheets", case_sheets), ("lewis", case_lewis), ("arithmetic", case_arithmetic),
-                     ("material", case_material), ("weights", case_weights), ("barrel", case_barrel)):
+                     ("material", case_material), ("part_materials", case_part_materials), ("weights", case_weights),
+                     ("barrel", case_barrel), ("per_part", case_per_part)):
         try:
             print("PASS %-10s %s" % (name, fn()))
         except Exception as e:      # noqa
