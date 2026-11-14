@@ -201,9 +201,10 @@ def centre_arbor(C, lo, hi, pinion, wheel):
 
 
 def hand_arbor(A, z0, z1, gear_solid):
-    """Seconds or day arbor: shaft 0.6, top 0.5, and a 0.3 tip for the hand from 9.9 to 10.3."""
+    """Seconds or day arbor: shaft 0.6 with a 0.8 collar under the plate above (it holds the arbor down),
+    top 0.5, and a 0.3 tip for the hand from 9.9 to 10.3."""
     x, y = A
-    return union([cyl(x, y, z0, z1, 0.6), cyl(x, y, z0 - 0.7, z0 + 0.01, 0.3), cyl(x, y, z1 - 0.01, 9.9, 0.5),
+    return union([cyl(x, y, z0, z1, 0.6), cyl(x, y, z1 - 0.4, z1, 0.8), cyl(x, y, z0 - 0.7, z0 + 0.01, 0.3), cyl(x, y, z1 - 0.01, 9.9, 0.5),
                   cyl(x, y, 9.89, 10.3, 0.3), gear_solid])
 
 
