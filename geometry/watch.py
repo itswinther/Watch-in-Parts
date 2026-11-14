@@ -184,18 +184,22 @@ class Movement:
                 raise FormatError("%s: needs a non-empty list of part files" % where)
             out = []
             for n in names:
-                if not isinstance(n, str) or not NAME_RE.match(n):
-                    raise FormatError("%s: bad part name %r (letters, digits, _ and - only, no extension)" % (where, n))
-                if n == "barrel":
-                    raise FormatError("%s: 'barrel' is reserved for the supplied barrel and cannot be a part name" % where)
-                if n in used:
-                    raise FormatError("part '%s' is used more than once" % n)
-                used.add(n)
-                if len(used) > MAX_PARTS:
-                    raise FormatError("more than %d parts" % MAX_PARTS)
+                reserve(n, where)
                 out.append(load_stl(n))
             return out
+
+        def reserve(n, where):
+            if not isinstance(n, str) or not NAME_RE.match(n):
+                raise FormatError("%s: bad part name %r (letters, digits, _ and - only, no extension)" % (where, n))
+            if n == "barrel":
+                raise FormatError("%s: 'barrel' is reserved for the supplied barrel and cannot be a part name" % where)
+            if n in used:
+                raise FormatError("part '%s' is used more than once" % n)
+            used.add(n)
+            if len(used) > MAX_PARTS:
+                raise FormatError("more than %d parts" % MAX_PARTS)
         self.doc = doc
+        self.load_part = load_stl       # Part 5 reads the keyless section's part files through it (same checks, same cache)
         self.barrel_speed = BARREL_TURNS_PER_HOUR      # the grader sets CHANGED_BARREL_TURNS_PER_HOUR at stage 3
         fixed_names = doc.get("fixed")
         self.fixed_parts = dict(zip(fixed_names if isinstance(fixed_names, list) else [], parts(fixed_names, "fixed")))
@@ -231,6 +235,30 @@ class Movement:
             if not all(isinstance(t, int) and 3 <= t <= 1000 for t in (ta, tb)):
                 raise FormatError("meshes[%d]: tooth counts must be integers from 3 to 1000" % i)
             self.meshes.append((a, ta, b, tb))
+        # friction_on (SESSION.md Decisions 2026-11-14 15:47): a mobile carried by friction on another coaxial mobile.
+        # In the going-train checks it turns with its carrier (speeds()); in the crown-winding part it is a free body.
+        self.friction = {}
+        for name, m in mob.items():
+            fo = m.get("friction_on")
+            if fo is None:
+                continue
+            if not isinstance(fo, str) or fo not in self.mobiles or fo in ("barrel", name):
+                raise FormatError("mobile '%s': 'friction_on' must name another mobile of the file (not 'barrel')" % name)
+            self.friction[name] = fo
+        for name, fo in self.friction.items():
+            if fo in self.friction:
+                raise FormatError("mobile '%s': 'friction_on' names '%s', which is itself carried by friction" % (name, fo))
+            a, b = self.mobiles[name]["axis"], self.mobiles[fo]["axis"]
+            if math.hypot(a[0] - b[0], a[1] - b[1]) > COAX_TOL:
+                raise FormatError("mobile '%s': 'friction_on' needs a coaxial mobile; the axes of '%s' and '%s' are %.4f mm "
+                                  "apart (at most %g)" % (name, name, fo, math.hypot(a[0] - b[0], a[1] - b[1]), COAX_TOL))
+        # the crown-winding (keyless) section: its part names count once with the others here; the section itself, and
+        # its part files, are read by geometry/keyless_job.py when Part 5 runs
+        from .keyless_job import keyless_part_names
+        self.keyless_names = keyless_part_names(doc.get("keyless"))
+        self.keyless_solids = {}        # filled by attach_keyless() (Part 4 when Part 5 is graded)
+        for n in self.keyless_names:
+            reserve(n, "keyless")
         self.hands = {}
         hd = doc.get("hands")
         if not isinstance(hd, dict):
@@ -251,17 +279,20 @@ class Movement:
     # ---- arithmetic ----
     def speeds(self, meshes=None):
         """Clockwise turns per hour of every mobile reached from the barrel, as exact fractions.
-        Returns (speeds, conflicts). Every declared mesh is external: it reverses direction.
+        Returns (speeds, conflicts). Every declared mesh is external: it reverses direction. A `friction_on` mobile
+        and its carrier turn as one, at the same speed, whichever of the two is reached first.
         meshes: the meshes to follow (default: every declared mesh)."""
         w = {"barrel": self.barrel_speed}
         conflicts = []
+        links = [(a, b, -Fraction(ta, tb)) for a, ta, b, tb in (self.meshes if meshes is None else meshes)]
+        links += [(c, f, Fraction(1)) for f, c in getattr(self, "friction", {}).items()]
         changed = True
         while changed:
             changed = False
-            for a, ta, b, tb in (self.meshes if meshes is None else meshes):
-                for src, ts, dst, td in ((a, ta, b, tb), (b, tb, a, ta)):
+            for a, b, r in links:
+                for src, dst, k in ((a, b, r), (b, a, 1 / r)):
                     if src in w:
-                        v = -w[src] * Fraction(ts, td)
+                        v = w[src] * k
                         if dst not in w:
                             w[dst] = v
                             changed = True
@@ -401,13 +432,24 @@ class Movement:
             out.setdefault(group[n], []).append(n)
         return sorted(out.values(), key=lambda g: (-len(g), names.index(g[0])))
 
-    def all_parts(self):
-        """name -> solid, for every part: the supplied barrel, the fixed parts and the parts of every mobile."""
+    def all_parts(self, keyless=False):
+        """name -> solid, for every part: the supplied barrel, the fixed parts and the parts of every mobile.
+        keyless: also the parts of the keyless section that attach_keyless() has read (none until then); the
+        assembly (Part 4) uses them when the crown-winding part is graded (A's request 21:20, agreed by B)."""
         out = {"barrel": self.mobiles["barrel"]["solid"]}
         out.update(self.fixed_parts)
         for m in self.mobiles.values():
             out.update(m["parts"])
+        if keyless:
+            out.update(self.keyless_solids)
         return out
+
+    def attach_keyless(self):
+        """Read the keyless section's part files (through the movement's own loader) so that the assembly includes
+        them. FormatError if one does not load; then none is attached."""
+        solids = {n: self.load_part(n) for n in self.keyless_names}
+        self.keyless_solids = solids
+        return solids
 
     def volumes(self):
         """(volume of the union of the fixed parts, sum of the volumes of every part of every mobile
@@ -417,7 +459,7 @@ class Movement:
 
     def assembly_box(self):
         lo, hi = np.full(3, np.inf), np.full(3, -np.inf)
-        for solid in self.all_parts().values():
+        for solid in self.all_parts(keyless=True).values():
             bb = np.array(solid.bounding_box())
             lo, hi = np.minimum(lo, bb[:3]), np.maximum(hi, bb[3:])
         return lo - ASM_CLEAR, hi + ASM_CLEAR
@@ -425,8 +467,9 @@ class Movement:
     def assembly_replay(self, order, paths):
         """Put the parts in one at a time. Returns per-part results and the list installed cleanly.
         A part is tested against every part placed before it, parts of its own mobile included.
-        A part missing from `order` stands in its assembled position from the start and is not installed."""
-        parts = self.all_parts()
+        A part missing from `order` stands in its assembled position from the start and is not installed.
+        The keyless section's parts take part once attach_keyless() has read them (Part 5 graded)."""
+        parts = self.all_parts(keyless=True)
         lo, hi = self.assembly_box()
         placed = [(n, solid) for n, solid in parts.items() if n not in order]
         results, installed = {n: {"not_in_order": True} for n, _ in placed}, []
@@ -723,7 +766,7 @@ def load_assembly(folder, movement):
             raise FormatError("assembly.json is not valid JSON") from e
     if not isinstance(doc, dict) or not isinstance(doc.get("order"), list) or not isinstance(doc.get("paths"), dict):
         raise FormatError("assembly.json: needs a list 'order' and an object 'paths'")
-    names = set(movement.all_parts())
+    names = set(movement.all_parts(keyless=True))     # keyless parts only once attach_keyless() has read them
     order = []
     for n in doc["order"]:
         if n in names and n not in order:

@@ -16,7 +16,13 @@ Cases (the letters of the builder brief):
   e  assembly.json missing: P4 scores 0, the others pass, reward = 0.5 x (1 - 0.25/0.75)
   f  movement.json missing, variant present: P1, P2 and P4 fail their gates; P3 is still graded, all its checks
      run, and its same_frame gate fails because there is no movement.json to compare with, so P3 scores 0 too
-     and the reward is 0 (decided: the variant is defined against movement.json; without it there is no job)"""
+     and the reward is 0 (decided: the variant is defined against movement.json; without it there is no job)
+Quick cases for crown winding (Part 5's format, geometry/keyless_job.py; graded only when KEYLESS_IN_JOB):
+  keyless_format  a `keyless` section loads and its parts are read; a part used twice (keyless and a mobile, keyless
+                  and fixed, twice in keyless) is a format error; the section's own rules; no section: as before
+  friction_on     a friction_on mobile turns at its carrier's speed; bad carriers are format errors; P5's split
+  keyless_assembly with P5 on, the keyless parts are parts of Part 4 (checks, replay, standing in place)
+  keyless_switch  the P5 row follows KEYLESS_IN_JOB; the scaled table agrees with A's files"""
 import json
 import os
 import shutil
@@ -147,6 +153,165 @@ def case_deadline(job, tmp):
     return "past the deadline: not run, %r; before it: runs" % info["error"]
 
 
+CACHE = {}          # part solids shared by the quick cases below (geometry.watch's cache: by name and file bytes)
+
+
+def _keyless_folder(job, tmp, name, keyless=True, friction=True):
+    """A copy of the job folder whose movement.json has the cannon pinion and minute hand as their own mobile
+    `cannon`, "friction_on": "centre" (friction), and a small `keyless` section (keyless) whose parts are byte copies
+    of hand parts (their shapes do not matter to the format)."""
+    folder = os.path.join(tmp, name)
+    shutil.copytree(job, folder)
+    for src, dst in (("hour_hand", "k_stem"), ("minute_hand", "k_ratchet"), ("seconds_hand", "k_wheel"),
+                     ("day_hand", "k_slide")):
+        shutil.copyfile(os.path.join(folder, "parts", src + ".step"), os.path.join(folder, "parts", dst + ".step"))
+
+    def edit(doc):
+        if friction:
+            cen = doc["mobiles"]["centre"]
+            doc["mobiles"]["centre"] = dict(cen, parts=[p for p in cen["parts"] if p not in ("cannon", "minute_hand")])
+            doc["mobiles"]["cannon"] = dict(cen, parts=["cannon", "minute_hand"], friction_on="centre")   # material kept
+            for e in doc["meshes"]:
+                if e["driver"] == "centre" and e["driven"] == "minute_wheel":
+                    e["driver"] = "cannon"
+            doc["hands"]["minute"]["mobile"] = "cannon"
+        if keyless:
+            cx, cy = doc["case_centre"]
+            doc["keyless"] = {"stem": {"parts": ["k_stem"], "point": [cx, cy, 5.5], "direction": [0.8090, 0.5878, 0]},
+                              "arbor": {"parts": ["k_ratchet"]},
+                              "mobiles": {"k_wheel": {"kind": "free", "dof": "rot", "point": [6.1, -2.9, 0],
+                                                      "direction": [0, 0, 1], "parts": ["k_wheel"]},
+                                          "k_slide": {"kind": "spring", "dof": "slide", "direction": [0.8090, 0.5878, 0],
+                                                      "rest": -1, "on_stem": True, "parts": ["k_slide"]}}}
+    _edit(folder, G.JOB_MOVEMENT, edit)
+    return folder
+
+
+def _format_error(folder, fn=None):
+    """The FormatError message of loading movement.json (and fn(movement) after it), or None."""
+    from geometry import watch as W
+    from geometry.core import FormatError
+    try:
+        m = W.load_movement(folder, cache=CACHE)
+        if fn is not None:
+            fn(m)
+    except FormatError as e:
+        return str(e)
+    return None
+
+
+def case_keyless_format(job, tmp):
+    """The `keyless` section (Part 5's format): it loads, its parts are read through the movement's loader, a part
+    used twice across fixed, mobiles and keyless is a format error, and the section's own rules hold."""
+    from geometry import watch as W
+    from geometry import keyless_job as KJ
+    folder = _keyless_folder(job, tmp, "keyless")
+    m = W.load_movement(folder, cache=CACHE)
+    assert m.keyless_names == ["k_stem", "k_ratchet", "k_wheel", "k_slide"], m.keyless_names
+    k, solids = KJ.load_keyless(m)
+    assert sorted(solids) == ["k_ratchet", "k_slide", "k_stem", "k_wheel"] and all(s.volume() > 0 for s in solids.values())
+    assert k["mobiles"]["k_slide"]["on_stem"] and k["mobiles"]["k_slide"]["rest"] == -1 and k["arbor"] == ["k_ratchet"]
+    assert abs(k["stem"]["direction"][0] ** 2 + k["stem"]["direction"][1] ** 2 - 1) < 1e-12
+    msgs = {}
+    # a part used twice: in the keyless section and in a mobile; in the keyless section and in fixed; twice in keyless
+    for label, change in (("mobile", lambda d: d["keyless"]["stem"].update(parts=["minute_hand"])),
+                          ("fixed", lambda d: d["keyless"]["arbor"].update(parts=["bridge"])),
+                          ("keyless", lambda d: d["keyless"]["mobiles"]["k_wheel"].update(parts=["k_stem"]))):
+        f2 = _keyless_folder(job, tmp, "twice_" + label)
+        _edit(f2, G.JOB_MOVEMENT, change)
+        msgs[label] = _format_error(f2)
+        assert msgs[label] is not None and "used more than once" in msgs[label], (label, msgs[label])
+    # the section's rules (FormatError from Part 5's reader; movement.json itself still loads)
+    for label, change, want in (
+            ("not radial", lambda d: d["keyless"]["stem"].update(point=[0, 0, 5.5]), "radial"),
+            ("not horizontal", lambda d: d["keyless"]["stem"].update(direction=[0.8, 0.58, 0.1]), "horizontal"),
+            ("on_stem rot", lambda d: d["keyless"]["mobiles"]["k_wheel"].update(on_stem=True), "ride on the stem"),
+            ("spring rest", lambda d: d["keyless"]["mobiles"]["k_slide"].update(rest=0), "rest 1 or -1"),
+            ("name clash", lambda d: d["keyless"]["mobiles"].update(third=d["keyless"]["mobiles"].pop("k_wheel")),
+             "bad mobile name")):
+        f2 = _keyless_folder(job, tmp, "rule_" + label.replace(" ", "_"))
+        _edit(f2, G.JOB_MOVEMENT, change)
+        assert _format_error(f2) is None, label
+        msgs[label] = _format_error(f2, KJ.parse_keyless)
+        assert msgs[label] is not None and want in msgs[label], (label, msgs[label])
+    # no keyless section: movement.json loads as before (P1 to P4 unchanged); Part 5's reader reports it
+    f3 = _keyless_folder(job, tmp, "no_keyless", keyless=False, friction=False)
+    m3 = W.load_movement(f3, cache=CACHE)
+    assert m3.keyless_names == [] and m3.friction == {}
+    assert "no 'keyless' section" in _format_error(f3, KJ.parse_keyless)
+    return "loads (%d keyless parts); twice: %s" % (len(solids), "; ".join("%s: %s" % kv for kv in msgs.items()))
+
+
+def case_friction_on(job, tmp):
+    """friction_on: the mobile turns at its carrier's speed (and drives what it meshes with); a carrier that is not
+    coaxial, or is itself carried, is a format error; P5's rule puts it, and what it alone drives, among the free
+    bodies."""
+    from geometry import watch as W
+    from geometry import keyless_job as KJ
+    folder = _keyless_folder(job, tmp, "friction", keyless=False)
+    m = W.load_movement(folder, cache=CACHE)
+    assert m.friction == {"cannon": "centre"}
+    sp, conflicts = m.speeds()
+    assert not conflicts and sp["cannon"] == sp["centre"] == G.HAND_SPEED["minute"], (sp, conflicts)
+    assert sp["hour_wheel"] == G.HAND_SPEED["hour"] and sp["day"] == G.DAY_SPEED, sp
+    ref = W.load_movement(job, cache=CACHE).speeds()[0]
+    assert all(sp[k] == v for k, v in ref.items()), "speeds differ from the reference's"
+    fixed, free = KJ.train_split(m)
+    assert sorted(fixed) == ["centre", "fourth", "seconds", "third"], fixed
+    assert free == ["cannon", "day", "day_idler", "hour_wheel", "minute_wheel"], free
+    msgs = {}
+    for label, change, want in (
+            ("not coaxial", lambda d: d["mobiles"]["cannon"].update(friction_on="third"), "coaxial"),
+            ("chain", lambda d: d["mobiles"]["centre"].update(friction_on="cannon"), "itself carried"),
+            ("barrel", lambda d: d["mobiles"]["cannon"].update(friction_on="barrel"), "not 'barrel'")):
+        f2 = _keyless_folder(job, tmp, "friction_" + label.replace(" ", "_"), keyless=False)
+        _edit(f2, G.JOB_MOVEMENT, change)
+        msgs[label] = _format_error(f2)
+        assert msgs[label] is not None and want in msgs[label], (label, msgs[label])
+    return "cannon turns at %s like centre; free bodies %s; errors: %s" % (sp["cannon"], free, msgs)
+
+
+def case_keyless_assembly(job, tmp):
+    """With Part 5 graded, the keyless section's parts are parts of movement.json for Part 4: they are in P4's
+    checks, in the replay (a part in `order` is replayed, one left out stands in place) and in the bounding box.
+    KEYLESS_IN_JOB is set True for this case only. Without it, P4's parts are those of the reference."""
+    from geometry import watch as W
+    from geometry import keyless_job as KJ
+    folder = _keyless_folder(job, tmp, "keyless_asm")
+    far = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 500.0], [0, 0, 0, 1]]
+    eye = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
+    with open(os.path.join(folder, G.JOB_ASSEMBLY), "w") as f:
+        json.dump({"order": ["k_stem"], "paths": {"k_stem": [far, eye]}}, f)
+    m = W.load_movement(folder, cache=CACHE)
+    old = KJ.KEYLESS_IN_JOB
+    try:
+        KJ.KEYLESS_IN_JOB = True
+        gates, checks, det = G._job_assembly(folder, m, G._run)
+    finally:
+        KJ.KEYLESS_IN_JOB = old
+    assert gates == {"files": True, "plan": True}, (gates, det.get("plan"))
+    assert set(m.keyless_names) <= set(checks) and len(checks) == len(m.all_parts()) + len(m.keyless_names), checks
+    res = det["parts"]
+    assert res["k_stem"]["format_messages"] and "moves" in res["k_stem"]["format_messages"][0], res["k_stem"]
+    assert all(res[n].get("not_in_order") for n in ("k_ratchet", "k_wheel", "k_slide")), {n: res[n] for n in m.keyless_names}
+    assert not any(checks[n] for n in m.keyless_names)
+    m2 = W.load_movement(folder, cache=CACHE)          # P5 off: no keyless part in Part 4
+    _, checks2, _ = G._job_assembly(folder, m2, G._run) if not old else (None, {}, None)
+    assert old or not set(m2.keyless_names) & set(checks2), checks2
+    return "P4 with P5 on: %d checks (%d keyless); k_stem replayed: %s; the other keyless parts stand in place" % (
+        len(checks), len(m.keyless_names), res["k_stem"]["format_messages"][0])
+
+
+def case_keyless_switch(job, tmp):
+    """KEYLESS_IN_JOB is False on this branch: no P5 row; the scaled table agrees with A's files."""
+    from geometry import keyless_job as KJ
+    errs = KJ.check_table()
+    assert not errs, errs
+    rows = [p[0] for p in G.JOB_PARTS]
+    assert rows == (["P1", "P2", "P3", "P4", "P5"] if KJ.KEYLESS_IN_JOB else ["P1", "P2", "P3", "P4"]), rows
+    return "KEYLESS_IN_JOB %s, parts %s, scaled %s" % (KJ.KEYLESS_IN_JOB, rows, KJ.scaled())
+
+
 def case_reward_formula(job, tmp):
     assert without("P3") == 0.5 * (1 - 0.15 / 0.75) == 0.4
     assert abs(without("P4") - 0.5 * (1 - 0.25 / 0.75)) < 1e-15
@@ -227,7 +392,8 @@ def case_f(job, tmp):
 
 
 QUICK = [("a", case_a), ("frame_gate", case_frame_gate), ("day_gate", case_day_gate), ("cache", case_cache), ("deadline", case_deadline),
-         ("reward_formula", case_reward_formula)]
+         ("reward_formula", case_reward_formula), ("keyless_format", case_keyless_format), ("friction_on", case_friction_on),
+         ("keyless_assembly", case_keyless_assembly), ("keyless_switch", case_keyless_switch)]
 SLOW = [("b", case_b), ("c", case_c), ("d", case_d), ("e", case_e), ("f", case_f)]
 
 
