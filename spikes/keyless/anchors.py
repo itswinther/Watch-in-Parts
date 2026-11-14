@@ -121,6 +121,24 @@ def drop_setting(j):
     j["fixed"] = [f for f in j["fixed"] if f != "setting_post"]
 
 
+def free_slider_with_pusher(d):
+    """The sliding pinion declared a free part, returned towards the winding pinion by a separate sprung
+    pusher ring on its outer face (a yoke-spring stand-in): exercises 'carried parts yield first' and
+    'springs push free parts'."""
+    import shapes as S
+    p = os.path.join(d, "keyless.json")
+    j = json.load(open(p))
+    sp = j["mobiles"]["sliding_pinion"]
+    sp["kind"] = "free"
+    sp.pop("rest", None)
+    S.write_stl(os.path.join(d, "parts", "pusher.stl"),
+                S.cyl_x(0, 0, 3.92, 4.2, 0.8, 64) - S.cyl_x(0, 0, 3.8, 4.3, 0.5, 64))
+    j["mobiles"]["pusher"] = {"kind": "spring", "dof": "slide", "direction": [1, 0, 0], "rest": -1,
+                              "parts": ["pusher"]}
+    with open(p, "w") as fh:
+        json.dump(j, fh, indent=1)
+
+
 def symlink_part(d):
     p = os.path.join(d, "parts", "click.stl")
     os.remove(p)
@@ -156,12 +174,20 @@ ANCHORS = [
      sc(*[k for k in C.STEPS if k != "wind"]), "le"),
     ("winding works brake the barrel (square dog teeth instead of Breguet)", {"breguet_square": True}, None,
      sc("assemble", "wind", "set", "return"), "le"),
+    ("free sliding pinion + sprung pusher, Breguet teeth symmetric: still cannot wind",
+     {"breguet_steep": 0.5}, free_slider_with_pusher, sc("assemble", "hold"), "le"),
+    ("free sliding pinion + sprung pusher, square dog teeth: still brakes the barrel",
+     {"breguet_square": True}, free_slider_with_pusher, sc("assemble", "wind", "set", "return"), "le"),
+    ("free sliding pinion + sprung pusher, proper Breguet teeth (control: reported, not a bound)", {},
+     free_slider_with_pusher, 1.0, "le"),
     ("sliding pinion's spur teeth 0.15 further out: meet the setting wheel before the Breguet teeth let go",
      {"teeth_shift": 0.15}, None, sc(*[k for k in C.STEPS if k != "backward"]), "le"),
     ("yoke stroke too small (counterbore 0.6 deeper: the pinion is dragged only 0.15)", {"cbore_end": 3.6}, None,
      sc("assemble", "wind", "hold", "run", "backward"), "le"),
     ("sliding pinion spring pointing the wrong way", {"rest_sign_slider": 1}, None, sc("assemble", "hold"), "le"),
     ("crown wheel 0.1 off its declared axis (caught at rest)", {"shift": {"crown_wheel": (0.1, 0.0, 0.0)}}, None, 0.0, "eq"),
+    ("X barrel wheel drawn 0.05 into its neighbours (overlap at rest, not phasable)",
+     {"shift": {"barrel_wheel": (0.0, -0.05, 0.0)}}, None, 0.0, "eq"),
     # ----- exploit hunt -----
     ("X nothing engages (no Breguet or setting teeth)", {"no_teeth": True}, None, sc("assemble", "hold"), "le"),
     ("X stem, sliding pinion and winding pinion fused into one mobile", {}, edit_json(fuse), sc("assemble", "wind"), "le"),
@@ -207,7 +233,7 @@ def run(i):
     rw = os.path.join(d, "reward.txt")
     dt = os.path.join(d, "details.json")
     p = subprocess.run([sys.executable, "-I", os.path.join(HERE, "grade.py"), d, os.path.join(HERE, "data"),
-                        "--reward", rw, "--details", dt, "--jobs", "3"], capture_output=True, text=True)
+                        "--reward", rw, "--details", dt, "--jobs", os.environ.get("ANCHOR_JOBS", "3")], capture_output=True, text=True)
     failed, secs, got = [], "-", float(open(rw).read())
     if os.path.exists(dt):
         j = json.load(open(dt))
