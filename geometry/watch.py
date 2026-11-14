@@ -101,6 +101,8 @@ class Movement:
             for n in names:
                 if not isinstance(n, str) or not NAME_RE.match(n):
                     raise FormatError("%s: bad part name %r (letters, digits, _ and - only, no extension)" % (where, n))
+                if n == "barrel":
+                    raise FormatError("%s: 'barrel' is reserved for the supplied barrel and cannot be a part name" % where)
                 if n in used:
                     raise FormatError("part '%s' is used more than once" % n)
                 used.add(n)
@@ -155,15 +157,16 @@ class Movement:
         return m["solid"] if deg == 0.0 else rot_about(m["solid"], m["axis"], deg)
 
     # ---- arithmetic ----
-    def speeds(self):
+    def speeds(self, meshes=None):
         """Clockwise turns per hour of every mobile reached from the barrel, as exact fractions.
-        Returns (speeds, conflicts). Every declared mesh is external: it reverses direction."""
+        Returns (speeds, conflicts). Every declared mesh is external: it reverses direction.
+        meshes: the meshes to follow (default: every declared mesh)."""
         w = {"barrel": self.barrel_speed}
         conflicts = []
         changed = True
         while changed:
             changed = False
-            for a, ta, b, tb in self.meshes:
+            for a, ta, b, tb in (self.meshes if meshes is None else meshes):
                 for src, ts, dst, td in ((a, ta, b, tb), (b, tb, a, ta)):
                     if src in w:
                         v = -w[src] * Fraction(ts, td)
@@ -229,10 +232,12 @@ class Movement:
 
     def assembly_replay(self, order, paths):
         """Put the parts in one at a time. Returns per-part results and the list installed cleanly.
-        A part is tested against every part placed before it, except parts of its own mobile."""
+        A part is tested against every part placed before it, except parts of its own mobile.
+        A part missing from `order` stands in its assembled position from the start and is not installed."""
         parts = self.all_parts()
         lo, hi = self.assembly_box()
-        placed, results, installed = [], {}, []
+        placed = [(n, solid, group) for n, (solid, group) in parts.items() if n not in order]
+        results, installed = {n: {"not_in_order": True} for n, _, _ in placed}, []
         for name in order:
             solid, group = parts[name]
             P = paths.get(name)

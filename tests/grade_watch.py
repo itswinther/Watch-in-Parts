@@ -1,6 +1,8 @@
 """Grader for the mechanical watch task. Run from this directory as:
     python -I grade_watch.py /abs/submission_folder [--stage 1|2|3|4] [--prev /abs/previous_stage_folder]
-                             [--reward FILE] [--details FILE]
+                             [--reward FILE] [--details FILE] [--skip CHECK,CHECK]
+--skip leaves named scored checks out (only for runs made before a check existed); the list is in the output.
+The grader reads no environment variables.
 Stage 1: design the movement. Stage 2: add a 24-hour hand to a frozen stage-1 movement (--prev).
 Stage 3: change request: the barrel turns once every 6 hours; every design check again, times a
 kept-parts factor against the stage-2 movement (--prev).
@@ -54,14 +56,18 @@ def stage_weights(stage):
     return dict(WEIGHTS, **(WEIGHTS_2 if stage in (2, 3) else {}))
 
 
-def grade_design(folder, stage=1, prev=None):
+STAGE_GATES = {1: GATES, 2: GATES + ("locked", "day_declared"), 3: GATES + ("change_met",)}
+CHANGE_CHECKS = ("hour", "minute", "seconds", "day_hand")     # stage 3: the change request is met
+
+
+def grade_design(folder, stage=1, prev=None, skip=()):
     import math
     from geometry import watch as W
     from geometry.core import ivol
     weights = stage_weights(stage)
-    for k in os.environ.get("WATCH_SKIP", "").split(","):      # only for grading runs made before a check existed
+    for k in skip:                  # --skip, only for grading runs made before a check existed
         weights.pop(k, None)
-    gates = {g: False for g in GATES + (("locked",) if stage == 2 else ())}
+    gates = {g: False for g in STAGE_GATES[stage]}
     checks = {k: False for k in weights}
     details = {}
     st = {"factor": 1.0}
@@ -102,10 +108,28 @@ def grade_design(folder, stage=1, prev=None):
     gates["assembled"], details["assembled"] = _run(assembled)
     if stage == 2:
         gates["locked"], details["locked"] = _run(lambda: locked_design(prev, folder))
+        gates["day_declared"], details["day_declared"] = _run(lambda: ("day" in m.hands, {}))
 
     speeds, conflicts = m.speeds()
+
+    def mesh_runs():
+        """Every declared mesh through the train test, once. Its results are shared by train and the hands."""
+        out = []
+        for a, ta, b, tb in m.meshes:
+            x = m.mesh_run(a, ta, b, tb)
+            x["pair"] = "%s/%s" % (a, b)
+            x["passes"] = x["worst_volume"] <= W.VOL_TOL and x["largest_gap"] <= W.ENGAGE_GAP and x["smallest_drive_overlap"] > W.VOL_TOL
+            out.append(x)
+        st["mesh_runs"] = out
+        return True, {}
+    st["mesh_runs"] = None
+    _run(mesh_runs)
+    runs = st["mesh_runs"]
+    # A declared mesh drives only if it passes the train test; if the test failed to run, nothing drives.
+    good = [e for e, x in zip(m.meshes, runs) if x["passes"]] if runs is not None else []
+    driven, _ = m.speeds(good)
     if stage == 3:
-        ok, details["kept"] = _run(lambda: kept_parts(prev, folder, speeds))
+        ok, details["kept"] = _run(lambda: kept_parts(prev, folder, driven))
         st["factor"] = details["kept"].get("factor", 0.0) if ok else 0.0
 
     def spin():
@@ -117,14 +141,11 @@ def grade_design(folder, stage=1, prev=None):
         return all(v > W.VOL_TOL for d in r.values() for v in d.values()), r
 
     def train():
-        r = {"conflicts": conflicts, "meshes": []}
+        if runs is None:
+            return False, {"error": "the mesh test did not run to the end"}
+        r = {"conflicts": conflicts, "meshes": runs}
         ok = not conflicts and bool(m.meshes) and all(m.hands[h][0] in speeds for h in HAND_SPEED)
-        for a, ta, b, tb in m.meshes:
-            x = m.mesh_run(a, ta, b, tb)
-            x["pair"] = "%s/%s" % (a, b)
-            r["meshes"].append(x)
-            ok = ok and x["worst_volume"] <= W.VOL_TOL and x["largest_gap"] <= W.ENGAGE_GAP and x["smallest_drive_overlap"] > W.VOL_TOL
-        return ok, r
+        return ok and all(x["passes"] for x in runs), r
 
     def clear():
         meshing = {frozenset((a, b)) for a, _, b, _ in m.meshes}
@@ -140,8 +161,8 @@ def grade_design(folder, stage=1, prev=None):
 
     def hand(h):
         def fn():
-            w = speeds.get(m.hands[h][0])
-            return (not conflicts) and w == HAND_SPEED[h], {"clockwise_turns_per_hour": str(w)}
+            w = driven.get(m.hands[h][0])
+            return (not conflicts) and w == HAND_SPEED[h], {"clockwise_turns_per_hour_through_working_meshes": str(w)}
         return fn
 
     def coaxial():
@@ -160,8 +181,8 @@ def grade_design(folder, stage=1, prev=None):
     def day_hand():
         if "day" not in m.hands:
             return False, {"error": "no 'day' hand declared"}
-        w = speeds.get(m.hands["day"][0])
-        return (not conflicts) and w == DAY_SPEED, {"clockwise_turns_per_hour": str(w)}
+        w = driven.get(m.hands["day"][0])
+        return (not conflicts) and w == DAY_SPEED, {"clockwise_turns_per_hour_through_working_meshes": str(w)}
 
     def day_place():
         if "day" not in m.hands:
@@ -179,6 +200,9 @@ def grade_design(folder, stage=1, prev=None):
              "seconds": hand("seconds"), "coaxial": coaxial, "hands": hands, "size": size}
     for k in weights:
         checks[k], details[k] = _run(table[k])
+    if stage == 3:
+        # the change request is met: every hand requirement passes with the 6-hour barrel (a skipped one is not checked)
+        gates["change_met"] = all(checks.get(k, True) for k in CHANGE_CHECKS)
     return result()
 
 
@@ -301,10 +325,11 @@ def grade_assembly(folder, prev):
     return out
 
 
-def grade(folder, stage=1, prev=None):
-    if stage == 4:
-        return grade_assembly(folder, prev)
-    return grade_design(folder, stage, prev)
+def grade(folder, stage=1, prev=None, skip=()):
+    skip = [k for k in skip if k]
+    res = grade_assembly(folder, prev) if stage == 4 else grade_design(folder, stage, prev, skip)
+    res["skipped"] = skip
+    return res
 
 
 def main(argv):
@@ -317,13 +342,13 @@ def main(argv):
     if len(args) != 1 or not os.path.isabs(args[0]):
         print("usage: grade_watch.py /abs/submission_folder")
         return 2
-    res = grade(args[0], int(opts.get("--stage", "1")), opts.get("--prev"))
+    res = grade(args[0], int(opts.get("--stage", "1")), opts.get("--prev"), opts.get("--skip", "").split(","))
     if opts.get("--details"):
         with open(opts["--details"], "w") as f:
             json.dump(res, f, indent=1, default=str)
     with open(reward_file, "w") as f:
         f.write("%.6f\n" % res["reward"])
-    print(json.dumps({k: res[k] for k in ("reward", "p", "gates", "checks", "kept_factor") if k in res}))
+    print(json.dumps({k: res[k] for k in ("reward", "p", "gates", "checks", "kept_factor", "skipped") if k in res}))
     return 0
 
 
