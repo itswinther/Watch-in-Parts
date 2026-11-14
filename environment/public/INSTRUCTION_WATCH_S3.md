@@ -7,7 +7,7 @@ barrel, and keep as many of the received part files byte-for-byte unchanged as
 you can, following "Stage 3" in `SPEC_WATCH.md`. The spec says exactly how kept
 parts are counted and how they enter the score.
 
-Write the result into `work/` and submit as the spec describes. Only the last
+Parts are STEP files made with CadQuery (see "What you submit" in the spec). Write the result into `work/` and submit as the spec describes. Only the last
 accepted submission is graded, by a separate program. You have about 35 minutes.
 
 ## How you are run

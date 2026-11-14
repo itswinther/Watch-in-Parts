@@ -5,7 +5,7 @@ Stage 1: design the movement. Stage 2: add a 24-hour hand to a frozen stage-1 mo
 Stage 3: change request: the barrel turns once every 6 hours; every design check again, times a
 kept-parts factor against the stage-2 movement (--prev).
 Stage 4: give an assembly order and paths for a frozen stage-3 movement (--prev).
-The folder holds movement.json and parts/<name>.step or .stl; only files named in movement.json are opened.
+The folder holds movement.json and parts/<name>.step; only files named in movement.json are opened.
 Never runs submitted code. Writes reward 0 first."""
 import json
 import os
@@ -183,13 +183,16 @@ def grade_design(folder, stage=1, prev=None):
 
 
 def _part_file(folder, name):
-    """The file of part `name`: parts/<name>.step if it exists, otherwise parts/<name>.stl."""
-    step = os.path.join(folder, "parts", name + ".step")
-    return step if os.path.isfile(step) else os.path.join(folder, "parts", name + ".stl")
+    """The file of part `name`, as the loader picks it (geometry.watch.part_path), or None."""
+    from geometry import watch as W
+    return W.part_path(folder, name)
 
 
 def _same_file(a, b):
-    if not (os.path.isfile(a) and os.path.isfile(b)):
+    """Both files exist, have the same extension and the same bytes."""
+    if a is None or b is None or not (os.path.isfile(a) and os.path.isfile(b)):
+        return False
+    if os.path.splitext(a)[1] != os.path.splitext(b)[1]:
         return False
     with open(a, "rb") as fa, open(b, "rb") as fb:
         return fa.read() == fb.read()

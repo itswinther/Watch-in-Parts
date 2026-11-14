@@ -1,6 +1,8 @@
 """Reference for the four-stage watch task.
     python solution/reference_watch.py OUT_DIR
-writes OUT_DIR/stage1 .. OUT_DIR/stage4, each with movement.json and parts/*.stl (stage4 also assembly.json).
+writes OUT_DIR/stage1 .. OUT_DIR/stage4, each with movement.json and parts/*.step (stage4 also assembly.json).
+Parts are built on the CAD kernel (geometry/watch_gears_cad.py, CadQuery/OpenCASCADE) and written as STEP.
+Like an agent, each stage copies the part files it keeps from the stage before and writes only new ones.
 
 Stage 1 train: barrel 96 -> 24 ("third"), 60 -> 30 (centre, minute hand), 90 -> 12 ("fourth"),
 96 -> 12 (seconds). Motion work on the dial side: cannon 12 -> 36 (minute wheel), 12 -> 48 (hour wheel,
@@ -18,8 +20,20 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 import numpy as np
 from geometry import watch as W
-from geometry import watch_gears as G
-from geometry.core import union, write_stl, box
+from geometry import watch_gears_cad as GC
+
+union, box = GC.union, GC.box
+_FILES = {}                # id(solid) -> the STEP file it was first written to
+
+
+def cyl(x, y, z0, z1, r, seg=None):
+    """True circular cylinder (the old mesh helper took a segment count; it is ignored here)."""
+    return GC.cyl(x, y, z0, z1, r)
+
+
+def minus(a, b):
+    """a with b (a solid or a list of tool solids) cut away."""
+    return GC.cut(a, *(b if isinstance(b, list) else [b]))
 
 M_A, M_B, M_C, M_D = 0.2, 0.25, 21.6 / 102, 0.2        # modules of the four train layers
 M_E, M_F = 0.25, 0.2                                     # motion work
@@ -71,19 +85,19 @@ def gear_at(axis, teeth, module, z, toward, partner=None):
         pt, pang = partner
         delta = ((line + 180.0) - pang) % (360.0 / pt)
         phase = line + delta * pt / teeth + 180.0 / teeth
-    return G.gear(teeth, module, z[0], z[1], phase_deg=phase).translate([axis[0], axis[1], 0]), phase
+    return GC.gear(teeth, module, z[0], z[1], phase_deg=phase, x=axis[0], y=axis[1]), phase
 
 
 def arbor(axis, z0, z1, r=0.5, pivot=0.3, plen=0.7, top=None):
     x, y = axis
     top = plen if top is None else top
-    return union([W.cyl(x, y, z0, z1, r), W.cyl(x, y, z0 - plen, z0 + 0.01, pivot), W.cyl(x, y, z1 - 0.01, z1 + top, pivot)])
+    return union([cyl(x, y, z0, z1, r), cyl(x, y, z0 - plen, z0 + 0.01, pivot), cyl(x, y, z1 - 0.01, z1 + top, pivot)])
 
 
 def hand(axis, z0, z1, length, hub_r, hole_r):
     x, y = axis
-    h = union([W.cyl(x, y, z0, z1, hub_r), box((x, y - 0.3, z0), (x + length, y + 0.3, z1))])
-    return h - W.cyl(x, y, z0 - 1, z1 + 1, hole_r) if hole_r else h
+    h = union([cyl(x, y, z0, z1, hub_r), box((x, y - 0.3, z0), (x + length, y + 0.3, z1))])
+    return minus(h, cyl(x, y, z0 - 1, z1 + 1, hole_r)) if hole_r else h
 
 
 # swept radius of each mobile of the largest stage, below the dial (wheels) and with the hands
@@ -123,18 +137,18 @@ def frame(P, with_day):
     C, I, T, S, Mw, Id, D = (P[k] for k in ("centre", "third", "fourth", "seconds", "minute_wheel", "day_idler", "day"))
     (cx, cy), R_PLATE, spots = P["case"]
     lo, hi = PLATE[1] + 0.1, BRIDGE[0] - 0.1
-    plate = union([W.cyl(cx, cy, PLATE[0], PLATE[1], R_PLATE, 96)] + [W.cyl(x, y, PLATE[1] - 0.1, BRIDGE[0], 0.75) for x, y in spots])
-    bridge = union([W.cyl(cx, cy, BRIDGE[0], BRIDGE[1], R_PLATE, 96)] + [W.cyl(x, y, BRIDGE[1] - 0.1, DIAL[0], 0.75) for x, y in spots])
-    dial = W.cyl(cx, cy, DIAL[0], DIAL[1], R_PLATE, 96)
-    ph = [W.cyl(0, 0, -1.1, PLATE[1] + 1, 0.6)] + [W.cyl(a[0], a[1], lo - 0.8, PLATE[1] + 1, 0.4) for a in (I, T, C, S)]
-    bh = [W.cyl(a[0], a[1], BRIDGE[0] - 1, hi + 0.8, 0.4) for a in (I, T)] + [W.cyl(a[0], a[1], BRIDGE[0] - 1, BRIDGE[1] + 1, 0.6) for a in (C, S)]
-    bh += [W.cyl(Mw[0], Mw[1], BRIDGE[1] - 0.7, BRIDGE[1] + 1, 0.4)]
-    dh = [W.cyl(Mw[0], Mw[1], DIAL[0] - 1, DIAL[0] + 0.45, 0.4), W.cyl(C[0], C[1], DIAL[0] - 1, DIAL[1] + 1, 1.15), W.cyl(S[0], S[1], DIAL[0] - 1, DIAL[1] + 1, 0.6)]
+    plate = union([cyl(cx, cy, PLATE[0], PLATE[1], R_PLATE, 96)] + [cyl(x, y, PLATE[1] - 0.1, BRIDGE[0], 0.75) for x, y in spots])
+    bridge = union([cyl(cx, cy, BRIDGE[0], BRIDGE[1], R_PLATE, 96)] + [cyl(x, y, BRIDGE[1] - 0.1, DIAL[0], 0.75) for x, y in spots])
+    dial = cyl(cx, cy, DIAL[0], DIAL[1], R_PLATE, 96)
+    ph = [cyl(0, 0, -1.1, PLATE[1] + 1, 0.6)] + [cyl(a[0], a[1], lo - 0.8, PLATE[1] + 1, 0.4) for a in (I, T, C, S)]
+    bh = [cyl(a[0], a[1], BRIDGE[0] - 1, hi + 0.8, 0.4) for a in (I, T)] + [cyl(a[0], a[1], BRIDGE[0] - 1, BRIDGE[1] + 1, 0.6) for a in (C, S)]
+    bh += [cyl(Mw[0], Mw[1], BRIDGE[1] - 0.7, BRIDGE[1] + 1, 0.4)]
+    dh = [cyl(Mw[0], Mw[1], DIAL[0] - 1, DIAL[0] + 0.45, 0.4), cyl(C[0], C[1], DIAL[0] - 1, DIAL[1] + 1, 1.15), cyl(S[0], S[1], DIAL[0] - 1, DIAL[1] + 1, 0.6)]
     if with_day:
-        bh += [W.cyl(a[0], a[1], BRIDGE[1] - 0.7, BRIDGE[1] + 1, 0.4) for a in (Id, D)]
-        dh += [W.cyl(Id[0], Id[1], DIAL[0] - 1, DIAL[0] + 0.45, 0.4), W.cyl(D[0], D[1], DIAL[0] - 1, DIAL[1] + 1, 0.6)]
-    return {"main_plate": plate - union(ph), "bridge": bridge - union(bh), "dial": dial - union(dh),
-            "barrel_cock": W.cyl(0, 0, 1.15, 2.45, 3.0) - W.cyl(0, 0, 1.0, 1.7, 0.6)}
+        bh += [cyl(a[0], a[1], BRIDGE[1] - 0.7, BRIDGE[1] + 1, 0.4) for a in (Id, D)]
+        dh += [cyl(Id[0], Id[1], DIAL[0] - 1, DIAL[0] + 0.45, 0.4), cyl(D[0], D[1], DIAL[0] - 1, DIAL[1] + 1, 0.6)]
+    return {"main_plate": minus(plate, ph), "bridge": minus(bridge, bh), "dial": minus(dial, dh),
+            "barrel_cock": minus(cyl(0, 0, 1.15, 2.45, 3.0), cyl(0, 0, 1.0, 1.7, 0.6))}
 
 
 def build_stage1():
@@ -150,18 +164,18 @@ def build_stage1():
     parts["third"] = union([arbor(I, lo, hi), p1, w1])
     p2, _ = gear_at(C, 30, M_B, Z["B"], ang(C, I), (60, ph_w1))
     w2, ph_w2 = gear_at(C, 90, M_C, Z["C"], ang(C, T))
-    parts["centre"] = union([W.cyl(cx, cy, lo, hi, 0.8), W.cyl(cx, cy, lo - 0.7, lo + 0.01, 0.3), W.cyl(cx, cy, hi - 0.01, 11.4, 0.5), p2, w2])
+    parts["centre"] = union([cyl(cx, cy, lo, hi, 0.8), cyl(cx, cy, lo - 0.7, lo + 0.01, 0.3), cyl(cx, cy, hi - 0.01, 11.4, 0.5), p2, w2])
     parts["cannon"], ph_can = gear_at(C, 12, M_E, Z["E"], ang(C, Mw))
     p3, _ = gear_at(T, 12, M_C, Z["C"], ang(T, C), (90, ph_w2))
     w3, ph_w3 = gear_at(T, 96, M_D, Z["D"], ang(T, S))
     parts["fourth"] = union([arbor(T, lo, hi), p3, w3])
     p4, _ = gear_at(S, 12, M_D, Z["D"], ang(S, T), (96, ph_w3))
-    parts["seconds"] = union([W.cyl(sx, sy, lo, hi, 0.8), W.cyl(sx, sy, lo - 0.7, lo + 0.01, 0.3), W.cyl(sx, sy, hi - 0.01, 10.3, 0.5), p4])
+    parts["seconds"] = union([cyl(sx, sy, lo, hi, 0.8), cyl(sx, sy, lo - 0.7, lo + 0.01, 0.3), cyl(sx, sy, hi - 0.01, 10.3, 0.5), p4])
     w5, _ = gear_at(Mw, 36, M_E, Z["E"], ang(Mw, C), (12, ph_can))
     p5, ph_p5 = gear_at(Mw, 12, M_F, Z["F"], ang(Mw, C))
     parts["minute_wheel"] = union([arbor(Mw, BRIDGE[1] + 0.1, DIAL[0] - 0.1, top=0.4), w5, p5])
     w6, phase["hour"] = gear_at(C, 48, M_F, Z["F"], ang(C, Mw), (12, ph_p5))
-    parts["hour_wheel"] = union([W.cyl(cx, cy, 7.4, 10.3, 1.0), W.cyl(cx, cy, 8.4, 8.65, 1.6), w6]) - W.cyl(cx, cy, 7.0, 10.6, 0.7)
+    parts["hour_wheel"] = minus(union([cyl(cx, cy, 7.4, 10.3, 1.0), cyl(cx, cy, 8.4, 8.65, 1.6), w6]), cyl(cx, cy, 7.0, 10.6, 0.7))
     parts["hour_hand"] = hand(C, 9.9, 10.2, 6.0, 1.3, 0.85)
     parts["minute_hand"] = hand(C, 10.7, 11.0, 9.0, 1.0, 0.0)
     parts["seconds_hand"] = hand(S, 9.9, 10.2, 5.0, 0.9, 0.0)
@@ -203,7 +217,7 @@ def build_stage2(doc, parts, P, phase):
     dw, _ = gear_at(D, 48, M_DAY, Z["E"], ang(D, Id), (12, ph_gb))
     dx, dy = D
     z0, z1 = BRIDGE[1] + 0.1, DIAL[0] - 0.1
-    parts["day"] = union([W.cyl(dx, dy, z0, z1, 0.8), W.cyl(dx, dy, z0 - 0.7, z0 + 0.01, 0.3), W.cyl(dx, dy, z1 - 0.01, 10.3, 0.5), dw])
+    parts["day"] = union([cyl(dx, dy, z0, z1, 0.8), cyl(dx, dy, z0 - 0.7, z0 + 0.01, 0.3), cyl(dx, dy, z1 - 0.01, 10.3, 0.5), dw])
     parts["day_hand"] = hand(D, 9.9, 10.2, 3.2, 0.9, 0.0)
     parts.update(frame(P, with_day=True))
     doc["mobiles"]["day_idler"] = {"axis": list(Id), "parts": ["day_idler"]}
@@ -227,7 +241,7 @@ def build_stage3(doc, parts, P):
     parts["third_54"] = union([arbor(I, lo, hi), p1, w1])
     p2, _ = gear_at(C, 36, M_B, Z["B"], ang(C, I), (54, ph_w1))
     w2, _ = gear_at(C, 90, M_C, Z["C"], ang(C, T))
-    parts["centre_36"] = union([W.cyl(cx, cy, lo, hi, 0.8), W.cyl(cx, cy, lo - 0.7, lo + 0.01, 0.3), W.cyl(cx, cy, hi - 0.01, 11.4, 0.5), p2, w2])
+    parts["centre_36"] = union([cyl(cx, cy, lo, hi, 0.8), cyl(cx, cy, lo - 0.7, lo + 0.01, 0.3), cyl(cx, cy, hi - 0.01, 11.4, 0.5), p2, w2])
     doc["mobiles"]["third"]["parts"] = ["third_54"]
     doc["mobiles"]["centre"]["parts"] = ["centre_36" if n == "centre" else n for n in doc["mobiles"]["centre"]["parts"]]
     for e in doc["meshes"]:
@@ -265,7 +279,13 @@ def write(folder, doc, parts):
     os.makedirs(os.path.join(folder, "parts"))
     names = list(doc["fixed"]) + [p for mm in doc["mobiles"].values() for p in mm["parts"]]
     for n in names:
-        write_stl(os.path.join(folder, "parts", n + ".stl"), parts[n])
+        dst = os.path.join(folder, "parts", n + ".step")
+        src = _FILES.get(id(parts[n]))
+        if src and os.path.basename(src) == n + ".step" and os.path.isfile(src):
+            shutil.copyfile(src, dst)          # kept part: the same file, byte for byte
+        else:
+            GC.export(dst, parts[n])
+            _FILES[id(parts[n])] = dst
     with open(os.path.join(folder, "movement.json"), "w") as f:
         json.dump(doc, f, indent=1)
 

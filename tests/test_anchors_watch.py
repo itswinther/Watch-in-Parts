@@ -1,4 +1,7 @@
-"""Reference set for the four-stage watch task.   python tests/test_anchors_watch.py [WORKERS]
+"""Reference set for the four-stage watch task.
+    python tests/test_anchors_watch.py [WORKERS] [--only NAME[,NAME...]] [--base REF_DIR]
+--only runs the anchors whose name contains one of the given texts (exact name match wins if one is exact).
+--base reuses a reference already written by solution/reference_watch.py instead of building one.
 Builds the reference for all four stages, changes one thing per anchor, grades it and asserts the score.
 Gold is 1.00 at every stage, do-nothing 0.00, likely shortcuts and partial work lower.
 Anchors are graded in parallel (default 3 worker processes)."""
@@ -44,13 +47,22 @@ def edit(d, fn, name="movement.json"):
         json.dump(doc, f)
 
 
+def part_file(d, part):
+    return W.part_path(d, part)
+
+
 def touch_part(d, part):
-    """Same geometry, different bytes (the STL header)."""
-    p = os.path.join(d, "parts", part + ".stl")
+    """Same geometry, different bytes (the STEP header's file name; for an STL, its 80-byte header)."""
+    p = part_file(d, part)
     with open(p, "rb") as f:
         data = f.read()
+    if p.endswith(".step"):
+        new = data.replace(b"FILE_NAME('", b"FILE_NAME('changed_", 1)
+        assert new != data, "no FILE_NAME in " + p
+    else:
+        new = b"changed".ljust(80, b" ") + data[80:]
     with open(p, "wb") as f:
-        f.write(b"changed".ljust(80, b" ") + data[80:])
+        f.write(new)
 
 
 def nothing(d):
@@ -63,7 +75,8 @@ def swap_hands(doc):
 
 
 def dup_fixed(d):
-    shutil.copyfile(os.path.join(d, "parts", "bridge.stl"), os.path.join(d, "parts", "bridge_copy.stl"))
+    src = part_file(d, "bridge")
+    shutil.copyfile(src, os.path.join(d, "parts", "bridge_copy" + os.path.splitext(src)[1]))
     edit(d, lambda doc: doc["fixed"].append("bridge_copy"))
 
 
@@ -87,7 +100,7 @@ def use_stage(n):
 
 def touch_all(d):
     for n in os.listdir(os.path.join(d, "parts")):
-        touch_part(d, n[:-4])
+        touch_part(d, os.path.splitext(n)[0])
 
 
 def rename_mobile(old, new):
@@ -112,7 +125,8 @@ def drop_mesh(a, b):
 def old_wheel_as_fixed(d, base):
     """Keep the received third-wheel file and declare it a fixed ornament, moved out of the way by
     renaming nothing: it stands where it always stood, so it collides with the new third wheel."""
-    shutil.copyfile(os.path.join(base, "stage2", "parts", "third.stl"), os.path.join(d, "parts", "third.stl"))
+    src = part_file(os.path.join(base, "stage2"), "third")
+    shutil.copyfile(src, os.path.join(d, "parts", os.path.basename(src)))
     edit(d, lambda doc: doc["fixed"].append("third"))
 
 
@@ -120,7 +134,7 @@ def old_wheel_as_fixed(d, base):
 ANCHORS = [
     ("s1 gold", 1, lambda d, b: None, 1.0),
     ("s1 do nothing", 1, lambda d, b: nothing(d), 0.0),
-    ("s1 a part file missing", 1, lambda d, b: os.remove(os.path.join(d, "parts", "fourth.stl")), 0.0),
+    ("s1 a part file missing", 1, lambda d, b: os.remove(part_file(d, "fourth")), 0.0),
     ("s1 two fixed parts overlap", 1, lambda d, b: dup_fixed(d), 0.0),
     ("s1 hour and minute hands swapped", 1, lambda d, b: edit(d, swap_hands), fails(1, "hour", "minute")),
     ("s1 one tooth count declared wrong", 1, lambda d, b: edit(d, lambda doc: doc["meshes"][1].update(driven_teeth=31)),
@@ -164,11 +178,25 @@ def run_one(args):
 
 
 def main():
-    base = tempfile.mkdtemp()
-    ref.main(base)
+    args = sys.argv[1:]
+    opt = lambda k: args[args.index(k) + 1] if k in args and args.index(k) + 1 < len(args) else None
+    only, base = opt("--only"), opt("--base")
+    pos = [a for i, a in enumerate(args) if not a.startswith("--") and (i == 0 or args[i - 1] not in ("--only", "--base"))]
+    workers = int(pos[0]) if pos else 3
+    pick = list(range(len(ANCHORS)))
+    if only:
+        want = [w.strip() for w in only.split(",") if w.strip()]
+        names = [a[0] for a in ANCHORS]
+        pick = [i for i, n in enumerate(names) if any(w == n for w in want) or
+                any(w in n and w not in names for w in want)]
+        if not pick:
+            raise SystemExit("no anchor matches %r" % only)
+    if base is None:
+        base = tempfile.mkdtemp()
+        ref.main(base)
     bad = 0
-    with Pool(int(sys.argv[1]) if len(sys.argv) > 1 else 3) as pool:
-        for ok, line in pool.imap(run_one, [(i, base) for i in range(len(ANCHORS))]):
+    with Pool(workers) as pool:
+        for ok, line in pool.imap(run_one, [(i, base) for i in pick]):
             bad += not ok
             print(line, flush=True)
     return 1 if bad else 0

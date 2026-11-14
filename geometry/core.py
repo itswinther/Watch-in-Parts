@@ -164,6 +164,16 @@ def write_step(path, shape):
     w.Transfer(shape, STEPControl_AsIs)
     if w.Write(str(path)) != IFSelect_RetDone:
         raise OSError("STEP write failed: %s" % path)
+    # neutral header: the base name only, no time stamp, no author or directories
+    import re
+    with open(path, "r", encoding="latin-1") as f:
+        text = f.read()
+    name = os.path.basename(str(path)).replace("'", "")
+    text = re.sub(r"FILE_NAME\(.*?\);\s*(?=FILE_SCHEMA)", "FILE_NAME('%s','',(''),(''),'','','');\n" % name,
+                  text, count=1, flags=re.S)
+    text = re.sub(r"Open CASCADE STEP translator [0-9.]+ \d+", "part", text)    # a per-process counter otherwise
+    with open(path, "w", encoding="latin-1", newline="") as f:
+        f.write(text)
 
 
 def _step_child(path, lin, ang, max_tris, max_tri_faces, memory_mb):

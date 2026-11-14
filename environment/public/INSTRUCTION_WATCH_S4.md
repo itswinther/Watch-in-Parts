@@ -5,7 +5,7 @@
 `work/assembly.json` with an order and a path for every part, following "Stage 4"
 in `SPEC_WATCH.md`.
 
-Submit as the spec describes. Only the last accepted submission is graded, by a
+The parts are STEP files. Submit as the spec describes. Only the last accepted submission is graded, by a
 separate program. You have about 35 minutes.
 
 ## How you are run

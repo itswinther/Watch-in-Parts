@@ -323,7 +323,7 @@ class Movement:
 
 
 def load_movement(folder):
-    """folder holds movement.json and parts/<name>.step or .stl. Opens only the files movement.json names."""
+    """folder holds movement.json and parts/<name>.step. Opens only the files movement.json names."""
     path = os.path.join(folder, "movement.json")
     if os.path.getsize(path) > MAX_JSON_BYTES:
         raise FormatError("movement.json too large")
@@ -336,7 +336,9 @@ def load_movement(folder):
     def load(name):
         p = part_path(folder, name)
         if p is None:
-            raise FormatError("part file parts/%s.step (or .stl) not found" % name)
+            if os.path.isfile(os.path.join(folder, "parts", name + ".stl")):
+                raise FormatError("parts/%s.stl: parts must be STEP files (parts/%s.step); STL is not accepted" % (name, name))
+            raise FormatError("part file parts/%s.step not found" % name)
         try:
             return load_part_file(p)
         except FormatError as e:
@@ -345,20 +347,17 @@ def load_movement(folder):
 
 
 def part_path(folder, name):
-    """parts/<name>.step if it exists, else parts/<name>.stl if it exists, else None."""
-    for ext in (".step", ".stl"):
-        p = os.path.join(folder, "parts", name + ext)
-        if os.path.isfile(p):
-            return p
-    return None
+    """parts/<name>.step if it exists, else None. (Parts are STEP files; STL parts are not accepted.)"""
+    p = os.path.join(folder, "parts", name + ".step")
+    return p if os.path.isfile(p) else None
 
 
 def load_part_file(p):
-    """One part file (.step or .stl) as a normalised Manifold, or FormatError."""
-    if p.endswith(".step"):
-        return core.load_step_part(p, MAX_STEP_BYTES, MAX_TRIANGLES, STEP_LINEAR_DEFLECTION, STEP_ANGULAR_DEFLECTION,
-                                   STEP_MAX_TRIANGLE_FACES, STEP_TIMEOUT_S, STEP_MEMORY_MB, SELF_UNION_TOL)
-    return core.load_part(p, MAX_TRIANGLES, MAX_STL_BYTES, SELF_UNION_TOL)
+    """One STEP part file as a normalised Manifold, or FormatError."""
+    if not p.endswith(".step"):
+        raise FormatError("parts must be STEP files (.step)")
+    return core.load_step_part(p, MAX_STEP_BYTES, MAX_TRIANGLES, STEP_LINEAR_DEFLECTION, STEP_ANGULAR_DEFLECTION,
+                               STEP_MAX_TRIANGLE_FACES, STEP_TIMEOUT_S, STEP_MEMORY_MB, SELF_UNION_TOL)
 
 
 def _asm_messages(name, solid, P, lo, hi):

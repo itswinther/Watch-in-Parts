@@ -1,8 +1,8 @@
 """Format-only submit for the watch task. Checks structure, never runs a test.
     python3 tools/submit.py
 Reads ./work, copies movement.json, the parts it names and assembly.json (if present) to ./submission,
-and ./scripts (if present) to ./submission/scripts. Each part is parts/<name>.step, or parts/<name>.stl;
-when both exist the .step file is the part. Every part is loaded exactly as the grader loads it."""
+and ./scripts (if present) to ./submission/scripts. Each part is parts/<name>.step (STL parts are not
+accepted). Every part is loaded exactly as the grader loads it."""
 import json
 import math
 import os
@@ -15,7 +15,6 @@ import kernel
 
 MAX_PARTS = __MAX_PARTS__
 MAX_TRIANGLES = __MAX_TRIANGLES__
-MAX_STL_BYTES = __MAX_STL_BYTES__
 MAX_STEP_BYTES = __MAX_STEP_BYTES__
 STEP_LINEAR_DEFLECTION = __STEP_LINEAR_DEFLECTION__
 STEP_ANGULAR_DEFLECTION = __STEP_ANGULAR_DEFLECTION__
@@ -35,19 +34,18 @@ class Bad(Exception):
 
 
 def part_file(n):
-    for ext in (".step", ".stl"):
-        p = os.path.join(WORK, "parts", n + ext)
-        if os.path.isfile(p):
-            return p
+    p = os.path.join(WORK, "parts", n + ".step")
+    if os.path.isfile(p):
+        return p
+    if os.path.isfile(os.path.join(WORK, "parts", n + ".stl")):
+        raise Bad("parts/%s.stl: parts must be STEP files (parts/%s.step); STL is not accepted" % (n, n))
     return None
 
 
 def load(p):
     """The part as the grader builds it (a manifold3d solid)."""
-    if p.endswith(".step"):
-        return kernel.load_step_part(p, MAX_STEP_BYTES, MAX_TRIANGLES, STEP_LINEAR_DEFLECTION, STEP_ANGULAR_DEFLECTION,
-                                     STEP_MAX_TRIANGLE_FACES, STEP_TIMEOUT_S, STEP_MEMORY_MB, SELF_UNION_TOL)
-    return kernel.load_part(p, MAX_TRIANGLES, MAX_STL_BYTES, SELF_UNION_TOL)
+    return kernel.load_step_part(p, MAX_STEP_BYTES, MAX_TRIANGLES, STEP_LINEAR_DEFLECTION, STEP_ANGULAR_DEFLECTION,
+                                 STEP_MAX_TRIANGLE_FACES, STEP_TIMEOUT_S, STEP_MEMORY_MB, SELF_UNION_TOL)
 
 
 def script_files():
@@ -125,7 +123,7 @@ def main():
     for n in names:
         p = part_file(n)
         if p is None:
-            raise Bad("parts/%s.step (or .stl) not found" % n)
+            raise Bad("parts/%s.step not found" % n)
         try:
             load(p)
         except kernel.FormatError as e:
@@ -153,8 +151,7 @@ def main():
         dst = os.path.join(SUBMIT, "scripts", rel)
         os.makedirs(os.path.dirname(dst), exist_ok=True)
         shutil.copyfile(os.path.join(SCRIPTS, rel), dst)
-    kinds = sorted({os.path.splitext(p)[1] for p in files.values()})
-    print(json.dumps({"result": "accepted", "parts": len(names), "part_formats": kinds,
+    print(json.dumps({"result": "accepted", "parts": len(names),
                       "assembly": os.path.isfile(asm), "scripts": len(scripts)}))
 
 
