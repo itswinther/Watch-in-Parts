@@ -523,16 +523,21 @@ def _near_cut(S, ax, O, ax_o):
     return S ^ keep
 
 
-def load_movement(folder):
-    """folder holds movement.json and parts/<name>.step. Opens only the files movement.json names."""
-    path = inside(folder, os.path.join(folder, "movement.json"))
+def load_movement(folder, name="movement.json", cache=None):
+    """folder holds movement.json and parts/<name>.step. Opens only the files movement.json names.
+    name: the movement file in folder to read instead of movement.json (a plain file name, e.g. variant_6h.json).
+    cache: an optional dict shared between calls; a part file whose name and bytes were loaded before is
+    taken from it instead of being read again (the same solid; the result does not depend on the cache)."""
+    if not isinstance(name, str) or os.path.basename(name) != name or not name.endswith(".json"):
+        raise FormatError("bad movement file name %r" % (name,))
+    path = inside(folder, os.path.join(folder, name))
     if os.path.getsize(path) > MAX_JSON_BYTES:
-        raise FormatError("movement.json too large")
+        raise FormatError("%s too large" % name)
     with open(path, "r", encoding="utf-8") as f:
         try:
             doc = json.load(f)
         except ValueError as e:
-            raise FormatError("movement.json is not valid JSON") from e
+            raise FormatError("%s is not valid JSON" % name) from e
 
     def load(name):
         p = part_path(folder, name)
@@ -540,10 +545,25 @@ def load_movement(folder):
             if os.path.isfile(os.path.join(folder, "parts", name + ".stl")):
                 raise FormatError("parts/%s.stl: parts must be STEP files (parts/%s.step); STL is not accepted" % (name, name))
             raise FormatError("part file parts/%s.step not found" % name)
+        key = None
+        if cache is not None and os.path.getsize(p) <= MAX_STEP_BYTES:
+            import hashlib
+            with open(p, "rb") as f:
+                key = (name, hashlib.sha256(f.read()).hexdigest())
+            if key in cache:            # a solid, or the format error that file gave
+                if isinstance(cache[key], FormatError):
+                    raise cache[key]
+                return cache[key]
         try:
-            return load_part_file(p)
+            solid = load_part_file(p)
         except FormatError as e:
-            raise FormatError("parts/%s: %s" % (os.path.basename(p), e))
+            err = FormatError("parts/%s: %s" % (os.path.basename(p), e))
+            if key is not None:
+                cache[key] = err
+            raise err
+        if key is not None:
+            cache[key] = solid
+        return solid
     return Movement(doc, load)
 
 

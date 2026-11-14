@@ -1,6 +1,11 @@
 """Grader for the mechanical watch task. Run from this directory as:
-    python -I grade_watch.py /abs/submission_folder [--stage 1|2|3|4] [--prev /abs/previous_stage_folder]
+    python -I grade_watch.py /abs/delivery_folder [--reward FILE] [--details FILE]
+One-job mode (no --stage): the delivery folder holds movement.json, variant_6h.json, assembly.json and
+parts/<name>.step; it is graded part by part (JOB_PARTS: P1 going train and hands, P2 24-hour hand,
+P3 6-hour variant, P4 assembly), with no part frozen and no part gating another. See grade_job.
+    python -I grade_watch.py /abs/submission_folder --stage 1|2|3|4 [--prev /abs/previous_stage_folder]
                              [--reward FILE] [--details FILE] [--skip CHECK,CHECK]
+Stage mode (kept to regrade old runs and for the stage anchors):
 --skip leaves named scored checks out (only for runs made before a check existed); the list is in the output.
 The grader reads no environment variables.
 Stage 1: design the movement. Stage 2: add a 24-hour hand to a frozen stage-1 movement (--prev).
@@ -13,6 +18,7 @@ import json
 import os
 import signal
 import sys
+import time
 from fractions import Fraction
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -30,16 +36,42 @@ WEIGHTS = {"spin": 1, "held": 2, "train": 3, "clear": 1, "minute": 2, "hour": 2,
 GATES = ("files", "assembled")
 TIMEOUT_S = 600
 
+# ---- one-job mode (no --stage): one delivery folder, graded part by part, nothing frozen ----
+# The delivery: movement.json (barrel 1 turn per 8 h), variant_6h.json (the same calibre for the barrel at
+# 1 turn per 6 h), assembly.json (order and paths for movement.json), parts/<name>.step for both movements.
+JOB_MOVEMENT, JOB_VARIANT, JOB_ASSEMBLY = "movement.json", "variant_6h.json", "assembly.json"
+JOB_CHECKS_1 = {k: w for k, w in WEIGHTS.items() if k != "light"}      # P1: stage-1 checks without light
+JOB_CHECKS_2 = dict(WEIGHTS_2)                                          # P2: the 24-hour hand
+# The parts of the job: (id, what it is, weight, gates, check weights). The reward renormalises the weights
+# over the parts listed here. P4's checks are one per part of movement.json, weight 1 each (None here).
+# P5 (crown winding, AT-0 to AT-6, weight 0.25) joins this table when the keyless geometry is agreed
+# (SESSION.md Decisions 15:29 and 15:44), with its grader in JOB_GRADERS below.
+JOB_PARTS = (
+    ("P1", "going train and hands", Fraction(25, 100), ("files", "assembled"), JOB_CHECKS_1),
+    ("P2", "24-hour hand", Fraction(10, 100), ("files", "assembled", "day_declared"), JOB_CHECKS_2),
+    ("P3", "6-hour variant", Fraction(15, 100), ("files", "assembled", "same_frame"), dict(JOB_CHECKS_1, **JOB_CHECKS_2)),
+    ("P4", "assembly", Fraction(25, 100), ("files", "plan"), None),
+)
+JOB_TIME_LIMIT_S = 1500     # s, whole run: once it has passed, every check not yet run fails (kept well under a 30-minute verifier)
+
 
 class _Timeout(Exception):
     pass
 
 
-def _run(fn):
+def _run(fn, deadline=None):
+    """(passed, details) of fn(); an exception or a timeout fails it. deadline: a time.monotonic() value
+    (one-job mode's whole-run limit); the check gets at most the time left, none once it has passed."""
+    limit = TIMEOUT_S
+    if deadline is not None:
+        limit = min(limit, deadline - time.monotonic())
+        if limit <= 0:
+            return False, {"error": "not run: the whole-run time limit of %d s was reached" % JOB_TIME_LIMIT_S}
+
     def handler(signum, frame):
         raise _Timeout()
     old = signal.signal(signal.SIGALRM, handler)
-    signal.setitimer(signal.ITIMER_REAL, TIMEOUT_S)
+    signal.setitimer(signal.ITIMER_REAL, limit)
     try:
         ok, info = fn()
         return bool(ok), info
@@ -60,81 +92,53 @@ STAGE_GATES = {1: GATES, 2: GATES + ("locked", "day_declared"), 3: GATES + ("cha
 CHANGE_CHECKS = ("hour", "minute", "seconds", "day_hand")     # stage 3: the change request is met
 
 
-def grade_design(folder, stage=1, prev=None, skip=()):
-    import math
+def _assembled(m):
+    """Gate: no two parts overlap, the parts of one mobile do not overlap, the fixed parts form one frame."""
     from geometry import watch as W
     from geometry.core import ivol
-    weights = stage_weights(stage)
-    for k in skip:                  # --skip, only for grading runs made before a check existed
-        weights.pop(k, None)
-    gates = {g: False for g in STAGE_GATES[stage]}
-    checks = {k: False for k in weights}
-    details = {}
-    st = {"factor": 1.0}
-
-    def result():
-        G = all(gates.values())
-        p = sum(w for k, w in weights.items() if checks[k]) / sum(weights.values())
-        S = (0.5 * p * p + 0.5 * (1.0 if all(checks.values()) else 0.0)) if G else 0.0
-        out = {"reward": S, "p": p, "gates": gates, "checks": checks, "details": details}
-        if stage == 3:
-            out["reward"] = S * st["factor"]
-            out["kept_factor"] = st["factor"]
-        return out
-
-    def load():
-        st["m"] = W.load_movement(folder)
-        return True, {}
-    gates["files"], details["files"] = _run(load)
-    if not gates["files"]:
-        if stage == 3:
-            st["factor"] = 0.0
-        return result()
-    m = st["m"]
-    if stage == 3:
-        m.barrel_speed = W.CHANGED_BARREL_TURNS_PER_HOUR
     names = list(m.mobiles)
+    worst, pair = 0.0, None
+    solids = [("fixed", m.fixed)] + [(n, m.mobiles[n]["solid"]) for n in names]
+    for i in range(len(solids)):
+        for j in range(i + 1, len(solids)):
+            v = ivol(solids[i][1], solids[j][1])
+            if v > worst:
+                worst, pair = v, solids[i][0] + "/" + solids[j][0]
+    fw, fp = m.fixed_overlap()
+    mw, mp = m.mobile_overlap()          # parts of one mobile touch but do not overlap
+    one_frame, groups = m.frame()        # the fixed parts form one frame
+    return worst <= W.VOL_TOL and fw <= W.VOL_TOL and mw <= W.VOL_TOL and one_frame, \
+        {"worst_volume": worst, "pair": pair, "fixed_parts_worst": fw, "fixed_pair": fp, "mobile_parts_worst": mw, "mobile_pair": mp,
+         "one_frame": one_frame, "frame_groups": groups}
 
-    def assembled():
-        worst, pair = 0.0, None
-        solids = [("fixed", m.fixed)] + [(n, m.mobiles[n]["solid"]) for n in names]
-        for i in range(len(solids)):
-            for j in range(i + 1, len(solids)):
-                v = ivol(solids[i][1], solids[j][1])
-                if v > worst:
-                    worst, pair = v, solids[i][0] + "/" + solids[j][0]
-        fw, fp = m.fixed_overlap()
-        mw, mp = m.mobile_overlap()          # parts of one mobile touch but do not overlap
-        one_frame, groups = m.frame()        # the fixed parts form one frame
-        return worst <= W.VOL_TOL and fw <= W.VOL_TOL and mw <= W.VOL_TOL and one_frame, \
-            {"worst_volume": worst, "pair": pair, "fixed_parts_worst": fw, "fixed_pair": fp, "mobile_parts_worst": mw, "mobile_pair": mp,
-             "one_frame": one_frame, "frame_groups": groups}
-    gates["assembled"], details["assembled"] = _run(assembled)
-    if stage == 2:
-        gates["locked"], details["locked"] = _run(lambda: locked_design(prev, folder))
-        gates["day_declared"], details["day_declared"] = _run(lambda: day_declared(prev, m))
 
-    speeds, conflicts = m.speeds()
+def _mesh_runs(m, run=None):
+    """Every declared mesh through the train test, once, or None if that did not run to the end.
+    Its results are shared by train and the hands."""
+    from geometry import watch as W
+    st = {"runs": None}
 
-    def mesh_runs():
-        """Every declared mesh through the train test, once. Its results are shared by train and the hands."""
+    def fn():
         out = []
         for a, ta, b, tb in m.meshes:
             x = m.mesh_run(a, ta, b, tb)
             x["pair"] = "%s/%s" % (a, b)
             x["passes"] = W.Movement.mesh_passes(x)
             out.append(x)
-        st["mesh_runs"] = out
+        st["runs"] = out
         return True, {}
-    st["mesh_runs"] = None
-    _run(mesh_runs)
-    runs = st["mesh_runs"]
-    # A declared mesh drives only if it passes the train test; if the test failed to run, nothing drives.
-    good = [e for e, x in zip(m.meshes, runs) if x["passes"]] if runs is not None else []
-    driven, _ = m.speeds(good)
-    if stage == 3:
-        ok, details["kept"] = _run(lambda: kept_parts(prev, folder, driven))
-        st["factor"] = details["kept"].get("factor", 0.0) if ok else 0.0
+    (run or _run)(fn)
+    return st["runs"]
+
+
+def _check_table(m, runs, speeds, conflicts, driven, thin_cache=None):
+    """name -> function () -> (passed, details), for every scored design check of movement m.
+    runs: _mesh_runs(m); speeds, conflicts: m.speeds(); driven: m.speeds(meshes that pass the train test)[0].
+    thin_cache: optional dict shared between movements; the thickness test of a solid object already
+    measured is reused (the same solid gives the same result)."""
+    import math
+    from geometry import watch as W
+    names = list(m.mobiles)
 
     def spin():
         r = {n: m.spin(n) for n in names}
@@ -217,8 +221,16 @@ def grade_design(folder, stage=1, prev=None, skip=()):
         ok, info = hand_ok("day", W.DAY_HAND_REACH)
         return d >= W.DAY_HAND_OFFSET and ok, dict(info, axis_distance=d)
 
+    def thin(solid):
+        if thin_cache is None:
+            return W.thin(solid)
+        hit = thin_cache.get(id(solid))
+        if hit is None or hit[0] is not solid:      # the solid is kept in the cache, so its id is not reused
+            hit = thin_cache[id(solid)] = (solid, W.thin(solid))
+        return hit[1]
+
     def printable():
-        r = {n: W.thin(solid) for n, solid in m.all_parts().items() if n != "barrel"}
+        r = {n: thin(solid) for n, solid in m.all_parts().items() if n != "barrel"}
         info = {n: {"pieces": v[0], "max_deviation": v[1]} for n, v in r.items()}
         return all(v[0] >= 1 and v[1] <= W.THIN_DEV for v in r.values()), info
 
@@ -234,8 +246,58 @@ def grade_design(folder, stage=1, prev=None, skip=()):
         fixed, mobile = m.volumes()
         return fixed <= W.FIXED_VOLUME_MAX and mobile <= W.MOBILE_VOLUME_MAX, {"fixed_volume": fixed, "mobile_volume": mobile}
 
-    table = {"seated": seated, "light": light, "printable": printable, "day_hand": day_hand, "day_place": day_place, "spin": spin, "held": held, "train": train, "clear": clear, "minute": hand("minute"), "hour": hand("hour"),
-             "seconds": hand("seconds"), "coaxial": coaxial, "hands": hands, "size": size, "tolerant": tolerant}
+    return {"seated": seated, "light": light, "printable": printable, "day_hand": day_hand, "day_place": day_place,
+            "spin": spin, "held": held, "train": train, "clear": clear, "minute": hand("minute"), "hour": hand("hour"),
+            "seconds": hand("seconds"), "coaxial": coaxial, "hands": hands, "size": size, "tolerant": tolerant}
+
+
+def grade_design(folder, stage=1, prev=None, skip=()):
+    from geometry import watch as W
+    weights = stage_weights(stage)
+    for k in skip:                  # --skip, only for grading runs made before a check existed
+        weights.pop(k, None)
+    gates = {g: False for g in STAGE_GATES[stage]}
+    checks = {k: False for k in weights}
+    details = {}
+    st = {"factor": 1.0}
+
+    def result():
+        G = all(gates.values())
+        p = sum(w for k, w in weights.items() if checks[k]) / sum(weights.values())
+        S = (0.5 * p * p + 0.5 * (1.0 if all(checks.values()) else 0.0)) if G else 0.0
+        out = {"reward": S, "p": p, "gates": gates, "checks": checks, "details": details}
+        if stage == 3:
+            out["reward"] = S * st["factor"]
+            out["kept_factor"] = st["factor"]
+        return out
+
+    def load():
+        st["m"] = W.load_movement(folder)
+        return True, {}
+    gates["files"], details["files"] = _run(load)
+    if not gates["files"]:
+        if stage == 3:
+            st["factor"] = 0.0
+        return result()
+    m = st["m"]
+    if stage == 3:
+        m.barrel_speed = W.CHANGED_BARREL_TURNS_PER_HOUR
+
+    gates["assembled"], details["assembled"] = _run(lambda: _assembled(m))
+    if stage == 2:
+        gates["locked"], details["locked"] = _run(lambda: locked_design(prev, folder))
+        gates["day_declared"], details["day_declared"] = _run(lambda: day_declared(prev, m))
+
+    speeds, conflicts = m.speeds()
+    runs = _mesh_runs(m)
+    # A declared mesh drives only if it passes the train test; if the test failed to run, nothing drives.
+    good = [e for e, x in zip(m.meshes, runs) if x["passes"]] if runs is not None else []
+    driven, _ = m.speeds(good)
+    if stage == 3:
+        ok, details["kept"] = _run(lambda: kept_parts(prev, folder, driven))
+        st["factor"] = details["kept"].get("factor", 0.0) if ok else 0.0
+
+    table = _check_table(m, runs, speeds, conflicts, driven)
     for k in weights:
         checks[k], details[k] = _run(table[k])
     if stage == 3:
@@ -388,6 +450,205 @@ def grade_assembly(folder, prev):
     return out
 
 
+# ---------------- one-job mode ----------------
+def _read_json(folder, name):
+    """The JSON document folder/name, opened as the loader opens movement.json: no symbolic link, size limit."""
+    from geometry import watch as W
+    from geometry.core import FormatError
+    path = W.inside(folder, os.path.join(folder, name))
+    if not os.path.isfile(path):
+        raise FormatError("%s not found" % name)
+    if os.path.getsize(path) > W.MAX_JSON_BYTES:
+        raise FormatError("%s too large" % name)
+    with open(path, "r", encoding="utf-8") as f:
+        try:
+            return json.load(f)
+        except ValueError as e:
+            raise FormatError("%s is not valid JSON" % name) from e
+
+
+def job_day_declared(m):
+    """P2 gate: a 24-hour hand is declared, and its part is used by no other hand."""
+    if "day" not in m.hands:
+        return False, {"error": "no 'day' hand declared"}
+    part = m.hands["day"][1]
+    shared = sorted(h for h, (_, p) in m.hands.items() if h != "day" and p == part)
+    return not shared, {"part": part, "also_used_by": shared}
+
+
+def job_same_frame(folder, v):
+    """P3 gate: the variant v uses the frame of movement.json: the same set of 'fixed' part names (one parts/
+    folder, so the same files) and the same case_centre. Read from movement.json's JSON only, so it does not
+    depend on movement.json's parts loading; it fails if movement.json cannot be read."""
+    import math
+    doc = _read_json(folder, JOB_MOVEMENT)
+    fixed = doc.get("fixed") if isinstance(doc, dict) else None
+    cc = doc.get("case_centre") if isinstance(doc, dict) else None
+    vf = list(v.doc["fixed"])
+    info = {"movement_fixed": fixed, "variant_fixed": vf, "movement_case_centre": cc, "variant_case_centre": list(v.case_centre)}
+    if not (isinstance(fixed, list) and all(isinstance(n, str) for n in fixed)):
+        return False, dict(info, error="movement.json: 'fixed' is not a list of part names")
+    same_fixed = sorted(fixed) == sorted(vf)
+    same_cc = isinstance(cc, list) and len(cc) == 2 and all(isinstance(x, (int, float)) and math.isfinite(x) for x in cc) \
+        and (float(cc[0]), float(cc[1])) == v.case_centre
+    info.update(same_fixed=same_fixed, same_case_centre=same_cc,
+                only_in_movement=sorted(set(fixed) - set(vf)), only_in_variant=sorted(set(vf) - set(fixed)))
+    return same_fixed and same_cc, info
+
+
+def _job_movement(folder, name, barrel_speed, keys, extra_gates, run, cache, thin_cache):
+    """Load the movement file `name` of the delivery with the barrel at barrel_speed and grade it: the gates
+    files and assembled, extra_gates (gate -> fn(movement) -> (passed, details)) and the checks in keys.
+    Returns (movement or None, gates, checks, details)."""
+    from geometry import watch as W
+    gates, details, st = {}, {}, {}
+    checks = {k: False for k in keys}
+
+    def load():
+        st["m"] = W.load_movement(folder, name, cache=cache)
+        return True, {}
+    gates["files"], details["files"] = run(load)
+    if not gates["files"]:
+        for k in ["assembled"] + list(extra_gates):
+            gates[k] = False
+        for k in ["assembled"] + list(extra_gates) + list(keys):
+            details[k] = {"error": "not run: %s did not load" % name}
+        return None, gates, checks, details
+    m = st["m"]
+    m.barrel_speed = barrel_speed
+    gates["assembled"], details["assembled"] = run(lambda: _assembled(m))
+    for g, fn in extra_gates.items():
+        gates[g], details[g] = run(lambda fn=fn: fn(m))
+
+    def speeds():
+        st["speeds"], st["conflicts"] = m.speeds()
+        return True, {}
+    ok, info = run(speeds)
+    if not ok:
+        for k in keys:
+            details[k] = dict(info, note="not run: the speeds of the train could not be worked out")
+        return m, gates, checks, details
+    runs = _mesh_runs(m, run)
+
+    def driven():
+        # A declared mesh drives only if it passes the train test; if the test failed to run, nothing drives.
+        good = [e for e, x in zip(m.meshes, runs) if x["passes"]] if runs is not None else []
+        st["driven"], _ = m.speeds(good)
+        return True, {}
+    ok, info = run(driven)
+    if not ok:
+        for k in keys:
+            details[k] = dict(info, note="not run: the driven speeds could not be worked out")
+        return m, gates, checks, details
+    table = _check_table(m, runs, st["speeds"], st["conflicts"], st["driven"], thin_cache)
+    for k in keys:
+        checks[k], details[k] = run(table[k])
+    return m, gates, checks, details
+
+
+def _job_assembly(folder, m, run):
+    """P4: replay assembly.json against movement.json (m, None if it did not load).
+    Returns (gates, checks, details); one check per part of m, passed if it is installed cleanly."""
+    from geometry import watch as W
+    from geometry.core import FormatError
+    gates = {"files": m is not None, "plan": False}
+    details = {"files": {} if m is not None else {"error": "%s did not load" % JOB_MOVEMENT}}
+    if m is None:
+        details["plan"] = {"error": "not run: %s did not load" % JOB_MOVEMENT}
+        return gates, {}, details
+    names = list(m.all_parts())
+    checks = {n: False for n in names}
+    st = {}
+
+    def plan():
+        if not os.path.isfile(W.inside(folder, os.path.join(folder, JOB_ASSEMBLY))):
+            raise FormatError("%s not found" % JOB_ASSEMBLY)
+        st["order"], st["paths"] = W.load_assembly(folder, m)
+        return True, {"order": st["order"]}
+    gates["plan"], details["plan"] = run(plan)
+    if not gates["plan"]:
+        return gates, checks, details
+
+    def replay():
+        results, installed = m.assembly_replay(st["order"], st["paths"])
+        st["installed"] = installed
+        return True, results
+    ok, details["parts"] = run(replay)
+    if ok:
+        checks = {n: n in st["installed"] for n in names}
+    return gates, checks, details
+
+
+def grade_job(folder):
+    """One-job mode: grade the delivery folder part by part (JOB_PARTS). A part whose gates fail scores 0; every
+    other part is still graded. reward = 0.5 x sum(w_p s_p) / sum(w_p) + 0.5 x [every gate and check of every
+    graded part passes], s_p = the weighted share of part p's checks passed."""
+    from geometry import watch as W
+    t0 = time.monotonic()
+    deadline = t0 + JOB_TIME_LIMIT_S
+    run = lambda fn: _run(fn, deadline)
+    cache, thin_cache = {}, {}      # part solids by (name, file bytes); thickness results by solid
+    raw = {}                        # part id -> (gates, checks, details)
+    by_id = {p[0]: p for p in JOB_PARTS}
+
+    def guarded(pids, fn):
+        """A failure outside the per-check try blocks scores those parts 0; it never stops the run."""
+        try:
+            return fn()
+        except Exception as e:      # noqa
+            for pid in pids:
+                raw[pid] = ({}, {}, {"error": "%s: %s" % (type(e).__name__, e)})
+            return None
+
+    st = {}
+
+    def movement():
+        keys = dict(by_id["P1"][4], **by_id["P2"][4])
+        st["m"], g, c, d = _job_movement(folder, JOB_MOVEMENT, W.BARREL_TURNS_PER_HOUR, keys,
+                                         {"day_declared": job_day_declared}, run, cache, thin_cache)
+        raw["P1"] = raw["P2"] = (g, c, d)
+    guarded(("P1", "P2"), movement)
+
+    def assembly():
+        raw["P4"] = _job_assembly(folder, st.get("m"), run)
+    guarded(("P4",), assembly)
+    st.clear()                      # the 8-hour movement is no longer needed; its part solids stay in the cache
+
+    def variant():
+        _, g, c, d = _job_movement(folder, JOB_VARIANT, W.CHANGED_BARREL_TURNS_PER_HOUR, by_id["P3"][4],
+                                   {"same_frame": lambda v: job_same_frame(folder, v)}, run, cache, thin_cache)
+        raw["P3"] = (g, c, d)
+    guarded(("P3",), variant)
+
+    parts, num, den, all_pass = {}, Fraction(0), Fraction(0), True
+    for pid, what, w, gate_names, cw in JOB_PARTS:
+        g, c, d = raw.get(pid, ({}, {}, {"error": "not graded"}))
+        gates = {k: bool(g.get(k, False)) for k in gate_names}
+        weights = {k: 1 for k in c} if cw is None else dict(cw)
+        checks = {k: bool(c.get(k, False)) for k in weights}
+        total = sum(weights.values())
+        share = Fraction(sum(weights[k] for k in checks if checks[k]), total) if total else Fraction(0)
+        s = share if all(gates.values()) else Fraction(0)
+        passed = all(gates.values()) and bool(checks) and all(checks.values())
+        all_pass = all_pass and passed
+        num += w * s
+        den += w
+        keep = set(gate_names) | set(checks) | ({"parts"} if cw is None else set()) | {"error"}
+        parts[pid] = {"name": what, "weight": float(w), "gates": gates, "checks": checks, "check_weights": weights,
+                      "share_of_checks": float(share), "s": float(s), "s_exact": str(s), "passed": passed,
+                      "details": {k: v for k, v in d.items() if k in keep}}
+    reward = Fraction(1, 2) * num / den + (Fraction(1, 2) if all_pass else Fraction(0))
+    return {"mode": "job", "reward": float(reward), "reward_exact": str(reward), "all_pass": all_pass,
+            "parts_graded": [p[0] for p in JOB_PARTS], "parts": parts, "elapsed_s": round(time.monotonic() - t0, 1),
+            "constants": {"part_weights": {p[0]: float(p[2]) for p in JOB_PARTS},
+                          "check_weights": {p[0]: (dict(p[4]) if p[4] is not None else "one per part of movement.json, 1 each")
+                                            for p in JOB_PARTS},
+                          "gates": {p[0]: list(p[3]) for p in JOB_PARTS},
+                          "barrel_turns_per_hour": {JOB_MOVEMENT: str(W.BARREL_TURNS_PER_HOUR),
+                                                    JOB_VARIANT: str(W.CHANGED_BARREL_TURNS_PER_HOUR)},
+                          "check_timeout_s": TIMEOUT_S, "time_limit_s": JOB_TIME_LIMIT_S}}
+
+
 def grade(folder, stage=1, prev=None, skip=()):
     skip = [k for k in skip if k]
     res = grade_assembly(folder, prev) if stage == 4 else grade_design(folder, stage, prev, skip)
@@ -403,15 +664,25 @@ def main(argv):
         f.write("0\n")
     args = [a for i, a in enumerate(argv) if not a.startswith("--") and (i == 0 or not argv[i - 1].startswith("--"))]
     if len(args) != 1 or not os.path.isabs(args[0]):
-        print("usage: grade_watch.py /abs/submission_folder")
+        print("usage: grade_watch.py /abs/delivery_folder [--reward FILE] [--details FILE]   (one-job mode)\n"
+              "       grade_watch.py /abs/submission_folder --stage 1|2|3|4 [--prev /abs/folder] ...   (stage mode)")
         return 2
-    res = grade(args[0], int(opts.get("--stage", "1")), opts.get("--prev"), opts.get("--skip", "").split(","))
+    if "--stage" in opts:
+        res = grade(args[0], int(opts["--stage"]), opts.get("--prev"), opts.get("--skip", "").split(","))
+        summary = {k: res[k] for k in ("reward", "p", "gates", "checks", "kept_factor", "skipped") if k in res}
+    else:
+        res = grade_job(args[0])
+        summary = {"reward": res["reward"], "parts_graded": res["parts_graded"], "elapsed_s": res["elapsed_s"],
+                   "parts": {pid: {"s": p["s"], "gates": p["gates"],
+                                   "checks": p["checks"] if pid != "P4" else
+                                   "%d of %d installed" % (sum(p["checks"].values()), len(p["checks"]))}
+                             for pid, p in res["parts"].items()}}
     if opts.get("--details"):
         with open(opts["--details"], "w") as f:
             json.dump(res, f, indent=1, default=str)
     with open(reward_file, "w") as f:
         f.write("%.6f\n" % res["reward"])
-    print(json.dumps({k: res[k] for k in ("reward", "p", "gates", "checks", "kept_factor", "skipped") if k in res}))
+    print(json.dumps(summary))
     return 0
 
 
