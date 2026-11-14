@@ -78,3 +78,67 @@ needs: foreseeing what a decision does three steps later.
    the end, to keep the delayed-consequence gap.
 3. Is the keyless stage in scope for the submission, given its build and grading cost? This file argues
    yes, but it is the humans' decision.
+
+---
+
+## Addendum (13:00, Mikael): an expert's brief: what to deliver, never how
+
+**The idea:** brief the agent the way a manufacturer briefs a senior engineer. The brief gives a role, the goal,
+the deliverable format and the software, and the acceptance test it will be judged by. It gives **no steps
+and no hints about method**. The agent must work out the architecture and the order of work itself:
+that it needs a click, a crown wheel, a sliding pinion, and an assembly order that works.
+
+**This is not hiding information.** Every requirement and how it is tested is stated, as in a customer's
+contract. Only the method is left open, and the method is the expert skill being tested.
+
+### Draft brief (shape only; numbers come from the constants file)
+
+> You are a movement designer at a watch manufacturer. Design a mechanical watch movement that the
+> customer can wind from the crown, that holds its wind, that runs the hour, minute and seconds hands at the
+> correct rates for at least 40 hours, and whose hands can be set with the crown pulled out.
+>
+> Deliver: one STEP file per part, made with CadQuery 2.8 (installed); `movement.json` in the format in
+> `FORMAT.md`; `assembly.json` with an order and a path for every part.
+>
+> Given: the case (inner radius R, height H), the mainspring barrel (mesh, capacity C turns, turning
+> once every T hours while running), the crown position and stem axis, and a minimum printable feature of F.
+>
+> Acceptance test (run once on your finished movement, in this order; a step counts only if all earlier
+> steps passed):
+> 0. assemble: every part goes in along its path, in your order, without collision;
+> 1. wind: crown in, N turns forward, and the barrel stores at least the stated turns;
+> 2. hold: crown released, and stored turns stay within tolerance;
+> 3. run: the hands turn at 1/12, 1 and 60 turns per hour, clockwise, for at least 40 h of stored turns;
+> 4. backward: crown turned back, and nothing winds or jams;
+> 5. set: crown pulled and turned, the hands move, and the barrel does not unwind;
+> 6. return: crown pushed in and wound, and it winds again without passing through a jammed or doubly
+>    engaged position.
+>
+> Report at the end what you did and whether you reached anything outside this container.
+
+### Keeping the pressure that produced every gap so far: change requests after delivery
+
+Without stages the agent can revise everything until the end. That removed the pressure in the five-step
+spike, where GPT re-solved every step. The realistic way to keep it:
+
+1. The agent delivers the movement and it is accepted.
+2. The customer then sends a change request ("the barrel now turns once every 6 hours", "add a 24-hour
+   hand"). The parts already delivered are in production and cannot change, except the ones the request
+   names or a stated allowance.
+3. The final acceptance test runs on the changed movement.
+
+This is the frozen-stage mechanism dressed as normal product work. A change request is not a hint: it is a
+new requirement arriving after delivery, which is how real projects go.
+
+### Runs: 8 per task and model, averaged
+
+- **Why:** GPT fell short in 1 of 2 chains; two runs cannot tell 50 % from 20 %. Eight give a usable rate.
+- **How:** Harbor `-k 8`, OpenCode as the organisers ask (`-a opencode -m provider/model`), allowlist set
+  to the model endpoint only, separate no-network verifier.
+- **Report per model:** the mean, the spread, and the pass rate (how many of the 8 reached 1.0), next to the
+  reference's 1.0, plus every shortfall traced to the acceptance step it failed and the decision behind it.
+- **Cost:** GPT via Codex credits is fine. On the $20 Anthropic key, 8 Sonnet runs of the full task may fit;
+  8 Opus runs likely do not, so ask the organisers for credits or run fewer and say so.
+
+**Note:** the role line ("you are a movement designer") sets context. It barely changes capability. The
+difficulty comes from the goal, the stated acceptance test and the freedom of method.
