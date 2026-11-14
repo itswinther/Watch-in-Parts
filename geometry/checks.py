@@ -1,5 +1,5 @@
 """Gates G1-G5, the 19 checks and the score, exactly as SPEC.md 0.1 states them.
-Used by the grader; the MCP tools use core/contract only and never call this."""
+Used by the grader only. The tools use core, contract and measure, never this file."""
 import math
 import signal
 import numpy as np
@@ -8,6 +8,7 @@ import manifold3d as m3
 from . import constants as C
 from . import bodies as B
 from . import core
+from . import measure
 from .core import FormatError, apply, translation, ivol, union, box
 from .contract import load_assembly, check_contract, replay
 
@@ -83,25 +84,7 @@ def g4(w):
 
 
 def g5(w):
-    h = C.G5_VOXEL
-    lo = np.minimum(C.ENVELOPE[0], C.LID_BOX[0]) - C.G5_MARGIN
-    hi = np.maximum(C.ENVELOPE[1], C.LID_BOX[1]) + C.G5_MARGIN
-    origin, shape = core.grid_for(lo, hi, h, C.GRID_JITTER)
-    plugs = [B.j1_section_box(C.K_GROW_OUTER, lo[0] - 1, 0.0),
-             B.j2_section_cyl(C.K_GROW_OUTER, C.PCB_SIZE[0], hi[0] + 1)]
-    inner = union([w.board, w.battery])
-    solid = core.voxelize(union(list(w.final.values()) + plugs), origin, shape, h)
-    passable = core.edt(~np.pad(solid, 1, constant_values=False)) >= (C.G5_SPHERE_DIA / 2) / h
-    lab, n = ndimage.label(passable)
-    edge = np.zeros_like(passable)
-    edge[0], edge[-1], edge[:, 0], edge[:, -1], edge[:, :, 0], edge[:, :, -1] = (True,) * 6
-    outside_ids = np.unique(lab[edge & passable])
-    outside = np.isin(lab, outside_ids[outside_ids > 0])
-    inner_vox = np.pad(core.voxelize(inner, origin, shape, h), 1)
-    d = core.edt(~inner_vox)[outside]
-    nearest = float(d.min() * h) if d.size else float("inf")
-    if not np.isfinite(nearest):
-        nearest = 1e9
+    nearest = measure.enclosure_reach(w.final.values(), union([w.board, w.battery]))
     return nearest >= C.G5_NEAR, {"outside_reaches_within": nearest}
 
 
@@ -183,14 +166,7 @@ def _window(w, plane_x, sec2d):
 
 def _wall(part):
     def fn():
-        bb = part.bounding_box()
-        origin, shape = core.grid_for(np.array(C.ENVELOPE[0]) - 1.0, np.array(C.ENVELOPE[1]) + 1.0, C.W_VOXEL, C.GRID_JITTER)
-        lo_i = np.maximum(np.floor((np.array(bb[:3]) - origin) / C.W_VOXEL).astype(int) - 1, 0)
-        hi_i = np.minimum(np.ceil((np.array(bb[3:]) - origin) / C.W_VOXEL).astype(int) + 1, np.array(shape))
-        sub_origin = origin + lo_i * C.W_VOXEL
-        solid = core.voxelize(part, sub_origin, tuple(int(v) for v in hi_i - lo_i), C.W_VOXEL)
-        n, dev = core.opening_test(solid, C.W_ERODE_VOX, C.W_DILATE_VOX)
-        dev_mm = dev * C.W_VOXEL if np.isfinite(dev) else 1e9
+        n, dev_mm = measure.wall_opening(part)
         return n == 1 and dev_mm <= C.W_DEV, {"pieces": n, "max_deviation": dev_mm}
     return fn
 
