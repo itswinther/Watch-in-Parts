@@ -35,7 +35,7 @@ WEIGHTS_2 = {"day_hand": 3, "day_place": 1}
 WEIGHTS = {"spin": 1, "held": 2, "train": 3, "clear": 1, "minute": 2, "hour": 2, "seconds": 2,
            "coaxial": 1, "hands": 1, "size": 1, "printable": 1, "tolerant": 2, "seated": 2, "light": 2}
 GATES = ("files", "assembled")
-TIMEOUT_S = 600
+TIMEOUT_S = 1800
 
 # ---- one-job mode (no --stage): one delivery folder, graded part by part, nothing frozen ----
 # The delivery: movement.json (barrel 1 turn per 8 h), variant_6h.json (the same calibre for the barrel at
@@ -56,7 +56,7 @@ JOB_PARTS = (
      dict(JOB_CHECKS_1, **JOB_CHECKS_2)),
     ("P4", "assembly", Fraction(25, 100), ("files", "plan"), None),
 )
-JOB_TIME_LIMIT_S = 3600     # s, whole run: generous (the reference takes 7 to 10 min); once it has passed, every check not yet run fails, and a running check is stopped
+JOB_TIME_LIMIT_S = 7200     # s, whole run: generous (the reference takes 6 to 10 min on an idle 4-CPU machine; printable alone took 273 s at load 16); once it has passed, every check not yet run fails, and a running check is stopped
 
 
 class _Timeout(Exception):

@@ -52,7 +52,7 @@ Each is at most 1,048,576 bytes and names at most 60 parts.
     ...
   },
   "meshes": [
-    {"driver": "barrel", "driver_teeth": 96, "driven": "mobile_name", "driven_teeth": n},
+    {"driver": "barrel", "driver_teeth": n, "driven": "mobile_name", "driven_teeth": n},
     ...
   ],
   "hands": {
@@ -69,7 +69,7 @@ Each is at most 1,048,576 bytes and names at most 60 parts.
 - `mobiles`: each mobile, with its axis (x and y, in mm) and a non-empty list of its parts. `barrel` is not listed;
   it exists already.
 - `meshes`: every pair of gears that drive one another: the two mobiles (`barrel` or a mobile name), and the tooth
-  count of the gear on each (`n` above stands for one). Tooth counts are integers from 3 to 1000.
+  count of the gear on each (each `n` above stands for one). Tooth counts are integers from 3 to 1000.
 - `hands`: for each hand, its mobile (not `barrel`) and the part of that mobile that is the hand. `day` is the
   24-hour hand. `hour`, `minute` and `seconds` are required; `day` may be left out.
   Every hand entry that is present must name a mobile of the file (not `barrel`) and a part listed in that
