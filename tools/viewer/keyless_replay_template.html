@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Keyless Replay</title>
+<style>
+:root { --bg:#f4f3ef; --panel:#fff; --ink:#1d1d1b; --muted:#6b6a65; --line:#dddbd3; --accent:#2f6fb0; --ok:#2e7d4f; --bad:#b3402e; --scene:#e9e7e0; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#161615; --panel:#1f1f1d; --ink:#ecebe6; --muted:#9a9890; --line:#34332f; --accent:#6fa6dd; --ok:#5bb37f; --bad:#e0705d; --scene:#262624; } }
+:root[data-theme="dark"] { --bg:#161615; --panel:#1f1f1d; --ink:#ecebe6; --muted:#9a9890; --line:#34332f; --accent:#6fa6dd; --ok:#5bb37f; --bad:#e0705d; --scene:#262624; }
+* { box-sizing: border-box; }
+html, body { margin:0; height:100%; background:var(--bg); color:var(--ink); font:13px/1.45 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+#app { display:grid; grid-template-columns: 1fr 330px; grid-template-rows: 1fr auto; height:100vh; }
+#view { position:relative; background:var(--scene); min-width:0; }
+aside { grid-row: 1 / span 2; grid-column: 2; background:var(--panel); border-left:1px solid var(--line); overflow-y:auto; padding:14px 16px; }
+#bar { grid-column:1; background:var(--panel); border-top:1px solid var(--line); padding:10px 14px; }
+h1 { font-size:15px; margin:0 0 4px; } h2 { font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin:16px 0 6px; font-weight:600; }
+#phase { font-weight:600; } #label { color:var(--muted); }
+input[type=range] { width:100%; accent-color:var(--accent); }
+button, select { font:inherit; color:var(--ink); background:var(--bg); border:1px solid var(--line); border-radius:6px; padding:4px 10px; cursor:pointer; }
+.row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.sw { display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:6px; vertical-align:-1px; }
+.leg div { margin:6px 0; } .leg b { font-weight:600; }
+.ok { color:var(--ok); } .bad { color:var(--bad); }
+#phases span { display:inline-block; padding:1px 7px; border-radius:9px; border:1px solid var(--line); margin:2px 3px 2px 0; cursor:pointer; font-size:12px; }
+#phases span.on { background:var(--accent); color:#fff; border-color:var(--accent); }
+@media (max-width: 900px) { #app { grid-template-columns:1fr; grid-template-rows: 60vh auto auto; height:auto; } aside { grid-row:auto; grid-column:1; border-left:0; } }
+</style>
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+               "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }
+</script>
+</head>
+<body>
+<div id="app">
+  <main id="view"></main>
+  <div id="bar">
+    <div class="row" style="justify-content:space-between">
+      <div><span id="phase"></span> <span id="label"></span></div>
+      <div class="row"><button id="play">Play</button>
+        <select id="speed"><option value="1">1x</option><option value="3" selected>3x</option><option value="8">8x</option></select>
+        <span id="fno" style="color:var(--muted)"></span></div>
+    </div>
+    <input id="t" type="range" min="0" max="0" step="1" value="0">
+    <div id="phases"></div>
+  </div>
+  <aside>
+    <h1 id="title"></h1>
+    <div id="score" style="color:var(--muted)"></div>
+    <h2>Acceptance steps (grader's result)</h2>
+    <div id="at"></div>
+    <h2>What each part does</h2>
+    <div class="leg" id="legend"></div>
+    <h2>Note</h2>
+    <div style="color:var(--muted)">Every part moves exactly as the grader's contact simulation moved it, step by step. Plates are drawn see-through. Drag to orbit, scroll to zoom.</div>
+  </aside>
+</div>
+<script type="module">
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+const D = /*__DATA__*/null;
+const $ = (id) => document.getElementById(id);
+const COLORS = ["#4e79a7","#f28e2b","#59a14f","#e15759","#76b7b2","#edc948","#b07aa1","#ff9da7","#9c755f","#86bcb6"];
+const view = $("view");
+const renderer = new THREE.WebGLRenderer({ antialias: true }); renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+view.appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 500); camera.up.set(0, 0, 1);
+const controls = new OrbitControls(camera, renderer.domElement); controls.enableDamping = true;
+scene.add(new THREE.HemisphereLight(0xffffff, 0x445566, 1.1));
+const kl = new THREE.DirectionalLight(0xffffff, 1.5); kl.position.set(20, -30, 40); scene.add(kl);
+function dec(b64, T) { const s = atob(b64), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return new T(u.buffer); }
+const names = Object.keys(D.mobiles); const color = {}; names.forEach((n, i) => color[n] = COLORS[i % COLORS.length]);
+const groups = {}; const box = new THREE.Box3();
+for (const n of names) { const g = new THREE.Group(); g.matrixAutoUpdate = false; scene.add(g); groups[n] = g; }
+const still = new THREE.Group(); scene.add(still);
+for (const p of D.parts) {
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute("position", new THREE.BufferAttribute(dec(p.pos, Float32Array), 3));
+  geo.setIndex(new THREE.BufferAttribute(dec(p.idx, Uint32Array), 1)); geo.computeVertexNormals(); geo.computeBoundingBox();
+  if (!p.ghost) box.union(geo.boundingBox);
+  const col = p.mobile ? color[p.mobile] : "#9fb4c7";
+  const mat = new THREE.MeshStandardMaterial({ color: col, metalness: .25, roughness: .5, side: THREE.DoubleSide,
+    transparent: p.ghost, opacity: p.ghost ? 0.12 : 1, depthWrite: !p.ghost });
+  const m = new THREE.Mesh(geo, mat);
+  (p.mobile ? groups[p.mobile] : still).add(m);
+}
+function rot(point, dir, a) {
+  const d = new THREE.Vector3(...dir).normalize(), P = new THREE.Vector3(...point);
+  const R = new THREE.Matrix4().makeRotationAxis(d, a);
+  return new THREE.Matrix4().makeTranslation(P.x, P.y, P.z).multiply(R).multiply(new THREE.Matrix4().makeTranslation(-P.x, -P.y, -P.z));
+}
+function slide(dir, s) { const d = new THREE.Vector3(...dir).normalize().multiplyScalar(s); return new THREE.Matrix4().makeTranslation(d.x, d.y, d.z); }
+function apply(f) {
+  const q = D.frames[f].q;
+  for (const n of names) {
+    const m = D.mobiles[n], v = q[n]; if (!v) continue;
+    let M;
+    if (m.dof === "stem") M = slide(m.dir, v[1]).multiply(rot(m.point, m.dir, v[0]));
+    else if (m.dof === "rot") M = rot(m.point, m.dir, v[0]);
+    else M = slide(m.dir, v[0]);
+    if (m.carrier && q[m.carrier]) { const c = D.mobiles[m.carrier]; M = rot(c.point, c.dir, q[m.carrier][0]).multiply(M); }
+    groups[n].matrix.copy(M);
+  }
+  const fr = D.frames[f];
+  $("phase").textContent = fr.phase_label + ":"; $("label").textContent = fr.label; $("fno").textContent = (f + 1) + " / " + D.frames.length;
+  document.querySelectorAll("#phases span").forEach(s => s.classList.toggle("on", s.dataset.k === fr.phase));
+}
+$("title").textContent = D.title || "Keyless works";
+$("score").textContent = D.product != null ? `product ${(+D.product).toFixed(3)} · reward ${(+D.reward).toFixed(3)}` : "";
+const ATN = {"AT-0":"Assemble","AT-1":"Wind","AT-2":"Hold","AT-3":"Run","AT-4":"Backward","AT-5":"Set","AT-6":"Return"};
+$("at").innerHTML = Object.entries(D.at || {}).map(([k, v]) => `<div>${k} ${ATN[k] || ""}: <span class="${v ? "ok" : "bad"}">${v ? "pass" : "fail"}</span></div>`).join("");
+$("legend").innerHTML = names.map(n => `<div><span class="sw" style="background:${color[n]}"></span><b>${n}</b><br>${D.mobiles[n].role}</div>`).join("");
+const firstOf = {}; D.frames.forEach((f, i) => { if (!(f.phase in firstOf)) firstOf[f.phase] = i; });
+$("phases").innerHTML = D.phases.filter(p => p.key in firstOf).map(p => `<span data-k="${p.key}">${p.at} ${p.label}</span>`).join("");
+$("phases").onclick = (e) => { const k = e.target.dataset.k; if (k) { cur = firstOf[k]; $("t").value = cur; apply(cur); } };
+const T = $("t"); T.max = Math.max(0, D.frames.length - 1);
+let cur = 0, playing = false, acc = 0;
+T.oninput = () => { cur = +T.value; apply(cur); };
+$("play").onclick = () => { playing = !playing; $("play").textContent = playing ? "Pause" : "Play"; };
+const c = box.getCenter(new THREE.Vector3()), sz = box.getSize(new THREE.Vector3()).length();
+controls.target.copy(c); camera.position.set(c.x + sz * 0.7, c.y - sz * 0.9, c.z + sz * 0.7);
+function resize() { const w = view.clientWidth, h = view.clientHeight || 500; renderer.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix(); }
+addEventListener("resize", resize); resize();
+const bgc = () => scene.background = new THREE.Color(getComputedStyle(document.documentElement).getPropertyValue("--scene").trim() || "#e9e7e0"); bgc();
+let last = performance.now();
+function loop(now) {
+  const dt = (now - last) / 1000; last = now;
+  if (playing && D.frames.length) { acc += dt * 20 * (+$("speed").value); while (acc >= 1) { acc -= 1; cur = (cur + 1) % D.frames.length; } T.value = cur; apply(cur); }
+  controls.update(); renderer.render(scene, camera); requestAnimationFrame(loop);
+}
+if (D.frames.length) apply(0);
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
