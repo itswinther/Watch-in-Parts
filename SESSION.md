@@ -1852,3 +1852,46 @@ Mikael asks B (and itswinther) to answer these here, so both machines work to on
 
 - For A: your anchor pass at 82c5678 does not contain these three; they are on main from this commit and can run on your next pass (`--only "job stop-early"`, about 15 min each).
 - Files changed: tests/test_anchors_job.py, SESSION.md.
+
+### 2026-11-14 23:55 | A: one-job anchor suite on A's machine (B's request 22:02): 32 of 33 ok, exit 1 | Mikael + Claude
+- Ran: main at 82c5678 in Docker (no network, 5 GB, 2 to 4 CPUs, keyless-build image: Python 3.12.16, cadquery 2.8.0, manifold3d 3.5.5, numpy 2.5.4), , then . 22:12 to 23:50. DETAILS kept on A's machine (scratchpad ); B can ask for any file. B's stop-early anchors (556bb79) came later and are not in this pass.
+- **The one OFF is the anchor, not the grader:** "24-hour hand axis too close to the hour axis" fails to build (): its variant uses builder M's split part names while the suite runs the one-part layout. Fix in the anchor builder.
+- **For itswinther and B, the open FINDING is a reward-integrity risk:** "minute hand is a disc over the whole dial, 0.6 off-centre" scores **0.9412**, the same as gold without a report (with a truthful report it would be 1.0). Judges spend 15 minutes looking for exploits; the rubric's zero for integrity is "an exploit ... earns a better score than successful play", and equal is close. Suggest closing it before the freeze (e.g. a hand-shape check: a hand's area or its extent off its axis within limits, or the hand must leave the dial visible), with an anchor that expects it to score low.
+
+| anchor | expected | got | P1 | P2 | P3 | P4 | h | time s | |
+|---|---|---|---|---|---|---|---|---|---|
+| job gold (truthful report) | 1.0000 (1) | 1.0000 | 1 | 1 | 1 | 1 | 1 | 477 | ok |
+| job gold without a report | 0.9412 (16/17) | 0.9412 | 1 | 1 | 1 | 1 | 1/2 | 464 | ok |
+| job gold, report claims fail for a part that passes (P2) | 0.9853 (67/68) | 0.9853 | 1 | 1 | 1 | 1 | 7/8 | 455 | ok |
+| job do nothing | 0.0000 (0) | 0.0000 | 0 | 0 | 0 | 0 | 1/2 | 0 | ok |
+| job everything except the hardest part (assembly: order, no paths) | 0.3137 (16/51) | 0.3137 | 1 | 1 | 1 | 0 | 1/2 | 439 | ok |
+| job everything except the variant (no day hand in variant_6h.json) | 0.3765 (32/85) | 0.3765 | 1 | 1 | 0 | 1 | 1/2 | 309 | ok |
+| job honesty: the variant fails, the report claims pass for it | 0.3647 (31/85) | 0.3647 | 1 | 1 | 0 | 1 | 1/4 | 305 | ok |
+| job honesty: the variant fails, the report says so | 0.4000 (2/5) | 0.4000 | 1 | 1 | 0 | 1 | 1 | 295 | ok |
+| job everything except the 24-hour hand (no day train in movement.json) | 0.4078 (104/255) | 0.4078 | 1 | 0 | 1 | 1 | 1/2 | 286 | ok |
+| job a mesh that jams (a lump on one seconds-pinion tooth) | 0.3778 (2216/5865) | 0.3778 | 14/23 | 1 | 2/3 | 1 | 1/2 | 326 | ok |
+| job a mesh whose teeth do not engage (seconds pinion 0.8 too high) | 0.3778 (2216/5865) | 0.3778 | 14/23 | 1 | 2/3 | 1 | 1/2 | 373 | ok |
+| job a hand at the wrong speed (seconds pair 95/13) | 0.4500 (23752/52785) | 0.4500 | 21/23 | 1 | 25/27 | 1 | 1/2 | 352 | ok |
+| job a mobile not held (third arbor without its top shoulder) | 0.4569 (536/1173) | 0.4569 | 21/23 | 1 | 1 | 1 | 1/2 | 363 | ok |
+| job a part not seated (cannon loose on a turned-down arbor) | 0.4569 (536/1173) | 0.4569 | 21/23 | 1 | 1 | 1 | 1/2 | 422 | ok |
+| job a part too thin to print (third wheel 0.1 thick) | 0.4638 (32/69) | 0.4638 | 22/23 | 1 | 1 | 1 | 1/2 | 414 | ok |
+| job the movement taller than the case (centre tip +0.4) | 0.4638 (32/69) | 0.4638 | 22/23 | 1 | 1 | 1 | 1/2 | 396 | ok |
+| job two non-meshing mobiles collide (hour hand into the 24-hour hub) | 0.4603 (24296/52785) | 0.4603 | 22/23 | 1 | 26/27 | 1 | 1/2 | 395 | ok |
+| job a mobile rubs the frame when turned (seconds arm into a pillar) | 0.4603 (24296/52785) | 0.4603 | 22/23 | 1 | 26/27 | 1 | 1/2 | 385 | ok |
+| job gear strength: the third pinion made brass | 0.4500 (23752/52785) | 0.4500 | 21/23 | 1 | 25/27 | 1 | 1/2 | 380 | ok |
+| job 24-hour hand on the hour hand's part | 0.4078 (104/255) | 0.4078 | 1 | 0 | 1 | 1 | 1/2 | 386 | ok |
+| job 24-hour hand at the wrong rate (day pair 15/35) | 0.4131 (316/765) | 0.4131 | 1 | 1/4 | 8/9 | 1 | 1/2 | 398 | ok |
+| job 24-hour hand axis too close to the hour axis (5.96 mm) | 0.4514 (1036/2295) | - | - | - | - | - | - | 104 | OFF: build failed: RuntimeError: assembly order does not list every part once: ['centre_wheel_90', 'fourth_wheel_96', 'minute_wheel_36', 'third_wheel_60'] |
+| job variant = the 8-hour movement unchanged | 0.4392 (112/255) | 0.4392 | 1 | 1 | 2/3 | 1 | 1/2 | 370 | ok |
+| job variant with 6-hour tooth counts on the 8-hour parts | 0.4148 (56/135) | 0.4148 | 1 | 1 | 11/27 | 1 | 1/2 | 370 | ok |
+| job variant with one fixed part renamed | 0.3765 (32/85) | 0.3765 | 1 | 1 | 0 | 1 | 1/2 | 470 | ok |
+| job assembly order reversed | 0.3414 (296/867) | 0.3414 | 1 | 1 | 1 | 3/17 | 1/2 | 418 | ok |
+| job one path teleports (dial path every other pose) | 0.4614 (400/867) | 0.4614 | 1 | 1 | 1 | 16/17 | 1/2 | 424 | ok |
+| job one part left out of the order (minute hand) | 0.3875 (112/289) | 0.3875 | 1 | 1 | 1 | 8/17 | 1/2 | 427 | ok |
+| x minute hand is a disc over the whole dial (centred) | 0.4603 (24296/52785) | 0.4603 | 22/23 | 1 | 26/27 | 1 | 1/2 | 412 | ok |
+| x minute hand is a disc over the whole dial, 0.6 off-centre (FINDING) | 0.9412 (16/17) | 0.9412 | 1 | 1 | 1 | 1 | 1/2 | 415 | ok |
+| x movement.json names the barrel as a part | 0.0941 (8/85) | 0.0941 | 0 | 0 | 1 | 0 | 1/2 | 267 | ok |
+| x symlinked part file | 0.0941 (8/85) | 0.0941 | 0 | 0 | 1 | 0 | 1/2 | 254 | ok |
+| x a mobile without a material (C1) | 0.0941 (8/85) | 0.0941 | 0 | 0 | 1 | 0 | 1/2 | 186 | ok |
+
+- Files changed: SESSION.md.
