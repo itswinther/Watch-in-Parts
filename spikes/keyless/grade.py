@@ -206,8 +206,9 @@ def _frame(point, direction):
     return to.tolist(), back.tolist()
 
 
-def _coaxial_holes(man, z, tol=0.02):
-    """Radii of the inner loops of man's section at height z that are centred on the z axis."""
+def _coaxial_holes(man, z, tol=None):
+    """Radii of the inner loops of man's section at height z that are centred on the z axis (within tol)."""
+    tol = C.FIT_CENTRE_TOL if tol is None else tol
     out = []
     for poly in man.slice(z).to_polygons():
         p = np.asarray(poly, float)
@@ -266,7 +267,7 @@ def relieve_fits(parts, sup, defs):
                 if not rs:
                     continue
                 r = min(rs)
-                slab = m3.Manifold.cylinder(z1 - z0, max(r - 0.01, 1e-3), circular_segments=128).translate([0, 0, z0])
+                slab = m3.Manifold.cylinder(z1 - z0, max(r - C.FIT_EMPTY_INSET, 1e-3), circular_segments=128).translate([0, 0, z0])
                 if (m ^ slab).volume() > 1e-9:
                     continue                # material inside the bore in this slab: not an empty bore
                 cuts.append(m3.Manifold.cylinder(z1 - z0 + 1e-4, r + c, circular_segments=256)

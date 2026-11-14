@@ -48,6 +48,11 @@ SCAN_ARC = 0.002    # mm of surface travel between samples when searching for th
 FORCE_EPS = 1e-7    # mm^3: overlap difference below which a contact is taken to push neither way
 SPRING_PUSH_ARC = 0.01  # mm of surface travel per increment when a returning spring pushes free parts
 SETTLE_RELAX_ROUNDS = 40  # at the start, springs return (pushing what they may) until nothing moves
+# Length floors (mm). Module constants so a caller working at another scale (B's joined job) can set them
+# to their value x s; the defaults are the standalone task's.
+RADIUS_FLOOR = 0.05     # a body's radius about its axis is taken as at least this (surface travel per radian)
+LEVER_FLOOR = 0.05      # budget(): a contact's lever arm about a rot body's axis is taken as at least this
+NEIGHBOUR_MARGIN = 0.05  # neighbours(): bounding boxes closer than this count as neighbours
 MAX_STEP_TRAVEL = 0.06  # mm: a step in which any body's surface travels further is split in halves (up to 4 times),
                         # so the friction-cone rule always sees small steps compared with the features
 
@@ -94,7 +99,7 @@ class Body:
             self.radius = float(np.max(np.linalg.norm(rel - np.outer(along, self.dir), axis=1)))
         else:
             self.radius = 1.0
-        self.radius = max(self.radius, 0.05)
+        self.radius = max(self.radius, RADIUS_FLOOR)
         self._cache = {}
 
     def arc(self, dq):
@@ -210,7 +215,7 @@ class World:
             if o is b or o.kind == "fixed":
                 continue
             _, B, _ = self.posed(o, with_key=True)
-            if all(A[i] < B[i + 3] + 0.05 and B[i] < A[i + 3] + 0.05 for i in range(3)):
+            if all(A[i] < B[i + 3] + NEIGHBOUR_MARGIN and B[i] < A[i + 3] + NEIGHBOUR_MARGIN for i in range(3)):
                 out.append(o)
         return out
 
@@ -345,7 +350,7 @@ class World:
                 if t <= 0:
                     continue
                 if b.dof == "rot":
-                    rb = max(self._axis_dist(b.point, b.dir, c), 0.05)
+                    rb = max(self._axis_dist(b.point, b.dir, c), LEVER_FLOOR)
                     best = max(best, K * t / rb)
                 else:
                     best = max(best, K * t)

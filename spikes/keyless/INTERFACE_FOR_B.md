@@ -144,6 +144,14 @@ there, or offer an equivalent post. Extents are from the current reference, ×1.
     Angles and friction do not change.
   - **Validation:** regrade the reference (about 10 min in Docker) and rerun the anchors (about 1 h on
     4 containers).
+- **Lengths on the engine-fix branch that `SCALE_TABLE` needs (B's 21:31 point 2).** All are module
+  attributes or default arguments now, with the standalone values as defaults, so `UNSCALED` can go:
+  - engine, the three former floors: `RADIUS_FLOOR` 0.05 (Body radius), `LEVER_FLOOR` 0.05
+    (`World.budget` lever arm), `NEIGHBOUR_MARGIN` 0.05 (`World.neighbours`, not called by grade.py);
+  - engine, new on the branch: `SPRING_PUSH_ARC` 0.01, and `World.phase:budget` 0.3 (a default
+    argument, like `World.settle:budget`);
+  - constants, new on the branch: `FIT_CLEARANCE` 0.005, `FIT_CENTRE_TOL` 0.02, `FIT_EMPTY_INSET`
+    0.01, `PULL_RANGE` (0.4, 1.0), all linear in s. `FORCE_EPS` (1e-7 mm³) scales by s³.
 - **Risk:** a tighter fit of the setting train around B's motion work, which isn't modelled in the
   keyless frame yet.
 - **Decision 14:45:** one scale for the whole job, B's demonstration scale (about 1.6×); "v2 at 1:1" is

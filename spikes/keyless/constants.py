@@ -12,6 +12,8 @@ FIT_CLEARANCE = 0.005            # the rig's fit rule: radial play given to ever
                                  # mobile's declared axis (CAD fits are drawn line to line; real pivots run
                                  # 5 to 15 um). Only empty coaxial bores are widened.
 FIT_SLICES = 12                  # bores are found and widened in this many slabs along the axis
+FIT_CENTRE_TOL = 0.02            # a hole counts as a bore of the axis when its centre is within this of it
+FIT_EMPTY_INSET = 0.01           # a bore is empty when nothing lies inside its radius less this
 FORWARD = -1.0                   # forward winding: the stem turns clockwise seen from outside (+x looking -x),
                                  # i.e. negative rotation about +x
 
