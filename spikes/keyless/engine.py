@@ -37,7 +37,11 @@ import numpy as np
 import manifold3d as m3
 
 TOL = 2e-4          # mm^3 of overlap allowed between two bodies
-K = 2.0             # friction-cone factor: ramps flatter than atan(2) = 63 deg slip
+try:
+    from constants import MU    # dry friction of the test rig
+except ImportError:             # the engine on its own (toy tests)
+    MU = 0.51
+K = 1.0 / MU        # friction-cone factor: a face inclined more steeply than atan(1/MU) to the push locks
 SWEEPS = 14
 RELAX_MAX = 0.25    # mm of surface travel a spring may return per step
 SCAN_ARC = 0.002    # mm of surface travel between samples when searching for the clearing position

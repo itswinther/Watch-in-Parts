@@ -1,6 +1,9 @@
 <!-- NOT-FOR-AGENT: background for judges and teammates. Never copied into the agent image. -->
 # Keyless works: context
 
+Principle: we do not design for failure. We build a realistic task, grade only the delivered output
+the way the owner of the watch would, and measure.
+
 ## What keyless works are
 
 Every mechanical watch has a crown, and behind it a small mechanism with one job: let the owner wind
