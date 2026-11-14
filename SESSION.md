@@ -218,6 +218,8 @@ Append one line per decision: time, decision, who agreed.
 
 - 2026-11-14 22:30 (B) Decided by itswinther: B's local smoke runs (Claude Code, outside Harbor) use Sonnet 5.5 only from now on; Fable and Opus are run only if Sonnet shows a gap. Reason: speed and usage; on every brief so far all three scored the same (1.0).
 
+- 2026-11-15 00:50 (B) Decided by itswinther: two rule changes, both stated in QA-W100 and built now. (1) **Hand shape:** new condition in the hands checks (P1 check 11 and P2 check 2, and P3 through them): seen from the dial side (the part's projection on the xy plane), a hand part covers at most `HAND_AREA_MAX_SHARE` = 0.25 of the disc its tip sweeps (pi x reach^2). Old: no limit; a minute hand made as a disc over the dial 0.6 off its axis scored 16/17 (A's anchor table 23:55). The reference's hands cover 0.030 to 0.112. (2) **Drive test independent of the delivered backlash phase:** before each drive-test step the driver D is first turned in the drive sense until its teeth touch N (the smallest turn after which D and N intersect by more than 0 mm3, searched up to one pitch of D), then the 0.25-pitch push and the V and V/H measure are taken from that contact position. Old: the push started at the delivered angle, so a real train delivered mid-backlash (ml01's 31 percent backlash) failed. Every other rule and number unchanged. Both need A's anchor rerun (offer 2) on the commit B posts.
+
 ## Proposed spec changes
 
 Append here. A human has to say yes before SPEC.md changes.
