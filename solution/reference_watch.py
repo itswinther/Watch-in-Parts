@@ -169,8 +169,11 @@ def case_geometry(P):
     return cc, rp, tuple((float(x), float(y)) for x, y in best3)
 
 
-def frame(P, with_day):
-    """Plate, bridge and dial cut down to skeletons: a boss round every hole and pillar, joined by bars."""
+def frame(P, with_day, job=False):
+    """Plate, bridge and dial cut down to skeletons: a boss round every hole and pillar, joined by bars.
+    job=True (the one-job delivery, two-body barrel): the arbor rises to BARREL_ARBOR_Z[1], so there is no barrel
+    cock; the arbor's upper pivot runs in the bridge, in a boss over the barrel (its square, z BARREL_SQUARE_Z,
+    is left free for a ratchet)."""
     C, I, T, S, Mw, Id, D = (P[k] for k in ("centre", "third", "fourth", "seconds", "minute_wheel", "day_idler", "day"))
     (cx, cy), R_PLATE, spots = P["case"]
     lo, hi = PLATE[1] + 0.1, BRIDGE[0] - 0.1
@@ -178,7 +181,7 @@ def frame(P, with_day):
     pb = [(0.0, 0.0, 1.3)] + [(a[0], a[1], 1.0) for a in (I, T, C, S)] + [(x, y, 0.85) for x, y in spots]
     plate = union([GC.skeleton(PLATE[0], PLATE[1], pb, BAR)[0]] + [cyl(x, y, PLATE[1] - 0.1, BRIDGE[0], 0.75) for x, y in spots])
     bb = [(a[0], a[1], 1.0) for a in (I, T, Mw)] + [(C[0], C[1], 1.4), (S[0], S[1], 1.2)] + [(x, y, 0.85) for x, y in spots] \
-        + [(0.0, 0.0, 0.8)]          # over the barrel: the barrel cock's post stands on it, so the fixed parts are one frame
+        + [(0.0, 0.0, 1.1 if job else 0.8)]   # over the barrel: the barrel cock's post stands on it (stages), or the arbor's pivot runs in it (job)
     db = [(Mw[0], Mw[1], 1.0), (C[0], C[1], 1.8), (S[0], S[1], 1.2)] + [(x, y, 0.85) for x, y in spots]
     if with_day:
         bb += [(Id[0], Id[1], 1.0), (D[0], D[1], 1.0)]
@@ -189,12 +192,16 @@ def frame(P, with_day):
     bh = [cyl(a[0], a[1], BRIDGE[0] - 1, hi + 0.8, 0.4) for a in (I, T)] + [cyl(C[0], C[1], BRIDGE[0] - 1, BRIDGE[1] + 1, 0.7),
                                                                           cyl(S[0], S[1], BRIDGE[0] - 1, BRIDGE[1] + 1, 0.6)]
     bh += [cyl(Mw[0], Mw[1], BRIDGE[1] - 0.7, BRIDGE[1] + 1, 0.4)]
+    if job:
+        bh += [cyl(0, 0, BRIDGE[0] - 1, W.BARREL_ARBOR_Z[1] + 0.1, W.BARREL_ARBOR_R + 0.1)]
     dh = [cyl(Mw[0], Mw[1], DIAL[0] - 1, DIAL[0] + 0.45, 0.4), cyl(C[0], C[1], DIAL[0] - 1, DIAL[1] + 1, 1.15), cyl(S[0], S[1], DIAL[0] - 1, DIAL[1] + 1, 0.6)]
     if with_day:
         bh += [cyl(a[0], a[1], BRIDGE[1] - 0.7, BRIDGE[1] + 1, 0.4) for a in (Id, D)]
         dh += [cyl(Id[0], Id[1], DIAL[0] - 1, DIAL[0] + 0.45, 0.4), cyl(D[0], D[1], DIAL[0] - 1, DIAL[1] + 1, 0.6)]
-    return {"main_plate": minus(plate, ph), "bridge": minus(bridge, bh), "dial": minus(dial, dh),
-            "barrel_cock": minus(union([cyl(0, 0, 1.15, 2.45, 1.6), cyl(0, 0, 2.4, BRIDGE[0], 0.6)]), cyl(0, 0, 1.0, 1.7, 0.6))}
+    out = {"main_plate": minus(plate, ph), "bridge": minus(bridge, bh), "dial": minus(dial, dh)}
+    if not job:
+        out["barrel_cock"] = minus(union([cyl(0, 0, 1.15, 2.45, 1.6), cyl(0, 0, 2.4, BRIDGE[0], 0.6)]), cyl(0, 0, 1.0, 1.7, 0.6))
+    return out
 
 
 def centre_arbor(C, lo, hi, pinion, wheel):
@@ -318,8 +325,9 @@ ORDER = ["main_plate", "barrel", "barrel_cock", "third_54", "centre_36", "fourth
          "minute_wheel", "hour_wheel", "day", "day_idler", "dial", "hour_hand", "seconds_hand", "day_hand", "minute_hand"]
 
 
-# the same order for the 8-hour movement, which has the 60/30 third wheel and centre pinion
-ORDER_8H = [{"third_54": "third", "centre_36": "centre"}.get(n, n) for n in ORDER]
+# the same order for the 8-hour movement, which has the 60/30 third wheel and centre pinion, and no barrel cock
+# (the one-job delivery's two-body barrel pivots in the bridge)
+ORDER_8H = [{"third_54": "third", "centre_36": "centre"}.get(n, n) for n in ORDER if n != "barrel_cock"]
 
 
 def build_assembly(folder, order=None):
@@ -402,6 +410,12 @@ def main_job(out):
     doc1, parts1, P, phase = build_stage1()
     doc2, parts2 = build_stage2(doc1, parts1, P, phase)
     doc3, parts3 = build_stage3(doc2, parts2, P)
+    # the two-body barrel's arbor rises to the bridge: the job frame (no barrel cock, a pivot hole in the bridge)
+    jf = frame(P, with_day=True, job=True)
+    for d, ps in ((doc2, parts2), (doc3, parts3)):
+        d["fixed"] = [n for n in d["fixed"] if n != "barrel_cock"]
+        ps.pop("barrel_cock", None)
+        ps.update(jf)
     doc2, doc3 = with_materials(doc2), with_materials(doc3)
     names = lambda d: list(d["fixed"]) + [p for mm in d["mobiles"].values() for p in mm["parts"]]
     shared = set(names(doc2)) & set(names(doc3))

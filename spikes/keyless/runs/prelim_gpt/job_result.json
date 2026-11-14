@@ -1,0 +1,40 @@
+{
+    "schema_version": 1,
+    "id": "c210a8b2-4719-4bbe-9c5c-894139b429b9",
+    "started_at": "2026-11-14T17:59:41.291453",
+    "updated_at": "2026-11-14T18:32:30.591377",
+    "finished_at": "2026-11-14T18:32:30.591377",
+    "n_total_trials": 1,
+    "stats": {
+        "n_completed_trials": 1,
+        "n_errored_trials": 0,
+        "n_running_trials": 0,
+        "n_pending_trials": 0,
+        "n_cancelled_trials": 0,
+        "n_retries": 0,
+        "evals": {
+            "codex__gpt-6.1-sol__adhoc": {
+                "n_trials": 1,
+                "n_errors": 0,
+                "metrics": [
+                    {
+                        "mean": 0.023739
+                    }
+                ],
+                "pass_at_k": {},
+                "reward_stats": {
+                    "reward": {
+                        "0.023739": [
+                            "task_codex__veR5EX3"
+                        ]
+                    }
+                },
+                "exception_stats": {}
+            }
+        },
+        "n_input_tokens": 2947302,
+        "n_cache_tokens": 2885504,
+        "n_output_tokens": 65332,
+        "cost_usd": 1.0654663999999998
+    }
+}

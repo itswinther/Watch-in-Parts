@@ -29,7 +29,7 @@ SUBMIT = os.environ.get("BIB_SUBMIT", os.path.join(os.getcwd(), "submission"))
 
 def part(name):
     if name == "barrel":
-        return W.barrel()
+        return W.barrel_stage()     # the stage task's one-body barrel
     if not W.NAME_RE.match(name):
         raise FormatError("bad part name")
     p = os.path.join(WORK, "parts", name + ".stl")
@@ -75,24 +75,24 @@ def t_interference(a):
 
 
 def t_speeds(a):
-    m = W.load_movement(WORK)
+    m = W.load_movement(WORK, barrel_solid=W.barrel_stage())
     w, conflicts = m.speeds()
     return {"clockwise_turns_per_hour": {k: str(v) for k, v in w.items()},
             "not_driven": [k for k in m.mobiles if k not in w], "conflicting_meshes": conflicts}
 
 
 def t_spin(a):
-    m = W.load_movement(WORK)
+    m = W.load_movement(WORK, barrel_solid=W.barrel_stage())
     return m.spin(mob(m, a.mobile))
 
 
 def t_held(a):
-    m = W.load_movement(WORK)
+    m = W.load_movement(WORK, barrel_solid=W.barrel_stage())
     return {"move": W.HELD_MOVE, "overlap_after_move": m.held(mob(m, a.mobile))}
 
 
 def t_mesh(a):
-    m = W.load_movement(WORK)
+    m = W.load_movement(WORK, barrel_solid=W.barrel_stage())
     for x, tx, y, ty in m.meshes:
         if (x, y) == (a.driver, a.driven):
             return m.mesh_run(x, tx, y, ty)
@@ -100,13 +100,13 @@ def t_mesh(a):
 
 
 def t_clear(a):
-    m = W.load_movement(WORK)
+    m = W.load_movement(WORK, barrel_solid=W.barrel_stage())
     w, _ = m.speeds()
     return m.clear_run(mob(m, a.a), mob(m, a.b), w.get(a.a, 0), w.get(a.b, 0))
 
 
 def t_extent(a):
-    m = W.load_movement(WORK)
+    m = W.load_movement(WORK, barrel_solid=W.barrel_stage())
     out = m.extent()
     out["hand_reach"] = {h: m.hand_reach(h) for h in m.hands}
     shape = {h: m.hand_shape(h) for h in m.hands}
@@ -117,7 +117,7 @@ def t_extent(a):
 
 
 def t_submit(a):
-    W.load_movement(WORK)
+    W.load_movement(WORK, barrel_solid=W.barrel_stage())
     with open(os.path.join(WORK, "movement.json")) as f:
         doc = json.load(f)
     names = list(doc["fixed"]) + [p for mm in doc["mobiles"].values() for p in mm["parts"]]

@@ -1,0 +1,42 @@
+{
+    "schema_version": 2,
+    "task": {
+        "name": "task_opencode",
+        "type": "local",
+        "digest": "sha256:6ef47777b05225e994e9d37b51838d5a87e0896a199557d5016af757f93ee4ea",
+        "path": "/private/tmp/claude-501/-Users-mikbs-Desktop-dev-Junction/824d3067-e8b7-4116-9934-5c800c5f6483/scratchpad/kl/task_opencode"
+    },
+    "install_only": false,
+    "timeout_multiplier": 1.0,
+    "agent": {
+        "name": "opencode",
+        "model_name": "anthropic/claude-sonnet-5-5",
+        "skip_model_parsing": false,
+        "skills": [],
+        "resume_trajectory": false,
+        "extra_allowed_hosts": [],
+        "kwargs": {
+            "disable_web_search": true
+        },
+        "mcp_servers": []
+    },
+    "bridge_inputs": {},
+    "skills": [],
+    "environment": {
+        "type": "docker",
+        "force_build": false,
+        "delete": true,
+        "stream": false,
+        "cpu_enforcement_policy": "auto",
+        "memory_enforcement_policy": "auto",
+        "extra_docker_compose": [],
+        "kwargs": {},
+        "extra_allowed_hosts": []
+    },
+    "verifier": {
+        "disable": false,
+        "environment_mode": "separate"
+    },
+    "artifacts": [],
+    "override_error_policy": {}
+}

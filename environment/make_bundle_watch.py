@@ -24,7 +24,7 @@ def main(argv):
     shutil.copyfile(os.path.join(pub, "INSTRUCTION_WATCH_S%d.md" % stage), os.path.join(out, "INSTRUCTION.md"))
     with open(os.path.join(pub, "SPEC_WATCH.md")) as f:
         spec = f.read()
-    shutil.copyfile(os.path.join(ROOT, "geometry", "data", "barrel.stl"), os.path.join(out, "meshes", "barrel.stl"))
+    shutil.copyfile(os.path.join(ROOT, "geometry", "data", "barrel_stage.stl"), os.path.join(out, "meshes", "barrel.stl"))   # the stage task's one-body barrel
     if tools == "no":
         with open(os.path.join(pub, "SPEC_WATCH_GIVEN_NOTOOLS.md")) as f:
             spec = spec[:spec.index("## Tools")] + f.read()
@@ -50,7 +50,7 @@ def main(argv):
         shutil.copyfile(os.path.join(ROOT, "environment", "tools_watch.py"), os.path.join(out, "tools", "tools_watch.py"))
         for f in ("__init__.py", "core.py", "watch.py"):
             shutil.copyfile(os.path.join(ROOT, "geometry", f), os.path.join(out, "tools", "geometry", f))
-        shutil.copyfile(os.path.join(ROOT, "geometry", "data", "barrel.stl"), os.path.join(out, "tools", "geometry", "data", "barrel.stl"))
+        shutil.copyfile(os.path.join(ROOT, "geometry", "data", "barrel_stage.stl"), os.path.join(out, "tools", "geometry", "data", "barrel_stage.stl"))
         with open(os.path.join(out, "tools", "public", "SPEC_WATCH.md"), "w") as f:
             f.write(spec)
     with open(os.path.join(out, "SPEC_WATCH.md"), "w") as f:

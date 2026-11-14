@@ -78,7 +78,7 @@ GRADERS = {
         "solution": ["solution/reference_watch.py", "geometry"],
         "reference": "PYTHONPATH=/solution python3 reference_watch.py /app/delivery --job",
         "reference_out": None,                              # written in place at /app/delivery
-        "verifier_timeout_sec": 4500.0,                     # B 17:40: >= 4500 s (grader self-limit 3600 s); measured below
+        "verifier_timeout_sec": 7800.0,                     # B 18:39: >= 7800 s (grader whole-run limit 7200 s, 1800 s per check)
         "verifier_memory_mb": 4096,
     },
 }
