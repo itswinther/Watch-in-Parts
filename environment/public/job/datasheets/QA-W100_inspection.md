@@ -41,7 +41,8 @@ every condition and every check of all four parts passes: everything must work.
   intersection of the two solids is at most 0.01 mm3.
 - **The frame** is the fixed parts of a movement, taken together.
 - **A mobile** is a set of parts that turn together as one rigid body about the vertical line through its axis.
-  The barrel is the mobile `barrel`; its axis is the axis of the barrel as supplied (DS-W01, section 3).
+  The barrel is the mobile `barrel` (its drum and its arbor together, as one solid); its axis is the axis of the
+  barrel as supplied (DS-W01, section 3).
 - **Speeds** are worked out from the tooth counts declared under `meshes`, as exact fractions, starting from the
   barrel at the speed, and in the running sense, of the speed class that the work order gives for the build
   being judged (DS-W01, section 4). Every declared mesh is external: its two mobiles turn in opposite directions.

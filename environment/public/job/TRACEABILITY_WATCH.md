@@ -21,10 +21,18 @@ hand speeds and directions, and the weights of the checks.
 | BARREL_TEETH | 96 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-20 | Teeth |
 | BARREL_MODULE | 0.2 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-20 | Module (mm) |
 | PRESSURE_ANGLE | 25.0 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-20 | Pressure angle |
-| BARREL_ARBOR_R | 0.5 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-20 | Arbor radius |
+| BARREL_ARBOR_R | 0.5 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-20 | Arbor pivot radius |
+| BARREL_INNER_D | 17.0 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-20 | Spring chamber inner diameter |
+| BARREL_CORE_R (= BARREL_INNER_D / 6, to 3 decimals) | 2.833 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-20 | Arbor core radius |
+| BARREL_SQUARE_SIDE | 1.4 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-20 | Winding square side |
 | barrel axis (x, y) = (0, 0) | (0, 0) | `datasheets/DS-W01_barrel.md` | 3.  | Axis | Value |
 | BARREL_WHEEL_Z | (0.0, 1.0) | `datasheets/DS-W01_barrel.md` | 3.  | Toothed drum | Value |
-| BARREL_ARBOR_Z | (-1.0, 1.6) | `datasheets/DS-W01_barrel.md` | 3.  | Arbor | Value |
+| BARREL_ARBOR_Z | (-1.0, 5.6) | `datasheets/DS-W01_barrel.md` | 3.  | Arbor | Value |
+| BARREL_BORE_R | 2.85 | `datasheets/DS-W01_barrel.md` | 3.  | Bore of the drum | Value |
+| BARREL_ARBOR_R (section 3) | 0.5 | `datasheets/DS-W01_barrel.md` | 3.  | Arbor, pivots and plain sections | Value |
+| BARREL_WHEEL_Z, BARREL_CORE_R (the core) | ((0.0, 1.0), 2.833) | `datasheets/DS-W01_barrel.md` | 3.  | Arbor core (inside the drum's bore) | Value |
+| BARREL_INNER_D (section 3) | 17.0 | `datasheets/DS-W01_barrel.md` | 3.  | Spring chamber inside the drum (not modelled in the mesh) | Value |
+| BARREL_SQUARE_Z, BARREL_SQUARE_SIDE | ((3.3, 4.9), 1.4) | `datasheets/DS-W01_barrel.md` | 3.  | Winding square | Value |
 | BARREL_TURNS_PER_HOUR (8-hour build, speed class D in the work order) | 1/8 | `datasheets/DS-W01_barrel.md` | 4. Speed classes | D | Barrel speed, steady running |
 | CHANGED_BARREL_TURNS_PER_HOUR (6-hour variant, speed class B in the work order) | 1/6 | `datasheets/DS-W01_barrel.md` | 4. Speed classes | B | Barrel speed, steady running |
 | barrel running sense, both builds (the grader turns the barrel clockwise seen from +z) | clockwise | `datasheets/DS-W01_barrel.md` | 4. Speed classes | D | Running sense, seen from the dial side |
@@ -66,17 +74,17 @@ hand speeds and directions, and the weights of the checks.
 
 Numbers the scan cannot tell apart (a document's own number equal to a supplier value):
 
-- `instruction.md` prints 1/2 for its own reasons; that number is also a value of: BARREL_ARBOR_R.
+- `instruction.md` prints 1/2 for its own reasons; that number is also a value of: BARREL_ARBOR_R; BARREL_ARBOR_R (section 3).
 - `instruction.md` prints 6 for its own reasons; that number is also a value of: CHANGED_BARREL_TURNS_PER_HOUR (6-hour variant, speed class B in the work order).
 - `instruction.md` prints 8 for its own reasons; that number is also a value of: BARREL_TURNS_PER_HOUR (8-hour build, speed class D in the work order).
-- `FORMAT.md` prints 0 for its own reasons; that number is also a value of: barrel axis (x, y) = (0, 0); BARREL_WHEEL_Z.
-- `FORMAT.md` prints 0.5 for its own reasons; that number is also a value of: BARREL_ARBOR_R.
-- `FORMAT.md` prints 1 for its own reasons; that number is also a value of: BARREL_WHEEL_Z; BARREL_TURNS_PER_HOUR (8-hour build, speed class D in the work order); CHANGED_BARREL_TURNS_PER_HOUR (6-hour variant, speed class B in the work order); THIN_VOXEL, THIN_ERODE_VOX, THIN_DILATE_VOX, THIN_DEV, voxel grid offset (the printability test).
+- `FORMAT.md` prints 0 for its own reasons; that number is also a value of: barrel axis (x, y) = (0, 0); BARREL_WHEEL_Z; BARREL_WHEEL_Z, BARREL_CORE_R (the core).
+- `FORMAT.md` prints 0.5 for its own reasons; that number is also a value of: BARREL_ARBOR_R; BARREL_ARBOR_R (section 3).
+- `FORMAT.md` prints 1 for its own reasons; that number is also a value of: BARREL_WHEEL_Z; BARREL_WHEEL_Z, BARREL_CORE_R (the core); BARREL_TURNS_PER_HOUR (8-hour build, speed class D in the work order); CHANGED_BARREL_TURNS_PER_HOUR (6-hour variant, speed class B in the work order); THIN_VOXEL, THIN_ERODE_VOX, THIN_DILATE_VOX, THIN_DEV, voxel grid offset (the printability test).
 - `FORMAT.md` prints 6 for its own reasons; that number is also a value of: CHANGED_BARREL_TURNS_PER_HOUR (6-hour variant, speed class B in the work order).
 - `FORMAT.md` prints 8 for its own reasons; that number is also a value of: BARREL_TURNS_PER_HOUR (8-hour build, speed class D in the work order).
-- `datasheets/QA-W100_inspection.md` prints 0 for its own reasons; that number is also a value of: barrel axis (x, y) = (0, 0); BARREL_WHEEL_Z.
+- `datasheets/QA-W100_inspection.md` prints 0 for its own reasons; that number is also a value of: barrel axis (x, y) = (0, 0); BARREL_WHEEL_Z; BARREL_WHEEL_Z, BARREL_CORE_R (the core).
 - `datasheets/QA-W100_inspection.md` prints 0.2 for its own reasons; that number is also a value of: BARREL_MODULE; MIN_FEATURE; THIN_VOXEL, THIN_ERODE_VOX, THIN_DILATE_VOX, THIN_DEV, voxel grid offset (the printability test).
-- `datasheets/QA-W100_inspection.md` prints 0.5 for its own reasons; that number is also a value of: BARREL_ARBOR_R.
-- `datasheets/QA-W100_inspection.md` prints 1 for its own reasons; that number is also a value of: BARREL_WHEEL_Z; BARREL_TURNS_PER_HOUR (8-hour build, speed class D in the work order); CHANGED_BARREL_TURNS_PER_HOUR (6-hour variant, speed class B in the work order); THIN_VOXEL, THIN_ERODE_VOX, THIN_DILATE_VOX, THIN_DEV, voxel grid offset (the printability test).
+- `datasheets/QA-W100_inspection.md` prints 0.5 for its own reasons; that number is also a value of: BARREL_ARBOR_R; BARREL_ARBOR_R (section 3).
+- `datasheets/QA-W100_inspection.md` prints 1 for its own reasons; that number is also a value of: BARREL_WHEEL_Z; BARREL_WHEEL_Z, BARREL_CORE_R (the core); BARREL_TURNS_PER_HOUR (8-hour build, speed class D in the work order); CHANGED_BARREL_TURNS_PER_HOUR (6-hour variant, speed class B in the work order); THIN_VOXEL, THIN_ERODE_VOX, THIN_DILATE_VOX, THIN_DEV, voxel grid offset (the printability test).
 - `datasheets/QA-W100_inspection.md` prints 6 for its own reasons; that number is also a value of: CHANGED_BARREL_TURNS_PER_HOUR (6-hour variant, speed class B in the work order).
 - `datasheets/QA-W100_inspection.md` prints 8 for its own reasons; that number is also a value of: BARREL_TURNS_PER_HOUR (8-hour build, speed class D in the work order).
