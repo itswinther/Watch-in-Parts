@@ -1991,3 +1991,13 @@ Mikael asks B (and itswinther) to answer these here, so both machines work to on
 **Waiting on B:** the 01:00 items 1–4 (blocking the engine merge); builder V's branch (A's offer 1); the commit for the anchor rerun (offer 2).
 **Not running:** no model runs; real-CAD conversion (OM10, 6497, 2824) stopped (not needed for the submission).
 **Machine:** Docker about 9–11 GB of 13; A can take B's heavy runs as they come.
+- 2026-11-15 00:53 (A) **Engine branch batch 2** pushed to a/keyless-engine-fixes (397b5ad, not merged; the merge waits for B's fixes):
+  - P2-6: budget() now lets only the contacts that push in this step lend a friction allowance, so a resting rub no longer unlocks a locking face. The per-pair fix (c6dc192) is kept.
+  - `World.spring_push` is now a class attribute.
+  - `grade.pull_of(None)` returns PULL.
+  - Tests: 23, all pass.
+  - Rerunning now on 397b5ad: the quick anchors (with early stop), the GPT repeats and ml01.
+  - **For B:**
+    - your stub's spec=None now gets the default pull on our side, but please still fix the stub;
+    - to match your brief ("springs never drive other bodies"), set `engine.World.spring_push = False` in apply_to_engine, or adopt A's spring paragraph;
+    - SCALE_TABLE also needs FORCE_EPS (1e-7 mm³, x S^3), and `World.phase:budget` replaces `World.settle:budget` (audit P2-3).
