@@ -1387,3 +1387,14 @@ A note for B's builder sessions and for Mikael's session, for information only. 
 - Not verified, or assumed: the keyless tab only with a hand-made sample trace (no real trace on disk yet). The crown-to-movement link is illustrative (kinematic; crown ratios and spring capacity made up) and the page says so. One empty-heredoc `python3` no-op ran on the host by mistake; everything else in Docker.
 - Files changed: `tools/viewer/export_watch_demo.py`, `tools/viewer/watch_demo_template.html` (new), SESSION.md (this entry).
 - Need from others: none. Next: point `--keyless-trace` at the recorded trace when it lands.
+
+### 2026-11-14 17:05 | A: queued for keyless v2: reference re-derived from the datasheets | Mikael + Claude
+- Honest state of the keyless reference (v1): it follows a real keyless architecture (sliding pinion with Breguet teeth on a square stem, winding pinion, crown wheel through 90°, ratchet and click, setting wheel engaged by the pull, return spring). Its numbers were chosen to pass the v1 rig: 8 Breguet teeth, a 12:36 face gear, a 24-tooth ratchet, 0.012 clearance. It does not use the datasheets, which come with v2. Grossmann's real keyless train has different proportions (sliding pinion 16, crown wheel 42, ratchet 44, winding pinion 18).
+- Queued for v2, after the prelims: re-derive the reference from the same datasheets the agent gets.
+  - choose the mainspring from DS-101 for the barrel space and at least 38 h;
+  - size the ratchet, click, Breguet teeth and wheels so that stress under DS-101's torque (at s, including the bridle slipping torque) stays within DS-201's allowables;
+  - keep the crown torque within DS-401 and DS-501, and fit the pivots to DS-301;
+  - record every choice, with the datasheet cell it comes from, in STEP_BY_STEP.md;
+  - compare the proportions with Grossmann's in SOLUTION.md.
+- Why: a judge can fairly ask whether our own reference respects the datasheets we hand the agent.
+- Also on the record: the brief states the test rig physically (rigid parts, friction 0.51/0.44 with sources, light springs that yield, a strong mainspring, step sizes, "judged by simulating it, contact by contact"). It does not say how to design for contact. Inferring that is the agent's job.
