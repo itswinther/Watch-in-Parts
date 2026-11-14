@@ -1940,3 +1940,20 @@ Mikael asks B (and itswinther) to answer these here, so both machines work to on
 - Engine: a fix landed tonight on a/keyless-engine-fixes (c6dc192, contact counted per pair); its anchors are rerunning; an independent engine audit is running too. Part 5 grading should use the engine after that merge.
 - Files changed: SESSION.md.
 - 2026-11-15 00:47 (A) **Harbor end-to-end check passed** on main at cd81895 (the judges' command, `harbor/watch_one/run_all.sh`, SKIP_MODEL=1): lint clean; **oracle 1.0** (agent 41 s; verifier 219 s, `/usr/bin/time` wall 3 min 26 s, peak RSS 1.69 GB in the 4 GB verifier); **nop 0.0**; no exceptions, no timeout, key scan clean. Four-part job, P5 off. The engine audit (A, scratchpad ENGINE_AUDIT.md) found three engine bugs in AT-0/AT-5/AT-6 (a spring carrying a wheel pushes it through solids; the position-2 end check needs a setting ratio of 0.042 while SET_MIN says 0.022; a spring touching a plate within TOL can never push); being fixed on a/keyless-engine-fixes with tests; a second audit pass is reading the P5 integration path (grade_watch one-job, grade_keyless, keyless_job SCALE_TABLE): findings for B will be posted here.
+
+### 2026-11-15 00:50 | A: engine fixes on a/keyless-engine-fixes (not merged) | Mikael + Claude
+- **Pushed to the branch** (af355d9), each with a test in `spikes/keyless/test_engine.py` (20 tests, all pass):
+  - c6dc192: `budget()` counts contact per pair. Tiny patches are skipped only when the pair has a bigger one. This fixes the GPT pre-wind jams in imWnpTP and b7qdG8X.
+  - 0d28846: a carried part gives way only if the parts behind it can. Otherwise it drives. Found on Marco Lang's ml01: the setting train jammed between the yoke and the setting lever.
+  - 5086722 (audit): F1, a returning spring that carries a wheel now answers for the wheel's contacts. F2, a spring is not stopped by a contact it only slides along. F3, in AT-5, position 1 is judged by a COUPLED_TURN forward turn and position 2 by SET_MIN over SET_TURN; the brief is updated to match.
+  - af355d9 (audit, small items): the engine takes MAIN_TRY from constants; docstrings corrected.
+- **Rule changes, with the brief updated:**
+  - COUPLED_TURN 30 → 90: ml01 has about 24° of slack after the let-go, plus a 30° Breguet pitch.
+  - SET_MIN 5 → 2: ml01's real minute wheel turns about 4.5° per 90° of crown.
+- **Before:** reference 1.0 three times on f005958.
+- **Now running, on af355d9:** the quick anchors with early stop, the GPT repeats regraded, and ml01.
+- **For B:** `geometry/keyless_job.py` SCALE_TABLE:
+  - replace the row `World.step:main_try_arc` with the engine attribute `MAIN_TRY`; the step default is now None, so check_table will flag the old row;
+  - add rows for `RADIUS_FLOOR`, `LEVER_FLOOR`, `NEIGHBOUR_MARGIN`, `SPRING_PUSH_ARC`, `World.phase:budget`, `FIT_CLEARANCE`, `FIT_CENTRE_TOL`, `FIT_EMPTY_INSET` and `PULL_RANGE` (listed in INTERFACE_FOR_B.md).
+- **For the v2 work:** the set/return jams (the yoke and the sliding pinion at pull) may be F1, F2 or the rider fix. Regrade v2 on af355d9 or later.
+- Files changed: SESSION.md.
