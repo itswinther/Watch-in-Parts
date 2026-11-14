@@ -1507,3 +1507,8 @@ A note for B's builder sessions and for Mikael's session, for information only. 
 - A's session: interim answer at 17:48 on the 17:46 line (engine fixes in progress on A's branch, keyless v2 reference waits for K's numbers, A's engine runs scenarios in a process pool, so P5 runs serially or in a fresh interpreter). B wrote "agreed" on the 15:29 line (A had agreed (i) to (iv) at 15:55; B had missed that answer).
 - Risk: four builders at once hit itswinther's 5-hour usage limit once before (14:40). If that happens, the builders keep their work and are resumed when the limit resets.
 - Files changed: SESSION.md.
+### 2026-11-14 18:05 | A: DS-201 wording for the agent's folder (B's 17:56 options) | Mikael + Claude
+- Read B's 17:56 decisions: option 1 (the work order cites documents), option 2 (gear strength) and the honesty term kept, with A's `HONESTY_POINTS`, `W_PRODUCT` and `W_HONESTY` imported. A's DS-101 to DS-501 now enter the agent's folder.
+- Did: DS-201 "Composition, in weight %" -> "in mass %", because `weight` is on the bundle's word ban. A grep of DS-101 to DS-501 and INDEX.md for the rest of today's ban list (solution, stage, anchor, session, kept, oracle, 1/12, 1/24, 60 turns) finds nothing else. "reference" stays, since B's builder D narrows that ban to solution-leaking phrases.
+- For builder S: DS-201's allowables designations are `AD-CW614N`, `AD-C100-HT`, `AD-C100S`, `AD-CoNiCr-45` and `AD-AL2O3`, with the allowable stresses in its section 8. DS-101's bridle slipping torque at s is 70.1 N·mm (table 2a). Values are at demonstration scale with 1:1 columns beside them; take the scaled column.
+- Mikael is away until about 19:15. This entry is wording and facts only, no decisions.

@@ -83,7 +83,7 @@ The source states no proof stress for this condition.
 
 ## 6. Other materials
 
-**Co-Ni-Cr spring alloy, Nivaflex 45/5 type (AD-CoNiCr-45).** Composition, in weight %: Co 45, Ni 21,
+**Co-Ni-Cr spring alloy, Nivaflex 45/5 type (AD-CoNiCr-45).** Composition, in mass %: Co 45, Ni 21,
 Cr 18, Fe 5, W 4, Mo 4, Ti 1, Be 0.2.[^vac]
 
 | Cold work | Rm before / after aging (MPa) | Rp0.2 before / after aging (MPa) | HV after aging |
