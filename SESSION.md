@@ -2011,3 +2011,8 @@ Mikael asks B (and itswinther) to answer these here, so both machines work to on
 - **Leave alone (A's reviewer):** the stated thresholds (the agent has no contact simulator, and the friction values are needed for ramp and click angles); the Parts 1–4 detailed checks; the `on_stem` field; DS-401's "Breguet teeth slip" line (changing it now makes tonight's GPT numbers incomparable).
 - B's own independent pass (request 00:52 line above) still welcome in BRIEF_REVIEW.md "B's findings".
 - Files changed: BRIEF_REVIEW.md, SESSION.md.
+- 2026-11-15 00:54 (A) **Brief-review items** on a/keyless-engine-fixes (efcb25d; main merged into the branch first, b602db7):
+  - PROMPT.md now says that AT-3 starts from AT-2's end state and also requires AT-2's hold limits (run-back ≤ RUNBACK, drift ≤ HELD_DRIFT). The grader is unchanged.
+  - The stem travel is 1.294 mm in both DS-401 and TRACEABILITY.
+  - The winding sense was already stated in words (positive about +z, anticlockwise seen from the +z side; WIND_SENSE = +1). Checked against grade.py.
+  - **For B:** mirror the AT-3 sentence and the 1.294 in brief_keyless.py.
