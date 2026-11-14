@@ -1,7 +1,7 @@
 """Fitting pass (SESSION.md Decisions 2026-11-14 17:46, B's item 2): workstream A's keyless v1 reference
 (spikes/keyless/reference.py, imported, not edited) scaled by s and placed on B's one-job reference delivery.
 
-    python3 solution/fit_keyless.py /abs/REF_JOB [--at0]
+    python3 solution/fit_keyless.py /abs/REF_JOB [--at0] [--set NAME=VALUE ...] [--no-rigid]
 
 REF_JOB is a delivery written by `python3 solution/reference_watch.py REF_JOB --job` (two-body barrel, no barrel
 cock). Prints:
@@ -12,7 +12,8 @@ cock). Prints:
      on the placed bodies, with B's whole movement as the fixed body;
   2. the proposed layout: the keyless works as envelopes (tip discs, rings and cylinders sized from A's v1 x S,
      z stack compacted), placed so that the four conditions of the brief hold; its collision table against B's
-     reference, the centre distances of its meshes, and the frame cuts it needs;
+     reference, the centre distances of its meshes, and the frame cuts it needs; --set changes one of its
+     parameters (the dict P below, e.g. --set r_pin=1.70 --set z_stem=6.15); --no-rigid skips section 1;
   3. the proposed numbers.
 Frames. B: +z is the dial side; barrel axis x = y = 0; main plate z -1.7..-0.3, bridge 5.0..6.0, dial 8.8..9.6.
 A: z towards A's main plate, the stem along +x through y = z = 0, the barrel arbor at constants.BARREL_AXIS."""
@@ -129,7 +130,8 @@ def shorten_stem(parts, pl, cc):
     face = pl.point((12.6, 0, 0))
     t_face = float((face[:2] - np.asarray(cc)) @ u[:2])
     shift = t_face - (W.CASE_RADIUS + CROWN_GAP_B)
-    cut = pl.point((5.0, 0, 0))
+    cut = pl.point((4.85 + max(shift, 0.0) / S, 0, 0))   # beyond the square (x_A 4.8): the moved round shaft stays
+                                                          # out of the sliding pinion's square bore
     off = float(u @ cut)
     inner = parts["stem"].trim_by_plane(list(-u), -off)
     outer = parts["stem"].trim_by_plane(list(u), off).translate(list(-u * shift))
@@ -149,9 +151,11 @@ def collisions(kparts, bparts, owner, skip=()):
             bb = bm.bounding_box()
             if any(kb[i] > bb[i + 3] or bb[i] > kb[i + 3] for i in range(3)):
                 continue
-            v = (km ^ bm).volume()
+            x = km ^ bm
+            v = x.volume()
             if v > VOL:
-                rows.append((kn, bn, owner[bn], v))
+                b = x.bounding_box()
+                rows.append((kn, bn, owner[bn], v, tuple(round((b[i] + b[i + 3]) / 2, 2) for i in range(3))))
     return rows
 
 
@@ -160,11 +164,11 @@ def print_table(rows, title):
     if not rows:
         print("    (no intersection above %g mm3)" % VOL)
         return
-    print("    %-16s %-14s %-12s %10s" % ("keyless part", "B part", "B mobile", "mm3"))
-    for kn, bn, ow, v in sorted(rows, key=lambda r: (-r[3])):
-        print("    %-16s %-14s %-12s %10.4f" % (kn, bn, ow, v))
+    print("    %-16s %-14s %-12s %10s  %s" % ("keyless part", "B part", "B mobile", "mm3", "centre of the overlap's box"))
+    for kn, bn, ow, v, c in sorted(rows, key=lambda r: (-r[3])):
+        print("    %-16s %-14s %-12s %10.4f  (%.2f, %.2f, %.2f)" % (kn, bn, ow, v, *c))
     tot = {}
-    for _, _, ow, v in rows:
+    for _, _, ow, v, _ in rows:
         k = "frame" if ow == "frame" else ("barrel" if ow == "barrel" else "going train / motion work")
         tot[k] = tot.get(k, 0.0) + v
     print("    totals: " + ", ".join("%s %.3f" % kv for kv in sorted(tot.items())))
@@ -438,6 +442,12 @@ def main(argv):
     global REF_Z, M
     ref = os.path.abspath(argv[0])
     do_at0 = "--at0" in argv
+    for i, a in enumerate(argv):
+        if a == "--set":
+            k, v = argv[i + 1].split("=")
+            if k not in P:
+                raise SystemExit("unknown parameter %s (one of %s)" % (k, ", ".join(P)))
+            P[k] = float(v)
     M, bparts, owner = load_b(ref)
     cc = M.case_centre
     allz = [z_range(mm) for mm in bparts.values()]
@@ -446,8 +456,9 @@ def main(argv):
           % (ref, cc[0], cc[1], W.CASE_RADIUS, W.CASE_HEIGHT, REF_Z[0], REF_Z[1], REF_Z[1] - REF_Z[0]))
     print("Supplied barrel: arbor z %s, pivots radius %s, core radius %.4f (inner diameter %s / 6), square side %s at z %s"
           % (W.BARREL_ARBOR_Z, W.BARREL_ARBOR_R, W.BARREL_CORE_R, W.BARREL_INNER_D, W.BARREL_SQUARE_SIDE, W.BARREL_SQUARE_Z))
-    print("\n== 1. A's keyless v1, rigid, scaled by S = %.3f about its barrel axis ==" % S)
-    rigid(bparts, owner, cc, do_at0)
+    if "--no-rigid" not in argv:
+        print("\n== 1. A's keyless v1, rigid, scaled by S = %.3f about its barrel axis ==" % S)
+        rigid(bparts, owner, cc, do_at0)
     print("\n== 2. Proposed layout ==")
     prop = proposed(bparts, owner, cc, M)
     print("\n== 3. Proposed numbers ==")
