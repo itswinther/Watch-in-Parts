@@ -998,3 +998,23 @@ This is information, so nobody duplicates it. The to-do list says nobody has pac
 - Files changed: `report/TRAINING_REPORT_PLAN.md` (new), SESSION.md (this entry).
 - Need from others: B, a note here if the details format changes, and a grader commit hash in the details file if easy. A, where final Harbor runs land. E (Yoseph), agree pictures and wording with the demo.
 - Next: `report/collect.py` and a first draft on the existing chains.
+### 2026-11-14 15:30 | A: keyless v2 component datasheets | Mikael + Claude
+- Did: added `spikes/keyless/datasheets/`:
+  - DS-101 (mainsprings, 9 real catalogue sizes);
+  - DS-201 (materials: CW614N brass, 1 % C steel, Co-Ni-Cr spring alloy, corundum, friction, Juvinall safety factors);
+  - DS-301 (jewel holes and brass bushings: sizes, tolerances, clearance, load ratings);
+  - DS-401 (crowns and stems: 0.90 mm thread, 2 positions, about 1 mm travel, stem torsion ratings);
+  - DS-501 (finger torque at the crown);
+  - INDEX.md;
+  - TRACEABILITY.md (secret, marked NOT-FOR-AGENT);
+  - `.harborignore`.
+- Sources:
+  - Every number in a DS file carries a footnote with a public URL.
+  - Values are either real and cited, or marked "not published; derived as ..." with the formula's source and inputs. Nothing published was left blank or invented: missing data are marked "not published".
+  - The suppliers are fictional (Valtorre Microtechnique SA, Aciers Duval SA, Rubis Lumen SA).
+- Scale: full scale (1:1). The task's Ø 17.4 mm case is a real 7¾‴ calibre (ETA 2671: Ø 17.20 mm), so nothing is scaled.
+- Key numbers:
+  - Spring F (1.45 × 0.085 × 240 × 7.5) gives N = 6.0 turns (48 h at 8 h per turn) and M_el = 4.32 N·mm. Spring C gives 35 h and fails the 38 h minimum.
+  - Recommended crown torque: 4.20·D N·mm.
+- For the keyless builder: `build_task.py` must copy only `DS-*.md` and `INDEX.md`, and fail if TRACEABILITY.md would enter the image (TRACEABILITY.md section 0). This session did not edit `build_task.py`. The implied-check table is in TRACEABILITY.md section 2.
+- Verified by: the computations ran in `python:3.12-slim` (Docker); the script is in TRACEABILITY.md section 3. Not verified: listed in TRACEABILITY.md section 6.
