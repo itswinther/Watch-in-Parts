@@ -140,17 +140,19 @@ def _mesh_runs(m, run=None):
     return st["runs"]
 
 
-def _check_table(m, runs, speeds, conflicts, driven, thin_cache=None):
+def _check_table(m, runs, speeds, conflicts, driven, thin_cache=None, job=False):
     """name -> function () -> (passed, details), for every scored design check of movement m.
     runs: _mesh_runs(m); speeds, conflicts: m.speeds(); driven: m.speeds(meshes that pass the train test)[0].
     thin_cache: optional dict shared between movements; the thickness test of a solid object already
-    measured is reused (the same solid gives the same result)."""
+    measured is reused (the same solid gives the same result).
+    job: one-job mode (Decisions 2026-11-15 01:19, A1 and A2): spin also at the SPIN_OFFGRID poses; clear on the
+    mobiles' swept solids (Movement.clear_swept). Stage mode (job=False) keeps the old spin and clear_run."""
     import math
     from geometry import watch as W
     names = list(m.mobiles)
 
     def spin():
-        r = {n: m.spin(n) for n in names}
+        r = {n: m.spin(n, W.SPIN_OFFGRID if job else ()) for n in names}
         return all(v["worst_volume"] <= W.VOL_TOL for v in r.values()), r
 
     def held():
@@ -181,15 +183,26 @@ def _check_table(m, runs, speeds, conflicts, driven, thin_cache=None):
 
     def clear():
         meshing = {frozenset((a, b)) for a, _, b, _ in m.meshes}
-        worst, pair = 0.0, None
+        worst, pair, failing, pruned, tested = 0.0, None, [], 0, 0
         for i in range(len(names)):
             for j in range(i + 1, len(names)):
                 if frozenset((names[i], names[j])) in meshing:
                     continue
-                x = m.clear_run(names[i], names[j], speeds.get(names[i], 0), speeds.get(names[j], 0))
+                if job:     # swept solids: every pair of angles at once
+                    x = m.clear_swept(names[i], names[j])
+                    pruned += x["pruned"]
+                    tested += not x["pruned"]
+                    if x["worst_volume"] > W.VOL_TOL:
+                        failing.append({"pair": names[i] + "/" + names[j], "volume": x["worst_volume"],
+                                        "z_range": x["z_range"]})
+                else:
+                    x = m.clear_run(names[i], names[j], speeds.get(names[i], 0), speeds.get(names[j], 0))
                 if x["worst_volume"] > worst:
                     worst, pair = x["worst_volume"], names[i] + "/" + names[j]
-        return worst <= W.VOL_TOL, {"worst_volume": worst, "pair": pair}
+        if not job:
+            return worst <= W.VOL_TOL, {"worst_volume": worst, "pair": pair}
+        return worst <= W.VOL_TOL, {"worst_volume": worst, "pair": pair, "failing": failing,
+                                    "pairs_swept": tested, "pairs_apart": pruned}
 
     def hand(h):
         def fn():
@@ -554,7 +567,7 @@ def _job_movement(folder, name, barrel_speed, keys, extra_gates, run, cache, thi
         for k in keys:
             details[k] = dict(info, note="not run: the driven speeds could not be worked out")
         return m, gates, checks, details
-    table = _check_table(m, runs, st["speeds"], st["conflicts"], st["driven"], thin_cache)
+    table = _check_table(m, runs, st["speeds"], st["conflicts"], st["driven"], thin_cache, job=True)
     for k in keys:
         checks[k], details[k] = run(table[k])
     return m, gates, checks, details
