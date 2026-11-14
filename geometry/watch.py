@@ -102,7 +102,7 @@ DS201_ALLOWABLE_ROWS = (
     ("Brass CW614N", "AD-CW614N", 110.0, "tensile"),
     ("Steel AD-C100-HT, < 1.000 mm", "AD-C100-HT", 750.0, "tensile"),
     ("Steel AD-C100-HT, 1.000 to < 1.575 mm", "AD-C100-HT", 725.0, "tensile"),
-    ("Corundum, compressive", "AD-AL2O3", 900.0, "compressive"),
+    ("Corundum, compressive", "AD-AL2O3", 450.0, "compressive"),
 )
 # The material a mobile may declare and the allowable its teeth are rated at (orchestrator's answers to
 # builder S, 2026-11-14, logged under Decisions by B): only a designation with a tensile (yield-based) allowable
@@ -170,7 +170,10 @@ class Movement:
 
     def __init__(self, doc, load_stl, barrel_solid=None, materials=False):
         """materials: one-job mode; every mobile must declare "material", a key of MATERIAL_ALLOWABLE_MPA (a format
-        error otherwise, C1). Without it (stage mode) the field is not read."""
+        error otherwise, C1), and may declare "part_materials", {part of that mobile: such a key}, overriding
+        "material" for those parts (a format error if a key is not a part of the mobile or a value does not
+        qualify). mobiles[name]["part_materials"] then gives every part its material. Without it (stage mode)
+        neither field is read."""
         if not isinstance(doc, dict):
             raise FormatError("movement.json: top level must be an object")
         cc = doc.get("case_centre")
@@ -184,18 +187,22 @@ class Movement:
                 raise FormatError("%s: needs a non-empty list of part files" % where)
             out = []
             for n in names:
-                if not isinstance(n, str) or not NAME_RE.match(n):
-                    raise FormatError("%s: bad part name %r (letters, digits, _ and - only, no extension)" % (where, n))
-                if n == "barrel":
-                    raise FormatError("%s: 'barrel' is reserved for the supplied barrel and cannot be a part name" % where)
-                if n in used:
-                    raise FormatError("part '%s' is used more than once" % n)
-                used.add(n)
-                if len(used) > MAX_PARTS:
-                    raise FormatError("more than %d parts" % MAX_PARTS)
+                reserve(n, where)
                 out.append(load_stl(n))
             return out
+
+        def reserve(n, where):
+            if not isinstance(n, str) or not NAME_RE.match(n):
+                raise FormatError("%s: bad part name %r (letters, digits, _ and - only, no extension)" % (where, n))
+            if n == "barrel":
+                raise FormatError("%s: 'barrel' is reserved for the supplied barrel and cannot be a part name" % where)
+            if n in used:
+                raise FormatError("part '%s' is used more than once" % n)
+            used.add(n)
+            if len(used) > MAX_PARTS:
+                raise FormatError("more than %d parts" % MAX_PARTS)
         self.doc = doc
+        self.load_part = load_stl       # Part 5 reads the keyless section's part files through it (same checks, same cache)
         self.barrel_speed = BARREL_TURNS_PER_HOUR      # the grader sets CHANGED_BARREL_TURNS_PER_HOUR at stage 3
         fixed_names = doc.get("fixed")
         self.fixed_parts = dict(zip(fixed_names if isinstance(fixed_names, list) else [], parts(fixed_names, "fixed")))
@@ -220,6 +227,20 @@ class Movement:
                     raise FormatError("mobile '%s': 'material' must be the designation of a material with a bending "
                                       "(tensile) design allowable in DS-201 section 8" % name)
                 self.mobiles[name]["material"] = mat
+                # part_materials (Decisions 2026-11-14 21:43, item 2): {part: designation} for some parts of this
+                # mobile, overriding "material" for those parts; the same designations qualify
+                pm = m.get("part_materials", {})
+                if not isinstance(pm, dict):
+                    raise FormatError("mobile '%s': 'part_materials' must be an object {part name: designation}" % name)
+                for pn, pmat in pm.items():
+                    if pn not in names:
+                        raise FormatError("mobile '%s': 'part_materials' names %r, which is not a part of this mobile"
+                                          % (name, pn))
+                    if not isinstance(pmat, str) or pmat not in MATERIAL_ALLOWABLE_MPA:
+                        raise FormatError("mobile '%s': 'part_materials' of part '%s' must be the designation of a "
+                                          "material with a bending (tensile) design allowable in DS-201 section 8"
+                                          % (name, pn))
+                self.mobiles[name]["part_materials"] = {pn: pm.get(pn, mat) for pn in names}
         self.meshes = []
         for i, e in enumerate(doc.get("meshes") or []):
             try:
@@ -231,6 +252,30 @@ class Movement:
             if not all(isinstance(t, int) and 3 <= t <= 1000 for t in (ta, tb)):
                 raise FormatError("meshes[%d]: tooth counts must be integers from 3 to 1000" % i)
             self.meshes.append((a, ta, b, tb))
+        # friction_on (SESSION.md Decisions 2026-11-14 15:47): a mobile carried by friction on another coaxial mobile.
+        # In the going-train checks it turns with its carrier (speeds()); in the crown-winding part it is a free body.
+        self.friction = {}
+        for name, m in mob.items():
+            fo = m.get("friction_on")
+            if fo is None:
+                continue
+            if not isinstance(fo, str) or fo not in self.mobiles or fo in ("barrel", name):
+                raise FormatError("mobile '%s': 'friction_on' must name another mobile of the file (not 'barrel')" % name)
+            self.friction[name] = fo
+        for name, fo in self.friction.items():
+            if fo in self.friction:
+                raise FormatError("mobile '%s': 'friction_on' names '%s', which is itself carried by friction" % (name, fo))
+            a, b = self.mobiles[name]["axis"], self.mobiles[fo]["axis"]
+            if math.hypot(a[0] - b[0], a[1] - b[1]) > COAX_TOL:
+                raise FormatError("mobile '%s': 'friction_on' needs a coaxial mobile; the axes of '%s' and '%s' are %.4f mm "
+                                  "apart (at most %g)" % (name, name, fo, math.hypot(a[0] - b[0], a[1] - b[1]), COAX_TOL))
+        # the crown-winding (keyless) section: its part names count once with the others here; the section itself, and
+        # its part files, are read by geometry/keyless_job.py when Part 5 runs
+        from .keyless_job import keyless_part_names
+        self.keyless_names = keyless_part_names(doc.get("keyless"))
+        self.keyless_solids = {}        # filled by attach_keyless() (Part 4 when Part 5 is graded)
+        for n in self.keyless_names:
+            reserve(n, "keyless")
         self.hands = {}
         hd = doc.get("hands")
         if not isinstance(hd, dict):
@@ -251,17 +296,20 @@ class Movement:
     # ---- arithmetic ----
     def speeds(self, meshes=None):
         """Clockwise turns per hour of every mobile reached from the barrel, as exact fractions.
-        Returns (speeds, conflicts). Every declared mesh is external: it reverses direction.
+        Returns (speeds, conflicts). Every declared mesh is external: it reverses direction. A `friction_on` mobile
+        and its carrier turn as one, at the same speed, whichever of the two is reached first.
         meshes: the meshes to follow (default: every declared mesh)."""
         w = {"barrel": self.barrel_speed}
         conflicts = []
+        links = [(a, b, -Fraction(ta, tb)) for a, ta, b, tb in (self.meshes if meshes is None else meshes)]
+        links += [(c, f, Fraction(1)) for f, c in getattr(self, "friction", {}).items()]
         changed = True
         while changed:
             changed = False
-            for a, ta, b, tb in (self.meshes if meshes is None else meshes):
-                for src, ts, dst, td in ((a, ta, b, tb), (b, tb, a, ta)):
+            for a, b, r in links:
+                for src, dst, k in ((a, b, r), (b, a, 1 / r)):
                     if src in w:
-                        v = -w[src] * Fraction(ts, td)
+                        v = w[src] * k
                         if dst not in w:
                             w[dst] = v
                             changed = True
@@ -401,13 +449,24 @@ class Movement:
             out.setdefault(group[n], []).append(n)
         return sorted(out.values(), key=lambda g: (-len(g), names.index(g[0])))
 
-    def all_parts(self):
-        """name -> solid, for every part: the supplied barrel, the fixed parts and the parts of every mobile."""
+    def all_parts(self, keyless=False):
+        """name -> solid, for every part: the supplied barrel, the fixed parts and the parts of every mobile.
+        keyless: also the parts of the keyless section that attach_keyless() has read (none until then); the
+        assembly (Part 4) uses them when the crown-winding part is graded (A's request 21:20, agreed by B)."""
         out = {"barrel": self.mobiles["barrel"]["solid"]}
         out.update(self.fixed_parts)
         for m in self.mobiles.values():
             out.update(m["parts"])
+        if keyless:
+            out.update(self.keyless_solids)
         return out
+
+    def attach_keyless(self):
+        """Read the keyless section's part files (through the movement's own loader) so that the assembly includes
+        them. FormatError if one does not load; then none is attached."""
+        solids = {n: self.load_part(n) for n in self.keyless_names}
+        self.keyless_solids = solids
+        return solids
 
     def volumes(self):
         """(volume of the union of the fixed parts, sum of the volumes of every part of every mobile
@@ -417,7 +476,7 @@ class Movement:
 
     def assembly_box(self):
         lo, hi = np.full(3, np.inf), np.full(3, -np.inf)
-        for solid in self.all_parts().values():
+        for solid in self.all_parts(keyless=True).values():
             bb = np.array(solid.bounding_box())
             lo, hi = np.minimum(lo, bb[:3]), np.maximum(hi, bb[3:])
         return lo - ASM_CLEAR, hi + ASM_CLEAR
@@ -425,8 +484,9 @@ class Movement:
     def assembly_replay(self, order, paths):
         """Put the parts in one at a time. Returns per-part results and the list installed cleanly.
         A part is tested against every part placed before it, parts of its own mobile included.
-        A part missing from `order` stands in its assembled position from the start and is not installed."""
-        parts = self.all_parts()
+        A part missing from `order` stands in its assembled position from the start and is not installed.
+        The keyless section's parts take part once attach_keyless() has read them (Part 5 graded)."""
+        parts = self.all_parts(keyless=True)
         lo, hi = self.assembly_box()
         placed = [(n, solid) for n, solid in parts.items() if n not in order]
         results, installed = {n: {"not_in_order": True} for n, _ in placed}, []
@@ -511,6 +571,54 @@ class Movement:
         return {"worst_volume": worst[0], "step": worst[1], "steps": n, "largest_gap": gap,
                 "smallest_drive_overlap": drive, "smallest_drive_ratio": ratio, "module": module,
                 "smallest_drive_height": height}
+
+    def drive_parts(self, a, ta, b, tb):
+        """For the strength check: the drive test of mesh_run (drawn position, no shift; the same steps, angles
+        and push), with the new overlap the push creates at each step split by part: for each of a and b, the
+        volume of that overlap inside each of its parts (the driver's parts pushed, the driven mobile's parts
+        held), summed over the drive-test steps. Returns {mobile: {part: mm3}}; the supplied barrel (no parts)
+        and a one-part mobile are left out (nothing to split)."""
+        A, ax_a = self.mobiles[a]["solid"], self.mobiles[a]["axis"]
+        B, ax_b = self.mobiles[b]["solid"], self.mobiles[b]["axis"]
+        A2, B2 = _near_cut(A, ax_a, B, ax_b), _near_cut(B, ax_b, A, ax_a)
+        A0, B0 = (A, B) if (A2.is_empty() or B2.is_empty()) else (A2, B2)
+        # each part without the material that can never reach the other mobile (as _near_cut does for mesh_run):
+        # the overlap lies inside the other mobile, so the part's share of it is unchanged
+        side = {}
+        for name, ax, other, ax_o in ((a, ax_a, B, ax_b), (b, ax_b, A, ax_a)):
+            ps = self.mobiles[name]["parts"]
+            if len(ps) > 1:
+                side[name] = (ax, {pn: _near_cut(q, ax, other, ax_o) for pn, q in ps.items()})
+        out = {name: {pn: 0.0 for pn in qs} for name, (_, qs) in side.items()}
+        if not side:
+            return out
+        n = SAMPLES_PER_TOOTH * max(ta, tb)
+        da = 360.0 / (SAMPLES_PER_TOOTH * ta)
+        db = -da * ta / tb
+        push = DRIVE_FRACTION * 360.0 / ta
+        rot = lambda S, ax, deg: S if deg == 0.0 else rot_about(S, ax, deg)
+        for i in range(0, n, 8):
+            Ai, Bi, P = rot(A0, ax_a, da * i), rot(B0, ax_b, db * i), rot(A0, ax_a, da * i + push)
+            if not core.bbox_overlap(P, Bi):
+                continue
+            N = (P ^ Bi) - Ai
+            if N.is_empty():
+                continue
+            for name, deg in ((a, da * i + push), (b, db * i)):
+                if name not in side:
+                    continue
+                ax, qs = side[name]
+                for pn, q in qs.items():
+                    if q.is_empty():
+                        continue
+                    qq = rot(q, ax, deg)
+                    if core.bbox_overlap(qq, N):
+                        v = qq ^ N
+                        vol = 0.0 if v.is_empty() else float(v.volume())
+                        if not math.isfinite(vol):
+                            raise ArithmeticError("non-finite volume")
+                        out[name][pn] += vol
+        return out
 
     @staticmethod
     def drive_passes(x):
@@ -723,7 +831,7 @@ def load_assembly(folder, movement):
             raise FormatError("assembly.json is not valid JSON") from e
     if not isinstance(doc, dict) or not isinstance(doc.get("order"), list) or not isinstance(doc.get("paths"), dict):
         raise FormatError("assembly.json: needs a list 'order' and an object 'paths'")
-    names = set(movement.all_parts())
+    names = set(movement.all_parts(keyless=True))     # keyless parts only once attach_keyless() has read them
     order = []
     for n in doc["order"]:
         if n in names and n not in order:
@@ -858,7 +966,7 @@ def check_strength_sheets(folder=None):
     bad = []
     with open(os.path.join(folder, STRENGTH_SHEETS["DS-101"]), encoding="utf-8") as f:
         ds101 = f.read()
-    row = re.search(r"^\|\s*Slipping torque of the bridle\s*\|[^|\n]*\|\s*\*\*([0-9.]+) to ([0-9.]+)\*\*\s*\|\s*$", ds101, re.M)
+    row = re.search(r"^\|\s*Slipping torque of the bridle[^|\n]*\|[^|\n]*\|\s*\*\*([0-9.]+) to ([0-9.]+)\*\*\s*\|\s*$", ds101, re.M)
     if not row:
         bad.append("DS-101 Table 2a: row 'Slipping torque of the bridle' with a bold 'a to b' cell not found")
     elif float(row.group(2)) != BARREL_TORQUE_MAX_NMM:
@@ -910,6 +1018,24 @@ def going_train(m, runs):
     return path[::-1], None
 
 
+def teeth_part(m, name, by_part):
+    """The part of mobile `name` that holds its teeth in a rated mesh (Decisions 2026-11-14 21:43, item 2): the part
+    holding the largest volume of the mesh's drive-test overlap with the other mobile (by_part: that mobile's entry
+    of Movement.drive_parts, summed over the drive test's steps); ties: the first in the mobile's parts list.
+    A one-part mobile: that part. Returns (part, by_part or None); (None, None) for a mobile that lists no parts."""
+    names = list(m.mobiles[name].get("parts", {}))
+    if not names:
+        return None, None
+    if len(names) == 1:
+        return names[0], None
+    by_part = by_part or {}
+    best = names[0]
+    for pn in names[1:]:
+        if by_part.get(pn, 0.0) > by_part.get(best, 0.0):
+            best = pn
+    return best, {pn: by_part.get(pn, 0.0) for pn in names}
+
+
 def strength_run(m, runs, driven):
     """The strength check of movement m: tooth bending by Lewis under the load case. runs: m.mesh_run of every
     declared mesh, in m.meshes order (None if the mesh test did not run); driven: m.speeds(passing meshes)[0].
@@ -918,7 +1044,9 @@ def strength_run(m, runs, driven):
     orchestrator's answer (B) to builder S). For each rated mesh: T at the driver = BARREL_TORQUE_MAX_NMM x
     |barrel speed / driver speed| (N·mm), F = T / (m z_D / 2) (N) with m = 2 x axis distance / (z_D + z_N) (mm),
     b = the smallest height in z of the drive test's new overlap over its steps (mm), sigma = F / (b m Y(z)) (MPa)
-    for each gear with its own z and its mobile's material, the supplied barrel's gear not rated. A rated mesh
+    for each gear with its own z, in the material of the part of its mobile that holds its teeth (teeth_part:
+    that part's entry of "part_materials", which defaults to the mobile's "material"), the supplied barrel's gear
+    not rated. A rated mesh
     whose drive test fails has no b, and fails (cannot happen on the path, which passes the mesh test).
     Returns (passed, details); details "margin" = allowable / sigma - 1 (passes when >= 0)."""
     if runs is None:
@@ -942,16 +1070,23 @@ def strength_run(m, runs, driven):
         bw = x["smallest_drive_height"]
         e["face_width"] = bw
         e["gears"] = {}
+        split = None
         for name, z in ((a, ta), (b, tb)):
             if name == "barrel":
                 e["gears"][name] = {"teeth": z, "rated": False}
                 continue
             Y = LEWIS_Y[z]
             sig = F / (bw * mod * Y)
-            mat = m.mobiles[name]["material"]
+            if len(m.mobiles[name].get("parts", {})) > 1 and split is None:
+                split = m.drive_parts(a, ta, b, tb)
+            part, by_part = teeth_part(m, name, (split or {}).get(name))
+            pm = m.mobiles[name].get("part_materials")
+            mat = pm[part] if pm and part is not None else m.mobiles[name]["material"]
             allow = MATERIAL_ALLOWABLE_MPA[mat]
-            e["gears"][name] = {"teeth": z, "Y": Y, "sigma_mpa": sig, "material": mat, "allowable_mpa": allow,
-                                "margin": allow / sig - 1.0}
+            e["gears"][name] = {"teeth": z, "Y": Y, "sigma_mpa": sig, "part": part, "material": mat,
+                                "allowable_mpa": allow, "margin": allow / sig - 1.0}
+            if by_part is not None:
+                e["gears"][name]["drive_overlap_by_part"] = by_part
             ok = ok and sig <= allow
     margins = [g["margin"] for e in out for g in e.get("gears", {}).values() if "margin" in g]
     return ok and bool(out), {"meshes": out, "smallest_margin": min(margins) if margins else None,

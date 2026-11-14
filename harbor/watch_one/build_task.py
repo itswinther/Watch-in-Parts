@@ -45,6 +45,9 @@ GRADER = "one-job"           # B's one-delivery grader is on main (071ab86, SPEC
 A_DATASHEETS = ()
 # ---------------------------------------------------------------------------------------------
 
+# Workstream A's runtime modules that B's one-job grader and reference import (copied at their repo path).
+A_KEYLESS = ["spikes/keyless/constants.py", "spikes/keyless/engine.py", "spikes/keyless/grade.py"]
+
 GRADERS = {
     # Placeholder until B's one-delivery grader lands: SPEC 0.6 grader, stage 1 (going train and hands),
     # on /app/delivery/movement.json. Bundle: today's make_bundle_watch.py (stage 1, no tools), mapped
@@ -74,8 +77,11 @@ GRADERS = {
         "bundle_map": None,                                 # take the allowlisted layout as B writes it
         "extra_allow": ["FORMAT.md", "instruction.md"],     # B 17:40: /app holds instruction.md too
         "prompt": os.path.join(REPO, "PROMPT.md"),          # fallback only; B's bundle writes instruction.md
-        "tests": ["tests/grade_watch.py", "geometry"],
-        "solution": ["solution/reference_watch.py", "geometry"],
+        # A's keyless modules keep their repo path: grade_watch.py's honesty term (builder H, 7d50fdc) and
+        # geometry/keyless_job.py (P5) load spikes/keyless/constants.py (and engine.py, grade.py) from beside or
+        # above their own folder; without them every trial, the oracle too, scores 0.
+        "tests": ["tests/grade_watch.py", "geometry"] + A_KEYLESS,
+        "solution": ["solution/reference_watch.py", "geometry"] + A_KEYLESS,
         "reference": "PYTHONPATH=/solution python3 reference_watch.py /app/delivery --job",
         "reference_out": None,                              # written in place at /app/delivery
         "verifier_timeout_sec": 7800.0,                     # B 18:39: >= 7800 s (grader whole-run limit 7200 s, 1800 s per check)
@@ -321,10 +327,13 @@ def brief(text):
 def copy_repo(paths, dst):
     for rel in paths:
         src = os.path.join(REPO, rel)
+        # spikes/... keeps its repo path (its importers look for spikes/keyless/ next to them); the rest is flat
+        target = os.path.join(dst, rel if rel.startswith("spikes/") else os.path.basename(rel))
+        os.makedirs(os.path.dirname(target), exist_ok=True)
         if os.path.isdir(src):
-            shutil.copytree(src, os.path.join(dst, os.path.basename(rel)), ignore=shutil.ignore_patterns("__pycache__"))
+            shutil.copytree(src, target, ignore=shutil.ignore_patterns("__pycache__"))
         else:
-            shutil.copyfile(src, os.path.join(dst, os.path.basename(rel)))
+            shutil.copyfile(src, target)
 
 
 def main(argv):

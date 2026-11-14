@@ -1,0 +1,58 @@
+{
+  "stem": {
+    "triangles": 3004,
+    "volume_mm3": 1.4798831153638072,
+    "closed": true,
+    "components": 1,
+    "max_case_radius_mm": 9.611992889818387
+  },
+  "barrel_click": {
+    "triangles": 28,
+    "volume_mm3": 0.07612793040894768,
+    "closed": true,
+    "components": 1,
+    "max_case_radius_mm": 4.542253605428125
+  },
+  "barrel": {
+    "triangles": 4764,
+    "volume_mm3": 7.573295813309957,
+    "closed": true,
+    "components": 1,
+    "max_case_radius_mm": 6.268910130201383
+  },
+  "winding_pinion": {
+    "triangles": 5058,
+    "volume_mm3": 0.7233103713321162,
+    "closed": true,
+    "components": 1,
+    "max_case_radius_mm": 1.5002796555081355
+  },
+  "sliding_clutch": {
+    "triangles": 3950,
+    "volume_mm3": 0.552737324162821,
+    "closed": true,
+    "components": 1,
+    "max_case_radius_mm": 1.6454668937119985
+  },
+  "bearing_bridge": {
+    "triangles": 4018,
+    "volume_mm3": 3.0338933429487978,
+    "closed": true,
+    "components": 1,
+    "max_case_radius_mm": 6.675070491452413
+  },
+  "winding_face_wheel": {
+    "triangles": 22290,
+    "volume_mm3": 17.52594631022017,
+    "closed": true,
+    "components": 1,
+    "max_case_radius_mm": 4.6594589948654175
+  },
+  "setting_face_wheel": {
+    "triangles": 12372,
+    "volume_mm3": 9.617006149673552,
+    "closed": true,
+    "components": 1,
+    "max_case_radius_mm": 7.09095669722302
+  }
+}

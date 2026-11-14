@@ -1,0 +1,1069 @@
+{
+ "note": "Numbers only (no geometry). Marco Lang ml01 going train at x1.2 through Part 1 of tests/grade_watch.py, via tests/realcad/fairness_ml01.py. Source STEP sha256 34f001d6f98eeab4b9aacea1f0a47e145666c00a3549364959dbdf33d1f75991; never committed.",
+ "runs": {
+  "run1_mid_backlash": {
+   "gates": {
+    "files": true,
+    "assembled": true
+   },
+   "checks": {
+    "spin": true,
+    "held": true,
+    "train": false,
+    "clear": true,
+    "minute": false,
+    "hour": false,
+    "seconds": false,
+    "coaxial": true,
+    "hands": true,
+    "size": true,
+    "printable": false,
+    "tolerant": false,
+    "seated": false,
+    "strength": false
+   },
+   "share_of_checks": 0.30434782608695654,
+   "elapsed_s": 663.4,
+   "phases_deg": {
+    "intermediate": 6.490384615384616,
+    "centre": 26.25,
+    "third": 28.125,
+    "seconds": 29.0625,
+    "minute_wheel": 3.125,
+    "hour_wheel": 5.4375
+   },
+   "meshes": [
+    {
+     "pair": "barrel/intermediate",
+     "worst_volume": 0.0,
+     "largest_gap": 0.041523988585051276,
+     "smallest_drive_overlap": 0.022969657948669734,
+     "smallest_drive_ratio": 1.5546988814556584,
+     "module": 0.17999967198261319,
+     "smallest_drive_height": 0.4559999704360962,
+     "passes": true
+    },
+    {
+     "pair": "intermediate/centre",
+     "worst_volume": 0.0,
+     "largest_gap": 0.08191312767579466,
+     "smallest_drive_overlap": 0.005191627251528948,
+     "smallest_drive_ratio": 0.2670507964149891,
+     "module": 0.18000276618373126,
+     "smallest_drive_height": 0.6000000238418579,
+     "passes": false
+    },
+    {
+     "pair": "centre/third",
+     "worst_volume": 0.0,
+     "largest_gap": 0.03361535954847533,
+     "smallest_drive_overlap": 0.006789493627551596,
+     "smallest_drive_ratio": 1.0108275703564336,
+     "module": 0.1560003576666125,
+     "smallest_drive_height": 0.2760000228881836,
+     "passes": true
+    },
+    {
+     "pair": "third/seconds",
+     "worst_volume": 0.0,
+     "largest_gap": 0.032580846407828615,
+     "smallest_drive_overlap": 0.003774850785719853,
+     "smallest_drive_ratio": 0.8130748335176441,
+     "module": 0.13908465623288344,
+     "smallest_drive_height": 0.23999977111816406,
+     "passes": true
+    },
+    {
+     "pair": "centre/minute_wheel",
+     "worst_volume": 0.0,
+     "largest_gap": 0.017245286646759946,
+     "smallest_drive_overlap": 0.024707431339476747,
+     "smallest_drive_ratio": 1.8238257344238011,
+     "module": 0.212501272996187,
+     "smallest_drive_height": 0.2999999523162842,
+     "passes": true
+    },
+    {
+     "pair": "minute_wheel/hour_wheel",
+     "worst_volume": 0.0,
+     "largest_gap": 0.024309989247074743,
+     "smallest_drive_overlap": 0.018117703904171053,
+     "smallest_drive_ratio": 1.451163612176231,
+     "module": 0.20400122207633953,
+     "smallest_drive_height": 0.29999998956918716,
+     "passes": true
+    }
+   ],
+   "tolerant": [
+    {
+     "pair": "barrel/intermediate",
+     "position": "away",
+     "worst_volume": 0.0,
+     "largest_gap": 0.04585117074597493,
+     "smallest_drive_overlap": 0.01865580614268859,
+     "smallest_drive_ratio": 1.2627162758586616,
+     "passes": true
+    },
+    {
+     "pair": "barrel/intermediate",
+     "position": "towards",
+     "worst_volume": 0.0,
+     "largest_gap": 0.038380725558295366,
+     "smallest_drive_overlap": 0.02821192733676872,
+     "smallest_drive_ratio": 1.9095213334129255,
+     "passes": true
+    },
+    {
+     "pair": "intermediate/centre",
+     "position": "away",
+     "worst_volume": 0.0,
+     "largest_gap": 0.08958553862083049,
+     "smallest_drive_overlap": 0.003134322057157115,
+     "smallest_drive_ratio": 0.16122559672179257,
+     "passes": false
+    },
+    {
+     "pair": "intermediate/centre",
+     "position": "towards",
+     "worst_volume": 0.0,
+     "largest_gap": 0.07932140138397076,
+     "smallest_drive_overlap": 0.0073981396766787475,
+     "smallest_drive_ratio": 0.3805510289793141,
+     "passes": false
+    },
+    {
+     "pair": "centre/third",
+     "position": "away",
+     "worst_volume": 0.0,
+     "largest_gap": 0.04307842700540082,
+     "smallest_drive_overlap": 0.00503744652968906,
+     "smallest_drive_ratio": 0.7499807961734984,
+     "passes": true
+    },
+    {
+     "pair": "centre/third",
+     "position": "towards",
+     "worst_volume": 0.0,
+     "largest_gap": 0.027534500000266308,
+     "smallest_drive_overlap": 0.009084701767265618,
+     "smallest_drive_ratio": 1.3525407811789152,
+     "passes": true
+    },
+    {
+     "pair": "third/seconds",
+     "position": "away",
+     "worst_volume": 0.0,
+     "largest_gap": 0.04006433304648382,
+     "smallest_drive_overlap": 0.002756901430523092,
+     "smallest_drive_ratio": 0.5938160999970911,
+     "passes": true
+    },
+    {
+     "pair": "third/seconds",
+     "position": "towards",
+     "worst_volume": 0.0,
+     "largest_gap": 0.019240768725305526,
+     "smallest_drive_overlap": 0.004964711178564234,
+     "smallest_drive_ratio": 1.069361928223745,
+     "passes": true
+    },
+    {
+     "pair": "centre/minute_wheel",
+     "position": "away",
+     "worst_volume": 0.0,
+     "largest_gap": 0.02492402215187463,
+     "smallest_drive_overlap": 0.021872540889444805,
+     "smallest_drive_ratio": 1.61456293870859,
+     "passes": true
+    },
+    {
+     "pair": "centre/minute_wheel",
+     "position": "towards",
+     "worst_volume": 0.0,
+     "largest_gap": 0.007661304328721125,
+     "smallest_drive_overlap": 0.027508837899518714,
+     "smallest_drive_ratio": 2.030616853524262,
+     "passes": true
+    },
+    {
+     "pair": "minute_wheel/hour_wheel",
+     "position": "away",
+     "worst_volume": 0.0,
+     "largest_gap": 0.035290853375168206,
+     "smallest_drive_overlap": 0.014868939272399382,
+     "smallest_drive_ratio": 1.1909491256668896,
+     "passes": true
+    },
+    {
+     "pair": "minute_wheel/hour_wheel",
+     "position": "towards",
+     "worst_volume": 0.0,
+     "largest_gap": 0.012714134665036713,
+     "smallest_drive_overlap": 0.02167732974385208,
+     "smallest_drive_ratio": 1.736276975261834,
+     "passes": true
+    }
+   ],
+   "printable": {
+    "plate_a": {
+     "pieces": 1,
+     "max_deviation": 0.15000000000000002
+    },
+    "plate_b": {
+     "pieces": 1,
+     "max_deviation": 0.158113883008419
+    },
+    "plate_c": {
+     "pieces": 1,
+     "max_deviation": 0.5545268253204709
+    },
+    "plate_d": {
+     "pieces": 1,
+     "max_deviation": 1.7014699527173556
+    },
+    "plate_e": {
+     "pieces": 1,
+     "max_deviation": 0.7778174593052023
+    },
+    "plate_e_2": {
+     "pieces": 1,
+     "max_deviation": 0.07071067811865477
+    },
+    "plate_f": {
+     "pieces": 1,
+     "max_deviation": 0.7516648189186454
+    },
+    "train_bridge": {
+     "pieces": 1,
+     "max_deviation": 0.1224744871391589
+    },
+    "barrel_bridge": {
+     "pieces": 1,
+     "max_deviation": 0.08660254037844387
+    },
+    "minute_bridge": {
+     "pieces": 1,
+     "max_deviation": 0.15000000000000002
+    },
+    "pallet_bridge": {
+     "pieces": 1,
+     "max_deviation": 0.08660254037844387
+    },
+    "cap_plate": {
+     "pieces": 1,
+     "max_deviation": 0.1224744871391589
+    },
+    "barrel_one": {
+     "pieces": 1,
+     "max_deviation": 0.1118033988749895
+    },
+    "barrel_one_2": {
+     "pieces": 1,
+     "max_deviation": 0.07071067811865477
+    },
+    "arbor_two": {
+     "pieces": 1,
+     "max_deviation": 0.08660254037844387
+    },
+    "ratchet_one": {
+     "pieces": 1,
+     "max_deviation": 0.08660254037844387
+    },
+    "ratchet_two": {
+     "pieces": 1,
+     "max_deviation": 0.1118033988749895
+    },
+    "dial_washer": {
+     "pieces": 12,
+     "max_deviation": 0.5172040216394301
+    },
+    "dial": {
+     "pieces": 1,
+     "max_deviation": 0.07071067811865477
+    },
+    "scr_minute_a": {
+     "pieces": 1,
+     "max_deviation": 0.08660254037844387
+    },
+    "scr_minute_b": {
+     "pieces": 1,
+     "max_deviation": 0.08660254037844387
+    },
+    "scr_barrel_a": {
+     "pieces": 1,
+     "max_deviation": 0.1
+    },
+    "scr_barrel_b": {
+     "pieces": 1,
+     "max_deviation": 0.08660254037844387
+    },
+    "scr_barrel_c": {
+     "pieces": 1,
+     "max_deviation": 0.08660254037844387
+    },
+    "scr_train_a": {
+     "pieces": 1,
+     "max_deviation": 0.08660254037844387
+    },
+    "scr_train_b": {
+     "pieces": 1,
+     "max_deviation": 0.08660254037844387
+    },
+    "scr_mw_post": {
+     "pieces": 1,
+     "max_deviation": 0.07071067811865477
+    },
+    "scr_ratchet_one": {
+     "pieces": 1,
+     "max_deviation": 0.07071067811865477
+    },
+    "scr_ratchet_two": {
+     "pieces": 1,
+     "max_deviation": 0.1
+    },
+    "scr_pallet_a": {
+     "pieces": 1,
+     "max_deviation": 0.1224744871391589
+    },
+    "scr_pallet_b": {
+     "pieces": 1,
+     "max_deviation": 0.15000000000000002
+    },
+    "scr_cap_a": {
+     "pieces": 1,
+     "max_deviation": 0.1224744871391589
+    },
+    "scr_cap_b": {
+     "pieces": 1,
+     "max_deviation": 0.1224744871391589
+    },
+    "inter_wheel": {
+     "pieces": 1,
+     "max_deviation": 0.08660254037844387
+    },
+    "centre_pinion": {
+     "pieces": 1,
+     "max_deviation": 0.2692582403567252
+    },
+    "centre_wheel": {
+     "pieces": 1,
+     "max_deviation": 0.1118033988749895
+    },
+    "seconds_bush": {
+     "pieces": 0,
+     "max_deviation": 1000000000.0
+    },
+    "cannon": {
+     "pieces": 2,
+     "max_deviation": 0.5545268253204709
+    },
+    "minute_hand": {
+     "pieces": 1,
+     "max_deviation": 0.08660254037844387
+    },
+    "third_pinion": {
+     "pieces": 5,
+     "max_deviation": 0.14142135623730953
+    },
+    "third_wheel": {
+     "pieces": 1,
+     "max_deviation": 0.1118033988749895
+    },
+    "seconds_pinion": {
+     "pieces": 5,
+     "max_deviation": 0.33166247903554
+    },
+    "seconds_wheel": {
+     "pieces": 1,
+     "max_deviation": 0.1224744871391589
+    },
+    "seconds_hand": {
+     "pieces": 1,
+     "max_deviation": 0.08660254037844387
+    },
+    "mw_wheel": {
+     "pieces": 1,
+     "max_deviation": 0.1118033988749895
+    },
+    "mw_pinion": {
+     "pieces": 1,
+     "max_deviation": 0.18027756377319948
+    },
+    "hw_wheel": {
+     "pieces": 1,
+     "max_deviation": 0.1118033988749895
+    },
+    "hw_pipe": {
+     "pieces": 1,
+     "max_deviation": 0.07071067811865477
+    },
+    "hour_hand": {
+     "pieces": 1,
+     "max_deviation": 0.07071067811865477
+    }
+   },
+   "seated_not_seated": [
+    "seconds_bush"
+   ],
+   "size": {
+    "radius": 20.373599844095736,
+    "z_min": -5.36855936050415,
+    "z_max": 3.191999912261963
+   },
+   "hands": {
+    "hour": {
+     "reach": 6.604362648510618,
+     "above_fixed": 0.5999999642372131,
+     "centre_from_axis": 1.465627828151522
+    },
+    "minute": {
+     "reach": 9.003199511625246,
+     "above_fixed": 1.3199999928474426,
+     "centre_from_axis": 2.9994509360502026
+    },
+    "seconds": {
+     "reach": 9.601687532146551,
+     "above_fixed": 2.015999972820282,
+     "centre_from_axis": 3.2184277212984105
+    }
+   },
+   "clear": {
+    "worst_volume": 0.0005319145219638498,
+    "pair": "centre/seconds"
+   },
+   "assembled": {
+    "worst_volume": 0.0005319126079842964,
+    "pair": "centre/seconds",
+    "fixed_parts_worst": 0.005532475558312525,
+    "fixed_pair": "plate_e/plate_e_2",
+    "mobile_parts_worst": 0.008779575972547369,
+    "mobile_pair": "hour_wheel:hw_wheel/hw_pipe",
+    "one_frame": true
+   },
+   "held_min_fixed_volume": {
+    "barrel": 0.5968806818295119,
+    "intermediate": 0.22869736308184918,
+    "centre": 0.18803208461319643,
+    "third": 0.046464578914970044,
+    "seconds": 0.026582137608111744,
+    "minute_wheel": 0.18266350462014275,
+    "hour_wheel": 0.17546563103572657
+   },
+   "strength_rows": [],
+   "strength_variants": {
+    "all steel (AD-C100-HT, 725 MPa)": {
+     "passes": false,
+     "failing": []
+    },
+    "brass wheels (AD-CW614N, 110 MPa) on steel pinions, per part": {
+     "passes": false,
+     "failing": []
+    },
+    "per mobile today: the wheel-only intermediate in brass, the rest steel": {
+     "passes": false,
+     "failing": []
+    },
+    "all brass (every mobile AD-CW614N)": {
+     "passes": false,
+     "failing": []
+    }
+   }
+  },
+  "run2_centre_on_push_flank": {
+   "gates": {
+    "files": true,
+    "assembled": true
+   },
+   "checks": {
+    "spin": true,
+    "held": true,
+    "train": true,
+    "clear": true,
+    "minute": true,
+    "hour": true,
+    "seconds": true,
+    "coaxial": true,
+    "hands": true,
+    "size": true,
+    "printable": false,
+    "tolerant": true,
+    "seated": false,
+    "strength": true
+   },
+   "share_of_checks": 0.8695652173913043,
+   "elapsed_s": 552.9,
+   "phases_deg": {
+    "intermediate": 6.490384615384616,
+    "centre": 30.25,
+    "third": 2.5249999999999986,
+    "seconds": 269.0625,
+    "minute_wheel": 1.7916666666666667,
+    "hour_wheel": 5.770833333333333
+   },
+   "meshes": [
+    {
+     "pair": "barrel/intermediate",
+     "worst_volume": 0.0,
+     "largest_gap": 0.041523988585051276,
+     "smallest_drive_overlap": 0.022969657948669734,
+     "smallest_drive_ratio": 1.5546988814556584,
+     "module": 0.17999967198261319,
+     "smallest_drive_height": 0.4559999704360962,
+     "passes": true
+    },
+    {
+     "pair": "intermediate/centre",
+     "worst_volume": 0.0,
+     "largest_gap": 0.015989601656298796,
+     "smallest_drive_overlap": 0.01916173614227171,
+     "smallest_drive_ratio": 0.9856556816517451,
+     "module": 0.18000276618373126,
+     "smallest_drive_height": 0.6000000238418579,
+     "passes": true
+    },
+    {
+     "pair": "centre/third",
+     "worst_volume": 0.0,
+     "largest_gap": 0.03480951998233059,
+     "smallest_drive_overlap": 0.0071233958987802735,
+     "smallest_drive_ratio": 1.0605393220830925,
+     "module": 0.1560003576666125,
+     "smallest_drive_height": 0.2760000228881836,
+     "passes": true
+    },
+    {
+     "pair": "third/seconds",
+     "worst_volume": 0.0,
+     "largest_gap": 0.03322419633290921,
+     "smallest_drive_overlap": 0.004003583653946072,
+     "smallest_drive_ratio": 0.8623421951459742,
+     "module": 0.13908465623288344,
+     "smallest_drive_height": 0.23999977111816406,
+     "passes": true
+    },
+    {
+     "pair": "centre/minute_wheel",
+     "worst_volume": 0.0,
+     "largest_gap": 0.01613837490965259,
+     "smallest_drive_overlap": 0.02388200219143387,
+     "smallest_drive_ratio": 1.7628951220319429,
+     "module": 0.212501272996187,
+     "smallest_drive_height": 0.2999999523162842,
+     "passes": true
+    },
+    {
+     "pair": "minute_wheel/hour_wheel",
+     "worst_volume": 0.0,
+     "largest_gap": 0.024231643317297255,
+     "smallest_drive_overlap": 0.017993730639678768,
+     "smallest_drive_ratio": 1.4412337948403553,
+     "module": 0.20400122207633953,
+     "smallest_drive_height": 0.29999998956918716,
+     "passes": true
+    }
+   ],
+   "tolerant": [
+    {
+     "pair": "barrel/intermediate",
+     "position": "away",
+     "worst_volume": 0.0,
+     "largest_gap": 0.04585117074597493,
+     "smallest_drive_overlap": 0.01865580614268859,
+     "smallest_drive_ratio": 1.2627162758586616,
+     "passes": true
+    },
+    {
+     "pair": "barrel/intermediate",
+     "position": "towards",
+     "worst_volume": 0.0,
+     "largest_gap": 0.038380725558295366,
+     "smallest_drive_overlap": 0.02821192733676872,
+     "smallest_drive_ratio": 1.9095213334129255,
+     "passes": true
+    },
+    {
+     "pair": "intermediate/centre",
+     "position": "away",
+     "worst_volume": 0.0,
+     "largest_gap": 0.022863129835094396,
+     "smallest_drive_overlap": 0.014797040701304994,
+     "smallest_drive_ratio": 0.7611412207424487,
+     "passes": true
+    },
+    {
+     "pair": "intermediate/centre",
+     "position": "towards",
+     "worst_volume": 0.0,
+     "largest_gap": 0.011829768419048108,
+     "smallest_drive_overlap": 0.023613599117355402,
+     "smallest_drive_ratio": 1.21465393122299,
+     "passes": true
+    },
+    {
+     "pair": "centre/third",
+     "position": "away",
+     "worst_volume": 0.0,
+     "largest_gap": 0.03995343357090042,
+     "smallest_drive_overlap": 0.005431248627716531,
+     "smallest_drive_ratio": 0.8086105025679536,
+     "passes": true
+    },
+    {
+     "pair": "centre/third",
+     "position": "towards",
+     "worst_volume": 0.0,
+     "largest_gap": 0.027190039821408853,
+     "smallest_drive_overlap": 0.009129511986065795,
+     "smallest_drive_ratio": 1.3592121777633548,
+     "passes": true
+    },
+    {
+     "pair": "third/seconds",
+     "position": "away",
+     "worst_volume": 0.0,
+     "largest_gap": 0.04084639715402536,
+     "smallest_drive_overlap": 0.0028401140003269155,
+     "smallest_drive_ratio": 0.6117394697355102,
+     "passes": true
+    },
+    {
+     "pair": "third/seconds",
+     "position": "towards",
+     "worst_volume": 0.0,
+     "largest_gap": 0.022281398786237045,
+     "smallest_drive_overlap": 0.005356444911028037,
+     "smallest_drive_ratio": 1.153738465837142,
+     "passes": true
+    },
+    {
+     "pair": "centre/minute_wheel",
+     "position": "away",
+     "worst_volume": 0.0,
+     "largest_gap": 0.027693680041984445,
+     "smallest_drive_overlap": 0.02061136958873739,
+     "smallest_drive_ratio": 1.5214671958876111,
+     "passes": true
+    },
+    {
+     "pair": "centre/minute_wheel",
+     "position": "towards",
+     "worst_volume": 0.0,
+     "largest_gap": 0.008730496063721848,
+     "smallest_drive_overlap": 0.027564712805133954,
+     "smallest_drive_ratio": 2.0347413652701167,
+     "passes": true
+    },
+    {
+     "pair": "minute_wheel/hour_wheel",
+     "position": "away",
+     "worst_volume": 0.0,
+     "largest_gap": 0.03482290566464615,
+     "smallest_drive_overlap": 0.01468880505433464,
+     "smallest_drive_ratio": 1.176521015794579,
+     "passes": true
+    },
+    {
+     "pair": "minute_wheel/hour_wheel",
+     "position": "towards",
+     "worst_volume": 0.0,
+     "largest_gap": 0.013318387870389196,
+     "smallest_drive_overlap": 0.021622795990566393,
+     "smallest_drive_ratio": 1.7319090156780943,
+     "passes": true
+    }
+   ],
+   "printable": {
+    "plate_a": {
+     "pieces": 1,
+     "max_deviation": 0.15000000000000002
+    },
+    "plate_b": {
+     "pieces": 1,
+     "max_deviation": 0.158113883008419
+    },
+    "plate_c": {
+     "pieces": 1,
+     "max_deviation": 0.5545268253204709
+    },
+    "plate_d": {
+     "pieces": 1,
+     "max_deviation": 1.7014699527173556
+    },
+    "plate_e": {
+     "pieces": 1,
+     "max_deviation": 0.7778174593052023
+    },
+    "plate_e_2": {
+     "pieces": 1,
+     "max_deviation": 0.07071067811865477
+    },
+    "plate_f": {
+     "pieces": 1,
+     "max_deviation": 0.7516648189186454
+    },
+    "train_bridge": {
+     "pieces": 1,
+     "max_deviation": 0.1224744871391589
+    },
+    "barrel_bridge": {
+     "pieces": 1,
+     "max_deviation": 0.08660254037844387
+    },
+    "minute_bridge": {
+     "pieces": 1,
+     "max_deviation": 0.15000000000000002
+    },
+    "pallet_bridge": {
+     "pieces": 1,
+     "max_deviation": 0.08660254037844387
+    },
+    "cap_plate": {
+     "pieces": 1,
+     "max_deviation": 0.1224744871391589
+    },
+    "barrel_one": {
+     "pieces": 1,
+     "max_deviation": 0.1118033988749895
+    },
+    "barrel_one_2": {
+     "pieces": 1,
+     "max_deviation": 0.07071067811865477
+    },
+    "arbor_two": {
+     "pieces": 1,
+     "max_deviation": 0.08660254037844387
+    },
+    "ratchet_one": {
+     "pieces": 1,
+     "max_deviation": 0.08660254037844387
+    },
+    "ratchet_two": {
+     "pieces": 1,
+     "max_deviation": 0.1118033988749895
+    },
+    "dial_washer": {
+     "pieces": 12,
+     "max_deviation": 0.5172040216394301
+    },
+    "dial": {
+     "pieces": 1,
+     "max_deviation": 0.07071067811865477
+    },
+    "scr_minute_a": {
+     "pieces": 1,
+     "max_deviation": 0.08660254037844387
+    },
+    "scr_minute_b": {
+     "pieces": 1,
+     "max_deviation": 0.08660254037844387
+    },
+    "scr_barrel_a": {
+     "pieces": 1,
+     "max_deviation": 0.1
+    },
+    "scr_barrel_b": {
+     "pieces": 1,
+     "max_deviation": 0.08660254037844387
+    },
+    "scr_barrel_c": {
+     "pieces": 1,
+     "max_deviation": 0.08660254037844387
+    },
+    "scr_train_a": {
+     "pieces": 1,
+     "max_deviation": 0.08660254037844387
+    },
+    "scr_train_b": {
+     "pieces": 1,
+     "max_deviation": 0.08660254037844387
+    },
+    "scr_mw_post": {
+     "pieces": 1,
+     "max_deviation": 0.07071067811865477
+    },
+    "scr_ratchet_one": {
+     "pieces": 1,
+     "max_deviation": 0.07071067811865477
+    },
+    "scr_ratchet_two": {
+     "pieces": 1,
+     "max_deviation": 0.1
+    },
+    "scr_pallet_a": {
+     "pieces": 1,
+     "max_deviation": 0.1224744871391589
+    },
+    "scr_pallet_b": {
+     "pieces": 1,
+     "max_deviation": 0.15000000000000002
+    },
+    "scr_cap_a": {
+     "pieces": 1,
+     "max_deviation": 0.1224744871391589
+    },
+    "scr_cap_b": {
+     "pieces": 1,
+     "max_deviation": 0.1224744871391589
+    },
+    "inter_wheel": {
+     "pieces": 1,
+     "max_deviation": 0.08660254037844387
+    },
+    "centre_pinion": {
+     "pieces": 1,
+     "max_deviation": 0.21794494717703372
+    },
+    "centre_wheel": {
+     "pieces": 1,
+     "max_deviation": 0.1118033988749895
+    },
+    "seconds_bush": {
+     "pieces": 0,
+     "max_deviation": 1000000000.0
+    },
+    "cannon": {
+     "pieces": 2,
+     "max_deviation": 0.5545268253204709
+    },
+    "minute_hand": {
+     "pieces": 1,
+     "max_deviation": 0.08660254037844387
+    },
+    "third_pinion": {
+     "pieces": 4,
+     "max_deviation": 0.32403703492039304
+    },
+    "third_wheel": {
+     "pieces": 1,
+     "max_deviation": 0.1224744871391589
+    },
+    "seconds_pinion": {
+     "pieces": 4,
+     "max_deviation": 0.316227766016838
+    },
+    "seconds_wheel": {
+     "pieces": 1,
+     "max_deviation": 0.1224744871391589
+    },
+    "seconds_hand": {
+     "pieces": 1,
+     "max_deviation": 0.07071067811865477
+    },
+    "mw_wheel": {
+     "pieces": 1,
+     "max_deviation": 0.08660254037844387
+    },
+    "mw_pinion": {
+     "pieces": 1,
+     "max_deviation": 0.18027756377319948
+    },
+    "hw_wheel": {
+     "pieces": 1,
+     "max_deviation": 0.1118033988749895
+    },
+    "hw_pipe": {
+     "pieces": 1,
+     "max_deviation": 0.07071067811865477
+    },
+    "hour_hand": {
+     "pieces": 1,
+     "max_deviation": 0.07071067811865477
+    }
+   },
+   "seated_not_seated": [
+    "seconds_bush"
+   ],
+   "size": {
+    "radius": 20.373599844095736,
+    "z_min": -5.36855936050415,
+    "z_max": 3.191999912261963
+   },
+   "hands": {
+    "hour": {
+     "reach": 6.604362411721214,
+     "above_fixed": 0.5999999642372131,
+     "centre_from_axis": 1.4656262914602303
+    },
+    "minute": {
+     "reach": 9.003199418336177,
+     "above_fixed": 1.3199999928474426,
+     "centre_from_axis": 2.999451868316218
+    },
+    "seconds": {
+     "reach": 9.601686733474843,
+     "above_fixed": 2.015999972820282,
+     "centre_from_axis": 3.218427297460821
+    }
+   },
+   "clear": {
+    "worst_volume": 0.0006135523356489304,
+    "pair": "centre/seconds"
+   },
+   "assembled": {
+    "worst_volume": 0.0006134811716584577,
+    "pair": "centre/seconds",
+    "fixed_parts_worst": 0.005532475558312525,
+    "fixed_pair": "plate_e/plate_e_2",
+    "mobile_parts_worst": 0.008779613342876798,
+    "mobile_pair": "hour_wheel:hw_wheel/hw_pipe",
+    "one_frame": true
+   },
+   "held_min_fixed_volume": {
+    "barrel": 0.5968806818295119,
+    "intermediate": 0.22869736308184918,
+    "centre": 0.18392070270274286,
+    "third": 0.046466944120141546,
+    "seconds": 0.026582116174100067,
+    "minute_wheel": 0.18539910793488817,
+    "hour_wheel": 0.17546555307236827
+   },
+   "strength_rows": [
+    {
+     "mesh": "barrel/intermediate",
+     "gear": "intermediate",
+     "teeth": 26,
+     "kind": "wheel",
+     "module": 0.17999967198261319,
+     "face_width": 0.4559999704360962,
+     "torque_nmm": 70.1,
+     "force_n": 9.736128853441912,
+     "Y": 0.3734,
+     "sigma_mpa": 317.66946466815494
+    },
+    {
+     "mesh": "intermediate/centre",
+     "gear": "intermediate",
+     "teeth": 26,
+     "kind": "wheel",
+     "module": 0.18000276618373126,
+     "face_width": 0.6000000238418579,
+     "torque_nmm": 22.7825,
+     "force_n": 9.735961491898404,
+     "Y": 0.3734,
+     "sigma_mpa": 241.42046777655216
+    },
+    {
+     "mesh": "intermediate/centre",
+     "gear": "centre",
+     "teeth": 12,
+     "kind": "pinion",
+     "module": 0.18000276618373126,
+     "face_width": 0.6000000238418579,
+     "torque_nmm": 22.7825,
+     "force_n": 9.735961491898404,
+     "Y": 0.2546,
+     "sigma_mpa": 354.0707096141578
+    },
+    {
+     "mesh": "centre/third",
+     "gear": "centre",
+     "teeth": 64,
+     "kind": "wheel",
+     "module": 0.1560003576666125,
+     "face_width": 0.2760000228881836,
+     "torque_nmm": 10.514999999999999,
+     "force_n": 2.106365362970743,
+     "Y": 0.456,
+     "sigma_mpa": 107.28380048139012
+    },
+    {
+     "mesh": "centre/third",
+     "gear": "third",
+     "teeth": 10,
+     "kind": "pinion",
+     "module": 0.1560003576666125,
+     "face_width": 0.2760000228881836,
+     "torque_nmm": 10.514999999999999,
+     "force_n": 2.106365362970743,
+     "Y": 0.2198,
+     "sigma_mpa": 222.57239772299314
+    },
+    {
+     "mesh": "third/seconds",
+     "gear": "third",
+     "teeth": 75,
+     "kind": "wheel",
+     "module": 0.13908465623288344,
+     "face_width": 0.23999977111816406,
+     "torque_nmm": 1.6429687499999999,
+     "force_n": 0.31500599121904804,
+     "Y": 0.4658,
+     "sigma_mpa": 20.25952602334822
+    },
+    {
+     "mesh": "third/seconds",
+     "gear": "seconds",
+     "teeth": 8,
+     "kind": "pinion",
+     "module": 0.13908465623288344,
+     "face_width": 0.23999977111816406,
+     "torque_nmm": 1.6429687499999999,
+     "force_n": 0.31500599121904804,
+     "Y": 0.1748,
+     "sigma_mpa": 53.98676900272082
+    }
+   ],
+   "strength_variants": {
+    "all steel (AD-C100-HT, 725 MPa)": {
+     "passes": true,
+     "failing": []
+    },
+    "brass wheels (AD-CW614N, 110 MPa) on steel pinions, per part": {
+     "passes": false,
+     "failing": [
+      [
+       "barrel/intermediate",
+       "intermediate",
+       26
+      ],
+      [
+       "intermediate/centre",
+       "intermediate",
+       26
+      ]
+     ]
+    },
+    "per mobile today: the wheel-only intermediate in brass, the rest steel": {
+     "passes": false,
+     "failing": [
+      [
+       "barrel/intermediate",
+       "intermediate",
+       26
+      ],
+      [
+       "intermediate/centre",
+       "intermediate",
+       26
+      ]
+     ]
+    },
+    "all brass (every mobile AD-CW614N)": {
+     "passes": false,
+     "failing": [
+      [
+       "barrel/intermediate",
+       "intermediate",
+       26
+      ],
+      [
+       "intermediate/centre",
+       "intermediate",
+       26
+      ],
+      [
+       "intermediate/centre",
+       "centre",
+       12
+      ],
+      [
+       "centre/third",
+       "third",
+       10
+      ]
+     ]
+    }
+   }
+  }
+ }
+}

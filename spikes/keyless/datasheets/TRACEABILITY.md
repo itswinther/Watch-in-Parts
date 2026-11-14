@@ -301,7 +301,7 @@ About 400 derived cells recomputed: all right except three DS-101 Table 4 cells 
 Also fixed: INDEX lists Rev F; Table 2a values are Sellita's specification limits (M½ max, M24 min, bridle
 min-max; p. 1 = PDF p. 3), not measurements; the leftover "Arbor core radius" section after Sources (wrong
 Saunier title) is deleted; DS-501's pinch value is labelled ages 20 to 34 (the norms span 20 to 75+, lowest 7.9 lb);
-DS-401's 0.80 mm is the travel between adjacent positions (SW200-1 has three positions); research-note
+DS-401's 0.80 mm is the total travel from winding to setting (SW200-1 sheet SW102580A: 0.30 to the date position, then 0.50; correction of the 21:00 wording); research-note
 wording in DS-301 reworded. Open with B: the 70.1 N·mm load case against spring L, and the corundum
 safety factor (UWA item 9 suggests about S = 6 for brittle materials on ultimate strength, so about 450 MPa, not 900).
 Verified sources: Sellita SW200-1 rev 04, Alleima 20C, Wieland CW614N, Nivaflex 45/5 (typical values),

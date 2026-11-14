@@ -1,0 +1,55 @@
+{
+  "parts": 11,
+  "total_triangles": 43752,
+  "largest_triangle_count": 9516,
+  "max_nonstem_case_radius": 8.169207382151397,
+  "max_rest_overlap_mm3": 6.279337571541299e-19,
+  "retention_probes": 26,
+  "smallest_retention_overlap_mm3": 0.0028456866933704843,
+  "part_details": {
+    "winding_pinion": {
+      "triangles": 4756,
+      "volume_mm3": 0.38599356437748306
+    },
+    "setting_bridge": {
+      "triangles": 1222,
+      "volume_mm3": 0.35489583111657524
+    },
+    "winding_transfer": {
+      "triangles": 9304,
+      "volume_mm3": 1.5045746838906375
+    },
+    "sliding_clutch": {
+      "triangles": 2412,
+      "volume_mm3": 0.24688003737626119
+    },
+    "setting_transfer": {
+      "triangles": 9516,
+      "volume_mm3": 1.2440181124869356
+    },
+    "barrel_winding_wheel": {
+      "triangles": 6960,
+      "volume_mm3": 32.387117449239604
+    },
+    "click_guide": {
+      "triangles": 48,
+      "volume_mm3": 0.2455000300264317
+    },
+    "winding_bridge": {
+      "triangles": 3124,
+      "volume_mm3": 0.7658254626776889
+    },
+    "retaining_click": {
+      "triangles": 12,
+      "volume_mm3": 0.012391708798737336
+    },
+    "pinion_bridge": {
+      "triangles": 1206,
+      "volume_mm3": 0.4219046550883001
+    },
+    "crown_stem": {
+      "triangles": 5192,
+      "volume_mm3": 1.4009710620473095
+    }
+  }
+}

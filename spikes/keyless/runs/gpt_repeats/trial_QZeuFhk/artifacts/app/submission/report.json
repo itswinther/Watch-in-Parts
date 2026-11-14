@@ -1,0 +1,12 @@
+{
+  "steps": {
+    "assemble": "pass",
+    "wind": "pass",
+    "hold": "not_tested",
+    "run": "pass",
+    "backward": "pass",
+    "set": "pass",
+    "return": "pass"
+  },
+  "summary": "Judgments use my specialized local quasi-static mesh model and a separate geometry audit, not the undisclosed official simulator. Ten binary STL solids implement a 5:1 crossed-helical winding train, a 36-tooth spring-loaded crown face clutch, an independent 36-tooth radial barrel click, and a crown-selected crossed-helical/21-tooth spur setting train. All submitted solids are single connected watertight positive-volume manifolds. No rest overlaps exceed 0.0002 mm3; bounds, binary sizes, counts, and retention shifts pass (32 radial directions plus the required axial shifts). Gear motion is found by first-clear intersection searches; ratchet drive/release direction uses the manufactured flank geometry and the specified friction cones. Winding gives 71.6928 degrees per crown turn (5.0214:1), with zero minute motion. A direct 45-degree arbor winding followed by local settling loses 4.8796 degrees, predicting 47.8916 hours reserve. HOLD IS NOT FULLY TESTED: the official 40-step tapping procedure is not reproduced, so AT-2 is not_tested despite the positive locking-flank analysis. Independent 20-degree arbor winding is unobstructed, followed by 5.2821 degrees winding from a 30-degree crown turn. Backward 360-degree crown rotation produces zero arbor/minute motion, followed by 5.2707 degrees winding. Both-direction 24-degree tests at all five pull and return positions never drive both trains; endpoints select the correct train. Setting 90 degrees each way moves the minute wheel -34.0223 and +32.1194 degrees without arbor loss. Final returned 90-degree winding gives 16.8834 degrees. The local model checks all cross-body overlaps at each simulated pose, using 3-degree crown turns and axial increments no greater than 0.03 mm. These are local-model results rather than a guarantee of identical force-resolution behavior in the official rig. Detailed measurements and reproducible scripts are in /app/scripts; REPORT.md records development issues and ambiguities. Outside access: none."
+}

@@ -1,0 +1,54 @@
+{
+  "wind": {
+    "series_contact_end_deg": [
+      -360.0,
+      -358.8999023437499,
+      59.73061523437499
+    ],
+    "ratio": 6.027059968952402,
+    "samples": 121,
+    "interferences": 0
+  },
+  "set": {
+    "forward_end_deg": [
+      -90.0,
+      -88.26558837890623,
+      14.610937499999997
+    ],
+    "reverse_end_deg": [
+      0.0,
+      -1.7348876953124606,
+      0.37642822265625137
+    ],
+    "minute_reverse_travel": 14.234509277343745,
+    "samples": 61,
+    "interferences": 0
+  },
+  "run": {
+    "independent_arbor_advance_deg": 20,
+    "step_deg": 0.5,
+    "largest_clutch_shift": 0.05264217376708985,
+    "interferences": 0
+  },
+  "backward": {
+    "crown_travel_deg": 360,
+    "largest_clutch_shift": 0.05264217376708985,
+    "arbor_travel_deg": 0,
+    "minute_travel_deg": 0,
+    "interferences": 0
+  },
+  "hold_click_geometry": {
+    "arbor_angle": 41.87999999999951,
+    "run_back_before_lock_deg": 3.1200000000004877,
+    "outward_jump": 0.068701171875
+  },
+  "friction": {
+    "mu_static": 0.51,
+    "mu_sliding": 0.44,
+    "clutch_ramp_worst_axial_normal_cosine": 0.7946499854957895,
+    "click_ramp_radial_normal_cosine": 0.869089912544028,
+    "minimum_cosine_for_a_slide": 0.45432608279601244,
+    "locking_face_slide_normal_component": 0,
+    "note": "Analytical normal-cone checks for ideal ramp/locking faces, not a full multi-contact friction solver."
+  }
+}

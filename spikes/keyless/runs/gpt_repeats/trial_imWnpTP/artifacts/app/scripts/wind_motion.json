@@ -1,0 +1,18 @@
+{
+  "winding_face_wheel/winding_pinion": [
+    1.6938798234755103e-06,
+    90.0
+  ],
+  "winding_face_wheel/bearing_bridge": [
+    0.00015496526932226942,
+    0.0
+  ],
+  "stem/sliding_clutch": [
+    1.5708711013843413e-16,
+    318.0
+  ],
+  "barrel/barrel_click": [
+    0.00017999973384830382,
+    21.0
+  ]
+}

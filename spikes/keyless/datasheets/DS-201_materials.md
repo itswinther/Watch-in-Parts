@@ -144,7 +144,7 @@ materials.[^ee]
 | Brass CW614N | Rp0.2 min 220 MPa[^wie] | 2 | 110[^d1] |
 | Steel AD-C100-HT, < 1.000 mm | Proof min 1500 MPa[^alleima] | 2 | 750[^d1] |
 | Steel AD-C100-HT, 1.000 to < 1.575 mm | Proof 1450 MPa[^alleima] | 2 | 725[^d1] |
-| Corundum, compressive | 2700 MPa[^mif] | 3 | 900[^d1] |
+| Corundum, compressive | 2700 MPa[^mif] | 6 | 450[^d1] |
 
 ## Notes
 
@@ -167,4 +167,4 @@ materials.[^ee]
 [^etb]: Engineering ToolBox, friction coefficients, https://engineeringtoolbox.com/friction-coefficients-d_778.html
 [^ee]: Engineers Edge, factor of safety review ("ductile materials use yield strength", "brittle materials use ultimate strength"), https://engineersedge.com/analysis/factor-of-safety-review.htm
 [^uwa]: Recommended safety factors after Juvinall and Marshek, based on yield, https://danotes.mech.uwa.edu.au/SSS/safety/safety.html
-[^d1]: Calculated: allowable = basis strength / S. The basis is from the cited row and S from [^uwa]: tier "1.5 to 2" for brass and steel, tier "2.5 to 3" for brittle corundum.
+[^d1]: Calculated: allowable = basis strength / S. The basis is from the cited row and S from [^uwa]: tier "1.5 to 2" for brass and steel, tier "2.5 to 3" for brittle corundum, doubled to 6 because it is rated on ultimate strength, as [^uwa] advises for brittle materials.

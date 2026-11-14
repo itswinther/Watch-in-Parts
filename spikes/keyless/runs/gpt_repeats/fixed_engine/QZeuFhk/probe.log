@@ -1,0 +1,3 @@
+PREWIND blocked 87 /90 first at step 3 first failed resolve: [({'crown_clutch': (0.0, 0.01)}, {('crown_clutch', 'winding_rotor'): 0.00379})]
+BACKWARD 120deg from rest blocked 38 /40 first at 2 first failed resolve: [({'crown_clutch': (0.0, 0.01)}, {('crown_clutch', 'winding_rotor'): 0.00367})]
+PULL to 0.9 from rest: blocked 0 first failed resolve: [({'barrel': (0.319, 0.0), 'winding_rotor': (0.241, 0.0)}, {('barrel', 'holding_click'): 0.00104})]

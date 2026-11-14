@@ -1,0 +1,83 @@
+{
+  "mobiles": {
+    "stem": {
+      "kind": "stem",
+      "parts": [
+        "crown_stem"
+      ]
+    },
+    "barrel": {
+      "kind": "barrel",
+      "parts": [
+        "barrel_gear"
+      ]
+    },
+    "winding_rotor": {
+      "kind": "free",
+      "dof": "rot",
+      "point": [
+        0,
+        0,
+        0
+      ],
+      "direction": [
+        1,
+        0,
+        0
+      ],
+      "parts": [
+        "winding_pinion"
+      ]
+    },
+    "crown_clutch": {
+      "kind": "spring",
+      "dof": "slide",
+      "direction": [
+        1,
+        0,
+        0
+      ],
+      "rest": -1,
+      "on_stem": true,
+      "parts": [
+        "sliding_clutch"
+      ]
+    },
+    "setting_rotor": {
+      "kind": "free",
+      "dof": "rot",
+      "point": [
+        7,
+        1.03602416709185,
+        0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "parts": [
+        "setting_intermediate"
+      ]
+    },
+    "holding_click": {
+      "kind": "spring",
+      "dof": "slide",
+      "direction": [
+        1,
+        0,
+        0
+      ],
+      "rest": -1,
+      "parts": [
+        "barrel_click"
+      ]
+    }
+  },
+  "fixed": [
+    "setting_axle",
+    "winding_left_bearing",
+    "winding_right_bearing",
+    "click_guide"
+  ]
+}

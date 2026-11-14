@@ -1,0 +1,9 @@
+=== b7qdG8X
+drive winding_pinion by -10 deg: blocked 0 /10 moved {'winding_pinion': -0.4, 'sliding_clutch': 0.12, 'winding_transfer': 0.35, 'barrel': -0.12, 'retaining_click': -0.18}
+drive winding_pinion by 10 deg: blocked 10 /10 moved {}
+=== imWnpTP
+drive winding_face_wheel by -10 deg: blocked 0 /10 moved {'winding_face_wheel': -7.5, 'winding_pinion': -38.01, 'sliding_clutch': 5.42, 'barrel': 10.86, 'barrel_click': 10.45}
+drive winding_face_wheel by 10 deg: blocked 10 /10 moved {}
+=== QZeuFhk
+drive winding_rotor by -10 deg: blocked 0 /10 moved {'barrel': 0.06, 'winding_rotor': -1.66, 'crown_clutch': 0.37, 'holding_click': -1.81}
+drive winding_rotor by 10 deg: blocked 10 /10 moved {}

@@ -1,0 +1,490 @@
+[
+  {
+    "operation": "pull",
+    "pull": 0.0,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "pull",
+    "pull": 0.03,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "pull",
+    "pull": 0.06,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "pull",
+    "pull": 0.09,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "pull",
+    "pull": 0.12,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "pull",
+    "pull": 0.15,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "pull",
+    "pull": 0.18,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "pull",
+    "pull": 0.21,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "pull",
+    "pull": 0.24,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "pull",
+    "pull": 0.27,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "pull",
+    "pull": 0.3,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "pull",
+    "pull": 0.32999999999999996,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "pull",
+    "pull": 0.36,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "pull",
+    "pull": 0.39,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "pull",
+    "pull": 0.42,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "pull",
+    "pull": 0.44999999999999996,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "pull",
+    "pull": 0.48,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "pull",
+    "pull": 0.51,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "pull",
+    "pull": 0.54,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "pull",
+    "pull": 0.57,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "pull",
+    "pull": 0.6,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "pull",
+    "pull": 0.63,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "pull",
+    "pull": 0.6599999999999999,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "pull",
+    "pull": 0.69,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "pull",
+    "pull": 0.72,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "pull",
+    "pull": 0.75,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "pull",
+    "pull": 0.78,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "pull",
+    "pull": 0.8099999999999999,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "pull",
+    "pull": 0.84,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "pull",
+    "pull": 0.87,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "pull",
+    "pull": 0.8999999999999999,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "push",
+    "pull": 0.87,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "push",
+    "pull": 0.84,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "push",
+    "pull": 0.8099999999999999,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "push",
+    "pull": 0.7799999999999999,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "push",
+    "pull": 0.7499999999999999,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "push",
+    "pull": 0.7199999999999999,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "push",
+    "pull": 0.6899999999999998,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "push",
+    "pull": 0.6599999999999998,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "push",
+    "pull": 0.6299999999999998,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "push",
+    "pull": 0.5999999999999998,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "push",
+    "pull": 0.5699999999999997,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "push",
+    "pull": 0.5399999999999997,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "push",
+    "pull": 0.5099999999999997,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "push",
+    "pull": 0.47999999999999965,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "push",
+    "pull": 0.4499999999999996,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "push",
+    "pull": 0.4199999999999996,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "push",
+    "pull": 0.38999999999999957,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "push",
+    "pull": 0.35999999999999954,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "push",
+    "pull": 0.3299999999999995,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "push",
+    "pull": 0.2999999999999995,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "push",
+    "pull": 0.26999999999999946,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "push",
+    "pull": 0.23999999999999944,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "push",
+    "pull": 0.2099999999999994,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "push",
+    "pull": 0.17999999999999938,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "push",
+    "pull": 0.14999999999999936,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "push",
+    "pull": 0.11999999999999933,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "push",
+    "pull": 0.0899999999999993,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "push",
+    "pull": 0.059999999999999276,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "push",
+    "pull": 0.02999999999999925,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  },
+  {
+    "operation": "push",
+    "pull": 0.0,
+    "stem_deg": 0.0,
+    "setting_deg": 0.0,
+    "rock": 0,
+    "wheel_adjustment": 0
+  }
+]

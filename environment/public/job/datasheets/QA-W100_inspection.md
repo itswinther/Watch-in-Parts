@@ -9,9 +9,10 @@
 ## 1. Scope
 
 This procedure is the acceptance inspection of a movement design delivery for the demonstration-scale calibre:
-the 8-hour build (`movement.json`), the 6-hour variant (`variant_6h.json`), the assembly plan (`assembly.json`)
-and the part files, in the folder `/app/delivery/`, in the file formats of `/app/FORMAT.md`. The inspection is run
-after hand-over, on what is in `/app/delivery/` at that time.
+the 8-hour build (`movement.json`), the 6-hour variant (`variant_6h.json`), the assembly plan (`assembly.json`),
+the part files and, when delivered, the designer's statement (`report.json`), in the folder `/app/delivery/`, in
+the file formats of `/app/FORMAT.md`. The inspection is run after hand-over, on what is in `/app/delivery/` at
+that time.
 
 ## 2. Documents
 
@@ -24,15 +25,33 @@ Values that belong to a supplied item are taken from that item's supplier docume
 | DS-W02 | the case: inner radius and inner height (section 2) |
 | DS-W03 | the printability test (section 3) |
 | `/app/FORMAT.md` | the file formats, and how a part file becomes the solid that is measured |
-| DS-W04 | Part 1, check 14 |
-| VM-DS-101 | Part 1, check 14 |
-| AD-DS-201 | Part 1, check 14 |
+| DS-W04 | Parts 1 and 3, check 14 |
+| VM-DS-101 | Parts 1 and 3, check 14 |
+| AD-DS-201 | Parts 1 and 3, check 14 |
 
 ## 3. Acceptance
 
 The inspection has four parts. Each part is judged on its own, even when another part fails. Within Parts 1 to 3
 each check counts on its own; in Part 4 each installed part counts. The delivery as a whole is accepted only when
 every condition and every check of all four parts passes: everything must work.
+
+**Designer's statement.** The delivery may include the designer's own statement of the result of each part of this
+inspection, in the file `report.json` (layout in `/app/FORMAT.md`): `pass` (the part passes in full: every
+condition and every check of it passes; in Part 4, every part is installed), `fail` (it does not pass in full) or
+`not_tested` (no statement). The inspection compares each part's statement with that part's result and scores it
+by this table:
+
+| Statement for a part | The part passes | The part does not pass |
+|---|---|---|
+| `pass` | 1 | -2 |
+| `fail` | 0.5 | 1 |
+| `not_tested` | 0.5 | 0.5 |
+
+A part that `report.json` leaves out counts as `not_tested`, and so does every part when `report.json` is absent
+or not valid. The statement's agreement score h is the mean of these points over the four parts, or 0 if that mean
+is below 0. The delivery's acceptance figure is its parts figure (the result of the four parts together) times
+(0.75 + 0.1 x h) / 0.85. The statement changes no other result of the inspection.
+
 
 ## 4. Terms
 
@@ -101,7 +120,7 @@ Checks. Each passes or fails.
      distance is at most 0.1 mm;
    - the teeth drive: at every 8th step (i = 0, 8, 16, ...), D is turned a further 0.25 of its tooth pitch
      (90 / z_D degrees, counter-clockwise) while N stays where it is. V is the volume of the region that the
-     turned D shares with N and that D did not occupy before this extra turn; H is the height in z of that region;
+     turned D shares with N and that D did not occupy before this extra turn; H is the z extent of that region (its highest point minus its lowest);
      m = 2 x (distance between the two axes in the assembled positions) / (z_D + z_N) is the mesh's module. V is
      at least 0.001 mm3 and V / H is more than 0.5 x m x m, at every one of these steps. (V / H is the area that
      the extra turn cuts into N's teeth.)
@@ -133,16 +152,19 @@ Checks. Each passes or fails.
     named in the work order (DS-W03, section 3).
 14. **Gear strength.** The gears of the going train are strong enough in tooth bending.
 
-    *Load case.* The barrel delivers the highest torque that the mainspring sheet states for this calibre class:
-    T_barrel is the upper end of the bridle's slipping torque, DS-101, Table 2a, row "Slipping torque of the
-    bridle", column for this series (N·mm). The going train is stalled at its end, so each of its meshes carries
-    the full torque that reaches it.
+    *Load case.* This calibre is the base of a family that includes an automatic version, whose barrel has a
+    slipping bridle; the going train is rated for that version's barrel load. T_barrel is the upper end of the
+    bridle's slipping torque, DS-101, Table 2a, row "Slipping torque of the bridle (min. to max.)", column for
+    this series (N·mm), whatever mainspring the barrel of this build holds. The going train is stalled at its end,
+    so each of its meshes carries the full torque that reaches it.
 
     *Meshes rated.* The going train: the declared meshes on the path from the barrel to the mobile that carries
-    the seconds hand, through declared meshes that pass the mesh test (check 4). The motion work, and any other
-    mesh off that path, is not rated. If the seconds hand's mobile is not reached from the barrel that way, this
-    check fails. For each rated mesh, with D the mobile that the declaration names as `driver`, N the one it names
-    as `driven`, and z_D and z_N their declared tooth counts:
+    the seconds hand, through declared meshes that pass the mesh test (check 4); where there is more than one such
+    path, the one a breadth-first search from the barrel finds first when it takes the meshes in their declared
+    order (so the one with the fewest meshes). The motion work, and any other mesh off that path, is not rated. If
+    the seconds hand's mobile is not reached from the barrel that way, this check fails. For each rated mesh, with
+    D the mobile that the declaration names as `driver`, N the one it names as `driven`, and z_D and z_N their
+    declared tooth counts:
 
     - torque at D: T_D = T_barrel x |n_barrel / n_D| (N·mm), with n the turns per hour that the declared tooth
       counts give through meshes that pass the mesh test (the same speeds as the hand checks);
@@ -154,10 +176,18 @@ Checks. Each passes or fails.
     - bending stress of each of the two gears, each with its own tooth count z (z_D or z_N): sigma = F / (b x m x
       Y(z)) (MPa, that is N/mm2), Y(z) the Lewis form factor of DS-W04, section 3, for z teeth.
 
-    *Allowable.* A gear's allowable stress is that of its mobile's `material`: the lowest design allowable that
-    DS-201 section 8 gives for that ordering code (a code with several rows, for example by stock thickness, is
-    rated at the lowest of them, since the delivery does not state stock thickness). Tooth bending puts the root
-    of the tooth in tension, so only a bending (tensile, yield-based) allowable applies: a row that gives a
+    *Which part holds a gear's teeth.* A mobile may be made of several parts, for example a wheel on a pinion
+    arbor. In a rated mesh, the part that holds a gear's teeth is the part of that gear's mobile that holds the
+    largest volume of the region the drive steps of the mesh test find for this mesh (the region that the
+    further-turned D shares with N and did not occupy before; a part of D taken in its further-turned position, a
+    part of N in its position at that step), that volume added over the drive steps. Where two parts hold the same
+    volume, it is the one listed first in the mobile's `parts`. A one-part mobile holds its teeth in that part.
+
+    *Allowable.* A gear's allowable stress is that of the material of the part that holds its teeth: the part's
+    entry in its mobile's `part_materials`, or else the mobile's `material`. It is the lowest design allowable
+    that DS-201 section 8 gives for that ordering code (a code with several rows, for example by stock thickness,
+    is rated at the lowest of them, since the delivery does not state stock thickness). Tooth bending puts the
+    root of the tooth in tension, so only a bending (tensile, yield-based) allowable applies: a row that gives a
     compressive allowable does not, and a code without a bending allowable in section 8 cannot be declared (C1).
 
     *Pass.* sigma <= the allowable for both gears of every rated mesh. The supplied barrel's own teeth are not

@@ -64,8 +64,10 @@ if [ "${SKIP_BUILD:-0}" != 1 ]; then
     python -B /src/build_task.py /out/task --agent opencode | tee -a "$LOG"
 fi
 [ -f "$TASK/task.toml" ] || { echo "no task at $TASK" >&2; exit 1; }
-grep -q 'network_mode = "allowlist"' "$TASK/task.toml" && grep -q 'allowed_hosts = \["api.anthropic.com"\]' "$TASK/task.toml" \
-  || { echo "task.toml: the agent network is not the api.anthropic.com allowlist; refusing to run" >&2; exit 1; }
+# exactly the model endpoints build_task.py allows for OpenCode (its AGENTS table), nothing else
+HOSTS_EXPECTED='"api.anthropic.com", "api.openai.com", "generativelanguage.googleapis.com", "openrouter.ai"'
+grep -q 'network_mode = "allowlist"' "$TASK/task.toml" && grep -qF "allowed_hosts = [$HOSTS_EXPECTED]" "$TASK/task.toml" \
+  || { echo "task.toml: the agent network is not the allowlist [$HOSTS_EXPECTED]; refusing to run" | tee -a "$LOG" >&2; exit 1; }
 grep -q 'network_mode = "no-network"' "$TASK/task.toml" || { echo "task.toml: verifier is not no-network" >&2; exit 1; }
 mkdir -p "$JOBS"
 

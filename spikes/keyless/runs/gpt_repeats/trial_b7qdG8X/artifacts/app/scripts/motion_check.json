@@ -1,0 +1,22 @@
+{
+  "wind": {
+    "maxima": {},
+    "first_failures": [],
+    "samples_failed": 0
+  },
+  "set": {
+    "maxima": {},
+    "first_failures": [],
+    "samples_failed": 0
+  },
+  "position1_no_setting": {
+    "maxima": {},
+    "first_failures": [],
+    "samples_failed": 0
+  },
+  "backward": {
+    "maxima": {},
+    "first_failures": [],
+    "samples_failed": 0
+  }
+}

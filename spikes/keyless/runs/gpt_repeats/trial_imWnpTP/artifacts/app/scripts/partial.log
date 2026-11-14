@@ -1,0 +1,8 @@
+Partial 0.225 1 set 0.0 bad {}
+Partial 0.225 -1 set -0.0 bad {}
+Partial 0.45 1 set 0.0 bad {}
+Partial 0.45 -1 set -0.0 bad {}
+Partial 0.675 1 set 4.697530110677081 bad {}
+Partial 0.675 -1 set -4.718363444010415 bad {}
+Partial 0.9 1 set 4.662536621093748 bad {}
+Partial 0.9 -1 set -4.674825032552081 bad {}

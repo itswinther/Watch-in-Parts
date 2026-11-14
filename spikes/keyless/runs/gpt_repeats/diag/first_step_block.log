@@ -1,0 +1,18 @@
+=== b7qdG8X
+FORWARD first 3deg step ok= False moved {}
+   failed resolve: moves {'stem': (1.5, 0.0)} overlaps>TOL {('sliding_clutch', 'winding_pinion'): 0.00594}
+BACKWARD first 3deg step ok= True moved {'stem': 3.0, 'sliding_clutch': 0.913, 'winding_transfer': 0.516, 'barrel': -0.151}
+   failed resolve: moves {'barrel': (0.0377, 0.0), 'winding_transfer': (0.228, 0.0)} overlaps>TOL {('barrel', 'retaining_click'): 0.00027}
+   failed resolve: moves {'barrel': (0.0188, 0.0)} overlaps>TOL {('barrel', 'retaining_click'): 0.00022}
+=== imWnpTP
+FORWARD first 3deg step ok= False moved {}
+   failed resolve: moves {'stem': (3.0, 0.0), 'winding_pinion': (2.8494, 0.0)} overlaps>TOL {('winding_face_wheel', 'winding_pinion'): 0.0008}
+BACKWARD first 3deg step ok= True moved {'sliding_clutch': 1.748, 'stem': 3.0, 'barrel': -0.226}
+   failed resolve: moves {'barrel': (0.3016, 0.0)} overlaps>TOL {('barrel', 'winding_face_wheel'): 0.00024, ('barrel', 'barrel_click'): 0.00058}
+   failed resolve: moves {'barrel': (0.1508, 0.0)} overlaps>TOL {('barrel', 'barrel_click'): 0.00028}
+=== QZeuFhk
+FORWARD first 3deg step ok= False moved {}
+   failed resolve: moves {'stem': (1.5, 0.0)} overlaps>TOL {('crown_clutch', 'winding_rotor'): 0.00218}
+BACKWARD first 3deg step ok= True moved {'stem': 3.0, 'crown_clutch': 0.675}
+   failed resolve: moves {'barrel': (0.0399, 0.0)} overlaps>TOL {('barrel', 'holding_click'): 0.0003}
+   failed resolve: moves {'barrel': (0.02, 0.0)} overlaps>TOL {('barrel', 'holding_click'): 0.00025}

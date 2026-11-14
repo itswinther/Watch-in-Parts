@@ -3,7 +3,7 @@ orchestrator's answers to builder S): the texts the brief generator includes, al
 The interface is the hook strength_module() of environment/make_brief_job.py (builder D):
     ds_w04()               the text of datasheets/DS-W04_gear_rating.md (Lewis form factors, 25 deg full depth)
     qa_strength_section()  check 14 of QA-W100 Part 1 ("14. **..."), citing every supplier value to its cell
-    format_text()          the `material` bullet of FORMAT.md's movement.json section
+    format_text()          the `material` and `part_materials` bullets of FORMAT.md's movement.json section
     trace_rows()           home cells of the strength constants, in the row format of make_brief_job.cell()
     check()                [error]: DS-101 and DS-201 cells against the constants, DS-W04 against LEWIS_Y, and no
                            supplier value in the QA text (empty when consistent)
@@ -117,11 +117,18 @@ def _fill(text, first, rest):
 
 
 def format_text():
-    """The `material` bullet of FORMAT.md's movement.json section (after the `mobiles` bullet)."""
+    """The `material` and `part_materials` bullets of FORMAT.md's movement.json section (after the `mobiles`
+    bullet)."""
     return _fill("`material`: in each mobile, its material, as an ordering code of DS-201 (its table of ordering "
-                 "codes). Every part of a mobile is of its material. The code must be one that has a design "
-                 "allowable for bending (a tensile, yield-based allowable) in DS-201's table of design allowables; "
-                 "any other value, or a mobile without `material`, makes the file not valid.", "- ", "  ") + "\n"
+                 "codes). Every part of a mobile is of its material, except a part named in `part_materials`. The "
+                 "code must be one that has a design allowable for bending (a tensile, yield-based allowable) in "
+                 "DS-201's table of design allowables; any other value, or a mobile without `material`, makes the "
+                 "file not valid.", "- ", "  ") + "\n" + \
+        _fill("`part_materials` (optional): in a mobile, an object `{\"part name\": \"ordering code\"}` that gives "
+              "some of its parts another material than the mobile's `material`, for example a brass wheel on a "
+              "steel pinion. Each key must be a part listed in that mobile's `parts`, and each code must qualify as "
+              "for `material`; anything else makes the file not valid. A part not named here is of the mobile's "
+              "`material`.", "- ", "  ") + "\n"
 
 
 def qa_strength_section(number=14, mesh_test="the mesh test (check 4)"):
@@ -130,12 +137,15 @@ def qa_strength_section(number=14, mesh_test="the mesh test (check 4)"):
     ind = " " * (len(str(number)) + 2)
     paras = [
         "**Gear strength.** The gears of the going train are strong enough in tooth bending.",
-        "*Load case.* The barrel delivers the highest torque that the mainspring sheet states for this calibre "
-        "class: T_barrel is the upper end of the bridle's slipping torque, DS-101, Table 2a, row \"Slipping torque "
-        "of the bridle\", column for this series (N·mm). The going train is stalled at its end, so each of its "
-        "meshes carries the full torque that reaches it.",
+        "*Load case.* This calibre is the base of a family that includes an automatic version, whose barrel has a "
+        "slipping bridle; the going train is rated for that version's barrel load. T_barrel is the upper end of the "
+        "bridle's slipping torque, DS-101, Table 2a, row \"Slipping torque of the bridle (min. to max.)\", column "
+        "for this series (N·mm), whatever mainspring the barrel of this build holds. The going train is stalled at "
+        "its end, so each of its meshes carries the full torque that reaches it.",
         "*Meshes rated.* The going train: the declared meshes on the path from the barrel to the mobile that "
-        "carries the seconds hand, through declared meshes that pass %s. The motion work, and any other mesh off "
+        "carries the seconds hand, through declared meshes that pass %s; where there is more than one such path, "
+        "the one a breadth-first search from the barrel finds first when it takes the meshes in their declared "
+        "order (so the one with the fewest meshes). The motion work, and any other mesh off "
         "that path, is not rated. If the seconds hand's mobile is not reached from the barrel that way, this check "
         "fails. For each rated mesh, with D the mobile that the declaration names as `driver`, N the one it names "
         "as `driven`, and z_D and z_N their declared tooth counts:" % mesh_test,
@@ -153,9 +163,17 @@ def qa_strength_section(number=14, mesh_test="the mesh test (check 4)"):
         "z teeth.",
     ]
     tail = [
-        "*Allowable.* A gear's allowable stress is that of its mobile's `material`: the lowest design allowable "
-        "that DS-201 section 8 gives for that ordering code (a code with several rows, for example by stock "
-        "thickness, is rated at the lowest of them, since the delivery does not state stock thickness). Tooth "
+        "*Which part holds a gear's teeth.* A mobile may be made of several parts, for example a wheel on a "
+        "pinion arbor. In a rated mesh, the part that holds a gear's teeth is the part of that gear's mobile that "
+        "holds the largest volume of the region the drive steps of the mesh test find for this mesh (the region "
+        "that the further-turned D shares with N and did not occupy before; a part of D taken in its "
+        "further-turned position, a part of N in its position at that step), that volume added over the drive "
+        "steps. Where two parts hold the same volume, it is the one listed first in the mobile's `parts`. A "
+        "one-part mobile holds its teeth in that part.",
+        "*Allowable.* A gear's allowable stress is that of the material of the part that holds its teeth: the "
+        "part's entry in its mobile's `part_materials`, or else the mobile's `material`. It is the lowest design "
+        "allowable that DS-201 section 8 gives for that ordering code (a code with several rows, for example by "
+        "stock thickness, is rated at the lowest of them, since the delivery does not state stock thickness). Tooth "
         "bending puts the root of the tooth in tension, so only a bending (tensile, yield-based) allowable applies: "
         "a row that gives a compressive allowable does not, and a code without a bending allowable in section 8 "
         "cannot be declared (C1).",
@@ -179,7 +197,7 @@ def _cell(constant, value, file, section, row=None, column=None, tokens=(), pick
 def trace_rows():
     """Home cells of every graded number of the strength check (agent-folder paths; make_brief_job checks them)."""
     rows = [_cell("BARREL_TORQUE_MAX_NMM (strength load case; the upper end of the cell)", W.BARREL_TORQUE_MAX_NMM,
-                  DS101_FILE, "4a. Reference measurement", "Slipping torque of the bridle", "This series",
+                  DS101_FILE, "4a. Reference specification of a real 11½‴ calibre (Table 2a, maker's limits)", "Slipping torque of the bridle (min. to max.)", "This series",
                   [_num(W.BARREL_TORQUE_MAX_NMM)], pick="max")]
     for i, (cell, code, mpa, kind) in enumerate(W.DS201_ALLOWABLE_ROWS):
         if kind != "tensile":

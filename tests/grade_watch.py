@@ -2,7 +2,9 @@
     python -I grade_watch.py /abs/delivery_folder [--reward FILE] [--details FILE]
 One-job mode (no --stage): the delivery folder holds movement.json, variant_6h.json, assembly.json and
 parts/<name>.step; it is graded part by part (JOB_PARTS: P1 going train and hands, P2 24-hour hand,
-P3 6-hour variant, P4 assembly), with no part frozen and no part gating another. See grade_job.
+P3 6-hour variant, P4 assembly; P5 crown winding only when geometry/keyless_job.py KEYLESS_IN_JOB is True, run by
+grade_keyless.py in a fresh interpreter), with no part frozen and no part gating another. See grade_job. It may also hold
+report.json, the designer's statement of each part's result, scored by the honesty term (job_honesty).
     python -I grade_watch.py /abs/submission_folder --stage 1|2|3|4 [--prev /abs/previous_stage_folder]
                              [--reward FILE] [--details FILE] [--skip CHECK,CHECK]
 Stage mode (kept to regrade old runs and for the stage anchors; it uses the one-body barrel those runs were given,
@@ -48,15 +50,17 @@ JOB_CHECKS_2 = dict(WEIGHTS_2)                                          # P2: th
 # (environment/public/job/PROMPT.md): files C1, assembled C2, day_declared C3, same_frame C4; P4's are C1 of
 # movement.json and plan (assembly.json valid). The reward renormalises the weights
 # over the parts listed here. P4's checks are one per part of movement.json, weight 1 each (None here).
-# P5 (crown winding, AT-0 to AT-6, weight 0.25) joins this table when the keyless geometry is agreed
-# (SESSION.md Decisions 15:29 and 15:44): one row here and one grading step in grade_job that sets raw["P5"].
+# P5 (crown winding, workstream A's AT-0 to AT-6, weight 0.25; SESSION.md Decisions 15:29, 15:44, 17:46) is a row
+# only when geometry/keyless_job.py KEYLESS_IN_JOB is True; its checks are A's steps with A's step weights, its gate
+# is files (movement.json and its keyless section load). grade_keyless_part grades it in a fresh interpreter.
+from geometry import keyless_job as KJ      # noqa: E402  (light: no CadQuery, no manifold at import)
 JOB_PARTS = (
     ("P1", "going train and hands", Fraction(25, 100), ("files", "assembled"), JOB_CHECKS_1),
     ("P2", "24-hour hand", Fraction(10, 100), ("files", "assembled", "day_declared"), JOB_CHECKS_2),
     ("P3", "6-hour variant", Fraction(15, 100), ("files", "assembled", "day_declared", "same_frame"),
      dict(JOB_CHECKS_1, **JOB_CHECKS_2)),
     ("P4", "assembly", Fraction(25, 100), ("files", "plan"), None),
-)
+) + ((("P5", "crown winding", Fraction(*KJ.P5_WEIGHT), ("files",), KJ.step_weights()),) if KJ.KEYLESS_IN_JOB else ())
 JOB_TIME_LIMIT_S = 7200     # s, whole run: generous (the reference takes 6 to 10 min on an idle 4-CPU machine; printable alone took 273 s at load 16); once it has passed, every check not yet run fails, and a running check is stopped
 
 
@@ -567,6 +571,11 @@ def _job_assembly(folder, m, run):
         details["plan"] = {"error": "not run: %s did not load" % JOB_MOVEMENT}
         return gates, {}, details
     names = list(m.all_parts())
+    if KJ.KEYLESS_IN_JOB and m.keyless_names:
+        # with Part 5 graded, the keyless section's parts are parts of movement.json for the assembly too (A's request
+        # 21:20, agreed by B): installed under the same rules. If one does not load, they all count as not installed.
+        names += list(m.keyless_names)
+        details["keyless_parts"] = run(lambda: (bool(m.attach_keyless()) or True, {"parts": list(m.keyless_names)}))[1]
     checks = {n: False for n in names}
     st = {}
 
@@ -587,6 +596,78 @@ def _job_assembly(folder, m, run):
     if ok:
         checks = {n: n in st["installed"] for n in names}
     return gates, checks, details
+
+
+# ---------------- Part 5: crown winding (workstream A's acceptance test, at B's scale) ----------------
+def keyless_prepare(m, work, run=None):
+    """P5, first half, in this process: read movement m's keyless section and its part files (FormatError: the files
+    gate fails), build A's bodies by B's rule (geometry/keyless_job.py build_world), cut the fixed body to the reach
+    of the moving ones, and write the world to the folder work. Returns (gates, details)."""
+    from geometry import watch as W  # noqa: F401
+    gates, details = {"files": False}, {}
+    if m is None:
+        details["files"] = {"error": "not run: %s did not load" % JOB_MOVEMENT}
+        return gates, details
+
+    def build():
+        k, solids = KJ.load_keyless(m)
+        bodies, meta = KJ.build_world(m, k, solids)
+        bodies, n0, n1 = KJ.crop_fixed(bodies)
+        meta["fixed_triangles"] = {"whole": n0, "cut_to_reach": n1}
+        meta["bodies"] = {b["name"]: b["role"] for b in bodies}
+        KJ.write_world(work, bodies, meta)
+        return True, {"world": meta}
+    gates["files"], details["files"] = (run or _run)(build)
+    return gates, details
+
+
+def keyless_run(work, deadline=None, force=False, jobs=1):
+    """P5, second half: A's AT-0 to AT-6 on the world in work, in a fresh interpreter (tests/grade_keyless.py), at
+    most KJ.KEYLESS_TIMEOUT_S and never past deadline. Returns (checks, details): one check per A step."""
+    import subprocess
+    steps = list(KJ.step_weights())
+    checks = {k: False for k in steps}
+    limit = KJ.KEYLESS_TIMEOUT_S if deadline is None else min(KJ.KEYLESS_TIMEOUT_S, deadline - time.monotonic())
+    if limit <= 0:
+        return checks, {"error": "not run: the whole-run time limit of %d s was reached" % JOB_TIME_LIMIT_S}
+    out = os.path.join(work, "result.json")
+    cmd = [sys.executable, "-I", os.path.join(HERE, "grade_keyless.py"), work, out] + (["--force"] if force else []) \
+        + (["--jobs", str(jobs)] if jobs > 1 else [])
+    det = {}
+    try:
+        p = subprocess.run(cmd, cwd=HERE, capture_output=True, text=True, timeout=limit)
+        if p.returncode != 0:
+            det["process"] = {"returncode": p.returncode, "stderr": p.stderr[-4000:]}
+    except subprocess.TimeoutExpired:
+        det["process"] = {"error": "timeout after %.0f s; the phases finished before it are kept" % limit}
+    except Exception as e:      # noqa: a failed part, never a crash
+        det["process"] = {"error": "%s: %s" % (type(e).__name__, e)}
+    try:
+        with open(out) as f:
+            res = json.load(f)
+    except (OSError, ValueError) as e:
+        return checks, dict(det, error="no result from grade_keyless.py (%s)" % e)
+    for k in steps:
+        checks[k] = bool(res.get("steps", {}).get(k, False))
+    det.update(res)
+    return checks, det
+
+
+def grade_keyless_part(m, deadline=None, run=None, force=False, jobs=1, work=None):
+    """P5 on movement m (geometry.watch.Movement, or None if movement.json did not load): (gates, checks, details).
+    work: the folder for the world (a temporary folder, removed afterwards, when None)."""
+    import shutil
+    import tempfile
+    tmp = work or tempfile.mkdtemp(prefix="keyless_p5_")
+    try:
+        gates, details = keyless_prepare(m, tmp, run)
+        if not gates["files"]:
+            return gates, {k: False for k in KJ.step_weights()}, details
+        checks, details["acceptance"] = keyless_run(tmp, deadline, force, jobs)
+        return gates, checks, details
+    finally:
+        if work is None:
+            shutil.rmtree(tmp, ignore_errors=True)
 
 
 def grade_job(folder):
@@ -622,6 +703,14 @@ def grade_job(folder):
     def assembly():
         raw["P4"] = _job_assembly(folder, st.get("m"), run)
     guarded(("P4",), assembly)
+    p5 = {}
+    if "P5" in by_id:               # crown winding: build A's world now (it needs the 8-hour movement), run it last
+        import tempfile
+        p5["work"] = tempfile.mkdtemp(prefix="keyless_p5_")
+
+        def keyless_build():
+            p5["prep"] = keyless_prepare(st.get("m"), p5["work"], run)
+        guarded(("P5",), keyless_build)
     st.clear()                      # the 8-hour movement is no longer needed; its part solids stay in the cache
 
     def variant():
@@ -630,6 +719,20 @@ def grade_job(folder):
                                    run, cache, thin_cache)
         raw["P3"] = (g, c, d)
     guarded(("P3",), variant)
+
+    if "P5" in by_id:
+        def keyless():
+            g, d = p5["prep"]
+            c = {k: False for k in by_id["P5"][4]}
+            if g["files"]:
+                c, d["acceptance"] = keyless_run(p5["work"], deadline, jobs=KJ.KEYLESS_JOBS)
+            raw["P5"] = (g, c, d)
+        try:
+            if "prep" in p5:
+                guarded(("P5",), keyless)
+        finally:
+            import shutil
+            shutil.rmtree(p5["work"], ignore_errors=True)
 
     parts, num, den, all_pass = {}, Fraction(0), Fraction(0), True
     for pid, what, w, gate_names, cw in JOB_PARTS:
@@ -644,12 +747,21 @@ def grade_job(folder):
         all_pass = all_pass and passed
         num += w * s
         den += w
-        keep = set(gate_names) | set(checks) | ({"parts"} if cw is None else set()) | {"error"}
+        keep = set(gate_names) | set(checks) | ({"parts"} if cw is None else set()) | {"error", "acceptance", "keyless_parts"}
         parts[pid] = {"name": what, "weight": float(w), "gates": gates, "checks": checks, "check_weights": weights,
                       "share_of_checks": float(share), "s": float(s), "s_exact": str(s), "passed": passed,
                       "details": {k: v for k, v in d.items() if k in keep}}
     reward = Fraction(1, 2) * num / den + (Fraction(1, 2) if all_pass else Fraction(0))
+    # the designer's statement (report.json) against each part's result: the honesty term (Decisions 17:56)
+    parts_reward = reward
+    try:
+        honesty, factor = job_honesty(folder, {pid: p["passed"] for pid, p in parts.items()})
+    except Exception as e:      # noqa  (A's constants missing: a broken verifier; fail closed, say so)
+        honesty, factor = {"error": "honesty term not computed, reward 0: %s: %s" % (type(e).__name__, e)}, Fraction(0)
+        print(honesty["error"], file=sys.stderr)
+    reward = parts_reward * factor
     return {"mode": "job", "reward": float(reward), "reward_exact": str(reward), "all_pass": all_pass,
+            "parts_reward": float(parts_reward), "parts_reward_exact": str(parts_reward), "honesty": honesty,
             "parts_graded": [p[0] for p in JOB_PARTS], "parts": parts, "elapsed_s": round(time.monotonic() - t0, 1),
             "constants": {"part_weights": {p[0]: float(p[2]) for p in JOB_PARTS},
                           "check_weights": {p[0]: (dict(p[4]) if p[4] is not None else "one per part of movement.json, 1 each")
@@ -658,6 +770,105 @@ def grade_job(folder):
                           "barrel_turns_per_hour": {JOB_MOVEMENT: str(W.BARREL_TURNS_PER_HOUR),
                                                     JOB_VARIANT: str(W.CHANGED_BARREL_TURNS_PER_HOUR)},
                           "check_timeout_s": TIMEOUT_S, "time_limit_s": JOB_TIME_LIMIT_S}}
+
+
+# ---------------- one-job mode: the designer's statement (honesty term, SESSION.md Decisions 2026-11-14 17:56) ----
+# The delivery may hold report.json, {"parts": {"P1": "pass" | "fail" | "not_tested", ...}}: the designer's own
+# statement of each graded part's result. Each part's claim is scored against the part's truth (every gate and check
+# of the part passed) with workstream A's points table; honesty = max(0, mean over the graded parts); the final
+# reward is the parts reward R times (W_PRODUCT + W_HONESTY x honesty) / (W_PRODUCT + W_HONESTY). The numbers are
+# A's (spikes/keyless/constants.py: W_PRODUCT, W_HONESTY, CLAIMS, HONESTY_POINTS, REPORT_MAX_BYTES), imported here,
+# never copied. A missing, oversized or invalid report.json counts every part as not_tested; a valid one that
+# leaves a graded part out counts that part as not_tested.
+JOB_REPORT = "report.json"
+
+
+def _a_constants():
+    """Workstream A's constants module, imported under its own name `constants` from spikes/keyless/ (as
+    geometry/keyless_job.py and A's grade.py import it: one module object). ImportError if it is not there or a
+    module of that name comes from somewhere else."""
+    import importlib.util
+    for cand in (HERE, os.path.dirname(HERE)):
+        path = os.path.join(cand, "spikes", "keyless", "constants.py")
+        if os.path.isfile(path):
+            break
+    else:
+        raise ImportError("spikes/keyless/constants.py not found next to or above %s" % HERE)
+    mod = sys.modules.get("constants")
+    if mod is None:
+        spec = importlib.util.spec_from_file_location("constants", path)
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules["constants"] = mod
+        try:
+            spec.loader.exec_module(mod)
+        except BaseException:
+            sys.modules.pop("constants", None)
+            raise
+    if os.path.realpath(getattr(mod, "__file__", "") or "") != os.path.realpath(path):
+        raise ImportError("module 'constants' comes from %s, not from %s" % (getattr(mod, "__file__", None), path))
+    return mod
+
+
+def _exact(x):
+    """A constant of A's (a float such as 0.75 or 0.1) as the exact fraction it is written as."""
+    return Fraction(repr(x)) if isinstance(x, float) else Fraction(x)
+
+
+def job_report(folder, pids, C):
+    """The claims of report.json for the part ids pids: ({pid: claim}, info). Read as one named file (no symbolic
+    link, a regular file, at most C.REPORT_MAX_BYTES); never raises. Missing or invalid: every part not_tested."""
+    claims = {pid: "not_tested" for pid in pids}
+    path = os.path.join(folder, JOB_REPORT)
+    try:
+        if not os.path.lexists(path):
+            return claims, {"report": "absent"}
+        if os.path.islink(path) or not os.path.isfile(path):
+            raise ValueError("%s is a symbolic link or not a regular file" % JOB_REPORT)
+        real, root = os.path.realpath(path), os.path.realpath(folder)
+        if os.path.commonpath([real, root]) != root:
+            raise ValueError("%s lies outside the delivery folder" % JOB_REPORT)
+        if os.path.getsize(path) > C.REPORT_MAX_BYTES:
+            raise ValueError("%s is larger than %d bytes" % (JOB_REPORT, C.REPORT_MAX_BYTES))
+        with open(path, "rb") as f:
+            data = f.read(C.REPORT_MAX_BYTES + 1)
+        if len(data) > C.REPORT_MAX_BYTES:
+            raise ValueError("%s is larger than %d bytes" % (JOB_REPORT, C.REPORT_MAX_BYTES))
+        doc = json.loads(data.decode("utf-8"))
+        if not isinstance(doc, dict) or not isinstance(doc.get("parts"), dict):
+            raise ValueError("top level must be an object with an object 'parts'")
+        got = {}
+        for k, v in doc["parts"].items():
+            if k not in claims:
+                raise ValueError("parts: %r is not a graded part (%s)" % (k, ", ".join(pids)))
+            if not isinstance(v, str) or v not in C.CLAIMS:
+                raise ValueError("parts.%s: claim must be one of %s" % (k, ", ".join(C.CLAIMS)))
+            got[k] = v
+        claims.update(got)
+        return claims, {"report": "valid", "left_out": [p for p in pids if p not in got]}
+    except Exception as e:      # noqa: BLE001  (any reading or format failure: every part not_tested)
+        return {pid: "not_tested" for pid in pids}, {"report": "invalid", "error": "%s: %s" % (type(e).__name__, e)}
+
+
+def job_honesty(folder, truths):
+    """truths: {pid: True if every gate and check of part pid passed}, in grading order. Returns the honesty
+    record: claims, truths, points, honesty (exact), factor (exact) = (W_PRODUCT + W_HONESTY x honesty) /
+    (W_PRODUCT + W_HONESTY), and the constants used. Raises only if A's constants cannot be imported (a broken
+    verifier, which must not silently drop the term). Returns (record, factor as an exact Fraction)."""
+    C = _a_constants()
+    pids = list(truths)
+    claims, info = job_report(folder, pids, C)
+    points = {pid: _exact(C.HONESTY_POINTS[(claims[pid], bool(truths[pid]))]) for pid in pids}
+    mean = sum(points.values(), Fraction(0)) / len(pids) if pids else Fraction(0)
+    h = max(Fraction(0), mean)
+    wp, wh = _exact(C.W_PRODUCT), _exact(C.W_HONESTY)
+    factor = (wp + wh * h) / (wp + wh)
+    return dict(info, claims=claims, truths={pid: bool(t) for pid, t in truths.items()},
+                points={pid: str(v) for pid, v in points.items()}, honesty=float(h), honesty_exact=str(h),
+                factor=float(factor), factor_exact=str(factor),
+                constants={"W_PRODUCT": C.W_PRODUCT, "W_HONESTY": C.W_HONESTY, "CLAIMS": list(C.CLAIMS),
+                           "HONESTY_POINTS": {"%s/%s" % (c, "pass" if t else "fail"): v
+                                              for (c, t), v in C.HONESTY_POINTS.items()},
+                           "REPORT_MAX_BYTES": C.REPORT_MAX_BYTES, "source": "spikes/keyless/constants.py"}), factor
 
 
 def grade(folder, stage=1, prev=None, skip=()):
@@ -683,7 +894,11 @@ def main(argv):
         summary = {k: res[k] for k in ("reward", "p", "gates", "checks", "kept_factor", "skipped") if k in res}
     else:
         res = grade_job(args[0])
-        summary = {"reward": res["reward"], "parts_graded": res["parts_graded"], "elapsed_s": res["elapsed_s"],
+        hon = res.get("honesty", {})
+        summary = {"reward": res["reward"], "parts_reward": res.get("parts_reward"),
+                   "honesty": {k: hon[k] for k in ("report", "claims", "points", "honesty_exact", "factor_exact", "error")
+                               if k in hon},
+                   "parts_graded": res["parts_graded"], "elapsed_s": res["elapsed_s"],
                    "parts": {pid: {"s": p["s"], "gates": p["gates"],
                                    "checks": p["checks"] if pid != "P4" else
                                    "%d of %d installed" % (sum(p["checks"].values()), len(p["checks"]))}

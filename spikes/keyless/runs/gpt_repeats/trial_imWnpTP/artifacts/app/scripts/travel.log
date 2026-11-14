@@ -1,0 +1,4 @@
+Hold click boundary: runback 0.2608551025390625 reserve hours 47.99420321994358
+Pull/push at 0.03 increments violations {}
+Arbor-only 20 degree travel violations {} clutch range 0 0.13358421325683595
+Dense gear sweeps max intersections {'pinion/face': 1.5658855338368402e-06, 'wind spur pair': 0, 'setting face': 1.6680751678680417e-06, 'setting spur pair': 0}

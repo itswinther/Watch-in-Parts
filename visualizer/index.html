@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Replay</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fragment+Mono&family=Inter:wght@400;500&family=Newsreader:opsz,wght@6..72,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="app/replay.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <h1>Replay</h1>
+    <p class="tag">It looked done. It wasn't.</p>
+  </div>
+  <div class="controls">
+    <label class="pill select-pill">
+      <span class="visually-hidden">Run</span>
+      <select id="run-select" aria-label="Choose a run"></select>
+    </label>
+    <button class="pill" id="play" type="button" aria-pressed="false">Play</button>
+    <label class="pill toggle" title="Show messages from the Claude Code tool itself, not the AI">
+      <input type="checkbox" id="show-harness"> Tool messages
+    </label>
+  </div>
+</header>
+
+<section class="runinfo mono" id="runinfo" aria-live="polite"></section>
+
+<main class="stage">
+  <section class="viewport" id="viewport" aria-label="The watch">
+    <iframe class="scene" id="scene" title="3D view of the watch" hidden></iframe>
+    <div class="vp-inner" id="vp-inner"></div>
+  </section>
+  <section class="logpanel" aria-label="What the AI did">
+    <div class="loghead">
+      <h2 id="log-title">Log</h2>
+      <span class="mono dim" id="log-meta"></span>
+    </div>
+    <ol class="log mono" id="log"></ol>
+    <div class="failures" id="failures"></div>
+  </section>
+</main>
+
+<footer class="timeline-wrap">
+  <div class="timeline" id="timeline" role="tablist" aria-label="Sections of the run"></div>
+  <div class="playhead-track"><div class="playhead" id="playhead"></div></div>
+</footer>
+
+<script src="data/index.js"></script>
+<script src="app/replay.js"></script>
+</body>
+</html>

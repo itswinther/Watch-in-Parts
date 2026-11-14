@@ -111,7 +111,7 @@ A hole equal to the pivot diameter has zero clearance and binds.[^wrt3]
 The bearing pressure on the projected area is p = F/(d·ℓ),[^ee] where ℓ is the engaged length of the
 pivot. The allowable pressures do not depend on scale:
 
-- **Jewels:** p_max = 900 N/mm².[^d1]
+- **Jewels:** p_max = 450 N/mm².[^d1]
 - **Brass bushings:** p_max = 110 N/mm².[^d2]
 
 So F_max = p_max·d·ℓ, which scales with s². This rating is for slow or intermittent turning (keyless
@@ -119,12 +119,12 @@ works, barrel).
 
 | Product | Hole Ø d (mm) | Engaged length ℓ (mm) | F_max radial (N) |
 |---|---|---|---|
-| RL-J (1:1 hole 0.14) | 0.226 | 0.243 | 49.4 |
-| RL-J (1:1 hole 0.14) | 0.226 | 0.485 | 98.9 |
-| RL-J (1:1 hole 0.20) | 0.323 | 0.243 | 70.6 |
-| RL-J (1:1 hole 0.20) | 0.323 | 0.485 | 141.2 |
-| RL-J (1:1 hole 0.32) | 0.517 | 0.243 | 113.0 |
-| RL-J (1:1 hole 0.32) | 0.517 | 0.485 | 226.0 |
+| RL-J (1:1 hole 0.14) | 0.226 | 0.243 | 24.7 |
+| RL-J (1:1 hole 0.14) | 0.226 | 0.485 | 49.4 |
+| RL-J (1:1 hole 0.20) | 0.323 | 0.243 | 35.3 |
+| RL-J (1:1 hole 0.20) | 0.323 | 0.485 | 70.6 |
+| RL-J (1:1 hole 0.32) | 0.517 | 0.243 | 56.5 |
+| RL-J (1:1 hole 0.32) | 0.517 | 0.485 | 113.0 |
 | RL-B-10-070-25-DS | 0.162 | 0.404 (full height) | 7.2 |
 | RL-B-11-100-35-DS | 0.178 | 0.566 | 11.1 |
 | RL-B-12-150-55-DS | 0.194 | 0.889 | 19.0 |
@@ -158,5 +158,5 @@ friction.[^bird]
 [^ee]: Engineers Edge, journal bearing load on the projected area, https://engineersedge.com/calculators/journal_bearing_lubrication_15314.htm
 [^epfl]: Laurenczy C., EPFL thesis no. 6665 (2015): jewel outside-diameter tolerance 0 to +0.006 mm "prescribed by NIHS 41-02" (p. 34, Tab. 3.2 p. 37); typical interference 0.010 mm (Figs. 6.3 to 6.5, pp. 84 to 87); acceptance criterion for watch press fits, axial hold ≥ 15 N (Tab. 2.1, p. 12). Copyrighted: cited as facts only. https://infoscience.epfl.ch/record/210616/files/EPFL_TH6665.pdf?version=1
 [^d3]: Not published at this scale; derived as the 1:1 value from [^epfl] × s = 1.617 for lengths and × s² = 2.615 for forces (geometric similarity: the contact pressure of the fit is unchanged).
-[^d1]: Not published; calculated as 2700 MPa (https://makeitfrom.com/material-properties/Synthetic-Sapphire) / S = 3. S is the upper end of the brittle tier at https://danotes.mech.uwa.edu.au/SSS/safety/safety.html, applied to ultimate strength as https://engineersedge.com/analysis/factor-of-safety-review.htm prescribes.
+[^d1]: Not published; calculated as 2700 MPa (https://makeitfrom.com/material-properties/Synthetic-Sapphire) / S = 6. S is the upper end of the brittle tier (2.5 to 3) at https://danotes.mech.uwa.edu.au/SSS/safety/safety.html, doubled as that page advises for brittle materials rated on ultimate strength, and applied to ultimate strength as https://engineersedge.com/analysis/factor-of-safety-review.htm prescribes.
 [^d2]: Not published; calculated as 220 MPa / S = 2. The 220 MPa is the lowest published CW614N proof stress, https://www.wieland.com/da/content/download/9842/file/Z32-Z33_EX_EN.pdf. S is from https://danotes.mech.uwa.edu.au/SSS/safety/safety.html. The bushings' brass grade is not stated by the source and is assumed here.

@@ -1,0 +1,59 @@
+=== b7qdG8X
+stem driven stem axis [np.float64(1.0), np.float64(0.0), np.float64(0.0)] carrier None
+winding_pinion contact rot axis [np.float64(1.0), np.float64(0.0), np.float64(0.0)] carrier None
+sliding_clutch spring slide axis [np.float64(1.0), np.float64(0.0), np.float64(0.0)] carrier stem
+winding_transfer contact rot axis [np.float64(0.0), np.float64(0.0), np.float64(1.0)] carrier None
+setting_transfer contact rot axis [np.float64(0.0), np.float64(0.0), np.float64(1.0)] carrier None
+barrel main rot axis [np.float64(0.0), np.float64(0.0), np.float64(1.0)] carrier None
+retaining_click spring slide axis [np.float64(1.0), np.float64(0.0), np.float64(0.0)] carrier None
+minute_wheel contact rot axis [np.float64(0.0), np.float64(0.0), np.float64(1.0)] carrier None
+forward 0.5deg: overlap sliding_clutch<->winding_pinion = 0.00219
+  turn winding_pinion by -2 deg -> overlap 0.00577
+  turn winding_pinion by -1 deg -> overlap 0.00198
+  turn winding_pinion by +1 deg -> overlap 0.00594
+  turn winding_pinion by +2 deg -> overlap 0.00889
+  move sliding_clutch by -0.05 (own coord) -> overlap 0.04298
+  move sliding_clutch by +0.05 (own coord) -> overlap 0.00027
+=== imWnpTP
+winding_face_wheel contact rot axis [np.float64(0.0), np.float64(0.0), np.float64(1.0)] carrier None
+setting_face_wheel contact rot axis [np.float64(0.0), np.float64(0.0), np.float64(1.0)] carrier None
+winding_pinion contact rot axis [np.float64(1.0), np.float64(0.0), np.float64(0.0)] carrier None
+sliding_clutch spring slide axis [np.float64(1.0), np.float64(0.0), np.float64(0.0)] carrier stem
+stem driven stem axis [np.float64(1.0), np.float64(0.0), np.float64(0.0)] carrier None
+barrel main rot axis [np.float64(0.0), np.float64(0.0), np.float64(1.0)] carrier None
+barrel_click spring slide axis [np.float64(1.0), np.float64(0.0), np.float64(0.0)] carrier None
+minute_wheel contact rot axis [np.float64(0.0), np.float64(0.0), np.float64(1.0)] carrier None
+forward 0.5deg: overlap winding_pinion<->winding_face_wheel = 0.00000
+  turn winding_face_wheel by -2 deg -> overlap 0.00614
+  turn winding_face_wheel by -1 deg -> overlap 0.00218
+  turn winding_face_wheel by +1 deg -> overlap 0.00219
+  turn winding_face_wheel by +2 deg -> overlap 0.00615
+  move winding_pinion by -0.05 (own coord) -> overlap 0.00081
+  move winding_pinion by +0.05 (own coord) -> overlap 0.00080
+=== QZeuFhk
+stem driven stem axis [np.float64(1.0), np.float64(0.0), np.float64(0.0)] carrier None
+barrel main rot axis [np.float64(0.0), np.float64(0.0), np.float64(1.0)] carrier None
+winding_rotor contact rot axis [np.float64(1.0), np.float64(0.0), np.float64(0.0)] carrier None
+crown_clutch spring slide axis [np.float64(1.0), np.float64(0.0), np.float64(0.0)] carrier stem
+setting_rotor contact rot axis [np.float64(0.0), np.float64(0.0), np.float64(1.0)] carrier None
+holding_click spring slide axis [np.float64(1.0), np.float64(0.0), np.float64(0.0)] carrier None
+minute_wheel contact rot axis [np.float64(0.0), np.float64(0.0), np.float64(1.0)] carrier None
+forward 0.5deg: overlap crown_clutch<->winding_rotor = 0.00081
+  turn winding_rotor by -2 deg -> overlap 0.00221
+  turn winding_rotor by -1 deg -> overlap 0.00086
+  turn winding_rotor by +1 deg -> overlap 0.00218
+  turn winding_rotor by +2 deg -> overlap 0.00320
+  move crown_clutch by -0.05 (own coord) -> overlap 0.02324
+  move crown_clutch by +0.05 (own coord) -> overlap 0.00000
+=== imWnpTP pinion to face wheel
+stem fwd 3deg: clutch<->pinion overlap 0.03977
+  pinion -3.00: clutch overlap 0.00000, face-wheel overlap 0.00089
+  pinion -2.85: clutch overlap 0.00009, face-wheel overlap 0.00080
+  pinion -1.00: clutch overlap 0.02794, face-wheel overlap 0.00000
+  pinion +1.00: clutch overlap 0.04912, face-wheel overlap 0.00000
+  pinion +2.85: clutch overlap 0.05990, face-wheel overlap 0.00079
+  pinion +3.00: clutch overlap 0.06040, face-wheel overlap 0.00089
+    with pinion -2.85: face wheel -3.0 -> overlap 0.00814
+    with pinion -2.85: face wheel -1.5 -> overlap 0.00185
+    with pinion -2.85: face wheel +1.5 -> overlap 0.00649
+    with pinion -2.85: face wheel +3.0 -> overlap 0.01262

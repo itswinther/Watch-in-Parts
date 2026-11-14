@@ -1,0 +1,4 @@
+Sequential setting leg 1 minute travel 19.374308268229164
+Sequential setting leg -1 minute travel -18.724283854166675
+Push after setting-cycle intersections {}
+Friction checks {'static_mu': 0.51, 'sliding_mu': 0.44, 'clutch_ramp_min_axial_to_tangential_normal': 0.7351326809400116, 'clutch_lock_max_axial_to_tangential_normal': 0.3609340893124273, 'pinion_max_pressure_angle_deg': 43.52730627177564, 'friction_angle_deg': 27.02158159117704, 'click_ramp_min_radial_to_tangential_normal': 1.1593972888248045}

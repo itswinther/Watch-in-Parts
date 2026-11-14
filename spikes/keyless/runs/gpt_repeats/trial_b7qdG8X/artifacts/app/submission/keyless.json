@@ -1,0 +1,100 @@
+{
+  "mobiles": {
+    "stem": {
+      "kind": "stem",
+      "parts": [
+        "crown_stem"
+      ]
+    },
+    "winding_pinion": {
+      "kind": "free",
+      "parts": [
+        "winding_pinion"
+      ],
+      "dof": "rot",
+      "point": [
+        0,
+        0,
+        0
+      ],
+      "direction": [
+        1,
+        0,
+        0
+      ]
+    },
+    "sliding_clutch": {
+      "kind": "spring",
+      "parts": [
+        "sliding_clutch"
+      ],
+      "dof": "slide",
+      "direction": [
+        1,
+        0,
+        0
+      ],
+      "rest": -1,
+      "on_stem": true
+    },
+    "winding_transfer": {
+      "kind": "free",
+      "parts": [
+        "winding_transfer"
+      ],
+      "dof": "rot",
+      "point": [
+        2.75,
+        0,
+        0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    "setting_transfer": {
+      "kind": "free",
+      "parts": [
+        "setting_transfer"
+      ],
+      "dof": "rot",
+      "point": [
+        5.25,
+        0,
+        0
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    "barrel": {
+      "kind": "barrel",
+      "parts": [
+        "barrel_winding_wheel"
+      ]
+    },
+    "retaining_click": {
+      "kind": "spring",
+      "parts": [
+        "retaining_click"
+      ],
+      "dof": "slide",
+      "direction": [
+        1,
+        0,
+        0
+      ],
+      "rest": -1
+    }
+  },
+  "fixed": [
+    "winding_bridge",
+    "pinion_bridge",
+    "setting_bridge",
+    "click_guide"
+  ]
+}

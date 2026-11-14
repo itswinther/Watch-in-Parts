@@ -1,0 +1,97 @@
+{
+  "mobiles": {
+    "winding_face_wheel": {
+      "kind": "free",
+      "parts": [
+        "winding_face_wheel"
+      ],
+      "dof": "rot",
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "point": [
+        1.5505410773038737,
+        0,
+        0
+      ]
+    },
+    "setting_face_wheel": {
+      "kind": "free",
+      "parts": [
+        "setting_face_wheel"
+      ],
+      "dof": "rot",
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "point": [
+        8.402246127321607,
+        0.0,
+        0
+      ]
+    },
+    "winding_pinion": {
+      "kind": "free",
+      "parts": [
+        "winding_pinion"
+      ],
+      "dof": "rot",
+      "direction": [
+        1,
+        0,
+        0
+      ],
+      "point": [
+        0,
+        0,
+        0
+      ]
+    },
+    "sliding_clutch": {
+      "kind": "spring",
+      "parts": [
+        "sliding_clutch"
+      ],
+      "dof": "slide",
+      "direction": [
+        1,
+        0,
+        0
+      ],
+      "rest": -1,
+      "on_stem": true
+    },
+    "stem": {
+      "kind": "stem",
+      "parts": [
+        "stem"
+      ]
+    },
+    "barrel": {
+      "kind": "barrel",
+      "parts": [
+        "barrel"
+      ]
+    },
+    "barrel_click": {
+      "kind": "spring",
+      "parts": [
+        "barrel_click"
+      ],
+      "dof": "slide",
+      "direction": [
+        1,
+        0,
+        0
+      ],
+      "rest": -1
+    }
+  },
+  "fixed": [
+    "bearing_bridge"
+  ]
+}

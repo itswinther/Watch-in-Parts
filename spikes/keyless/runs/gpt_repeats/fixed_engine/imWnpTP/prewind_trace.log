@@ -1,0 +1,155 @@
+{
+ "rest_overlap_barrel_wheel": 0.0,
+ "rest_min_gap_barrel_wheel_mm": 0.0073,
+ "baseline": {
+  "blocked_first_step": 70,
+  "barrel_deg_at_stall": 35.0
+ },
+ "stall_pose_deg": {
+  "winding_face_wheel": -23.066,
+  "winding_pinion": -119.729,
+  "barrel": 35.0
+ },
+ "stall_pose_slide_mm": {
+  "sliding_clutch": 0.0071,
+  "barrel_click": 0.0501
+ },
+ "failing_step_ok": false,
+ "failing_step_push_calls_last12": [
+  [
+   "barrel_click",
+   0.02967,
+   [
+    1.0
+   ],
+   true
+  ],
+  [
+   "winding_face_wheel",
+   0.01231,
+   [
+    1.0,
+    -1.0
+   ],
+   true
+  ],
+  [
+   "winding_pinion",
+   0.05707,
+   [
+    1.0,
+    -1.0
+   ],
+   true
+  ],
+  [
+   "sliding_clutch",
+   0.0,
+   [
+    1.0
+   ],
+   false
+  ],
+  [
+   "sliding_clutch",
+   0.0,
+   [
+    1.0
+   ],
+   false
+  ]
+ ],
+ "raw_overlaps_after_barrel_step": {
+  "barrel<->winding_face_wheel": 0.00153,
+  "winding_face_wheel<->winding_pinion": 7e-05,
+  "winding_pinion<->sliding_clutch": 0.0001
+ },
+ "barrel_wheel_overlap_vs_wheel_turn_min": [
+  -9.25,
+  0.0
+ ],
+ "barrel_wheel_overlap_vs_wheel_turn_sample": [
+  [
+   -10.0,
+   0.00329
+  ],
+  [
+   -5.0,
+   0.02873
+  ],
+  [
+   -2.0,
+   0.00804
+  ],
+  [
+   -1.0,
+   0.00074
+  ],
+  [
+   -0.5,
+   0.0
+  ],
+  [
+   0.0,
+   0.00153
+  ],
+  [
+   0.5,
+   0.0055
+  ],
+  [
+   1.0,
+   0.0104
+  ],
+  [
+   2.0,
+   0.02055
+  ],
+  [
+   5.0,
+   0.02316
+  ],
+  [
+   10.0,
+   0.01497
+  ]
+ ],
+ "wheel_pinion_overlap_vs_wheel_turn": [
+  [
+   -2,
+   0.00817
+  ],
+  [
+   -1,
+   0.00355
+  ],
+  [
+   -0.5,
+   0.0015
+  ],
+  [
+   0.5,
+   3e-05
+  ],
+  [
+   1,
+   0.00092
+  ],
+  [
+   2,
+   0.00515
+  ]
+ ],
+ "prewind_no_clutch_pinion_contact": {
+  "blocked": 0,
+  "first": null
+ },
+ "prewind_no_wheel_pinion_contact": {
+  "blocked": 0,
+  "first": null
+ },
+ "crown_driven": {
+  "blocked": 0,
+  "barrel_deg_reached": 101.935
+ }
+}

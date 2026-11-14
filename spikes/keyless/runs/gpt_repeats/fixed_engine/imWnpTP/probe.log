@@ -1,0 +1,3 @@
+PREWIND blocked 20 /90 first at step 70 first failed resolve: [({'sliding_clutch': (0.0, 0.01), 'winding_pinion': (0.781, 0.0), 'winding_face_wheel': (0.096, 0.0)}, {('barrel', 'winding_face_wheel'): 0.00059})]
+BACKWARD 120deg from rest blocked 0 /40 first at None first failed resolve: [({'barrel': (0.302, 0.0)}, {('barrel', 'barrel_click'): 0.00028})]
+PULL to 0.9 from rest: blocked 0 first failed resolve: [({'barrel': (0.603, 0.0), 'winding_face_wheel': (0.116, 0.0)}, {('barrel', 'barrel_click'): 0.00087})]

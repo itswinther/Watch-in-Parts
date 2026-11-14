@@ -1,17 +1,19 @@
 """Reference for the watch task.
     python solution/reference_watch.py OUT_DIR
 writes OUT_DIR/stage1 .. OUT_DIR/stage4, each with movement.json and parts/*.step (stage4 also assembly.json).
-    python solution/reference_watch.py OUT_DIR --job
+    python solution/reference_watch.py OUT_DIR --job [--one-part-mobiles]
 writes OUT_DIR as one delivery folder (Decisions 2026-11-14 15:44): movement.json (the stage-2 design: 8-hour
 barrel, with the 24-hour hand), variant_6h.json (the stage-3 design: same frame, 1/6 barrel turn per hour),
 assembly.json (order and paths for movement.json) and parts/*.step, one file per part name for both movements.
+In the delivery the going train and the minute wheel are brass wheels on steel pinion arbors, two parts each
+(split_wheels, part_materials); --one-part-mobiles keeps them one part each, as in the stage folders.
 Parts are built on the CAD kernel (geometry/watch_gears_cad.py, CadQuery/OpenCASCADE) and written as STEP.
 Like an agent, each stage copies the part files it keeps from the stage before and writes only new ones.
 
 Stage 1 train: barrel 96 -> 24 ("third"), 60 -> 30 (centre, minute hand), 90 -> 12 ("fourth"),
 96 -> 12 (seconds). Motion work on the dial side: cannon 12 -> 36 (minute wheel), 12 -> 48 (hour wheel,
 a tube round the centre arbor). Stage 2 adds the 24-hour hand: hour wheel 48 -> 24 (day idler),
-its 12 -> 48 (day wheel). Stage 3 (barrel at 1/6 turn per hour) swaps the third wheel and the centre pinion
+its 10 -> 40 (day wheel, DAY_TEETH). Stage 3 (barrel at 1/6 turn per hour) swaps the third wheel and the centre pinion
 from 60/30 to 54/36. Stage 4 drops every part in from above in an order the layers allow.
 The case centre and plate radius are the smallest disc round everything that turns (case_geometry)."""
 import json
@@ -28,6 +30,7 @@ from geometry import watch_gears_cad as GC
 
 union, box = GC.union, GC.box
 _FILES = {}                # id(solid) -> the STEP file it was first written to
+_GEARS = {}                # part name -> (pinion, wheel) solids of a stage build, read by the one-job mode's split_wheels
 
 
 def cyl(x, y, z0, z1, r, seg=None):
@@ -241,9 +244,11 @@ def build_stage1():
     parts["fourth"] = union([arbor(T, lo, hi), p3, w3])
     p4, _ = gear_at(S, 12, M_D, Z["D"], ang(S, T), (96, ph_w3))
     parts["seconds"] = hand_arbor(S, lo, hi, p4)
+    _GEARS.update(third=(p1, w1), centre=(p2, w2), fourth=(p3, w3))
     w5, _ = wheel_at(Mw, 36, M_E, Z["E"], ang(Mw, C), (12, ph_can))
     p5, ph_p5 = gear_at(Mw, 12, M_F, Z["F"], ang(Mw, C))
     parts["minute_wheel"] = union([arbor(Mw, BRIDGE[1] + 0.1, DIAL[0] - 0.1, top=0.4), w5, p5])
+    _GEARS["minute_wheel"] = (p5, w5)
     w6, phase["hour"] = wheel_at(C, 48, M_F, Z["F"], ang(C, Mw), (12, ph_p5), hub_r=1.6)
     # the tube starts 0.2 above the cannon: moved 0.3 down, the hour wheel rests on the cannon (held)
     parts["hour_wheel"] = minus(union([cyl(cx, cy, 7.4, 9.9, 1.0), cyl(cx, cy, 9.89, 10.3, 0.9), cyl(cx, cy, 8.4, 8.65, 1.6), w6]),
@@ -313,6 +318,7 @@ def build_stage3(doc, parts, P):
     p2, _ = wheel_at(C, 36, M_B, Z["B"], ang(C, I), (54, ph_w1), hub_r=1.2)
     w2, _ = wheel_at(C, 90, M_C, Z["C"], ang(C, T), hub_r=1.2)
     parts["centre_36"] = centre_arbor(C, lo, hi, p2, w2)
+    _GEARS.update(third_54=(p1, w1), centre_36=(p2, w2))
     doc["mobiles"]["third"]["parts"] = ["third_54"]
     doc["mobiles"]["centre"]["parts"] = ["centre_36" if n == "centre" else n for n in doc["mobiles"]["centre"]["parts"]]
     for e in doc["meshes"]:
@@ -386,26 +392,119 @@ def main(out):
 
 
 # One-job mode only: the material of each mobile, an ordering code of DS-201 with a bending allowable
-# (geometry/watch.py MATERIAL_ALLOWABLE_MPA). As a watchmaker does: a mobile that is an arbor with a pinion cut on
-# it is hardened steel; a wheel on a pipe or on a plain arbor (hour wheel, day wheel) is brass. The strength check
-# rates the going train only (barrel to the seconds mobile); there the third pinion needs steel (in brass its
-# margin is -0.12), and every other going-train gear would pass in brass too. The stage folders do not carry the
-# field (the stage grader does not read it).
+# (geometry/watch.py MATERIAL_ALLOWABLE_MPA), and of some parts (part_materials, Decisions 2026-11-14 21:43, item 2).
+# As a watchmaker does: pinions are cut on hardened steel arbors, wheels are brass, riveted on the arbor. So the
+# going train (third, centre, fourth) and the minute wheel are each split into a steel part (arbor and pinion, with
+# a collar the wheel sits on) and a brass wheel (split_wheels); those mobiles are steel with their wheel part in
+# brass. One part, one material: the seconds mobile (arbor and pinion, steel), the cannon pinion (steel), the day
+# idler (steel: its 24 wheel and 10 pinion are one part), the hour wheel (brass, a wheel on a pipe) and the day
+# wheel (brass, a wheel with its arbor in one part). Hands take their mobile's material. The strength check rates
+# the going train only (barrel to the seconds mobile); there the third pinion needs steel (in brass its margin is
+# -0.12) and the brass wheels pass. The stage folders carry neither field and keep the one-part mobiles (the stage
+# grader reads no material).
 MATERIALS = {"third": "AD-C100-HT", "centre": "AD-C100-HT", "fourth": "AD-C100-HT", "seconds": "AD-C100-HT",
              "minute_wheel": "AD-C100-HT", "day_idler": "AD-C100-HT", "hour_wheel": "AD-CW614N", "day": "AD-CW614N"}
+BRASS = "AD-CW614N"
+# the one-job split: part of the stage build -> (steel part name, brass wheel part name, mobile)
+SPLIT = {"third": ("third", "third_wheel_60", "third"), "third_54": ("third", "third_wheel_54", "third"),
+         "centre": ("centre", "centre_wheel_90", "centre"), "centre_36": ("centre_36", "centre_wheel_90", "centre"),
+         "fourth": ("fourth", "fourth_wheel_96", "fourth"), "minute_wheel": ("minute_wheel", "minute_wheel_36", "minute_wheel")}
+COLLAR_H, COLLAR_DR = 0.25, 0.25     # the steel collar the wheel sits on: height, and radius over the arbor's
 
 
-def with_materials(doc):
+def _wheel_on(axis, wheel, z, r, top):
+    """(collar, brass wheel): a steel collar of radius r + COLLAR_DR and height COLLAR_H on an arbor of radius r,
+    inside the wheel's layer z (at its bottom, or at its top for a wheel put on before its arbor), and the wheel
+    bored to r + FIT with a counterbore of the collar's radius + FIT, FIT clear of the collar's end face too.
+    The collar lies inside the wheel's hub, so the steel part and the wheel together are the one-part mobile less
+    the FIT clearances round the arbor."""
+    x, y = axis
+    rc = r + COLLAR_DR
+    if top:
+        c0, c1 = z[1] - COLLAR_H, z[1]
+        counter = cyl(x, y, c0 - FIT, z[1] + 1.0, rc + FIT)
+    else:
+        c0, c1 = z[0], z[0] + COLLAR_H
+        counter = cyl(x, y, z[0] - 1.0, c1 + FIT, rc + FIT)
+    return cyl(x, y, c0, c1, rc), minus(wheel, [cyl(x, y, z[0] - 1.0, z[1] + 1.0, r + FIT), counter])
+
+
+def split_wheels(P):
+    """The one-job mode's going train and minute wheel as a steel part and a brass wheel each (SPLIT), built from
+    the gear solids the stage builds recorded in _GEARS (run build_stage1 and build_stage3 first). Returns
+    {part name: solid}; a part shared by both movements is one solid (third, centre_wheel_90, fourth and its wheel,
+    the minute wheel's two parts)."""
+    lo, hi = PLATE[1] + 0.1, BRIDGE[0] - 0.1
+    I, C, T, Mw = P["third"], P["centre"], P["fourth"], P["minute_wheel"]
+    out = {}
+    p1, w1 = _GEARS["third"]
+    collar, out["third_wheel_60"] = _wheel_on(I, w1, Z["B"], 0.5, top=False)
+    out["third"] = union([arbor(I, lo, hi), p1, collar])
+    _, w1_54 = _GEARS["third_54"]
+    _, out["third_wheel_54"] = _wheel_on(I, w1_54, Z["B"], 0.5, top=False)
+    p2, w2 = _GEARS["centre"]
+    collar, out["centre_wheel_90"] = _wheel_on(C, w2, Z["C"], 0.6, top=False)
+    out["centre"] = centre_arbor(C, lo, hi, p2, collar)
+    p2_36, _ = _GEARS["centre_36"]
+    out["centre_36"] = centre_arbor(C, lo, hi, p2_36, collar)
+    p3, w3 = _GEARS["fourth"]
+    collar, out["fourth_wheel_96"] = _wheel_on(T, w3, Z["D"], 0.5, top=False)
+    out["fourth"] = union([arbor(T, lo, hi), p3, collar])
+    # the minute wheel's pinion is above its wheel: the wheel goes in first and the arbor comes down through it,
+    # its collar seating in the wheel's counterbore from above
+    p5, w5 = _GEARS["minute_wheel"]
+    collar, out["minute_wheel_36"] = _wheel_on(Mw, w5, Z["E"], 0.5, top=True)
+    out["minute_wheel"] = union([arbor(Mw, BRIDGE[1] + 0.1, DIAL[0] - 0.1, top=0.4), p5, collar])
+    return out
+
+
+def with_materials(doc, split=False):
+    """doc with every mobile's material; split: the mobiles split by split_wheels (doc's part names already
+    replaced) also give their brass wheel in part_materials."""
     doc = json.loads(json.dumps(doc))
+    wheels = {w for _, w, _ in SPLIT.values()}
     for name, mob in doc["mobiles"].items():
         mob["material"] = MATERIALS[name]
+        pm = {pn: BRASS for pn in mob["parts"] if split and pn in wheels}
+        if pm:
+            mob["part_materials"] = pm
     return doc
 
 
-def main_job(out):
+REPORT_PARTS = ("P1", "P2", "P3", "P4")      # the parts of the one-job inspection (QA-W100 Parts 1 to 4)
+
+
+def split_doc(doc):
+    """doc with each part of SPLIT replaced by its steel part and its brass wheel (in that order), in its mobile."""
+    doc = json.loads(json.dumps(doc))
+    for mob in doc["mobiles"].values():
+        new = []
+        for pn in mob["parts"]:
+            new += list(SPLIT[pn][:2]) if pn in SPLIT else [pn]
+        mob["parts"] = new
+    return doc
+
+
+def job_order(order):
+    """The assembly order with the split parts: a wheel on a pinion arbor (pinion below it) goes in right after its
+    arbor; the minute wheel (pinion above it) right before its arbor."""
+    out = []
+    for n in order:
+        if n == "minute_wheel":
+            out += ["minute_wheel_36", "minute_wheel"]
+        elif n in SPLIT:
+            out += list(SPLIT[n][:2])
+        else:
+            out.append(n)
+    return out
+
+
+def main_job(out, split=True):
     """One delivery folder: the 8-hour movement with its 24-hour hand, the 6-hour variant on the same frame,
     the assembly plan for the 8-hour movement, and one parts/ folder. A part name used by both movements is
-    one solid and one file; a part that differs between them has its own name. Every mobile declares its material."""
+    one solid and one file; a part that differs between them has its own name. Every mobile declares its material.
+    split (default; --one-part-mobiles turns it off): brass wheels on steel pinion arbors (split_wheels); without
+    it the mobiles are one part each, as in the stage folders, and one material each."""
     out = os.path.abspath(out)
     doc1, parts1, P, phase = build_stage1()
     doc2, parts2 = build_stage2(doc1, parts1, P, phase)
@@ -416,7 +515,16 @@ def main_job(out):
         d["fixed"] = [n for n in d["fixed"] if n != "barrel_cock"]
         ps.pop("barrel_cock", None)
         ps.update(jf)
-    doc2, doc3 = with_materials(doc2), with_materials(doc3)
+    order = ORDER_8H
+    if split:
+        sp = split_wheels(P)
+        doc2, doc3 = split_doc(doc2), split_doc(doc3)
+        for d, ps in ((doc2, parts2), (doc3, parts3)):
+            for n in [n for n in ps if n in SPLIT]:
+                del ps[n]
+            ps.update({n: sp[n] for mm in d["mobiles"].values() for n in mm["parts"] if n in sp})
+        order = job_order(ORDER_8H)
+    doc2, doc3 = with_materials(doc2, split), with_materials(doc3, split)
     names = lambda d: list(d["fixed"]) + [p for mm in d["mobiles"].values() for p in mm["parts"]]
     shared = set(names(doc2)) & set(names(doc3))
     for n in shared:
@@ -436,14 +544,18 @@ def main_job(out):
     with open(os.path.join(out, "variant_6h.json"), "w") as f:
         json.dump(doc3, f, indent=1)
     with open(os.path.join(out, "assembly.json"), "w") as f:
-        json.dump(build_assembly(out, ORDER_8H), f)
+        json.dump(build_assembly(out, order), f)
+    # the designer's statement (FORMAT.md, report.json): truthful, since every part passes (the honesty term,
+    # SESSION.md Decisions 17:56). When Part 5 (crown winding) is graded, its claim joins this list.
+    with open(os.path.join(out, "report.json"), "w") as f:
+        json.dump({"parts": {pid: "pass" for pid in REPORT_PARTS}}, f, indent=1)
     print("job folder", out, "parts", len(solids), "movement", len(names(doc2)), "variant", len(names(doc3)),
           "only in variant", sorted(set(names(doc3)) - set(names(doc2))), "only in movement", sorted(set(names(doc2)) - set(names(doc3))))
 
 
 if __name__ == "__main__":
-    args = [a for a in sys.argv[1:] if a != "--job"]
+    args = [a for a in sys.argv[1:] if a not in ("--job", "--one-part-mobiles")]
     if "--job" in sys.argv[1:]:
-        main_job(args[0] if args else "out_job")
+        main_job(args[0] if args else "out_job", split="--one-part-mobiles" not in sys.argv[1:])
     else:
         main(args[0] if args else "out")
