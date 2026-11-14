@@ -1587,3 +1587,7 @@ A note for B's builder sessions and for Mikael's session, for information only. 
 - Caveat, stated on DS-W04: its Y values are computed by "the gear design office", not copied from a published table; S found them 10 to 16 percent below Shigley's 20-degree table as S remembers it (so the check errs strict); S could not reach a published 25-degree table (network). For a judge: the sheet says how they are computed; the agent is graded against the sheet it is given.
 - Files changed: geometry/watch.py, geometry/data/lewis_y.json, tests/grade_watch.py, tests/test_strength.py, solution/reference_watch.py, environment/brief_strength.py, environment/check_format_job.py, environment/make_bundle_job.py, environment/public/job/* (regenerated), SESSION.md.
 - Next: the honesty term (builder H), anchors updated to the new totals and the cock-less reference, a fresh review of the work order and QA-W100, the reference graded, then one smoke run per model on the new brief.
+
+### 2026-11-14 20:03 | B: usage limit hit at about 19:55, reset at 20:00; builders resumed | itswinther + Claude
+- itswinther's 5-hour usage limit stopped builder P (P5 adapter; its two commits 0dd2b7c and 333eb59 are on its branch), builder H (honesty term and anchors, just started) and a fresh reviewer (work order and QA-W100). The limit reset at 20:00 Helsinki; all three were resumed at 20:03 with their work intact. Nothing was lost.
+- Files changed: SESSION.md.
