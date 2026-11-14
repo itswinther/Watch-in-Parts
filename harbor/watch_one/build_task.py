@@ -37,8 +37,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
 
 # ---------------------------------------------------------------------------------------------
-# The switch. Change to "one-job" when B's one-delivery grader is on main (or pass --grader one-job).
-GRADER = "spec06-stage1"
+# The switch (or --grader, or GRADER= for run_all.sh).
+GRADER = "one-job"           # B's one-delivery grader is on main (071ab86, SPEC 0.7); "spec06-stage1" is the old placeholder
 # A's sheets in spikes/keyless/datasheets that join the agent's datasheets/ beside B's generated ones.
 # () today (B's 15:44: watch-side sheets only); add names (e.g. "DS-101_mainspring_barrel.md",
 # "DS-201_materials.md") if B's sheets cite them; "ALL" (every DS-*.md, INDEX.md, public_domain/) with P5.
@@ -72,13 +72,13 @@ GRADERS = {
         "bundle_script": "environment/make_bundle_job.py",
         "bundle_args": [],
         "bundle_map": None,                                 # take the allowlisted layout as B writes it
-        "extra_allow": ["FORMAT.md"],
+        "extra_allow": ["FORMAT.md", "instruction.md"],     # B 17:40: /app holds instruction.md too
         "prompt": os.path.join(REPO, "PROMPT.md"),          # fallback only; B's bundle writes instruction.md
         "tests": ["tests/grade_watch.py", "geometry"],
         "solution": ["solution/reference_watch.py", "geometry"],
         "reference": "PYTHONPATH=/solution python3 reference_watch.py /app/delivery --job",
         "reference_out": None,                              # written in place at /app/delivery
-        "verifier_timeout_sec": 2400.0,
+        "verifier_timeout_sec": 4500.0,                     # B 17:40: >= 4500 s (grader self-limit 3600 s); measured below
         "verifier_memory_mb": 4096,
     },
 }
@@ -128,11 +128,9 @@ mkdir -p /logs/verifier
 echo 0 > /logs/verifier/reward.txt
 cd /tests
 /usr/bin/time -v python3 -I /tests/grade_watch.py /app/delivery {args} \\
-    --reward /tests/reward.txt --details /tests/details.json > /logs/verifier/grade.log 2>&1
+    --reward /logs/verifier/reward.txt --details /logs/verifier/details.json > /logs/verifier/grade.log 2>&1
 status=$?
 echo "grader exit $status" >> /logs/verifier/grade.log
-if [ -f /tests/details.json ]; then cp /tests/details.json /logs/verifier/details.json; fi
-if [ $status -eq 0 ] && [ -f /tests/reward.txt ]; then cp /tests/reward.txt /logs/verifier/reward.txt; fi
 grep -E "Elapsed|Maximum resident" /logs/verifier/grade.log
 echo "reward $(cat /logs/verifier/reward.txt)"
 exit 0
@@ -149,7 +147,7 @@ ls -R /app/delivery | head -50
 """
 
 TASK_TOML = CANARY_SH + """schema_version = "1.3"
-artifacts = ["/app"]   # covers /app/delivery (graded), plus any scripts, notes or renders the agent left in /app
+artifacts = ["/app/delivery"]   # the whole delivery, scripts/ included; the agent log comes with every trial (agent/)
 
 [task]
 name = "junction/watch-one"
@@ -192,7 +190,7 @@ storage_mb = 10240
 DATASHEETS = os.path.join(REPO, "spikes", "keyless", "datasheets")
 NEVER_NAMES = ("SOLUTION.md", "STEP_BY_STEP.md", "CONTEXT.md", "TRACEABILITY.md", "SESSION.md", "CLAUDE.md",
                "grade_watch.py", "reference_watch.py", "watch.py", "watch_gears_cad.py", "anchors.py",
-               "INTERFACE_FOR_B.md", "REVIEW_RUBRIC.md", "JUDGE_PROMPT.md")
+               "INTERFACE_FOR_B.md", "REVIEW_RUBRIC.md", "JUDGE_PROMPT.md", "TRACEABILITY_WATCH.md", "PROMPT.md")
 NEVER_DIRS = ("tests", "solution", "anchors", "realcad", "report", "runs", "review", ".git", "geometry")
 MARK = b"NOT-FOR-AGENT"
 
@@ -225,11 +223,11 @@ def bundle(app, G):
             for root, _, files in os.walk(b):
                 for f in files:
                     rel = os.path.relpath(os.path.join(root, f), b).replace(os.sep, "/")
+                    if rel in PROMPT_NAMES and brief_text is None:
+                        brief_text = open(os.path.join(b, rel)).read()
                     if any(p.match(rel) for p in pats):
                         pairs.append((rel, rel))
-                    elif rel in PROMPT_NAMES and brief_text is None:
-                        brief_text = open(os.path.join(b, rel)).read()
-                    else:
+                    elif rel not in PROMPT_NAMES:
                         print("not taken into the agent image: bundle/%s" % rel)
         for src, dst in pairs:
             os.makedirs(os.path.dirname(os.path.join(app, dst)), exist_ok=True)
@@ -259,6 +257,7 @@ def bundle(app, G):
 def forbidden_hashes():
     """Content of every file that must never reach the agent, so a renamed copy is caught too."""
     paths = [os.path.join(DATASHEETS, "TRACEABILITY.md"), os.path.join(REPO, "SESSION.md"),
+             os.path.join(REPO, "environment", "public", "job", "TRACEABILITY_WATCH.md"),
              os.path.join(REPO, "CLAUDE.md"), os.path.join(REPO, "SPEC.md")]
     for d in ("tests", "solution", "geometry", "spikes/keyless/docs", "spikes/keyless/realcad",
               "spikes/keyless/report", "spikes/keyless/runs", "anchors"):

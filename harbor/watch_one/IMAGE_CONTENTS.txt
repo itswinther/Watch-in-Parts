@@ -1,14 +1,20 @@
-# Agent image /app tree: harbor/watch_one, build_task.py --agent opencode, GRADER spec06-stage1 (placeholder), layout of B Decisions 15:44
-# built 2026-11-14T14:01Z from origin/main 6622d43; listed with: docker run --rm watch-one-agent (find /app ...)
+# Agent image /app tree: harbor/watch_one, build_task.py --agent opencode, GRADER one-job (SPEC 0.7, B run-readiness 17:40)
+# built 2026-11-14T15:37Z from origin/main 071ab86; listed with: docker run --rm watch-one-agent (find /app ...)
 
 /app/
-/app/SPEC_WATCH.md  21658 bytes  sha256 4bf82baeda0b52dd
+/app/FORMAT.md  4276 bytes  sha256 1b55e3483c4e9c2c
 /app/datasheets/
+/app/datasheets/DS-W01_barrel.md  1928 bytes  sha256 e15196760a79e200
+/app/datasheets/DS-W02_case.md  633 bytes  sha256 46add0ea5ba38e7a
+/app/datasheets/DS-W03_process.md  1074 bytes  sha256 2bd69fa791f2dc00
+/app/datasheets/INDEX.md  251 bytes  sha256 9335b163811c9562
 /app/delivery/
+/app/instruction.md  15695 bytes  sha256 36fd713ada3ff64c
 /app/supplied/
-/app/supplied/barrel.stl  345484 bytes  sha256 c503ce8fce091301
+/app/supplied/barrel.stl  345484 bytes  sha256 dcc79d495c4440f7
 /app/tools/
-/app/tools/kernel.py  21775 bytes  sha256 4c9a8ae4280862b5
+/app/tools/check_format.py  8111 bytes  sha256 c7170fce66254486
+/app/tools/kernel.py  21767 bytes  sha256 6a5912d36dd6a06f
 
 # outside /app: grader, solution and project files (expect none)
 absent /tests

@@ -105,6 +105,21 @@ for f in "$JOBS"/*/*/verifier/test-stdout.txt; do
   [ -f "$f" ] && say "$(echo "$f" | sed "s|$JOBS/||; s|/verifier/test-stdout.txt||"): $(grep -E 'Elapsed|Maximum resident|^reward' "$f" | tr -s ' \t' ' ' | paste -sd ';' -)"
 done
 
+# agent timeout: did it bind? (per trial, from Harbor's result.json; needs jq)
+AGENT_TIMEOUT=$(awk '/^\[agent\]/{a=1} a&&/^timeout_sec/{print int($3); exit}' "$TASK/task.toml")
+if command -v jq >/dev/null; then
+  for r in "$JOBS"/*/*/result.json; do
+    [ -f "$r" ] || continue
+    say "$(echo "$r" | sed "s|$JOBS/||; s|/result.json||"): $(jq -r --argjson t "$AGENT_TIMEOUT" '
+      def secs(p): if p and p.started_at and p.finished_at then
+        ((p.finished_at|sub("\\.[0-9]+Z$";"Z")|fromdate) - (p.started_at|sub("\\.[0-9]+Z$";"Z")|fromdate)) else null end;
+      (secs(.agent_execution)) as $a | (.exception_info.exception_type // "none") as $e |
+      "agent \($a // "?") s of \($t) s; verifier phase \(secs(.verifier) // "?") s; exception \($e); timeout bound: \(if ($e|test("Timeout")) or (($a // 0) >= $t) then "YES" else "no" end); reward_valid \(.reward_valid)"' "$r")"
+  done
+else
+  say "jq not found: agent-timeout check skipped"
+fi
+
 # ---- 5. key scan ----
 if grep -rIlE "sk-ant-[A-Za-z0-9_-]{10}|sk-proj-[A-Za-z0-9_-]{10}" "$OUT" 2>/dev/null | grep -v '/task/' ; then
   say "WARNING: a string like an API key appears in the files above; do not publish them"
