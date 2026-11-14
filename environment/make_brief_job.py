@@ -363,7 +363,7 @@ Installed software: Python 3 with CadQuery 2.8.0 (OpenCASCADE, importable as `ca
 The delivery is inspected after you hand it in. What is in `/app/delivery/` when you finish is what is inspected.
 
 The inspection has {nw} parts. Each part is judged on its own, even when another part fails. The delivery as a
-whole is accepted only when every condition and every check of all {nw} parts passes: the movement must all work.
+whole is accepted only when every condition and every check of all {nw} parts passes: everything must work.
 
 Terms used below:
 
