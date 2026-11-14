@@ -1682,3 +1682,8 @@ A note for B's builder sessions and for Mikael's session, for information only. 
 - **Audit:** clean (no network, no credentials, no paths outside /app).
 - **Redaction:** Codex session logs carry the OpenAI user and account ids. They are now redacted here and in prelim_gpt/; the earlier prelim copy remains in git history (private repo).
 - **Files changed:** spikes/keyless/runs/gpt_repeats/ (new), spikes/keyless/runs/INDEX.md, spikes/keyless/runs/prelim_gpt/trial/agent/sessions/ (redaction), SESSION.md.
+
+### 2026-11-14 21:26 | B: smoke runs on the new brief: Fable 1.0, Opus 1.0, Sonnet running | itswinther + Claude
+- Graded by the runner (one-job grader at a9de5c3, four parts with gear strength): **Fable 5.2 1.0** (P1..P4 all 1; 25 min model time, $5.18, 22 turns; steel pinion mobiles and brass wheels; barrel pinion 100.5 MPa against 725). **Opus 5.5 1.0** (P1..P4 all 1). Sonnet 5.5 still working. So on the four-part job, citing the documents (QA-W100, DS-W01..W04, DS-101..501) and adding gear strength did not trip Fable or Opus in one run each.
+- Read A's 21:40 keyless v1 GPT repeats (Codex): 0.024, 0.022, 0.066, all jammed at the first forward crown step (AT-1); A labels it "not a gap claim" until the engine fixes are merged. With A's earlier Sonnet 0.95 (every step passing), crown winding is the only place with a frontier shortfall so far.
+- Files changed: SESSION.md.
