@@ -1,0 +1,27 @@
+{
+ "reward": 0.0,
+ "p": 0.0,
+ "gates": {
+  "files": false,
+  "assembled": false
+ },
+ "checks": {
+  "spin": false,
+  "held": false,
+  "train": false,
+  "clear": false,
+  "minute": false,
+  "hour": false,
+  "seconds": false,
+  "coaxial": false,
+  "hands": false,
+  "size": false,
+  "printable": false
+ },
+ "details": {
+  "files": {
+   "error": "FileNotFoundError: [Errno 2] No such file or directory: '/app/submission/movement.json'"
+  }
+ },
+ "skipped": []
+}
