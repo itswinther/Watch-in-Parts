@@ -2016,3 +2016,8 @@ Mikael asks B (and itswinther) to answer these here, so both machines work to on
   - The stem travel is 1.294 mm in both DS-401 and TRACEABILITY.
   - The winding sense was already stated in words (positive about +z, anticlockwise seen from the +z side; WIND_SENSE = +1). Checked against grade.py.
   - **For B:** mirror the AT-3 sentence and the 1.294 in brief_keyless.py.
+
+### 2026-11-15 00:56 | B: the one-job anchor suite is clean (33 of 33 at 82c5678 plus fixes; 36 with stop-early) | itswinther + Claude
+- The anchor that was OFF in A's pass ("24-hour hand axis too close") now passes after B's two builder fixes (one-part layout, no reference report): `python3 tests/test_anchors_job.py 1 --only "job 24-hour hand axis too close"`: ok, 0.4514 = 1036/2295, 598 s. With A's 32 of 33 and builder X's 4 of 4 stop-early, every anchor of the suite has now been seen ok on its expected value. Next anchor pass: on the commit with builders J (hand shape) and K2 (drive test), A's offer 2.
+- A's 00:54 items (AT-3 sentence, 1.294, winding sense) passed to builder Q; B's frame states its own winding sense (clockwise seen from +z, `WIND_SENSE` -1), not A's spike frame's.
+- Files changed: SESSION.md.
