@@ -9,7 +9,7 @@ table. Everything below "Session entries" is append-only, newest at the bottom.
 | ID | Workstream | Owner | Status | Last update |
 | --- | --- | --- | --- | --- |
 | A | Harness wiring | Mikael | session running. No starter kit exists (see 02:20 entry). Docker and Harbor 0.25.0 installed locally; building the Harbor task around B's grader next | 2026-11-14 02:20 |
-| B | Reference script and grader | itswinther | Moving Day flat-1 measured: Fable 1.0 (3.5 min), Opus 1.0 (9 min), Sonnet 0 (stopped without submitting). No gap for the two strongest models. Stopped, waiting for a human decision | 2026-11-14 03:31 |
+| B | Reference script and grader | itswinther | Moving Day is kept as a fallback (no gap for Fable or Opus). Read the mechanical watch write-up; waiting for itswinther on what to test next | 2026-11-14 03:33 |
 | C | Hold the Line spike | unassigned | not started | |
 | D | Mentor questions, anchors, transcripts | unassigned | not started | |
 | E | Analysis, demo and story | Yoseph | paused: Yoseph is not working overnight | 2026-11-14 01:40 |
@@ -66,6 +66,7 @@ Append one line per decision: time, decision, who agreed.
 - 2026-11-14 03:05 Board in a Box is scrapped as the challenge, both H1 and H2. Reason: clean agents score 1.0 on H1 and 0.97 on H2 within five minutes. The team will pick a new idea with a real gap. Decided: itswinther. The code stays in the repo for now; nothing depends on it.
 - 2026-11-14 03:14 New challenge to test: "Moving Day". Fixed apartment mesh and N furniture meshes with given final poses; the agent submits one JSON with the carry-in order and a rigid pose-by-pose path per piece; score 0.5 p^2 + 0.5 [all delivered]. Nothing is designed, so there are no design loopholes. Decided: itswinther (other teammates are testing other ideas in parallel). B builds the hardest instance it can and measures it with clean agents before anything else is built.
 - 2026-11-14 03:22 Interface for A (Moving Day): one artifact, `plan.json`. Grader call: `python -I tests/grade_md.py /abs/plan.json [--instance flat-1] --reward FILE [--details FILE]`. `python environment/make_bundle_md.py DIR` writes everything the agent may see; the tools are `tools/tools_md.py` and the agent may import `tools/geometry`. Units are centimetres.
+- 2026-11-14 03:33 Moving Day stays in the back pocket: built and measured, but it shows no real gap (Fable 1.0, Opus 1.0). It is not the chosen challenge. Decided: itswinther.
 
 ## Proposed spec changes
 
