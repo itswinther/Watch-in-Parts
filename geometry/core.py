@@ -180,10 +180,20 @@ def write_step(path, shape):
         f.write(text)
 
 
+def _limit_memory(memory_mb):
+    """Cap this process's address space where the platform allows it (macOS refuses RLIMIT_AS;
+    Windows has no `resource` module). The caller's timeout applies either way. True if the cap is set."""
+    try:
+        import resource
+        resource.setrlimit(resource.RLIMIT_AS, (memory_mb * 1024 * 1024, memory_mb * 1024 * 1024))
+        return True
+    except (ImportError, AttributeError, ValueError, OSError):
+        return False
+
+
 def _step_child(path, lin, ang, max_tris, max_tri_faces, memory_mb):
     """Runs in its own process. Prints b'OK\\n' + float64 triangles, or b'ERR\\n' + a message."""
-    import resource
-    resource.setrlimit(resource.RLIMIT_AS, (memory_mb * 1024 * 1024, memory_mb * 1024 * 1024))
+    _limit_memory(memory_mb)
     sys.stdout.flush()
     out = os.fdopen(os.dup(1), "wb")                 # our channel; OpenCASCADE's own printing goes to /dev/null
     os.dup2(os.open(os.devnull, os.O_WRONLY), 1)

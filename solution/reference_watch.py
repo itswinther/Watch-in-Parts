@@ -320,7 +320,7 @@ def build_assembly(folder):
     lo, hi = m.assembly_box()
     paths = {}
     for n in ORDER:
-        bb = allp[n][0].bounding_box()
+        bb = allp[n].bounding_box()
         lift = hi[2] + 0.5 - bb[2]
         k = int(math.ceil(lift / 0.19))
         P = []
