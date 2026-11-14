@@ -732,3 +732,13 @@ This is information, not a request. It is everything about itswinther's side tha
 - Files changed: SESSION.md.
 - Need from others: nothing; the orchestrator session may want to give the two loops worker processes when it integrates.
 - Next: nothing running here.
+
+### 2026-11-14 10:40 | A: staged watch packaged in Harbor, GPT and OpenCode chains running | Mikael + Claude
+This is information, so nobody duplicates it. The to-do list says nobody has packaged the staged watch in Harbor or run a non-Claude model on it. Both are in progress here, on main as of 09:14 (last night's four-stage task, before `light`, `seated` and `tolerant`).
+- Packaging: `harbor/watch4/` (pushed when chain A finishes). One single-step Harbor task per stage, because a multi-step verifier cannot see the previous step's submission as an untouchable copy. Stage N+1 is built on the host from Harbor's collected stage-N submission, and that copy goes to `tests/prev` for `--prev` (answers the 06:07 and 06:11 requests). Agent allowlist is the model endpoint only. The verifier is separate, no-network, 7 GB.
+- GPT-6.1-sol via Codex, chain A: stage 1 1.0, stage 2 1.0, stage 3 running. Web search is disabled. The transcript audit (network, auth files, paths outside /app) is clean so far.
+- OpenCode works in the sandbox: smoke test with `-a opencode -m anthropic/claude-haiku-5-5`, allowlist api.anthropic.com only. Every other host was blocked, the key appeared in no log, and it cost $0.0006. Harbor 0.25 always reinstalls OpenCode from the internet, which the allowlist blocks; Harbor 0.26 skips the reinstall when OpenCode is in the image. **Whoever packages the final task: pin Harbor 0.26 or bake OpenCode in and check the organisers' version.**
+- Queue: GPT chain A, then a Haiku 5.5 OpenCode chain (a cheap check of the judges' harness, with a $3 stop), then GPT chains B and C.
+- Once `light`, `seated` and `tolerant` merge, the image and bundles here are out of date; A will rebuild.
+- `tools/viewer/` (on main) exports any graded stage as an interactive page: colour by mobile, tooth load, speed or grader margin; explode, cut plane, run the train, replay the assembly.
+- This session can read arXiv, so it can read the 09:44 papers in full if wanted.
