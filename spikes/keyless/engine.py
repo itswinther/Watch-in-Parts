@@ -414,14 +414,25 @@ class World:
     def _spring_push(self, b, sgn, remaining):
         """A returning spring pushes free and spring-loaded parts on its rest side (see relax)."""
         inc = b.coord_from_arc(SPRING_PUSH_ARC)
+        fam = [b] + self.children(b)        # a spring that carries a wheel answers for the wheel's contacts
         done = 0.0
         while done < remaining - 1e-12:
             d = sgn * min(inc, remaining - done)
             q1 = b.q + d
             if q1 < b.lo or q1 > b.hi:
                 break
-            hits = [o for o in self.bodies.values() if o is not b and self.pairs_ok(b, o)
-                    and self._pen1(b, q1, {o.name}) > 0.5 * TOL]
+            # a hit is a body the spring (or a part it carries) would now overlap more than it may: more
+            # than TOL/2, or than it already touches it (up to TOL), as in relax(); a contact it only
+            # slides along (a yoke resting on the plate) is not a hit
+            hits = []
+            for o in self.bodies.values():
+                if o in fam:
+                    continue
+                v1 = self.pen(b, q1, {o.name})
+                if v1 <= 0.5 * TOL:
+                    continue
+                if v1 > min(TOL, max(0.5 * TOL, self.pen(b, None, {o.name}))) + FORCE_EPS:
+                    hits.append(o)
             if not hits:
                 b.q = q1
                 done += abs(d)

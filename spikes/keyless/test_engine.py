@@ -201,6 +201,42 @@ def many_tiny_patches():
     return max(sizes) < E.PATCH_FLOOR_FRAC * E.TOL and sum(sizes) > E.TOL and ok and blk.q > 0.04
 
 
+def spring_carrier_stops_at_wheel_contact():
+    """A returning spring that carries a wheel (a sprung setting-wheel lever) stops where the wheel meets
+    a fixed part; it does not push the wheel through it (audit F1, probe p1)."""
+    lever = E.Body("lever", S.box((-0.3, -0.3, 0), (0.3, 5.0, 0.5)), "spring", dof="rot", point=(0, 0, 0),
+                   direction=(0, 0, 1), rest=math.inf)
+    wheel = E.Body("wheel", S.cyl_z(0, 5.0, 0.5, 1.0, 1.0, 64), "contact", dof="rot", point=(0, 5.0, 0),
+                   direction=(0, 0, 1), carrier="lever")
+    wall = E.Body("wall", S.box((-3.0, 4.0, 0.6), (-1.2, 6.0, 0.9)), "fixed")
+    w = E.World([lever, wheel, wall])
+    for _ in range(6):
+        w.relax(lever)
+    v = w.pen(wheel)
+    print("sprung lever carrying a wheel into a wall: lever %.4f rad, wheel/wall overlap %.2e (TOL %.0e)"
+          % (lever.q, v, E.TOL))
+    return v <= E.TOL and lever.q > 0.03
+
+
+def spring_pushes_while_touching_plate():
+    """A spring resting on a fixed plate with a legal touching overlap (TOL/2 < v <= TOL) still pushes a
+    free part ahead of it (a yoke on the plate returning the sliding pinion; audit F2, probe p2)."""
+    res = []
+    for dz in (0.0, 3e-4):
+        floor = _block("floor", (-1, -1, -1), (5, 1, 0.2 + dz), "fixed")
+        spr = _block("spring", (0.0, -0.5, 0.2), (0.5, 0.5, 0.8), "spring", dof="slide", direction=(1, 0, 0),
+                     rest=math.inf)
+        blk = _block("block", (0.6, -0.5, 0.25), (1.1, 0.5, 0.8), "contact", dof="slide", direction=(1, 0, 0))
+        wall = _block("wall", (3.0, -1, 0.25), (3.5, 1, 1), "fixed")
+        w = E.World([floor, spr, blk, wall])
+        v0 = w._pen1(spr, None, {"floor"})
+        for _ in range(20):
+            w.relax(spr)
+        print("spring on a plate (overlap %.1e): block pushed to %.3f (expect 1.9)" % (v0, blk.q))
+        res.append(abs(blk.q - 1.9) < 0.02)
+    return all(res)
+
+
 def touching_can_be_pushed():
     """A part resting on a fixed face with an overlap between TOL/2 and TOL (touching) can still be
     pushed along that face: one threshold, TOL."""
@@ -317,7 +353,9 @@ if __name__ == "__main__":
            "spring_through_link": spring_through_link(), "pull_moves_no_rider": pull_moves_no_rider(),
            "rider_gives_way": rider_gives_way(), "rider_drives_steep_face": rider_drives_steep_face(),
            "rider_drives_when_chain_blocked": rider_drives_when_chain_blocked(),
-           "many_tiny_patches": many_tiny_patches(), "touching_can_be_pushed": touching_can_be_pushed(), "fit_clearance": fit_clearance(),
+           "many_tiny_patches": many_tiny_patches(),
+           "spring_carrier_stops_at_wheel_contact": spring_carrier_stops_at_wheel_contact(),
+           "spring_pushes_while_touching_plate": spring_pushes_while_touching_plate(), "touching_can_be_pushed": touching_can_be_pushed(), "fit_clearance": fit_clearance(),
            "phase_gears": phase_gears(), "carried_wheel": carried_wheel(), "force_direction": force_direction(),
            "stem_protrudes_at_crown_end": stem_protrudes_at_crown_end(),
            "early_stop_bound": early_stop_bound()}

@@ -237,8 +237,9 @@ AT-4, AT-5 and AT-6 each start from the state at the end of AT-2: crown let go, 
      forward and, separately, $SWEEP_TURN degrees backward. No test turn may be blocked, and none may
      drive both trains (the arbor winding by more than $STILL_TOL degree and the minute wheel moving
      by more than $STILL_TOL degree).
-   - **End positions.** At position 1 the forward test turn must wind and not set. At position 2 it
-     must set and not wind.
+   - **End positions.** At position 1 the forward test turn must not set, and a forward turn of
+     $COUPLED_TURN degrees from there (never blocked) must wind the arbor by more than $STILL_TOL degree.
+     At position 2 the forward test turn must not wind; that it sets is judged by the turns below.
    - **Setting.** Then, in position 2, the crown is turned $SET_TURN degrees forward and $SET_TURN
      back. It is never blocked, the minute wheel turns at least $SET_MIN degrees each way, and the
      arbor never loses more than $HOLD_TOL degrees.

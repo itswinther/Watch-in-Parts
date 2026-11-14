@@ -493,15 +493,25 @@ def worker(args):
                          and out["barrel_deg"] <= C.STILL_TOL and cb == 0 and out["then_winds_deg"] > C.STILL_TOL)
         elif phase == "set":
             w.restore(start)
-            samples, pb = [], 0
+            samples, pb, winds1 = [], 0, None
             for i in range(C.SWEEP_SAMPLES):
                 pb += _pull(w, PULL * i / (C.SWEEP_SAMPLES - 1))
                 if pb:
                     break
                 samples.append(_test_turns(w))
-            out = {"pull_blocked": pb, "samples": samples}
+                if i == 0:
+                    # position 1 winds: judged over COUPLED_TURN (the same allowance for slack as AT-3/AT-4)
+                    snap = w.snapshot()
+                    a = _state(w)
+                    bl1 = _turn(w, fw * C.COUPLED_TURN)
+                    winds1 = {"blocked": bl1, "barrel": round(_deg(a, _state(w), "barrel", C.WIND_SENSE), 3)}
+                    w.restore(snap)
+            out = {"pull_blocked": pb, "samples": samples, "position1_winds": winds1}
             ok = pb == 0 and len(samples) == C.SWEEP_SAMPLES and all(_clean(s) for s in samples)
-            ok = ok and _mode(samples[0]) == (True, False) and _mode(samples[-1]) == (False, True)
+            # end positions: position 1 winds and does not set; position 2 does not wind (that it sets is
+            # judged by the SET_TURN turns below, against SET_MIN)
+            ok = ok and winds1["blocked"] == 0 and winds1["barrel"] > C.STILL_TOL
+            ok = ok and not _mode(samples[0])[1] and not _mode(samples[-1])[0]
             if ok:
                 s0 = _state(w)
                 b1 = _turn(w, fw * C.SET_TURN)
