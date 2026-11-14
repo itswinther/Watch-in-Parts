@@ -457,6 +457,16 @@ def b_disc_off_centre(d):
     _disc_hand(d, 0.6)
 
 
+def b_broad_hand(d):
+    """The minute hand a broad flat bar: x from -1 to +9 about the centre axis, y +-3, same z and bore."""
+    ref, P, lo, hi = _ref()
+    from geometry import watch_gears_cad as GC
+    cx, cy = P["centre"]
+    bar = GC.cut(GC.box((cx - 1.0, cy - 3.0, 10.7), (cx + 9.0, cy + 3.0, 11.0)),
+                 GC.cyl(cx, cy, 10.0, 11.5, 0.35 + ref.FIT))
+    _write(d, "minute_hand", bar)
+
+
 def b_barrel_as_part(d):
     _edit(d, "movement.json", lambda doc: doc["mobiles"]["third"]["parts"].append("barrel"))
 
@@ -743,15 +753,28 @@ ANCHORS = [
 
     # ---- 8. exploit-style and format ----
     # The minute hand replaced by a disc r 18 (0.3 thick) on the centre axis, over the whole dial: it reaches
-    # and lies above the frame but its centre of volume is on the axis (< 0.5): Hands fails in P1 and P3 (1).
-    # 24296/52785 = 0.460282
+    # and lies above the frame but its centre of volume is on the axis (< 0.5), and seen from the dial it covers
+    # (pi 18^2 - pi 0.355^2) / (pi 18^2) = 0.9996 > 0.25 of its swept disc: Hands fails in P1 and P3 (1).
+    # D = (1/4)(1/23) + (3/20)(1/27) = 17/1035; R = 3037/6210; x 16/17 = 24296/52785 = 0.460282
     ("x minute hand is a disc over the whole dial (centred)", b_disc_centred,
      X(P1={"checks": ["hands"]}, P3={"checks": ["hands"]}),
-     [detail(["P1", "details", "hands", "minute", "centre_from_axis"], lambda v: v < 0.5, "< 0.5")]),
+     [detail(["P1", "details", "hands", "minute", "centre_from_axis"], lambda v: v < 0.5, "< 0.5"),
+      detail(["P1", "details", "hands", "minute", "area_share_of_swept_disc"], lambda v: v > 0.99, "about 0.9996")]),
     # The same disc 0.6 off-centre: reach 18.6 (+1.72 to the case centre = 20.32 <= 20.7), above the frame,
-    # centre of volume 0.6 from the axis: every stated rule holds, so the rule gives R = 1; x 16/17 = 0.941176.
-    # FINDING (reported 18:39): a hand may be a disc that hides the seconds and 24-hour hands; no stated rule stops it.
-    ("x minute hand is a disc over the whole dial, 0.6 off-centre (FINDING)", b_disc_off_centre, X(), []),
+    # centre of volume 0.6 from the axis, but seen from the dial it covers (pi 18^2 - pi 0.355^2) / (pi 18.6^2)
+    # = 1017.5 / 1086.9 = 0.936 > 0.25 of its swept disc (HAND_AREA_MAX_SHARE, B Decisions 00:50, 15 Nov; before
+    # that rule it scored R = 1, the finding of 18:39). Only Hands fails, in P1 and P3 (1), as for the centred
+    # disc: D = (1/4)(1/23) + (3/20)(1/27) = 17/1035; R = 3037/6210; x 16/17 = 24296/52785 = 0.460282
+    ("x minute hand is a disc over the whole dial, 0.6 off-centre", b_disc_off_centre,
+     X(P1={"checks": ["hands"]}, P3={"checks": ["hands"]}),
+     [detail(["P1", "details", "hands", "minute", "centre_from_axis"], lambda v: abs(v - 0.6) < 0.01, "0.6"),
+      detail(["P1", "details", "hands", "minute", "area_share_of_swept_disc"], lambda v: 0.93 < v < 0.94, "about 0.936")]),
+    # The minute hand a broad flat bar, x -1 to +9 and y -3 to +3 about the centre axis (same z 10.7-11.0 and bore
+    # 0.355; inside the disc above, which cleared every other part and was installed): reach sqrt(9^2 + 3^2) =
+    # 9.487 >= 5, centre of volume 4.0 from the axis, seen from the dial (60 - pi 0.355^2) / (pi 90) = 59.60 /
+    # 282.74 = 0.211 <= 0.25. Every rule holds: R = 1; x 16/17 = 16/17 = 0.941176
+    ("x minute hand a broad bar (0.21 of its swept disc)", b_broad_hand, X(),
+     [detail(["P1", "details", "hands", "minute", "area_share_of_swept_disc"], lambda v: 0.2 < v < 0.22, "about 0.211")]),
     # movement.json lists 'barrel' as a part of the third mobile: a format error (C1), so P1, P2 and P4 score 0;
     # the variant still passes (C4 reads movement.json's fixed list and case centre only).
     # R = 1/2 - (2/3)(3/5) = 1/10; x 16/17 = 8/85 = 0.094118

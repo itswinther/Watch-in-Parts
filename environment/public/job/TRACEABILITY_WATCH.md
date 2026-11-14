@@ -57,6 +57,8 @@ hand speeds and directions, and the weights of the checks.
 | HAND_REACH | 5.0 | `datasheets/QA-W100_inspection.md` | 5. Part 1 | **Hands.** | statement |
 | HAND_CENTRE_MIN (also Part 2 check 2) | 0.5 | `datasheets/QA-W100_inspection.md` | 5. Part 1 | **Hands.** | statement |
 | hand wholly above the frame (`Movement.hand_shape`, margin 0) | 0.0 | `datasheets/QA-W100_inspection.md` | 5. Part 1 | **Hands.** | statement |
+| HAND_AREA_MAX_SHARE (`Movement.hand_area`: projection on xy / (pi x hand_reach ** 2)) | 0.25 | `datasheets/QA-W100_inspection.md` | 5. Part 1 | **Hands.** | statement |
+| HAND_AREA_MAX_SHARE (Part 2 check 2) | 0.25 | `datasheets/QA-W100_inspection.md` | 6. Part 2 | **24-hour hand placement.** | statement |
 | hands required by the loader (`Movement.__init__`): hour, minute, seconds; `day` optional |  | `datasheets/QA-W100_inspection.md` | 5. Part 1 | **C1 Files.** | statement |
 | C3: `hands.day` declared, its part not the hour, minute or seconds hand's part |  | `datasheets/QA-W100_inspection.md` | 6. Part 2 | **C3 24-hour hand declared** | statement |
 | DAY_HAND_OFFSET | 6.0 | `datasheets/QA-W100_inspection.md` | 6. Part 2 | **24-hour hand placement.** | statement |

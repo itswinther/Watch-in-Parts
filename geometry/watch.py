@@ -48,6 +48,8 @@ DRIVE_AREA_RATIO = 0.5      # drive test: overlap / (its height in z) must excee
                             # (module = 2 x axis distance / (driver teeth + driven teeth))
 FRAME_JOIN = 0.01           # mm: two fixed parts this close are joined; the fixed parts must form one frame
 HAND_CENTRE_MIN = 0.5       # mm: a hand part's centre of volume is at least this far from its axis
+HAND_AREA_MAX_SHARE = 0.25  # one-job mode: a hand part seen from the dial side (its projection on the xy plane)
+                            # covers at most this share of the disc its tip sweeps (pi x Movement.hand_reach ** 2)
 THIN_SLAB = 32              # layers per slab of the thickness test (memory only; the result does not depend on it)
 THIN_DEV_CAP_VOX = 8        # the thickness test's deviation is exact up to this many voxels (limit THIN_DEV is 4)
 SEAT_TOUCH = 0.02           # mm: parts of one mobile closer than this touch; a mobile's parts must form one piece
@@ -684,6 +686,15 @@ class Movement:
         cen = ((a + b + c) * v6[:, None]).sum(axis=0) / (4.0 * v6.sum())
         above = float(vp[:, 2].min() - core.verts(self.fixed)[:, 2].max())
         return above, float(math.hypot(cen[0] - ax[0], cen[1] - ax[1]))
+
+    def hand_area(self, hand):
+        """A hand is slender: (area of the hand part seen from the dial side, i.e. its projection on the xy
+        plane in mm2, that area as a share of the disc its tip sweeps, pi x hand_reach ** 2).
+        One-job mode only; the limit is HAND_AREA_MAX_SHARE."""
+        mob, part = self.hands[hand]
+        area = float(self.mobiles[mob]["parts"][part].project().area())
+        r = self.hand_reach(hand)
+        return area, (area / (math.pi * r * r) if r > 0.0 else float("inf"))
 
     def hand_reach(self, hand):
         mob, part = self.hands[hand]
