@@ -14,14 +14,16 @@ Kinds
   driven  : its coordinates are set by the scenario (the stem: rotation and pull).
   contact : moves only when pushed, and only as far as needed to clear the contact.
   spring  : like contact when pushed; between steps it returns towards `rest` (a coordinate, or
-            +inf / -inf for a direction) until it touches something. A spring never pushes.
+            +inf / -inf for a direction) until it touches something; on the way it pushes free and
+            spring parts on its rest side (never fixed, driven or main bodies; see relax).
   main    : the mainspring arbor. Pushed like contact; between steps it tries to turn towards
             `rest` and does push whatever is in its way (it is strong).
 
 Contact rule
 ------------
 Penetration of a body = its largest intersection volume with any other body (fixed-fixed pairs
-and pairs inside one carrier family are not counted). A step is resolved when every penetration is at
+are not counted; a carried part and its carrier are, so a part drawn into its own carrier stays in
+contact with it as it moves). A step is resolved when every penetration is at
 most TOL. A pushed body may move at most K times the surface travel (arc length at the body's
 outer radius) of the bodies touching it in this step; it moves the least distance that clears it.
 This is the friction-cone rule: a contact face inclined steeper than atan(K) to the direction of
@@ -38,9 +40,9 @@ import manifold3d as m3
 
 TOL = 2e-4          # mm^3 of overlap allowed between two bodies
 try:
-    from constants import MU    # dry friction of the test rig
+    from constants import MU, MAIN_TRY   # dry friction of the test rig; the mainspring's try per step
 except ImportError:             # the engine on its own (toy tests)
-    MU = 0.51
+    MU, MAIN_TRY = 0.51, 0.02
 K = 1.0 / MU        # friction-cone factor: a face inclined more steeply than atan(1/MU) to the push locks
 SWEEPS = 14
 RELAX_MAX = 0.25    # mm of surface travel a spring may return per step
@@ -559,8 +561,11 @@ class World:
                 m = max(m, self.dqs[b.carrier][0] * b.radius)
         return m
 
-    def step(self, driver, dq=0.0, dp=0.0, main_try_arc=0.02, _depth=0):
-        """Move the driven body by dq (rotation) and dp (pull). Returns True, or False if blocked."""
+    def step(self, driver, dq=0.0, dp=0.0, main_try_arc=None, _depth=0):
+        """Move the driven body by dq (rotation) and dp (pull). Returns True, or False if blocked.
+        main_try_arc: the mainspring's try (mm of surface travel); default the module's MAIN_TRY."""
+        if main_try_arc is None:
+            main_try_arc = MAIN_TRY
         snap = self.snapshot()
         d = self.bodies[driver]
         d.q += dq

@@ -652,8 +652,8 @@ def _cannot_exceed(known, bound):
 
 
 def grade(sub, data, jobs=4, stop_le=None):
-    """Returns (product, gates, conds, steps, det). Every step is evaluated (for the honesty check);
-    the product counts only the steps passed in order from AT-0.
+    """Returns (product, gates, conds, steps, det). Every step is evaluated and scored on its own (no
+    in-order gating), plus the whole-build term when all pass; see the brief's Score section.
 
     stop_le (anchor runs only, never the verifier): stop as soon as the product cannot be above it; the
     steps not run count as failed and det["early_stop"] names them. Implies the serial path."""

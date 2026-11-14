@@ -237,6 +237,23 @@ def spring_pushes_while_touching_plate():
     return all(res)
 
 
+def main_try_from_constants():
+    """The mainspring's try per step is the module's MAIN_TRY (from constants.py, as the brief states)."""
+    import constants as C
+    got = []
+    for arc in (C.MAIN_TRY, 0.5 * C.MAIN_TRY):
+        E.MAIN_TRY = arc
+        drv = _block("drv", (5, 5, 5), (6, 6, 6), "driven", dof="stem", point=(0, 0, 0), direction=(1, 0, 0))
+        bar = E.Body("barrel", S.cyl_z(0, 0, 0, 1, 2.0, 64), "main", dof="rot", point=(0, 0, 0), direction=(0, 0, 1),
+                     rest=-math.inf)
+        w = E.World([drv, bar])
+        w.step("drv", dq=0.0)
+        got.append(-bar.q * bar.radius)
+    E.MAIN_TRY = C.MAIN_TRY
+    print("mainspring try per step: %.4f and %.4f mm (MAIN_TRY %.3f, then half)" % (got[0], got[1], C.MAIN_TRY))
+    return abs(got[0] - C.MAIN_TRY) < 1e-3 and abs(got[1] - 0.5 * C.MAIN_TRY) < 1e-3
+
+
 def touching_can_be_pushed():
     """A part resting on a fixed face with an overlap between TOL/2 and TOL (touching) can still be
     pushed along that face: one threshold, TOL."""
@@ -353,7 +370,7 @@ if __name__ == "__main__":
            "spring_through_link": spring_through_link(), "pull_moves_no_rider": pull_moves_no_rider(),
            "rider_gives_way": rider_gives_way(), "rider_drives_steep_face": rider_drives_steep_face(),
            "rider_drives_when_chain_blocked": rider_drives_when_chain_blocked(),
-           "many_tiny_patches": many_tiny_patches(),
+           "many_tiny_patches": many_tiny_patches(), "main_try_from_constants": main_try_from_constants(),
            "spring_carrier_stops_at_wheel_contact": spring_carrier_stops_at_wheel_contact(),
            "spring_pushes_while_touching_plate": spring_pushes_while_touching_plate(), "touching_can_be_pushed": touching_can_be_pushed(), "fit_clearance": fit_clearance(),
            "phase_gears": phase_gears(), "carried_wheel": carried_wheel(), "force_direction": force_direction(),
