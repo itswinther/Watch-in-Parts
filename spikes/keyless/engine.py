@@ -455,13 +455,25 @@ class World:
     def resolve(self):
         """Sweeps of pushes. Light springs yield first, then free bodies, then the mainspring arbor."""
         fixed_names = {n for n, o in self.bodies.items() if o.kind == "fixed"}
+        immovable = {n for n, o in self.bodies.items() if o.kind in ("fixed", "main", "driven")}
         for _ in range(SWEEPS):
             bad = False
             before = {b.name: b.q for b in self.movers}
-            for b in self.movers:
+            # carried free parts whose carrier turned in this step go first: like springs they are light
+            # (nothing but a spring through a link holds them along their own freedom), so where the
+            # contact pushes them along that freedom within the friction rule (a Breguet ramp) they give
+            # way rather than drive the train behind the part they touch; a steep face (a Breguet drive
+            # face) cannot be cleared that way and drives the train instead
+            riders = [b for b in self.movers if b.kind == "contact" and b.carrier
+                      and self.dqs.get(b.carrier, (0.0, 0.0))[0] > 0]
+            order = [b for b in self.movers if b.kind == "spring"] + riders + \
+                    [b for b in self.movers if b.kind != "spring" and b not in riders]
+            for b in order:
                 if self.pen(b) <= TOL:
                     continue
                 movers_now = self.moved_now(b)
+                if b in riders and self._rider_yields(b, immovable):
+                    continue
                 if b.kind == "spring":
                     # a pushed spring part moves only the way the contact pushes it (the sign of the
                     # contact's moment, or force, on its own coordinate): a click whose reaction pulls it
@@ -491,27 +503,16 @@ class World:
                 if all(self.pen(b) <= TOL for b in self.movers):
                     return True
             elif all(abs(b.q - before[b.name]) < 1e-12 for b in self.movers):
-                # last resort: a part carried (by its carrier's rotation) into a part that cannot move
-                # gives way along its own freedom, if the contact and the friction rule let it (Breguet
-                # teeth slipping back: the sliding pinion is pushed off the winding pinion); what it then
-                # runs into is resolved next
-                if not self._riders_give_way(fixed_names):
-                    return False        # no progress: blocked
+                return False            # no progress: blocked
         return all(self.pen(b) <= TOL for b in self.movers)
 
-    def _riders_give_way(self, fixed_names):
-        moved = False
-        for b in self.movers:
-            if b.kind != "contact" or not b.carrier or self.dqs.get(b.carrier, (0.0, 0.0))[0] <= 0:
-                continue
-            if self.pen(b) <= TOL:
-                continue
-            blockers = {o.name for o in self.bodies.values() if o is not b and self.pairs_ok(b, o)
-                        and self._pen1(b, None, {o.name}) > TOL} | fixed_names
-            touching = [o for o in self.bodies.values() if o is not b and o.name in blockers]
-            if self.push(b, self.budget(b, touching), only=blockers, signs=self.force_signs(b, blockers)):
-                moved = True
-        return moved
+    def _rider_yields(self, b, immovable):
+        """A carried part gives way along its own freedom: it clears what it overlaps now, without
+        running into anything immovable; free or spring parts it then meets are resolved next."""
+        blockers = {o.name for o in self.bodies.values() if o is not b and self.pairs_ok(b, o)
+                    and self._pen1(b, None, {o.name}) > TOL} | immovable
+        touching = [o for o in self.bodies.values() if o is not b and o.name in blockers]
+        return self.push(b, self.budget(b, touching), only=blockers, signs=self.force_signs(b, blockers))
 
     def snapshot(self):
         return {n: (b.q, b.p) for n, b in self.bodies.items()}

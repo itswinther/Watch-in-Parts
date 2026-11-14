@@ -194,7 +194,9 @@ AT-4, AT-5 and AT-6 each start from the state at the end of AT-2: crown let go, 
    - It takes between $WIND_LO and $WIND_HI crown turns per turn of the barrel arbor (measured over
      this turn).
    - The minute wheel moves at most $STILL_TOL degree.
-2. **AT-2 Hold.** The crown is let go for $HOLD_STEPS steps. It is now free to turn, pushed like any
+2. **AT-2 Hold.** The crown is let go for $HOLD_STEPS steps, or longer while the arbor is still running
+   back (up to $HOLD_MAX_STEPS steps, or until it has run back more than $RUNBACK degrees). It is now
+   free to turn, pushed like any
    free part. The mainspring pulls back. Every $TAP_EVERY steps the rig taps the
    movement: each free part moves up to $TAP_ARC (surface travel) in the direction it can move
    furthest, while spring-loaded parts return towards rest. The arbor runs back at most $RUNBACK

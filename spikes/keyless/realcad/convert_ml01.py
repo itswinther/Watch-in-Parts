@@ -59,7 +59,8 @@ MOBILES = {
 # 1e-4 target a pushed body must reach, so the pinion could never be pushed). Real endshake is about
 # 0.01 to 0.02 mm; 0.005 mm is applied.
 ENDSHAKE = {"winding_pinion": [-0.005, 0.0, 0.0]} if LEGACY else {}
-ML01_PULL = 0.49     # ml01's own position 2: the setting lever's second jumper notch (about 14 deg of lever)
+ML01_PULL = 0.6      # ml01 position 2. The jumper-notch fit gave about 0.49 (rough: the notch arc fit mixes in the
+                     # flank); in the rig the setting wheel engages from 0.54, so 0.6 (an assumption, see REAL_CAD.md)
 # spring sides (sign of the mobile's own coordinate its spring urges it to), from the geometry:
 #   yoke: pivot (10, -11), fork at the sliding pinion: + turns the fork towards -x (setting); its spring
 #         (an arm of the Winkelhebelfeder) holds it towards winding, so -1;
@@ -72,6 +73,12 @@ SUPPLIED = {"main_plate": [139], "dial_plate": [196, 197, 198, 213, 214, 215, 18
             "barrel_arbor": [5], "minute_wheel": [157, 158], "minute_post": [42]}
 FIXED_SCREWS = [221, 133, 136, 137, 43, 202, 204, 205, 211, 219, 217, 222, 218, 56, 61, 62,
                 128, 20, 175, 119]
+# The flexure springs are screwed plates with a flexing arm. Their arms become declared `spring` mobiles;
+# their screwed bodies stay as fixed parts, because in ml01 they are also the plates that hold the yoke
+# and the setting-wheel lever down (+z). Each body is the spring cut to an xy box (CAD frame) that keeps
+# the screwed plate and drops the arm: Winkelhebelfeder (138) below y = -3.0; Zeigerstellungsfeder (206)
+# x < 7.6 and y > -6.0 (its loop arm runs below and right of that).
+SPRING_BODIES = {138: ((8.0, -9.6), (17.0, -3.0)), 206: ((3.0, -6.0), (7.6, 0.4))}
 EXPECT = {67: "Aufzugwelle", 68: "Kupplungstrieb", 12: "Kupplungsrad", 212: "Kronrad z45", 220: "Sperrklinke",
           207: "Winkelhebel", 110: "Kupplungshebel", 132: "Zeigerstellhebel", 108: "Zeigerstellrad",
           4: "Federhaustrommel I ", 5: "Federhausdeckel", 139: "Grundplatine", 196: "Aufzugsbr",
@@ -258,6 +265,12 @@ def main():
         write_stl(os.path.join(out, "sub", "parts", pn + ".stl"), man_tris(man_of([i])))
         fixed.append(pn)
         log["fixed"][pn] = rows[i]["name"]
+    for i, (lo, hi) in ([] if LEGACY else SPRING_BODIES.items()):
+        pn = "fx_%03d_body" % i
+        box = m3.Manifold.cube([hi[0] - lo[0], hi[1] - lo[1], 20.0]).translate([lo[0], lo[1], -10.0])
+        write_stl(os.path.join(out, "sub", "parts", pn + ".stl"), man_tris(man_of([i]) ^ box))
+        fixed.append(pn)
+        log["fixed"][pn] = rows[i]["name"] + " (screwed body only, flexing arm cut off)"
     spec = {"mobiles": mobiles, "fixed": fixed}
     if not LEGACY:
         spec["pull"] = ML01_PULL

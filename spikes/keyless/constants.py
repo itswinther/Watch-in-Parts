@@ -48,7 +48,9 @@ TAP_EVERY = 5                    # AT-2: the rig taps the movement every 5 steps
 TAP_ARC = 0.05                   # ... each tap moves every free part up to this far (surface travel) in the
                                  # direction it can move furthest; sprung parts return, free parts do not
 HELD_LAST_STEPS = 10             # AT-2: over the last 10 hold steps the arbor moves at most HELD_DRIFT (it is held,
-HELD_DRIFT = 0.3                 # ... not still running back slowly)
+HOLD_MAX_STEPS = 240             # AT-2 goes on past HOLD_STEPS while the arbor still runs back (and has not
+                                 # yet passed CLICK_RUNBACK), up to this many steps
+HELD_DRIFT = 0.3                # ... not still running back slowly)
 CLICK_RUNBACK = 30.0             # ... the arbor may run back at most this much (2 teeth of a 24-tooth ratchet)
 HOLD_TOL = 4.0                   # AT-4 and AT-5: the arbor may lose at most this much
 STILL_TOL = 1.0                  # a train counts as driven if it moves more than this in a test turn

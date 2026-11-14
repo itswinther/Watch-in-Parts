@@ -150,6 +150,20 @@ def rider_gives_way():
     return ok and arm.q < -0.1
 
 
+def rider_drives_steep_face():
+    """...but against a face square to its motion it cannot give way along its freedom: it drives."""
+    stem = E.Body("stem", S.cyl_x(0, 0, 0, 5, 0.3, 48), "driven", dof="stem", point=(0, 0, 0), direction=(1, 0, 0))
+    arm = E.Body("arm", S.box((1.0, 0.3, -0.1), (1.2, 1.5, 0.1)), "contact", dof="slide", direction=(1, 0, 0),
+                 carrier="stem")
+    paddle = E.Body("paddle", S.box((0.5, 0.3, 0.1), (1.7, 1.5, 0.3)), "contact", dof="rot", point=(0, 0, 0),
+                    direction=(1, 0, 0))
+    w = E.World([stem, arm, paddle])
+    ok = all(w.step("stem", dq=math.radians(2.0)) for _ in range(10))
+    print("rider against a square face: not blocked=%s, paddle turned %.1f deg (expect ~20), rider slid %.3f"
+          % (ok, math.degrees(paddle.q), arm.q))
+    return ok and abs(math.degrees(paddle.q) - 20) < 2 and abs(arm.q) < 0.01
+
+
 def touching_can_be_pushed():
     """A part resting on a fixed face with an overlap between TOL/2 and TOL (touching) can still be
     pushed along that face: one threshold, TOL."""
@@ -230,7 +244,7 @@ if __name__ == "__main__":
     t = time.time()
     res = {"gear": gear_pair(), "ratchet": ratchet_pawl(), "mainspring": mainspring_click(), "detent": detent(),
            "spring_through_link": spring_through_link(), "pull_moves_no_rider": pull_moves_no_rider(),
-           "rider_gives_way": rider_gives_way(),
+           "rider_gives_way": rider_gives_way(), "rider_drives_steep_face": rider_drives_steep_face(),
            "touching_can_be_pushed": touching_can_be_pushed(), "fit_clearance": fit_clearance(),
            "phase_gears": phase_gears(), "carried_wheel": carried_wheel(), "force_direction": force_direction()}
     print(res, "%.1f s" % (time.time() - t))

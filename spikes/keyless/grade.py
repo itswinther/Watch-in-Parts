@@ -429,19 +429,33 @@ def worker(args):
             _set_kind(w, "barrel", "main")
             sw = _state(w)
             _set_kind(w, "stem", "contact")
-            last = None
-            for i in range(C.HOLD_STEPS):
-                if i == C.HOLD_STEPS - C.HELD_LAST_STEPS:
-                    last = _state(w)
+            # at least HOLD_STEPS; while the arbor is still running back (more than HELD_DRIFT over the
+            # last HELD_LAST_STEPS) and has not yet run back more than CLICK_RUNBACK, the hold goes on, up to
+            # HOLD_MAX_STEPS: a click that takes longer to seat than the rig's slow mainspring creep
+            # (MAIN_TRY per step) is judged by where it holds, not by when the 40th step happens to fall
+            hist = []
+            i = 0
+            while True:
+                hist.append(_state(w)["barrel"])
                 w.step("fixed", dq=0.0)
                 if (i + 1) % C.TAP_EVERY == 0:
                     _tap(w)
+                i += 1
+                if i < C.HOLD_STEPS:
+                    continue
+                cur = _state(w)["barrel"]
+                still = abs(math.degrees(cur - hist[-C.HELD_LAST_STEPS])) > C.HELD_DRIFT
+                ran = -math.degrees(cur - sw["barrel"]) * C.WIND_SENSE
+                if not still or ran > C.CLICK_RUNBACK or i >= C.HOLD_MAX_STEPS:
+                    break
             _set_kind(w, "stem", "driven")
             s2 = _state(w)
-            drift = abs(_deg(last, s2, "barrel"))
+            drift = abs(math.degrees(s2["barrel"] - hist[-C.HELD_LAST_STEPS]))
+            hold_steps = i
             prewound = _deg(sw, sw, "barrel")  # 0, kept for clarity
             runback = -_deg(sw, s2, "barrel", C.WIND_SENSE)
             out["hold"] = {"prewind_blocked": pw_bl, "runback_deg": runback, "last_steps_drift_deg": round(drift, 4),
+                           "hold_steps": hold_steps,
                            "crown_spun_back_deg": _deg(sw, s2, "stem", C.FORWARD),
                            "ok": pw_bl == 0 and runback <= C.CLICK_RUNBACK and drift <= C.HELD_DRIFT}
             # AT-3 RUN, from the state after AT-2
