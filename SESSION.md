@@ -9,23 +9,51 @@ table. Everything below "Session entries" is append-only, newest at the bottom.
 | ID | Workstream | Owner | Status | Last update |
 | --- | --- | --- | --- | --- |
 | A | Harness wiring | Mikael | Harbor + Codex sandbox works. GPT-6.1-sol, sandboxed: five-step watch 1.0 x3; regulation 1.0 x3; regulation with a 100-minute budget mean 0.974 over 12 runs. No gap. See 06:00 entry | 2026-11-14 06:00 |
-| B | Reference script and grader | itswinther | Overnight build finished. On main: four-stage watch (design, extend, change to a 6-hour barrel, assemble), STEP parts only, case 20.7 x 13.4, chain score as product. Reference 1.0 at every stage, anchors all ok, two review rounds, no blocking finding open. One clean chain per model: Fable 5.2 1.00, Opus 5.5 1.00, Sonnet 5.5 0.47 (one part cannot be installed at stage 4, inherited from its own stage 2). Packages in `transcripts/watch4_chain_*`. See the final entry for what a human should decide | 2026-11-14 09:14 |
+| B | Reference script and grader | itswinther | Building three additions to the staged watch, approved by itswinther: mass budget (`light`), every part assembled and seated (`seated`), mesh test with arbors 0.03 out of place (`tolerant`). Four Opus builders started 09:55 (three checks, one reference). main still holds last night's task (reference 1.0, chains Fable 1.00, Opus 1.00, Sonnet 0.47). No clean chains until itswinther has seen the build report | 2026-11-14 09:55 |
 | C | Hold the Line spike | unassigned | not started | |
 | D | Mentor questions, anchors, transcripts | unassigned | not started | |
 | E | Analysis, demo and story | Yoseph | paused: Yoseph is not working overnight | 2026-11-14 01:40 |
 
 Spec version in use: 0.4 (staged watch, four stages; `environment/public/SPEC_WATCH.md`)
 
-## Deadlines (Helsinki time)
+## To do, in priority order
 
-- Sat 03:00 harness wired end to end
-- Sat 07:00 both spikes done
-- Sat 09:00 decision between the two ideas
-- Sat 16:00 latest switch
-- Sat 22:00 build-out done, anchor suite passing
-- Sun 03:00 full runs and failure analysis
-- Sun 09:00 README and demo ready
-- Sun 10:00 final submission
+There is no timeline. The aim is to excel on every judging criterion, whatever
+work that takes. Work from the top; when the situation changes, reorder this
+list instead of dropping items. The one fixed date is the submission: Sunday
+15 Nov, 10:00 Helsinki.
+
+This list assigns nobody. Who does what is decided by the team in person.
+
+**1. The gap (30 points): frontier models must consistently score below the reference.**
+- Find a mechanism that makes Fable, Opus and GPT-class models fall short, not only Sonnet. Today no frontier model does.
+- Finish and test the three checks being built (`light`, `seated`, `tolerant`).
+- Build and test the remaining proposals from the 09:44 entry: a winding stem at right angles (bevel or crown teeth), an intermittent date ring, a change request that edits geometry with "kept" measured by volume.
+- Keep looking beyond that list; nothing is ruled out because it is large.
+- Test every candidate with clean chains, at least three per model, including GPT in the Harbor sandbox. Keep what bites on the strongest models.
+
+**2. Meaningful difficulty (30 points): every shortfall explained and fair.**
+- For each failed check, trace it to a decision the agent made, in the transcript and in the submitted files.
+- Confirm each failure against the grader, so a grader fault is never reported as an agent failure.
+- Confirm the agent had the information and tools to do better, and that no failure comes from a time limit, trick wording or a broken tool.
+- Write the failure analysis, with pictures from `tools/viewer/`.
+
+**3. Reward integrity (25 points): no exploit beats real work.**
+- Anchors for every stage and every check, including each new one; all asserted by one script.
+- A deliberate exploit hunt against the grader and the STEP loader; every attempt logged with its score, every hit turned into an anchor.
+- Do-nothing and stop-early baselines defined, run and in the results table.
+- Fix the kept-parts score, which counts files and can be padded.
+- Close the open review notes (hard links, project name in file headers, the reference's thin drive margin).
+
+**4. Craft (15 points): it makes sense and anyone can reproduce it.**
+- One Harbor task for all stages; reference 1.0 and do-nothing 0.0 in the sandbox; one command in the README. Rebuild the image and rerun both whenever a new check lands.
+- A dry run from a clean clone by someone who did not write the README.
+- Repeat runs, so every reported number is shown to repeat.
+- README in a human voice (the organisers warned that AI-written READMEs read poorly); demo script and video, using `tools/viewer/` to show the reference running and a part that cannot be installed.
+- A read of `environment/public/SPEC_WATCH.md` by someone who knows watches, flagging anything a watchmaker would call wrong.
+
+**5. Tiebreaker: a smaller model that improves after training on our environment.**
+- This was cut from scope on day one. The organisers name it as the tiebreaker and as something they look for, so it is back on the list; a human should confirm.
 
 ## Requests
 
@@ -38,7 +66,7 @@ line and ticks it. Format: `- [ ] to B, from A, HH:MM: what you need`.
 - [ ] to whoever owns branch `claude/fervent-brown-cb0201` (`cala-tests/`, Cala API responses): is that meant for this repo? It is not on main.
 - [ ] to Abhishek (watch idea), from B, 2026-11-14 03:42: itswinther has made the mechanical watch the main idea. B is building the first runnable version now in `geometry/watch.py`, `tests/grade_watch.py`, `solution/reference_watch.py`, `environment/tools_watch.py`. Please do not build the same pieces; if you have a barrel mesh, tooth numbers or a brief already, push them and say so here.
 - [x] to B (and Abhishek), from A, 2026-11-14 04:00: before building the watch further, read `spikes/README.md` and `spikes/gear_train/`. A fully specified watch gear train (exact rates, centre distances from tooth counts, layered packing in a round plate, balance keep-out) was solved by all three models: Fable 1.0, Opus 1.0, Sonnet 0.92, each by writing an exhaustive search. Your version differs in two ways that may matter: a minimal brief where the hand rates are unstated, and a rotating replay (jam, engagement, drive). Those are the untested parts; a first clean run on a stripped brief would show quickly whether they create a gap. Also: with no torque limit the power reserve objective is trivially maxed (6.5 x 140/7 = 130 h). **B, 03:52: read. My version is exactly those two untested parts: the brief leaves the hand speeds, direction and shared hour-minute axis unstated, and the agent must submit real meshing gears as STL that the grader turns (jam, engagement, drive). There is no power-reserve term. Three clean runs (Fable, Opus, Sonnet) started at 03:47; results will be in my next entry. I am not building further until they are in.**
-- [ ] to A, from B, 2026-11-14 04:55: read your 05:10 to 06:00 entries. The most useful run now is the one neither of us has: the **frozen** staged watch on GPT-6.1-sol in your Harbor sandbox. Stages and grader are on main (`tests/grade_watch.py --stage N --prev FOLDER`, bundles from `environment/make_bundle_watch.py OUT --stage N --prev FOLDER --tools no`, reference from `solution/reference_watch.py`). Each step must start a fresh conversation, receive the previous step's submission as read-only `previous/` plus a copy in `work/`, and must not be able to change frozen files (the grader checks bytes). Image needs `manifold3d==3.5.5 scipy trimesh numpy`. Grading a stage takes 2 to 3 minutes. If you can run three chains, post the per-step scores here. An overnight orchestrator session may change the stage list (it adds a change-request stage and STEP files); the three-stage version on main at commit 6bfb150 is stable and is the one to run first.
+- [x] to A, from B, 2026-11-14 04:55: read your 05:10 to 06:00 entries. The most useful run now is the one neither of us has: the **frozen** staged watch on GPT-6.1-sol in your Harbor sandbox. Stages and grader are on main (`tests/grade_watch.py --stage N --prev FOLDER`, bundles from `environment/make_bundle_watch.py OUT --stage N --prev FOLDER --tools no`, reference from `solution/reference_watch.py`). Each step must start a fresh conversation, receive the previous step's submission as read-only `previous/` plus a copy in `work/`, and must not be able to change frozen files (the grader checks bytes). Image needs `manifold3d==3.5.5 scipy trimesh numpy`. Grading a stage takes 2 to 3 minutes. If you can run three chains, post the per-step scores here. An overnight orchestrator session may change the stage list (it adds a change-request stage and STEP files); the three-stage version on main at commit 6bfb150 is stable and is the one to run first. **B, 10:21: out of date, do not act on the details in this line. It describes the three-stage task at commit 6bfb150; main is now four stages with STEP parts only. See the status entry of 10:21 for the current state.**
 - [ ] to A, from B (orchestrator), 2026-11-14 06:07: what Harbor needs for the staged watch as it is on main now. (1) Four steps, one fresh conversation each: design, extend, change, assemble; step N+1 starts from step N's `submission/` (bundle: `python environment/make_bundle_watch.py OUT --stage N --prev PREV_SUBMISSION`). (2) Grader per step: `python -I tests/grade_watch.py /abs/submission --stage N [--prev /abs/previous_submission] --reward /logs/verifier/reward.txt`; it needs `geometry/` next to `tests/`. (3) Image packages for agent and verifier: `manifold3d==3.5.5 scipy numpy trimesh cadquery==2.8.0` (cadquery-ocp 7.9.3.1.1; build123d cannot be installed beside it). (4) Verifier resources: a stage takes 3 to 4 minutes and peaks at 5.7 GB of memory here (the thickness check on the plates), so give it 8 GB and a 15-minute timeout. (5) Reward: Harbor has only `mean` and `final`; our chain score is the product, so use `final` with the last verifier grading all four folders, or report the mean and say so. (6) Artifacts per step: `movement.json`, `parts/*.step`, `scripts/`, and `assembly.json` at step 4. STL parts stop being accepted once the reference port lands tonight.
 - [ ] to A, from B (orchestrator), 2026-11-14 06:11: when you package the staged watch in Harbor, the verifier must take `--prev` from the previous step's own graded submission, never from the `previous/` copy inside the agent's workspace (the agent can edit that copy, which would defeat the frozen-file and kept-file checks). Found by the reviewer; `environment/run_clean_chain.sh` already does this.
 
@@ -102,6 +130,11 @@ Append one line per decision: time, decision, who agreed.
 - 2026-11-14 07:28 (orchestrator, B) Open after two review rounds, not fixed, for a human: a hard link in a submission is accepted (it can only point at a file that exists in the agent's own container); `tools/submit.py` reports a symlinked part as "not a STEP file" instead of naming the symlink; the string "board-in-a-box" is in the header of `meshes/barrel.stl` and in a comment of `tools/kernel.py`, both visible to the agent; the reference's day-wheel pair passes the drive test at 0.0133 mm3 against the 0.01 limit (deterministic, but the thinnest margin in the reference).
 - 2026-11-14 09:14 (orchestrator, B) Chain packages are committed in the packer's compact form (schema `watch-chain-pack/2`): each distinct part file once, gzip-compressed, under `parts_store/`, and a `parts.json` per stage in place of `submission/parts/`; `python3 tests/pack_run.py --unpack PACK OUT` rebuilds the files byte for byte. Reason: a plain package of one chain was 127 MB because every stage repeats the STEP files; the three compact packages are 8, 14 and 12 MB.
 - 2026-11-14 09:14 (orchestrator, B) Chain result reported as measured, and the task is not changed after it: Fable 5.2 and Opus 5.5 score 1.0 at all four stages; Sonnet 5.5 scores 1.0, 1.0, 1.0, 0.468. Whether one model's shortfall on one chain is enough of a gap is a human decision (see the final entry).
+- 2026-11-14 09:55 Proposals 1, 2 and 4 of the CAD-difficulty list are approved for building, all at once: itswinther ("Build 1, 2 and four all at the same time ... report back to me when done before testing"). Proposals 3, 5 and 6 are not started. No clean-agent chains are run on the new build until itswinther has had the report.
+- 2026-11-14 09:55 (orchestrator, B) Rules fixed before the builders started, so four builders can work in parallel. (1) `light`, weight 2, stages 1 to 3: the fixed parts together at most `FIXED_VOLUME_MAX`, all mobile parts together (barrel not counted) at most `MOBILE_VOLUME_MAX`; both set from the reworked reference at its largest stage plus 10 percent, target at most 50 and 60 percent of today's reference; pass or fail, in line with the earlier decision that material is a check and not a multiplier. A rule on rounding concave corners is only adopted if builder LIGHT shows a threshold that is robust to how the voxel grid lines up. (2) Parts of one mobile may no longer overlap (added to the Assembled hard requirement, tolerance 0.01 mm3); `seated`, weight 2, stages 1 to 3: every part of a multi-part mobile, moved 0.3 along each of +x, -x, +y, -y, must intersect the rest of its mobile, and along +z or -z at least once; stage 4 tests a path against every part placed before it, parts of the same mobile included. (3) `tolerant`, weight 2, stages 1 to 3: every declared mesh passes the mesh test also with the driven mobile moved `MESH_SHIFT` = 0.03 away from and towards the driver's axis (0.02 if 0.03 cannot be met against the supplied barrel). Totals become 23 at stage 1 and 27 at stages 2 and 3 (24 and 28 with a corner rule).
+- 2026-11-14 09:55 (orchestrator, B) Builder split: LIGHT, SEATED and TOLERANT each write one check (grader, engine, spec text, anchors, fixture tests) and do not touch the reference; REF alone reworks `solution/reference_watch.py` for all three rules and then merges the three check branches, sets the two volume limits and the totals, and adds the anchors that depend on the new reference. Reason: last night two builders in the same files merged cleanly only because their regions were apart; the reference would not be.
+- 2026-11-14 10:12 Two directions from itswinther, now in `CLAUDE.md` under "Current focus" and binding on every session. (1) The goal is a real gap on frontier models (Fable, Opus, GPT class); a shortfall only on a mid-tier model is not the result. (2) No session limits its scope or thinking by the time left: no dropping or shrinking ideas because of the deadline, no proposals to freeze the task for safety, no settling for the claim we can already support. What to cut is the humans' call. This withdraws the parts of the 10:15 entry that proposed freezing the task at Sat 16:00 and presenting a mid-tier gap; the old "latest switch Saturday 16:00" line in `CLAUDE.md` is marked superseded.
+- 2026-11-14 10:15 There is no timeline any more. The "Deadlines" section is replaced by "To do, in priority order", ordered by the four judging criteria, with the aim of excelling on every one whatever work it takes. The small-model training tiebreaker, cut on day one, is back on the list pending a human yes. Decided: itswinther.
 
 ## Proposed spec changes
 
@@ -606,3 +639,86 @@ Template:
 - Files changed: SESSION.md (Proposed spec changes, this entry).
 - Need from others: a human yes/no per proposal; allow `arxiv.org` in the session's network settings if the papers should be read in full.
 - Next: nothing until a human chooses.
+
+### 2026-11-14 09:55 | B: building proposals 1, 2 and 4 (builders started) | itswinther + Claude
+- Did: on itswinther's go, started four Opus builders in parallel, each in its own worktree: LIGHT (volume budget, study of a corner rule), TOLERANT (mesh test at plus and minus 0.03, with a faster `mesh_run` that must return identical numbers), SEATED (no overlap inside a mobile, `seated`, stage 4 over every pair; the former builder TASK), REF (reference reworked for all three rules, then integration; the former builder CAD). Each check builder also measures its rule on last night's nine agent submissions, so we see how hard each rule is before any new chain is run. Wrote `/tmp/gslot`, a wrapper that lets at most two full grader runs go at once.
+- Verified by (command and result): `/tmp/gslot echo "gslot ok"` printed `gslot ok`. Nothing else yet.
+- Not verified, or assumed: nothing of the build exists yet.
+- Files changed: SESSION.md (row B, Decisions, this entry).
+- Need from others: nothing.
+- Next: merge the check branches as they report, REF integrates, full anchors, one review round, then report to itswinther before any chain.
+
+### 2026-11-14 10:08 | README rewritten, next steps per person | itswinther + Claude (first B session, not the orchestrator)
+- Did: rewrote `README.md` for the four-stage watch task: what the agent does, why it should be hard, how it is scored, the results table, how to run it, layout, what was tried before, open work. It had described Board in a Box with a status dated 00:50. README.md is workstream E's file; I changed it on itswinther's instruction and hand it back to E. Added `cadquery==2.8.0` to `requirements.txt` (the STEP path needs it and it was missing). Added three requests, one per teammate, under Requests. Did not touch row B, which the orchestrator session owns.
+- Verified by (command and result): in this session's container, `pip install manifold3d==3.5.5 scipy==1.18.1 numpy==2.5.3 cadquery==2.8.0` then `python3 -c "import cadquery, manifold3d, scipy"` printed `imports ok 2.8.0`; `python3 solution/reference_watch.py OUT` wrote the four stage folders in 37 s. The grader commands in the README are the ones the orchestrator ran and logged at 06:07 and 07:28; my own fresh-install run of them was still grading when this was written and its result follows in the next entry.
+- Not verified, or assumed: the README's results table is copied from the orchestrator's 09:14 entry, not rerun. The anchor count (27) is from the 07:28 entry. The README does not describe the three checks being built since 09:55 (`light`, `seated`, `tolerant`); it says they exist and are not on main.
+- (A proposed timeline stood here. It was removed on itswinther's instruction; see "To do, in priority order" at the top of this file.)
+- Decisions that only a human can take, in order of urgency: (1) which watch task is the submission: this four-stage one, or A's five-step spike (I recommend this one: it has the only shortfall, the STEP output, the anchors and the review rounds); (2) how to present a gap that shows for Sonnet and not for Fable, Opus or GPT, and which model the README names as the benchmark; (3) confirm or reverse the three scoring rules the orchestrator added after review round 1; (4) the kept-parts score counts files and can be padded.
+- Files changed: `README.md`, `requirements.txt`, SESSION.md (three requests, this entry).
+- Need from others: see the three requests dated 10:15.
+- Next: add the fresh-install grading result.
+
+### 2026-11-14 10:12 | Direction from itswinther: frontier gap, no limits from the clock | itswinther + Claude (first B session)
+- Did: on itswinther's instruction, rewrote "Current focus" in `CLAUDE.md` with the two directions logged under Decisions at the same time, marked the old Saturday 16:00 switch rule as superseded, and changed the README's open-work line from "decide how to present a mid-tier gap" to "find a gap that holds on the strongest models".
+- Withdrawn from my 10:15 entry: the proposed freeze at Sat 16:00, and decision (2) about presenting a gap that only Sonnet shows. The requests to A, E and Abhishek stand; read them without any implied time limit on what may still be built.
+- Verified by (command and result): nothing to run.
+- Not verified, or assumed: other sessions pick this up only when they next sync and re-read `CLAUDE.md`.
+- Files changed: `CLAUDE.md`, `README.md`, SESSION.md.
+- Need from others: every session, re-read "Current focus" in `CLAUDE.md` after your next fetch.
+- Next: nothing running here.
+
+### 2026-11-14 10:15 | Timeline removed, prioritised to-do list added | itswinther + Claude (first B session)
+- Did: on itswinther's instruction, replaced the "Deadlines" section of this file with "To do, in priority order" (the gap, meaningful difficulty, reward integrity, craft, tiebreaker), removed the proposed timeline from my 10:15 entry, and added one sentence to "Current focus" in `CLAUDE.md` pointing sessions at the list.
+- Verified by (command and result): `grep -n -i "timeline" README.md CLAUDE.md` finds no timeline in either file.
+- Not verified, or assumed: `HANDOFF_OVERNIGHT.md` and `HANDOFF_PROMPT.md` still contain last night's time boxes; they describe a finished run and I left them as history.
+- Files changed: SESSION.md, `CLAUDE.md`.
+- Need from others: a human yes or no on putting the training tiebreaker back in scope.
+- Next: nothing running here.
+
+### 2026-11-14 10:18 | Requests to teammates withdrawn | itswinther + Claude (first B session)
+- Did: on itswinther's instruction, removed the three requests I added at 10:15 (to Mikael, Yoseph and Abhishek). The work they named is all in "To do, in priority order" at the top of this file, which now says it assigns nobody: who does what is decided by the team in person. Where my 10:15 and 10:25 entries say those requests exist or stand, read this entry instead.
+- Verified by (command and result): `grep -c "first B session, 2026-11-14 10:15" SESSION.md` counts no remaining request line.
+- Not verified, or assumed: three older lines addressed to A are still under Requests (mine of 04:55 about a GPT run, and the orchestrator's of 06:07 and 06:11 with the Harbor details). I left them because they carry technical details whoever packages the task will need.
+- Files changed: SESSION.md.
+- Need from others: nothing.
+- Next: nothing running here.
+
+### 2026-11-14 10:21 | Status for workstream A (Mikael's session): what itswinther has going on | itswinther + Claude (first B session)
+This is information, not a request. It is everything about itswinther's side that is on `origin/main` at commit e489ade. Anything his orchestrator session has done since its last push (09:55) is not visible to me and is not in here.
+
+- Direction set by itswinther this morning (in `CLAUDE.md` under "Current focus"; re-read it):
+  - The goal is a real gap on frontier models: Fable, Opus and GPT class consistently below the reference. A shortfall only on Sonnet is evidence about the mechanism, not the result.
+  - No session limits its scope or thinking by the time left. No freezing the task for safety, no settling for the claim we can already support.
+  - There is no timeline. The "Deadlines" section of this file is replaced by "To do, in priority order", ordered by the four judging criteria. It assigns nobody; the team decides in person who does what. The three requests I addressed to Mikael, Yoseph and Abhishek at 10:15 are withdrawn.
+- What is on main now (unchanged since 09:14):
+  - The four-stage watch: 1 design, 2 extend (24-hour hand), 3 change (barrel once per 6 hours), 4 assemble. STEP parts only (CadQuery 2.8.0); STL parts are refused. Case radius 20.7, height 13.4. Chain score is the product of the stage scores. SPEC.md 0.4.
+  - Reference 1.0 at every stage, anchors 27 of 27, two review rounds with no blocking finding.
+  - One clean headless chain per model: Fable 5.2 1.00, Opus 5.5 1.00, Sonnet 5.5 0.47 (one part cannot be installed at stage 4, caused at its stage 2). Packages in `transcripts/watch4_chain_*`.
+  - `README.md` rewritten at 10:08 for this task; `requirements.txt` now includes `cadquery==2.8.0`.
+- What itswinther's orchestrator session is building (started 09:55, nothing merged yet, branch `claude/confident-brown-ipeiud`):
+  - Three new scored checks for stages 1 to 3, weight 2 each: `light` (a volume budget for the fixed parts and for the mobile parts, set from a reworked reference plus 10 percent), `seated` (every part of a multi-part mobile must be held by the rest of its mobile; parts of one mobile may no longer overlap, which also goes into the "Assembled" hard requirement), `tolerant` (every mesh must also pass the mesh test with the driven arbor 0.03 nearer to and further from its driver).
+  - Stage 4 will test each path against every part placed before it, parts of the same mobile included.
+  - Four Opus builders: LIGHT, SEATED, TOLERANT (one check each) and REF (reworks the reference for all three, then merges). Then full anchors and one review round.
+  - No clean agent chains will be run on the new build until itswinther has read the build report.
+  - Proposals 3, 5 and 6 of the 09:44 list (a winding stem at right angles, an intermittent date ring, a geometry-editing change request with "kept" by volume) are not started.
+- What this will change for a Harbor package of the watch, once it lands:
+  - The grader call stays `python -I tests/grade_watch.py /abs/submission --stage N [--prev /abs/previous_submission] --reward FILE` (orchestrator decision of 04:55).
+  - Totals become 23 at stage 1 and 27 at stages 2 and 3.
+  - The mesh test runs three times per gear pair, so verifier time will change. The "8 GB and 15 minutes" in the 06:07 request were measured on last night's task and will need measuring again.
+  - The spec text the agent reads changes (three new requirements, the no-overlap rule), so any image or bundle built before the merge is out of date after it.
+- State of the lines addressed to A under Requests: the 06:07 and 06:11 lines from the orchestrator are correct for main as it is now. My 04:55 line was out of date and is ticked off with a note.
+- Not done by anyone, as far as main shows: the staged watch has not been packaged as a Harbor task, and no non-Claude model has run it. Both are in the to-do list; nobody is assigned.
+- This session: nothing is running here except a fresh-install check of the README commands. So far it gives: `pip install manifold3d==3.5.5 scipy==1.18.1 numpy==2.5.3 cadquery==2.8.0` imports fine; `python3 solution/reference_watch.py OUT` took 37 s; `python3 -I grade_watch.py OUT/stage1 --stage 1` reward 1.0 in 233 s; stage 2 with `--prev` reward 1.0 in 289 s; stages 3 and 4 were still grading when this was written. That is slower than the 3 to 4 minutes per stage in the 06:07 request, on an idle 4-core machine.
+
+### 2026-11-14 10:22 | README commands checked on a fresh install | itswinther + Claude (first B session)
+- Did: ran the commands in the README's "Running it" section in a container that had none of the packages installed, to confirm they work as written.
+- Verified by (command and result):
+  - `pip install manifold3d==3.5.5 scipy==1.18.1 numpy==2.5.3 cadquery==2.8.0`, then `python3 -c "import cadquery, manifold3d, scipy"`: printed `imports ok 2.8.0`.
+  - `python3 solution/reference_watch.py OUT`: four stage folders written in 37 s.
+  - `cd tests && python3 -I grade_watch.py OUT/stageN --stage N [--prev OUT/stage(N-1)] --reward FILE`: stage 1 reward 1.000000 in 233 s; stage 2 reward 1.000000 in 289 s; stage 3 reward 1.000000 in 305 s; stage 4 reward 1.000000 in 28 s.
+  - The same grader on an empty folder: reward 0.000000.
+- Finding: on an idle 4-core machine a design stage takes 4 to 5 minutes to grade, not the 3 to 4 minutes quoted to A at 06:07. The whole chain is about 14 minutes of grading. The verifier timeout for a Harbor package should be set from these numbers, and again after the three new checks land.
+- Not verified, or assumed: I did not rerun the anchor script, the clean-chain runner or the packer; the README's lines for those rest on the orchestrator's logged runs.
+- Files changed: SESSION.md.
+- Need from others: nothing.
+- Next: nothing running here.

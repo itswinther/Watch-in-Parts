@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Watch Movement Viewer</title>
+<style>
+:root {
+  --bg: #f4f3ef; --panel: #ffffff; --ink: #1d1d1b; --muted: #6b6a65; --line: #dddbd3;
+  --accent: #2f6fb0; --ok: #2e7d4f; --bad: #b3402e; --warn: #b07a1f; --scene: #e9e7e0;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #161615; --panel: #1f1f1d; --ink: #ecebe6; --muted: #9a9890; --line: #34332f;
+    --accent: #6fa6dd; --ok: #5bb37f; --bad: #e0705d; --warn: #d9a54a; --scene: #262624;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #161615; --panel: #1f1f1d; --ink: #ecebe6; --muted: #9a9890; --line: #34332f;
+  --accent: #6fa6dd; --ok: #5bb37f; --bad: #e0705d; --warn: #d9a54a; --scene: #262624;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink);
+  font: 13px/1.45 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+#app { display: grid; grid-template-columns: 300px 1fr 320px; height: 100vh; }
+aside { background: var(--panel); border-right: 1px solid var(--line); overflow-y: auto; padding: 14px 16px; }
+aside.right { border-right: 0; border-left: 1px solid var(--line); }
+#view { position: relative; background: var(--scene); min-width: 0; }
+#view canvas { display: block; }
+h1 { font-size: 15px; margin: 0 0 2px; }
+h2 { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 18px 0 6px; font-weight: 600; }
+.sub { color: var(--muted); font-size: 12px; word-break: break-all; }
+label { display: flex; align-items: center; gap: 8px; margin: 5px 0; }
+label span.v { margin-left: auto; color: var(--muted); font-variant-numeric: tabular-nums; }
+input[type=range] { flex: 1; min-width: 0; accent-color: var(--accent); }
+select, button { font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line);
+  border-radius: 6px; padding: 4px 8px; }
+button { cursor: pointer; }
+button.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+.row { display: flex; gap: 6px; flex-wrap: wrap; }
+table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+td, th { padding: 3px 4px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+th { color: var(--muted); font-weight: 500; font-size: 11px; }
+.ok { color: var(--ok); } .bad { color: var(--bad); } .warn { color: var(--warn); }
+.pill { display: inline-block; padding: 0 6px; border-radius: 9px; font-size: 11px; border: 1px solid currentColor; }
+#legend { position: absolute; left: 12px; bottom: 12px; background: var(--panel); border: 1px solid var(--line);
+  border-radius: 8px; padding: 8px 10px; max-width: 260px; font-size: 12px; }
+#legend .bar { height: 10px; border-radius: 3px; margin: 4px 0 2px; }
+#legend .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+#hint { position: absolute; right: 12px; top: 10px; color: var(--muted); font-size: 12px; }
+.note { color: var(--muted); font-size: 11.5px; margin-top: 6px; }
+#partlist div { cursor: pointer; padding: 1px 4px; border-radius: 4px; display: flex; gap: 6px; align-items: center; }
+#partlist div:hover { background: var(--bg); }
+#partlist div.sel { outline: 1px solid var(--accent); }
+#partlist input { margin: 0; }
+@media (max-width: 900px) {
+  #app { grid-template-columns: 1fr; grid-template-rows: auto 60vh auto; height: auto; }
+  aside { border: 0; border-bottom: 1px solid var(--line); }
+}
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<div id="app">
+  <aside>
+    <h1>Watch movement</h1>
+    <div class="sub" id="title"></div>
+    <div id="verdict" style="margin-top:8px"></div>
+
+    <h2>Colour by</h2>
+    <select id="colorMode" style="width:100%">
+      <option value="mobile">Mobile (which parts turn together)</option>
+      <option value="role">Part type (wheel, pinion, arbor, plate)</option>
+      <option value="load">Tooth load: safety factor (estimate)</option>
+      <option value="speed">Speed (turns per hour)</option>
+      <option value="margin">Grader margin (closest to a limit)</option>
+    </select>
+
+    <div id="loadCtl">
+      <h2>Load assumptions</h2>
+      <label>Barrel torque <input type="range" id="torque" min="1" max="40" step="0.5" value="10"><span class="v" id="torqueV"></span></label>
+      <label>Allowed stress <input type="range" id="allow" min="10" max="200" step="5" value="50"><span class="v" id="allowV"></span></label>
+      <div class="note">Tooth force = torque / pitch radius; bending stress by Lewis, σ = F / (b·m·Y), Y from tooth count. These are estimates for comparing parts, not the grader's checks. 50 MPa is about printed PLA.</div>
+    </div>
+
+    <h2>View</h2>
+    <label>Fixed parts <input type="range" id="fixedOpacity" min="0" max="1" step="0.05" value="0.35"><span class="v" id="fixedOpacityV"></span></label>
+    <label>Explode <input type="range" id="explode" min="0" max="3" step="0.05" value="0"><span class="v" id="explodeV"></span></label>
+    <label>Cut plane <input type="range" id="cut" min="-1" max="1" step="0.005" value="1"><span class="v" id="cutV"></span></label>
+    <div class="row" style="margin:4px 0">
+      <select id="cutAxis"><option value="x">cut along x</option><option value="y">cut along y</option><option value="z">cut along z</option><option value="mesh">cut through a gear pair</option></select>
+      <select id="cutMesh"></select>
+    </div>
+    <label><input type="checkbox" id="edges" checked> Outline edges</label>
+    <label><input type="checkbox" id="caseRing" checked> Case limits (radius and height)</label>
+    <div class="row" style="margin-top:6px">
+      <button data-cam="top">Top</button><button data-cam="side">Side</button><button data-cam="iso">3/4</button><button data-cam="fit">Fit</button>
+    </div>
+
+    <h2>Motion</h2>
+    <div class="row">
+      <button id="run">Run gear train</button>
+      <select id="timescale">
+        <option value="60">1 min of watch time / s</option>
+        <option value="600" selected>10 min / s</option>
+        <option value="3600">1 hour / s</option>
+        <option value="21600">6 hours / s</option>
+      </select>
+    </div>
+    <div id="asmBox">
+      <h2>Assembly sequence</h2>
+      <label>Step <input type="range" id="asm" min="0" max="1" step="0.001" value="1"><span class="v" id="asmV"></span></label>
+      <div class="row"><button id="asmPlay">Play assembly</button></div>
+      <div class="note">Replays the agent's declared assembly.json: each part moves along its own path, in the declared order.</div>
+    </div>
+  </aside>
+
+  <main id="view">
+    <div id="hint">drag to orbit · right-drag to pan · scroll to zoom · click a part</div>
+    <div id="legend"></div>
+  </main>
+
+  <aside class="right">
+    <h2 style="margin-top:0">Selected part</h2>
+    <div id="info" class="sub">Click a part in the view or the list below.</div>
+    <h2>Gear pairs</h2>
+    <div id="meshTable"></div>
+    <h2>Grader checks</h2>
+    <div id="checks"></div>
+    <h2>Parts</h2>
+    <div id="partlist"></div>
+  </aside>
+</div>
+
+<script type="module">
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+
+const DATA = /*__DATA__*/null;
+const $ = (id) => document.getElementById(id);
+const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const frac = (p) => p[0] / p[1];
+const fmt = (x, d = 2) => (x == null || !isFinite(x)) ? "–" : Number(x).toFixed(d);
+
+// ---------- palette ----------
+const CAT = ["#4e79a7","#f28e2b","#59a14f","#e15759","#76b7b2","#edc948","#b07aa1","#ff9da7","#9c755f","#86bcb6","#d37295","#a0cbe8"];
+const ROLE = { wheel: "#c9a227", pinion: "#b5651d", arbor: "#7a8a99", hand: "#2f3a4a", fixed: "#9fb4c7", supplied: "#8c5a9e", other: "#999999" };
+function ramp(t) { // 0 = bad (red) .. 1 = good (green), through amber
+  t = Math.max(0, Math.min(1, t));
+  const stops = [[0, [190, 50, 40]], [0.5, [230, 170, 40]], [1, [60, 150, 90]]];
+  for (let i = 1; i < stops.length; i++) if (t <= stops[i][0]) {
+    const [a, ca] = stops[i - 1], [b, cb] = stops[i]; const u = (t - a) / (b - a);
+    return new THREE.Color(...ca.map((c, k) => (c + (cb[k] - c) * u) / 255));
+  }
+  return new THREE.Color(60 / 255, 150 / 255, 90 / 255);
+}
+function lewisY(z) { // Lewis form factor, 20° full depth, tabulated
+  const tab = [[10,.201],[12,.245],[14,.277],[16,.296],[18,.309],[20,.322],[24,.337],[30,.359],[40,.389],[50,.408],[75,.435],[100,.447],[300,.47]];
+  if (z <= tab[0][0]) return tab[0][1];
+  for (let i = 1; i < tab.length; i++) if (z <= tab[i][0]) {
+    const [z0, y0] = tab[i-1], [z1, y1] = tab[i]; return y0 + (y1 - y0) * (z - z0) / (z1 - z0);
+  }
+  return .47;
+}
+
+// ---------- scene ----------
+const view = $("view");
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.localClippingEnabled = true;
+view.appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 2000);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+scene.add(new THREE.HemisphereLight(0xffffff, 0x445566, 1.1));
+const key = new THREE.DirectionalLight(0xffffff, 1.6); key.position.set(30, -40, 60); scene.add(key);
+const fill = new THREE.DirectionalLight(0xffffff, 0.6); fill.position.set(-40, 30, 20); scene.add(fill);
+camera.up.set(0, 0, 1);
+
+const clip = new THREE.Plane(new THREE.Vector3(-1, 0, 0), 1e6);
+const root = new THREE.Group(); scene.add(root);
+
+function decode(b64, Type) {
+  const bin = atob(b64); const buf = new ArrayBuffer(bin.length); const u8 = new Uint8Array(buf);
+  for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+  return new Type(buf);
+}
+
+const mobiles = Object.keys(DATA.axes);
+const mobileColor = {}; mobiles.forEach((m, i) => mobileColor[m] = new THREE.Color(m === "barrel" ? "#8c5a9e" : CAT[i % CAT.length]));
+const speed = {}; for (const [k, v] of Object.entries(DATA.speeds)) speed[k] = frac(v);
+const fixedSet = new Set(DATA.movement.fixed || []);
+
+const parts = []; // {data, pivot, mesh, edges, mat}
+const bbox = new THREE.Box3();
+for (const p of DATA.parts) {
+  const g = new THREE.BufferGeometry();
+  g.setAttribute("position", new THREE.BufferAttribute(decode(p.pos, Float32Array), 3));
+  g.setIndex(new THREE.BufferAttribute(decode(p.idx, Uint32Array), 1));
+  g.computeVertexNormals();
+  g.computeBoundingBox(); bbox.union(g.boundingBox);
+  const mat = new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 0.25, roughness: 0.5,
+    side: THREE.DoubleSide, clippingPlanes: [clip], polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 });
+  const mesh = new THREE.Mesh(g, mat); mesh.userData.part = p.name;
+  const eg = new THREE.EdgesGeometry(g, 35);
+  const edges = new THREE.LineSegments(eg, new THREE.LineBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.35, clippingPlanes: [clip] }));
+  // pivot sits on the mobile's axis so spinning is a rotation about z
+  const ax = DATA.axes[p.mobile] || [0, 0];
+  const spin = new THREE.Group(); spin.position.set(ax[0], ax[1], 0);
+  mesh.position.set(-ax[0], -ax[1], 0); edges.position.copy(mesh.position);
+  spin.add(mesh); spin.add(edges);
+  const asm = new THREE.Group(); asm.add(spin); // assembly path transform
+  const expl = new THREE.Group(); expl.add(asm); // explode offset
+  root.add(expl);
+  parts.push({ data: p, mesh, edges, mat, spin, asm, expl, zc: (p.zmin + p.zmax) / 2 });
+}
+const centre = bbox.getCenter(new THREE.Vector3()); const size = bbox.getSize(new THREE.Vector3());
+const span = Math.max(size.x, size.y, size.z);
+
+// case limits: cylinder outline at the case radius around the declared case centre
+const caseGroup = new THREE.Group(); scene.add(caseGroup);
+{
+  const cc = DATA.movement.case_centre || [0, 0]; const R = DATA.limits.case_radius;
+  const zs = [bbox.min.z, bbox.min.z + DATA.limits.case_height];
+  for (const z of zs) {
+    const pts = []; for (let i = 0; i <= 128; i++) { const a = i / 128 * Math.PI * 2; pts.push(new THREE.Vector3(cc[0] + R * Math.cos(a), cc[1] + R * Math.sin(a), z)); }
+    caseGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), new THREE.LineDashedMaterial({ color: 0xb3402e, dashSize: 0.8, gapSize: 0.5 })));
+  }
+  caseGroup.children.forEach(l => l.computeLineDistances());
+}
+
+// ---------- loads ----------
+function computeLoads() {
+  const T0 = +$("torque").value, allow = +$("allow").value;
+  const torque = { barrel: T0 };
+  const rows = [];
+  // Only the going train (barrel to seconds) carries the mainspring's torque; the motion
+  // work and day train only drag the hands, so their load is left out.
+  for (let pass = 0; pass < 6; pass++) for (const m of DATA.meshes) {
+    if (m.going_train && torque[m.driver] != null && torque[m.driven] == null) torque[m.driven] = torque[m.driver] * m.driven_teeth / m.driver_teeth;
+  }
+  for (const m of DATA.meshes) {
+    const T = m.going_train ? torque[m.driver] : null; const F = T != null && m.driver_pitch_r > 0 ? T / m.driver_pitch_r : null; // N (N·mm / mm)
+    const b = Math.max(m.face_width, 0.05), mod = m.module;
+    const sA = F != null ? F / (b * mod * lewisY(m.driver_teeth)) : null;
+    const sB = F != null ? F / (b * mod * lewisY(m.driven_teeth)) : null;
+    rows.push({ m, T, F, sA, sB, sfA: sA ? allow / sA : null, sfB: sB ? allow / sB : null });
+  }
+  return { torque, rows, allow };
+}
+let LOADS = computeLoads();
+
+function marginOfPart(p) { // 0 = at a grader limit, 1 = comfortable
+  let worst = null;
+  for (const m of DATA.meshes) {
+    if (!m.grader) continue;
+    if (m.driver_part === p.name || m.driven_part === p.name || (p.mobile && (m.driver === p.mobile || m.driven === p.mobile))) {
+      const o = m.grader.smallest_drive_overlap, g = m.grader.largest_gap;
+      const a = o != null ? Math.min(1, (o - DATA.limits.drive_overlap) / 0.06) : 1;
+      const b = g != null ? Math.min(1, (DATA.limits.engage_gap - g) / 0.08) : 1;
+      const v = Math.min(a, b); worst = worst == null ? v : Math.min(worst, v);
+    }
+  }
+  return worst;
+}
+
+// ---------- colouring ----------
+function partColor(p, mode) {
+  if (mode === "mobile") return p.mobile ? mobileColor[p.mobile] : new THREE.Color(ROLE.fixed);
+  if (mode === "role") return new THREE.Color(ROLE[p.role] || ROLE.other);
+  if (mode === "speed") {
+    if (!p.mobile || speed[p.mobile] == null) return new THREE.Color(ROLE.fixed);
+    const s = Math.abs(speed[p.mobile]); const t = (Math.log10(s) + 2) / 4; // 0.01 .. 100 turns/h
+    return new THREE.Color().setHSL(0.66 - 0.66 * Math.max(0, Math.min(1, t)), 0.65, 0.5);
+  }
+  if (mode === "load") {
+    let sf = null;
+    for (const r of LOADS.rows) {
+      if (r.m.driver_part === p.name && r.sfA != null) sf = sf == null ? r.sfA : Math.min(sf, r.sfA);
+      if (r.m.driven_part === p.name && r.sfB != null) sf = sf == null ? r.sfB : Math.min(sf, r.sfB);
+    }
+    if (sf == null) return new THREE.Color(p.role === "fixed" ? ROLE.fixed : "#bbbbbb");
+    return ramp((Math.log10(sf) + 0.3) / 1.6); // SF 0.5 red .. 1.5 amber .. 20 green
+  }
+  if (mode === "margin") {
+    const v = marginOfPart(p);
+    if (v == null) return new THREE.Color(p.role === "fixed" ? ROLE.fixed : "#bbbbbb");
+    return ramp(v);
+  }
+  return new THREE.Color("#cccccc");
+}
+
+function applyColors() {
+  const mode = $("colorMode").value;
+  const op = +$("fixedOpacity").value;
+  for (const P of parts) {
+    const isFixed = P.data.role === "fixed";
+    P.mat.color.copy(partColor(P.data, mode));
+    P.mat.transparent = isFixed && op < 1;
+    P.mat.opacity = isFixed ? op : 1;
+    P.mat.depthWrite = !(isFixed && op < 1);
+    P.mesh.visible = !(isFixed && op === 0) && P.visible !== false;
+    P.edges.visible = $("edges").checked && P.mesh.visible && (!isFixed || op > 0.2);
+    if (P === selected) P.mat.emissive.setHex(0x333333); else P.mat.emissive.setHex(0x000000);
+  }
+  drawLegend(mode);
+  $("loadCtl").style.display = mode === "load" ? "" : "none";
+}
+
+function drawLegend(mode) {
+  const L = $("legend");
+  if (mode === "mobile") {
+    L.innerHTML = "<b>Mobiles</b><br>" + mobiles.map(m => `<span class="sw" style="background:#${mobileColor[m].getHexString()}"></span>${m} <span class="sub">${speed[m] != null ? fmt(speed[m], 3) + " t/h" : ""}</span>`).join("<br>") +
+      `<br><span class="sw" style="background:${ROLE.fixed}"></span>fixed parts`;
+  } else if (mode === "role") {
+    L.innerHTML = "<b>Part type</b><br>" + Object.entries(ROLE).map(([k, c]) => `<span class="sw" style="background:${c}"></span>${k}`).join("<br>");
+  } else if (mode === "speed") {
+    L.innerHTML = `<b>Speed, turns per hour</b><div class="bar" style="background:linear-gradient(90deg,hsl(240,65%,50%),hsl(120,65%,50%),hsl(0,65%,50%))"></div><div class="row" style="justify-content:space-between"><span>0.01</span><span>1</span><span>100</span></div>`;
+  } else {
+    const lab = mode === "load" ? ["SF 0.5", "1.5", "20+"] : ["at limit", "", "comfortable"];
+    L.innerHTML = `<b>${mode === "load" ? "Tooth bending safety factor (estimate)" : "Margin to grader's mesh limits"}</b><div class="bar" style="background:linear-gradient(90deg,rgb(190,50,40),rgb(230,170,40),rgb(60,150,90))"></div><div class="row" style="justify-content:space-between"><span>${lab[0]}</span><span>${lab[1]}</span><span>${lab[2]}</span></div><div class="sub">grey: no gear pair on this part</div>`;
+  }
+}
+
+// ---------- tables ----------
+function renderMeshTable() {
+  LOADS = computeLoads();
+  const rows = LOADS.rows.map(r => {
+    const g = r.m.grader;
+    const sf = Math.min(r.sfA ?? Infinity, r.sfB ?? Infinity);
+    const sfc = !isFinite(sf) ? "" : sf < 1 ? "bad" : sf < 2 ? "warn" : "ok";
+    const ov = g ? g.smallest_drive_overlap : null, gap = g ? g.largest_gap : null;
+    const ovc = ov == null ? "" : ov < DATA.limits.drive_overlap ? "bad" : ov < 0.03 ? "warn" : "ok";
+    return `<tr><td>${r.m.driver}→${r.m.driven}<div class="sub">${r.m.driver_teeth}:${r.m.driven_teeth}, m ${fmt(r.m.module, 3)}</div></td>
+      <td>${r.m.going_train ? fmt(r.T, 2) + `<div class="sub">${fmt(r.F, 2)} N</div>` : '<span class="sub">hands only</span>'}</td>
+      <td class="${sfc}">${isFinite(sf) ? fmt(sf, 1) : "–"}</td>
+      <td class="${ovc}">${ov == null ? "–" : fmt(ov, 4)}<div class="sub">gap ${gap == null ? "–" : fmt(gap, 3)}</div></td></tr>`;
+  }).join("");
+  $("meshTable").innerHTML = `<table><tr><th>pair</th><th>driver torque N·mm</th><th>SF</th><th>overlap mm³</th></tr>${rows}</table>
+    <div class="note">Overlap is the grader's smallest drive overlap (limit ${DATA.limits.drive_overlap}); gap is its largest mesh gap (limit ${DATA.limits.engage_gap}). SF uses the load assumptions on the left.</div>`;
+  $("torqueV").textContent = $("torque").value + " N·mm"; $("allowV").textContent = $("allow").value + " MPa";
+}
+
+function renderChecks() {
+  const d = DATA.details;
+  if (!d) { $("checks").innerHTML = `<div class="sub">No details.json next to this submission.</div>`; $("verdict").innerHTML = ""; return; }
+  const item = (k, v, gate) => `<tr><td>${k}${gate ? ' <span class="pill sub">gate</span>' : ""}</td><td class="${v ? "ok" : "bad"}">${v ? "pass" : "fail"}</td></tr>`;
+  $("checks").innerHTML = `<table>${Object.entries(d.gates || {}).map(([k, v]) => item(k, v, true)).join("")}${Object.entries(d.checks || {}).map(([k, v]) => item(k, v, false)).join("")}</table>`;
+  const s = d.details && d.details.size;
+  $("verdict").innerHTML = `<span class="pill ${d.reward >= 1 ? "ok" : d.reward > 0 ? "warn" : "bad"}">reward ${fmt(d.reward, 3)}</span> <span class="sub">stage ${DATA.stage}</span>` +
+    (s ? `<div class="sub" style="margin-top:4px">radius ${fmt(s.radius, 2)} / ${DATA.limits.case_radius} · height ${fmt(s.z_max - s.z_min, 2)} / ${DATA.limits.case_height} mm</div>` : "");
+}
+
+function renderPartList() {
+  $("partlist").innerHTML = parts.map((P, i) => `<div data-i="${i}"><input type="checkbox" data-vis="${i}" checked><span class="sw" style="display:inline-block;width:9px;height:9px;border-radius:2px;background:#${partColor(P.data, "mobile").getHexString()}"></span>${P.data.name}<span class="sub" style="margin-left:auto">${P.data.mobile || "fixed"}</span></div>`).join("");
+  $("partlist").onclick = (e) => {
+    const vis = e.target.dataset.vis;
+    if (vis != null) { parts[+vis].visible = e.target.checked; applyColors(); return; }
+    const row = e.target.closest("div[data-i]"); if (row) select(parts[+row.dataset.i]);
+  };
+}
+
+let selected = null;
+function select(P) {
+  selected = P; applyColors();
+  document.querySelectorAll("#partlist div").forEach(d => d.classList.toggle("sel", P && +d.dataset.i === parts.indexOf(P)));
+  if (!P) { $("info").innerHTML = "Click a part in the view or the list below."; return; }
+  const p = P.data; const d = DATA.details && DATA.details.details;
+  const lines = [`<b>${p.name}</b> <span class="sub">${p.role}${p.mobile ? " · mobile " + p.mobile : ""}</span>`,
+    `z ${fmt(p.zmin)} to ${fmt(p.zmax)} mm · reaches ${fmt(p.rmax)} mm from its axis · ${p.tris.toLocaleString()} triangles`];
+  if (p.mobile && speed[p.mobile] != null) lines.push(`turns ${fmt(speed[p.mobile], 4)} per hour (${speed[p.mobile] > 0 ? "clockwise" : "anticlockwise"}) · torque ${fmt(LOADS.torque[p.mobile], 2)} N·mm`);
+  for (const r of LOADS.rows) {
+    if (r.m.driver_part === p.name || r.m.driven_part === p.name)
+      lines.push(`meshes ${r.m.driver}→${r.m.driven}: force ${fmt(r.F, 2)} N, stress ${fmt(r.m.driver_part === p.name ? r.sA : r.sB, 1)} MPa, SF ${fmt(r.m.driver_part === p.name ? r.sfA : r.sfB, 1)}`);
+  }
+  if (d && d.held && p.mobile && d.held[p.mobile]) {
+    const h = d.held[p.mobile]; lines.push(`held: free play ${Object.entries(h).map(([k, v]) => `${k} ${fmt(v, 2)}`).join(", ")} mm`);
+  }
+  if (d && d.printable && d.printable[p.name]) lines.push(`printable: ${d.printable[p.name].pieces} piece(s), max deviation ${fmt(d.printable[p.name].max_deviation, 3)} mm`);
+  $("info").innerHTML = lines.map(l => `<div style="margin:3px 0">${l}</div>`).join("");
+}
+
+// ---------- explode / cut / assembly ----------
+function applyExplode() {
+  const k = +$("explode").value; $("explodeV").textContent = k.toFixed(2);
+  const zmid = centre.z;
+  for (const P of parts) P.expl.position.z = (P.zc - zmid) * k;
+}
+function applyCut() {
+  const t = +$("cut").value; const axis = $("cutAxis").value;
+  $("cutV").textContent = t >= 1 ? "off" : t.toFixed(2);
+  if (t >= 1) { clip.constant = 1e6; return; }
+  if (axis === "mesh") {
+    const m = DATA.meshes[+$("cutMesh").value]; if (!m) return;
+    const a = DATA.axes[m.driver], b = DATA.axes[m.driven];
+    const dir = new THREE.Vector3(b[0] - a[0], b[1] - a[1], 0).normalize();
+    const n = new THREE.Vector3(-dir.y, dir.x, 0); // plane containing both axes, sweep sideways
+    const p0 = new THREE.Vector3(a[0], a[1], 0).addScaledVector(n, t * span / 2);
+    clip.setFromNormalAndCoplanarPoint(n.clone().negate(), p0); return;
+  }
+  const i = { x: 0, y: 1, z: 2 }[axis];
+  const n = new THREE.Vector3(); n.setComponent(i, -1);
+  const lo = bbox.min.getComponent(i), hi = bbox.max.getComponent(i);
+  const pos = lo + (t + 1) / 2 * (hi - lo);
+  clip.normal.copy(n); clip.constant = pos;
+}
+const asmData = DATA.assembly;
+function applyAssembly() {
+  if (!asmData) return;
+  const u = +$("asm").value; const order = asmData.order; const n = order.length;
+  const x = u * n; $("asmV").textContent = u >= 1 ? "done" : `${Math.min(n, Math.floor(x) + 1)} / ${n}: ${order[Math.min(n - 1, Math.floor(x))]}`;
+  const idx = {}; order.forEach((name, i) => idx[name] = i);
+  for (const P of parts) {
+    const i = idx[P.data.name]; const path = asmData.paths[P.data.name];
+    if (i == null || !path || !path.length) { P.asm.visible = true; P.asm.matrix.identity(); P.asm.matrixAutoUpdate = false; continue; }
+    const local = x - i; // <0 not yet, 0..1 moving, >1 placed
+    P.asm.visible = local >= 0;
+    const f = Math.max(0, Math.min(1, local)) * (path.length - 1);
+    const j = Math.min(path.length - 2, Math.floor(f)); const w = f - j;
+    const A = new THREE.Matrix4().fromArray(path[j].flat()).transpose();
+    const B = new THREE.Matrix4().fromArray(path[Math.min(path.length - 1, j + 1)].flat()).transpose();
+    const pa = new THREE.Vector3(), qa = new THREE.Quaternion(), sa = new THREE.Vector3();
+    const pb = new THREE.Vector3(), qb = new THREE.Quaternion(), sb = new THREE.Vector3();
+    A.decompose(pa, qa, sa); B.decompose(pb, qb, sb);
+    const M = new THREE.Matrix4().compose(pa.lerp(pb, w), qa.slerp(qb, w), new THREE.Vector3(1, 1, 1));
+    // the path transforms the part in world space; the spin pivot sits inside, so apply around the origin
+    P.asm.matrix.copy(M); P.asm.matrixAutoUpdate = false;
+  }
+}
+if (!asmData) $("asmBox").style.display = "none";
+
+// ---------- camera ----------
+function setCam(kind) {
+  const d = span * 2.0; const c = centre;
+  controls.target.copy(c);
+  if (kind === "top") camera.position.set(c.x, c.y - 0.001, c.z + d);
+  else if (kind === "side") camera.position.set(c.x, c.y - d, c.z);
+  else camera.position.set(c.x + d * 0.6, c.y - d * 0.75, c.z + d * 0.6);
+  controls.update();
+}
+document.querySelectorAll("[data-cam]").forEach(b => b.onclick = () => setCam(b.dataset.cam === "fit" ? "iso" : b.dataset.cam));
+
+// ---------- picking ----------
+const ray = new THREE.Raycaster(); const mouse = new THREE.Vector2(); let down = null;
+renderer.domElement.addEventListener("pointerdown", e => down = [e.clientX, e.clientY]);
+renderer.domElement.addEventListener("pointerup", e => {
+  if (!down || Math.hypot(e.clientX - down[0], e.clientY - down[1]) > 4) return;
+  const r = renderer.domElement.getBoundingClientRect();
+  mouse.set((e.clientX - r.left) / r.width * 2 - 1, -(e.clientY - r.top) / r.height * 2 + 1);
+  ray.setFromCamera(mouse, camera);
+  const hits = ray.intersectObjects(parts.filter(P => P.mesh.visible).map(P => P.mesh), false)
+    .filter(h => clip.distanceToPoint(h.point) >= 0)
+    .filter(h => { const P = parts.find(Q => Q.mesh === h.object); return !(P.data.role === "fixed" && P.mat.opacity < 0.5); });
+  select(hits.length ? parts.find(P => P.mesh === hits[0].object) : null);
+});
+
+// ---------- run ----------
+let running = false, watchHours = 0, last = performance.now();
+$("run").onclick = () => { running = !running; $("run").classList.toggle("on", running); $("run").textContent = running ? "Stop" : "Run gear train"; };
+let asmPlaying = false;
+$("asmPlay").onclick = () => { asmPlaying = !asmPlaying; if (asmPlaying && +$("asm").value >= 1) $("asm").value = 0; $("asmPlay").classList.toggle("on", asmPlaying); };
+
+function frame(now) {
+  const dt = Math.min(0.1, (now - last) / 1000); last = now;
+  if (running) {
+    watchHours += dt * (+$("timescale").value) / 3600;
+    for (const P of parts) {
+      const s = P.data.mobile ? speed[P.data.mobile] : null;
+      P.spin.rotation.z = s == null ? 0 : -2 * Math.PI * s * watchHours; // clockwise seen from +z
+    }
+  }
+  if (asmPlaying) {
+    const n = asmData ? asmData.order.length : 1;
+    let u = +$("asm").value + dt / (n * 0.6); if (u >= 1) { u = 1; asmPlaying = false; $("asmPlay").classList.remove("on"); }
+    $("asm").value = u; applyAssembly();
+  }
+  controls.update(); renderer.render(scene, camera); requestAnimationFrame(frame);
+}
+
+function resize() {
+  const w = view.clientWidth, h = view.clientHeight || 500;
+  renderer.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix();
+}
+addEventListener("resize", resize);
+const mq = matchMedia("(prefers-color-scheme: dark)");
+function bg() { scene.background = new THREE.Color(css("--scene") || "#e9e7e0"); }
+mq.addEventListener("change", () => { bg(); applyColors(); });
+
+// ---------- wire up ----------
+$("title").textContent = DATA.title;
+$("cutMesh").innerHTML = DATA.meshes.map((m, i) => `<option value="${i}">${m.driver}→${m.driven}</option>`).join("");
+for (const id of ["colorMode", "fixedOpacity", "edges"]) $(id).addEventListener("input", applyColors);
+for (const id of ["torque", "allow"]) $(id).addEventListener("input", () => { renderMeshTable(); applyColors(); if (selected) select(selected); });
+$("fixedOpacity").addEventListener("input", () => $("fixedOpacityV").textContent = (+$("fixedOpacity").value).toFixed(2));
+$("explode").addEventListener("input", applyExplode);
+for (const id of ["cut", "cutAxis", "cutMesh"]) $(id).addEventListener("input", applyCut);
+$("caseRing").addEventListener("input", () => caseGroup.visible = $("caseRing").checked);
+$("asm").addEventListener("input", applyAssembly);
+$("fixedOpacityV").textContent = (+$("fixedOpacity").value).toFixed(2);
+// optional URL hash, e.g. #color=load&explode=1.5&cut=0.1&cam=top
+for (const kv of location.hash.slice(1).split("&")) {
+  const [k, v] = kv.split("="); if (!v) continue;
+  if (k === "color") $("colorMode").value = v; else if (k === "explode") $("explode").value = v;
+  else if (k === "cut") $("cut").value = v; else if (k === "axis") $("cutAxis").value = v; else if (k === "fixed") $("fixedOpacity").value = v;
+}
+bg(); resize(); renderMeshTable(); renderChecks(); renderPartList(); applyColors(); applyExplode(); applyCut(); applyAssembly(); setCam((location.hash.match(/cam=(\w+)/) || [])[1] || "iso");
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

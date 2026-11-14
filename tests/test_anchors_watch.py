@@ -6,6 +6,7 @@ Builds the reference for all four stages, changes one thing per anchor, grades i
 Gold is 1.00 at every stage, do-nothing 0.00, likely shortcuts and partial work lower.
 Anchors are graded in parallel (default 3 worker processes)."""
 import json
+import math
 import os
 import shutil
 import sys
@@ -147,7 +148,106 @@ def old_wheel_as_fixed(d, base):
     edit(d, lambda doc: doc["fixed"].append("third"))
 
 
+def _far_xy(d, gap):
+    """A point `gap` beyond the case radius, to +x of case_centre: clear of every part of any reference."""
+    with open(os.path.join(d, "movement.json")) as f:
+        cx, cy = json.load(f)["case_centre"]
+    return cx + W.CASE_RADIUS + gap, cy
+
+
+def heavy_fixed_block(d, base):
+    """One extra fixed part: a solid block whose volume alone is 1.2 x FIXED_VOLUME_MAX. No room for it in the
+    case, so it stands outside the case radius (size fails too), at z 0 to 6, clear of everything."""
+    import cadquery as cq
+    from geometry.core import write_step
+    s = math.sqrt(1.2 * W.FIXED_VOLUME_MAX / 6.0)
+    x, y = _far_xy(d, s)
+    write_step(os.path.join(d, "parts", "ballast.step"), cq.Workplane("XY").box(s, s, 6.0, centered=(True, True, False)).translate((x, y, 0)))
+    edit(d, lambda doc: doc["fixed"].append("ballast"))
+
+
+def heavy_mobile(d, base):
+    """One extra mobile: a solid cylinder of volume 1.2 x MOBILE_VOLUME_MAX turning in a closed fixed cage with
+    0.1 clearance (so it turns freely and is held), outside the case radius (size fails too)."""
+    import cadquery as cq
+    from geometry.core import write_step
+    r, c, wall = 5.0, 0.1, 1.0
+    h = 1.2 * W.MOBILE_VOLUME_MAX / (math.pi * r * r)
+    x, y = _far_xy(d, r + c + wall + 5.0)
+    rotor = cq.Workplane("XY").circle(r).extrude(h).translate((x, y, 0))
+    side = 2 * (r + c + wall)
+    cage = cq.Workplane("XY").box(side, side, h + 2 * (c + wall), centered=(True, True, False)).translate((x, y, -c - wall))
+    cage = cage.cut(cq.Workplane("XY").circle(r + c).extrude(h + 2 * c).translate((x, y, -c)))
+    cage = cage.cut(cq.Workplane("XY").circle(1.0).extrude(wall + 2).translate((x, y, h)))     # a vent: one shell
+    write_step(os.path.join(d, "parts", "flywheel.step"), rotor)
+    write_step(os.path.join(d, "parts", "flywheel_cage.step"), cage)
+
+    def fn(doc):
+        doc["fixed"].append("flywheel_cage")
+        doc["mobiles"]["flywheel"] = {"axis": [x, y], "parts": ["flywheel"]}
+    edit(d, fn)
+
+
 # (name, stage, change(folder, base), expected score)
+# ---- parts of one mobile (seated, no overlap, stage-4 every pair). Chosen from movement.json, no names assumed.
+def _doc_of(d):
+    with open(os.path.join(d, "movement.json")) as f:
+        return json.load(f)
+
+
+def _wheel_of(d):
+    """(mobile, part): in the first mobile with at least two parts that are not hands, its least tall
+    non-hand part (a wheel on its arbor), judged from the loaded solids."""
+    doc = _doc_of(d)
+    hands = {h["part"] for h in doc["hands"].values()}
+    m = W.load_movement(d)
+    for k, mo in doc["mobiles"].items():
+        cand = [p for p in mo["parts"] if p not in hands]
+        if len(cand) >= 2:
+            z = {p: m.mobiles[k]["parts"][p].bounding_box() for p in cand}
+            return k, min(cand, key=lambda p: z[p][5] - z[p][2])
+    raise RuntimeError("no mobile with two parts that are not hands")
+
+
+def move_part_up(dz):
+    def fn(d, base):
+        import cadquery as cq
+        from geometry import core
+        _, part = _wheel_of(d)
+        p = part_file(d, part)
+        shape = cq.importers.importStep(p).translate((0, 0, dz))
+        core.write_step(p, shape)
+    return fn
+
+
+def dup_mobile_part(d, base):
+    """A copy of a part of a multi-part mobile added to the same mobile: the two overlap completely."""
+    k, part = _wheel_of(d)
+    src = part_file(d, part)
+    shutil.copyfile(src, os.path.join(d, "parts", part + "_copy" + os.path.splitext(src)[1]))
+    edit(d, lambda doc: doc["mobiles"][k]["parts"].append(part + "_copy"))
+
+
+def swap_within_mobile(d, base):
+    """Stage 4: of two parts of one mobile that are closest in the order, the later one (it sits on the
+    earlier, e.g. a wheel on its arbor) is put in first. The earlier one then has to pass through it."""
+    doc = _doc_of(d)
+    with open(os.path.join(d, "assembly.json")) as f:
+        order = json.load(f)["order"]
+    best = None
+    for mo in doc["mobiles"].values():
+        idx = sorted(order.index(p) for p in mo["parts"] if p in order)
+        for i, j in zip(idx, idx[1:]):
+            if best is None or j - i < best[1] - best[0]:
+                best = (i, j)
+    a, b = order[best[0]], order[best[1]]
+
+    def fn(asm):
+        asm["order"].remove(b)
+        asm["order"].insert(asm["order"].index(a), b)
+    edit(d, fn, "assembly.json")
+
+
 ANCHORS = [
     ("s1 gold", 1, lambda d, b: None, 1.0),
     ("s1 do nothing", 1, lambda d, b: nothing(d), 0.0),
@@ -157,6 +257,9 @@ ANCHORS = [
     ("s1 one tooth count declared wrong", 1, lambda d, b: edit(d, lambda doc: doc["meshes"][1].update(driven_teeth=31)),
      fails(1, "train", "minute", "hour", "seconds")),
     ("s1 barrel not held from above", 1, lambda d, b: edit(d, lambda doc: doc["fixed"].remove("barrel_cock")), fails(1, "held")),
+    # mass budget: these pass as "light and size fail" only once the reference itself meets the budget
+    ("s1 one extra solid block added as a fixed part", 1, heavy_fixed_block, fails(1, "light", "size")),
+    ("s1 one extra heavy mobile in a fixed cage", 1, heavy_mobile, fails(1, "light", "size")),
     ("s2 gold", 2, lambda d, b: None, 1.0),
     ("s2 stage-1 design handed back unchanged", 2, use_stage(1), 0.0),          # no day hand declared: hard requirement
     ("s2 seconds hand declared as the 24-hour hand", 2,
@@ -180,6 +283,12 @@ ANCHORS = [
     # the dial stands in place from the start, so the 13 parts ORDER puts in before it cannot come down from above
     ("s4 dial left out of the order", 4, lambda d, b: edit(d, lambda doc: doc["order"].remove("dial"), "assembly.json"),
      parts_score(1 + ref.ORDER.index("dial"))),
+    # Valid once the reference seats every part (builder REF). Moving the wheel 0.4 up its arbor takes it off
+    # its shoulder and must change nothing else: the reference leaves 0.4 of vertical play above each wheel.
+    ("s1 a wheel moved 0.4 up its arbor, off its shoulder", 1, move_part_up(0.4), fails(1, "seated")),
+    ("s1 two parts of one mobile overlap", 1, dup_mobile_part, 0.0),
+    ("s4 a part put in after the part of its mobile that blocks it", 4, swap_within_mobile,
+     lambda d: parts_score(1, len(W.load_movement(d).all_parts()))),     # all parts, the barrel included
     ("s4 bridge on before the wheels", 4, lambda d, b: edit(d, reorder("bridge", "barrel"), "assembly.json"), parts_score(6)),
 ]
 
@@ -190,6 +299,8 @@ def run_one(args):
     d = tempfile.mkdtemp()
     shutil.rmtree(d)
     shutil.copytree(os.path.join(base, "stage%d" % stage), d)
+    if callable(want):                  # an expected value that depends on the reference (e.g. its part count)
+        want = want(d)
     change(d, base)
     r = grade(d, stage, os.path.join(base, "stage%d" % (stage - 1)) if stage > 1 else None)
     failed = [k for dd in (r["gates"], r["checks"]) for k, v in dd.items() if not v]

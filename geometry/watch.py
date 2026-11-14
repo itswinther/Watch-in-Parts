@@ -30,6 +30,10 @@ HELD_MOVE = 0.3
 SAMPLES_PER_TOOTH = 8
 ENGAGE_GAP = 0.1            # mm: meshing gears are never further apart than this
 DRIVE_FRACTION = 0.25       # of the driver's tooth pitch: backlash must be smaller
+MESH_SHIFT = 0.03           # mm: tolerant test, the driven mobile moved this far away from and towards the driver's axis
+MESH_CUT_MARGIN = 1.05      # mm, private speed-up of mesh_run: material further than this from the other mobile's reach
+                            # is cut away before stepping (must exceed the 1.0 search length of min_gap in mesh_run)
+MESH_GAP_SEARCH = 0.15      # mm, private speed-up of mesh_run: gaps are searched this far first, then to 1.0 if none found
 CLEAR_STEPS = 144
 HAND_REACH = 5.0
 COAX_TOL = 0.01
@@ -43,6 +47,10 @@ THIN_VOXEL = 0.05
 THIN_ERODE_VOX = 1.5        # ball radius 0.1 on the 0.05 grid, less half a voxel of margin
 THIN_DILATE_VOX = 1.0
 THIN_DEV = 0.2              # no point of a part may be further than this from what survives the opening
+# mass budget, mm3. PLACEHOLDERS: 50 % of the current reference's fixed volume (4233.68, stage 1) and 60 % of its
+# mobile volume (853.19, stage 2); builder REF replaces them with the reworked reference's values plus 10 %.
+FIXED_VOLUME_MAX = 2117.0   # union of the fixed parts
+MOBILE_VOLUME_MAX = 512.0   # sum of the volumes of every part of every mobile, the supplied barrel not counted
 MAX_PARTS = 60
 MAX_TRIANGLES = 200_000
 MAX_STL_BYTES = 32 * 1024 * 1024
@@ -216,6 +224,32 @@ class Movement:
         return worst, pair
 
     # ---- assembly ----
+    # ---- parts of one mobile: no overlap, and each seated on the rest ----
+    def mobile_overlap(self):
+        """Largest overlap between two parts of the same mobile: (volume, 'mobile:a/b')."""
+        worst, pair = 0.0, None
+        for k, mo in self.mobiles.items():
+            names = list(mo["parts"])
+            for i in range(len(names)):
+                for j in range(i + 1, len(names)):
+                    v = ivol(mo["parts"][names[i]], mo["parts"][names[j]])
+                    if v > worst:
+                        worst, pair = v, "%s:%s/%s" % (k, names[i], names[j])
+        return worst, pair
+
+    def seated(self, name):
+        """Each part of a mobile with more than one part, moved HELD_MOVE along each axis direction:
+        its overlap with the other parts of that mobile. {} for a one-part mobile."""
+        parts = self.mobiles[name]["parts"]
+        if len(parts) < 2:
+            return {}
+        out = {}
+        for pn, ps in parts.items():
+            rest = union([q for qn, q in parts.items() if qn != pn])
+            out[pn] = {label: ivol(ps.translate([c * HELD_MOVE for c in d]), rest) for label, d in
+                       (("+x", (1, 0, 0)), ("-x", (-1, 0, 0)), ("+y", (0, 1, 0)), ("-y", (0, -1, 0)), ("+z", (0, 0, 1)), ("-z", (0, 0, -1)))}
+        return out
+
     def all_parts(self):
         """name -> (solid, group). Parts of one mobile share a group and may pass through each other."""
         out = {"barrel": (self.mobiles["barrel"]["solid"], "mobile:barrel")}
@@ -226,6 +260,12 @@ class Movement:
                 out[n] = (p, "mobile:" + k)
         return out
 
+    def volumes(self):
+        """(volume of the union of the fixed parts, sum of the volumes of every part of every mobile
+        except the supplied barrel), in mm3, of the solids built from the part files."""
+        mobile = sum(p.volume() for k, mo in self.mobiles.items() if k != "barrel" for p in mo["parts"].values())
+        return float(self.fixed.volume()), float(mobile)
+
     def assembly_box(self):
         lo, hi = np.full(3, np.inf), np.full(3, -np.inf)
         for solid, _ in self.all_parts().values():
@@ -235,7 +275,7 @@ class Movement:
 
     def assembly_replay(self, order, paths):
         """Put the parts in one at a time. Returns per-part results and the list installed cleanly.
-        A part is tested against every part placed before it, except parts of its own mobile.
+        A part is tested against every part placed before it, parts of its own mobile included.
         A part missing from `order` stands in its assembled position from the start and is not installed."""
         parts = self.all_parts()
         lo, hi = self.assembly_box()
@@ -252,8 +292,6 @@ class Movement:
                 for i, T in enumerate(P):
                     mv = core.apply(solid, T)
                     for pn, ps, pg in placed:
-                        if pg == group:
-                            continue
                         v = ivol(mv, ps)
                         if v > worst[0]:
                             worst = (v, i, pn)
@@ -264,24 +302,41 @@ class Movement:
             results[name] = res
         return results, installed
 
-    def mesh_run(self, a, ta, b, tb, speeds=None):
+    def mesh_run(self, a, ta, b, tb, speeds=None, shift=0.0, cut=True):
         """Turn a declared mesh through max(ta, tb) tooth pitches of the driver. Reports the largest
         overlap, the largest gap, and the smallest overlap produced by pushing the driver
-        DRIVE_FRACTION of a tooth pitch further with the driven gear held."""
+        DRIVE_FRACTION of a tooth pitch further with the driven gear held.
+        shift: the driven mobile (and its axis) is first moved this far straight away from the driver's
+        axis (negative: towards it); same steps and angles. cut=False skips the speed-up (same results)."""
+        A, ax_a = self.mobiles[a]["solid"], self.mobiles[a]["axis"]
+        B, ax_b = self.mobiles[b]["solid"], self.mobiles[b]["axis"]
+        if shift:
+            dx, dy = ax_b[0] - ax_a[0], ax_b[1] - ax_a[1]
+            d = math.hypot(dx, dy)
+            ux, uy = (dx / d, dy / d) if d > 1e-12 else (1.0, 0.0)
+            B = B.translate([shift * ux, shift * uy, 0.0])
+            ax_b = (ax_b[0] + shift * ux, ax_b[1] + shift * uy)
+        if cut:
+            A2, B2 = _near_cut(A, ax_a, B, ax_b), _near_cut(B, ax_b, A, ax_a)
+            if not (A2.is_empty() or B2.is_empty()):      # nothing within reach: keep the whole solids
+                A, B = A2, B2
+        pa = lambda deg: A if deg == 0.0 else rot_about(A, ax_a, deg)
+        pb = lambda deg: B if deg == 0.0 else rot_about(B, ax_b, deg)
         n = SAMPLES_PER_TOOTH * max(ta, tb)
         da = 360.0 / (SAMPLES_PER_TOOTH * ta)                 # driver turns counter-clockwise here; the sign is irrelevant
         db = -da * ta / tb
         worst, gap, drive = (0.0, 0), 0.0, float("inf")
         push = DRIVE_FRACTION * 360.0 / ta
         for i in range(n):
-            A, B = self.posed(a, da * i), self.posed(b, db * i)
-            v = ivol(A, B)
+            Ai, Bi = pa(da * i), pb(db * i)
+            v = ivol(Ai, Bi)
             if v > worst[0]:
                 worst = (v, i)
-            if i % 4 == 0:
-                gap = max(gap, float(A.min_gap(B, 1.0)) if v <= 1e-12 else 0.0)
+            if i % 4 == 0 and v <= 1e-12:
+                g = Ai.min_gap(Bi, MESH_GAP_SEARCH)       # exact below the short search length, and much faster
+                gap = max(gap, float(g if g < MESH_GAP_SEARCH else Ai.min_gap(Bi, 1.0)))
             if i % 8 == 0:
-                drive = min(drive, ivol(self.posed(a, da * i + push), B))
+                drive = min(drive, ivol(pa(da * i + push), Bi))
         return {"worst_volume": worst[0], "step": worst[1], "steps": n, "largest_gap": gap, "smallest_drive_overlap": drive}
 
     def clear_run(self, a, b, wa, wb):
@@ -328,6 +383,27 @@ class Movement:
         V = core.verts(self.mobiles[mob]["parts"][part])
         ax = self.mobiles[mob]["axis"]
         return float(np.hypot(V[:, 0] - ax[0], V[:, 1] - ax[1]).max())
+
+
+def _near_cut(S, ax, O, ax_o):
+    """S (turning about ax) without the material that can never come within MESH_CUT_MARGIN of O (turning
+    about ax_o), whatever the two angles: everything closer to ax than (axis distance - reach of O - margin),
+    and everything outside O's z range grown by the margin. Intersection volumes and gaps up to the margin
+    are unchanged, because O at any angle stays inside both regions that are kept."""
+    if S.is_empty() or O.is_empty():
+        return S
+    VS, VO = core.verts(S), core.verts(O)
+    r_o = float(np.hypot(VO[:, 0] - ax_o[0], VO[:, 1] - ax_o[1]).max())
+    d = math.hypot(ax_o[0] - ax[0], ax_o[1] - ax[1])
+    lo, hi = VS.min(axis=0) - 1.0, VS.max(axis=0) + 1.0
+    z0, z1 = max(lo[2], float(VO[:, 2].min()) - MESH_CUT_MARGIN), min(hi[2], float(VO[:, 2].max()) + MESH_CUT_MARGIN)
+    if z1 <= z0:
+        return m3.Manifold()          # empty: the caller then keeps the whole solids
+    keep = core.box((lo[0], lo[1], z0), (hi[0], hi[1], z1))
+    r_in = d - r_o - MESH_CUT_MARGIN          # removed as a polygon inscribed in this circle: only points inside it go
+    if r_in > 0.0:
+        keep = keep - cyl(ax[0], ax[1], lo[2] - 1.0, hi[2] + 1.0, r_in, 96)
+    return S ^ keep
 
 
 def load_movement(folder):
@@ -450,3 +526,25 @@ def thin(part):
     solid = core.voxelize(part, lo * h - 0.0137, tuple(int(v) for v in hi - lo), h)
     n, dev = core.opening_test(solid, THIN_ERODE_VOX, THIN_DILATE_VOX)
     return n, (dev * h if np.isfinite(dev) else 1e9)
+
+
+CORNER_ERODE_VOX = 1.5      # study only, not a requirement: the opening of `thin`, applied to the empty space
+CORNER_DILATE_VOX = 1.0
+CORNER_MARGIN_VOX = 4       # empty voxels kept around the part's bounding box
+
+
+def corners(part, offset=(0.0137, 0.0137, 0.0137)):
+    """Dual of `thin`, unused by the grader: open the empty space around the part on a THIN_VOXEL grid.
+    Returns (largest distance in mm from an empty voxel to the opened empty space, number of empty
+    voxels the opening removes). Sharp concave corners and gaps narrower than the ball are removed."""
+    h = THIN_VOXEL
+    bb = np.array(part.bounding_box())
+    lo = np.floor(bb[:3] / h).astype(int) - CORNER_MARGIN_VOX
+    hi = np.ceil(bb[3:] / h).astype(int) + CORNER_MARGIN_VOX
+    solid = core.voxelize(part, lo * h - np.asarray(offset), tuple(int(v) for v in hi - lo), h)
+    empty = ~solid                      # the grid's border counts as empty space that goes on (edt sees no zero there)
+    keep = core.edt(empty) >= CORNER_ERODE_VOX
+    opened = (core.edt(~keep) <= CORNER_DILATE_VOX) & empty
+    removed = empty & ~opened
+    dev = core.edt(~opened)[empty].max() if removed.any() else 0.0
+    return float(dev * h), int(removed.sum())

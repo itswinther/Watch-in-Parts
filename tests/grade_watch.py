@@ -26,7 +26,7 @@ HAND_SPEED = {"hour": Fraction(1, 12), "minute": Fraction(1), "seconds": Fractio
 DAY_SPEED = Fraction(1, 24)
 WEIGHTS_2 = {"day_hand": 3, "day_place": 1}
 WEIGHTS = {"spin": 1, "held": 2, "train": 3, "clear": 1, "minute": 2, "hour": 2, "seconds": 2,
-           "coaxial": 1, "hands": 1, "size": 1, "printable": 1}
+           "coaxial": 1, "hands": 1, "size": 1, "printable": 1, "tolerant": 2, "seated": 2, "light": 2}
 GATES = ("files", "assembled")
 TIMEOUT_S = 600
 
@@ -104,7 +104,9 @@ def grade_design(folder, stage=1, prev=None, skip=()):
                 if v > worst:
                     worst, pair = v, solids[i][0] + "/" + solids[j][0]
         fw, fp = m.fixed_overlap()
-        return worst <= W.VOL_TOL and fw <= W.VOL_TOL, {"worst_volume": worst, "pair": pair, "fixed_parts_worst": fw, "fixed_pair": fp}
+        mw, mp = m.mobile_overlap()          # parts of one mobile touch but do not overlap
+        return worst <= W.VOL_TOL and fw <= W.VOL_TOL and mw <= W.VOL_TOL, \
+            {"worst_volume": worst, "pair": pair, "fixed_parts_worst": fw, "fixed_pair": fp, "mobile_parts_worst": mw, "mobile_pair": mp}
     gates["assembled"], details["assembled"] = _run(assembled)
     if stage == 2:
         gates["locked"], details["locked"] = _run(lambda: locked_design(prev, folder))
@@ -146,6 +148,19 @@ def grade_design(folder, stage=1, prev=None, skip=()):
         r = {"conflicts": conflicts, "meshes": runs}
         ok = not conflicts and bool(m.meshes) and all(m.hands[h][0] in speeds for h in HAND_SPEED)
         return ok and all(x["passes"] for x in runs), r
+
+    def tolerant():
+        """Every declared mesh passes the train test again with the driven mobile moved MESH_SHIFT away
+        from and towards the driver's axis. Only this check uses these runs."""
+        r, ok = [], bool(m.meshes)
+        for a, ta, b, tb in m.meshes:
+            for label, s in (("away", W.MESH_SHIFT), ("towards", -W.MESH_SHIFT)):
+                x = m.mesh_run(a, ta, b, tb, shift=s)
+                x.update(pair="%s/%s" % (a, b), position=label, shift=s)
+                x["passes"] = x["worst_volume"] <= W.VOL_TOL and x["largest_gap"] <= W.ENGAGE_GAP and x["smallest_drive_overlap"] > W.VOL_TOL
+                ok = ok and x["passes"]
+                r.append(x)
+        return ok, {"meshes": r}
 
     def clear():
         meshing = {frozenset((a, b)) for a, _, b, _ in m.meshes}
@@ -196,8 +211,18 @@ def grade_design(folder, stage=1, prev=None, skip=()):
         info = {n: {"pieces": v[0], "max_deviation": v[1]} for n, v in r.items()}
         return all(v[0] >= 1 and v[1] <= W.THIN_DEV for v in r.values()), info
 
-    table = {"printable": printable, "day_hand": day_hand, "day_place": day_place, "spin": spin, "held": held, "train": train, "clear": clear, "minute": hand("minute"), "hour": hand("hour"),
-             "seconds": hand("seconds"), "coaxial": coaxial, "hands": hands, "size": size}
+    def seated():
+        r = {n: m.seated(n) for n in names if n != "barrel"}
+        bad = sorted(p for d in r.values() for p, mv in d.items()
+                     if not (all(mv[k] > W.VOL_TOL for k in ("+x", "-x", "+y", "-y")) and max(mv["+z"], mv["-z"]) > W.VOL_TOL))
+        return not bad, {"not_seated": bad, "moves": r}
+
+    def light():
+        fixed, mobile = m.volumes()
+        return fixed <= W.FIXED_VOLUME_MAX and mobile <= W.MOBILE_VOLUME_MAX, {"fixed_volume": fixed, "mobile_volume": mobile}
+
+    table = {"seated": seated, "light": light, "printable": printable, "day_hand": day_hand, "day_place": day_place, "spin": spin, "held": held, "train": train, "clear": clear, "minute": hand("minute"), "hour": hand("hour"),
+             "seconds": hand("seconds"), "coaxial": coaxial, "hands": hands, "size": size, "tolerant": tolerant}
     for k in weights:
         checks[k], details[k] = _run(table[k])
     if stage == 3:
