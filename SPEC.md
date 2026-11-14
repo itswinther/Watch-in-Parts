@@ -1,6 +1,6 @@
 # SPEC.md
 
-Version: 0.6 (2026-11-14): version 0.5 (light, seated, tolerant) plus the seven exploit fixes of HANDOFF_EXPLOITS.md (see Decisions in SESSION.md).
+Version: 0.7 (2026-11-14): the one-job watch. One brief (`environment/public/job/PROMPT.md`, generated from the constants with `FORMAT.md` and the datasheets DS-W01..03), one delivery folder graded in one call (`tests/grade_watch.py` without `--stage`): P1 going train and hands, P2 24-hour hand, P3 6-hour variant on the same frame, P4 assembly; reward = 0.5 x weighted share + 0.5 x all pass; nothing frozen, no `light` (Decisions 15:44 and 17:40 in SESSION.md). The staged text below describes version 0.6, which the `--stage N` mode still grades for old runs.
 
 **The task under test is the staged mechanical watch gear train.** Its
 specification, exactly as the agent sees it, is `environment/public/SPEC_WATCH.md`
