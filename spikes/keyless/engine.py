@@ -114,6 +114,10 @@ class Body:
 
 
 class World:
+    # a returning spring pushes free parts on its rest side (relax). A class attribute, so a caller whose
+    # brief says springs never drive other bodies can set World.spring_push = False for every world.
+    spring_push = True
+
     def __init__(self, bodies):
         self.bodies = {b.name: b for b in bodies}
         self.order_spring = [b for b in bodies if b.kind == "spring"]
@@ -126,7 +130,6 @@ class World:
         self.evals = 0
         self.pair_cache = {}
         self.dqs = {}
-        self.spring_push = True         # a returning spring pushes free parts on its rest side (relax)
 
     # ----- poses -----
     def matrix(self, b, q=None):

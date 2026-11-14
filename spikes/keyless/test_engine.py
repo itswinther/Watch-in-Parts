@@ -254,6 +254,27 @@ def main_try_from_constants():
     return abs(got[0] - C.MAIN_TRY) < 1e-3 and abs(got[1] - 0.5 * C.MAIN_TRY) < 1e-3
 
 
+def spring_push_switch():
+    """World.spring_push (class attribute) switches spring pushing off for every new world."""
+    def run():
+        spr = _block("spring", (0.0, -0.5, 0.2), (0.5, 0.5, 0.8), "spring", dof="slide", direction=(1, 0, 0),
+                     rest=math.inf)
+        blk = _block("block", (0.6, -0.5, 0.2), (1.1, 0.5, 0.8), "contact", dof="slide", direction=(1, 0, 0))
+        wall = _block("wall", (3.0, -1, 0), (3.5, 1, 1), "fixed")
+        w = E.World([spr, blk, wall])
+        for _ in range(20):
+            w.relax(spr)
+        return blk.q
+    on = run()
+    E.World.spring_push = False
+    try:
+        off = run()
+    finally:
+        E.World.spring_push = True
+    print("spring pushing on: block to %.3f; off: %.3f" % (on, off))
+    return abs(on - 1.9) < 0.02 and abs(off) < 1e-9
+
+
 def touching_can_be_pushed():
     """A part resting on a fixed face with an overlap between TOL/2 and TOL (touching) can still be
     pushed along that face: one threshold, TOL."""
@@ -370,7 +391,7 @@ if __name__ == "__main__":
            "spring_through_link": spring_through_link(), "pull_moves_no_rider": pull_moves_no_rider(),
            "rider_gives_way": rider_gives_way(), "rider_drives_steep_face": rider_drives_steep_face(),
            "rider_drives_when_chain_blocked": rider_drives_when_chain_blocked(),
-           "many_tiny_patches": many_tiny_patches(), "main_try_from_constants": main_try_from_constants(),
+           "many_tiny_patches": many_tiny_patches(), "spring_push_switch": spring_push_switch(), "main_try_from_constants": main_try_from_constants(),
            "spring_carrier_stops_at_wheel_contact": spring_carrier_stops_at_wheel_contact(),
            "spring_pushes_while_touching_plate": spring_pushes_while_touching_plate(), "touching_can_be_pushed": touching_can_be_pushed(), "fit_clearance": fit_clearance(),
            "phase_gears": phase_gears(), "carried_wheel": carried_wheel(), "force_direction": force_direction(),
