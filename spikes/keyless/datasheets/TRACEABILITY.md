@@ -281,3 +281,17 @@ This is our reading, not legal advice.
 Grossmann (1905), art. 168–169, gives these counts: sliding pinion 16, setting wheels 27 and 18,
 minute wheel 30, cannon pinion 12, ratchet 44, crown wheel 42, winding pinion 18. The comparison with
 the reference is in `../docs/SOLUTION.md`.
+
+## Resolved 14 Nov 2026, 20:15 (A)
+- **Barrel chamber:** B shrank the spring chamber to spring L's listed size (inner diameter 12.12, core 2.02,
+  bore 2.0367 at s; commit 51568b7). The "Open for A and B" item above is closed: DS-101 Rev F ships as is,
+  and Note 1 (fit a spring only in a barrel of its listed D) holds for spring L in the supplied chamber.
+- **Meta wording moved here from the bundle** (B's fresh review, 20:08): the sheets no longer say the suppliers
+  are fictional, that cited documents are copyrighted or not reproduced, that no maker publishes torque for these
+  springs, or that the core radius removes a 47 h versus 28 h ambiguity. Those facts stay true and are recorded
+  here only: the suppliers are fictional; Sellita's SW200-1 documentation and ISO 6425 are copyrighted and cited
+  as facts only, not reproduced; no maker publishes torque or turns for springs L, M and N; and fixing the core at
+  one third of the inner radius settles the 47 h versus 28 h reading of the old sheet.
+- **Corrections:** DS-201's header now points to section 8 for allowables; DS-401 says 1450 MPa is the lowest
+  proof strength *of the steel strip* in AD-DS-201 (brass is 220 MPa); DS-101 Note 5 lists the footnotes that
+  exist ([^d1] to [^d3] and [^d5] to [^d7]; there is no [^d4]).

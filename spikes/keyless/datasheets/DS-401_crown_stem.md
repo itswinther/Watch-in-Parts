@@ -6,8 +6,7 @@
 |---|---|---|---|
 | VM-DS-401 | D | 2026-11-14 | Released |
 
-> **About this document.** Valtorre Microtechnique SA is a fictional supplier, used for this exercise
-> only.
+> **About this document.** Valtorre Microtechnique SA, demonstration series.
 >
 > - **What is real:** the 1:1 dimensions are those of real parts and documents, cited per row. The 1:1
 >   crown withstand ratings (section 5a) are the test values of real watch specifications.
@@ -63,7 +62,7 @@ For the finger torque available on each crown diameter, see VM-AN-501. Finger to
 
 The stem fails in torsion at the square that drives the sliding pinion. The maximum shear stress in a
 solid square of side a under a torque T is τ = T/(0.208·a³).[^uok] The steel yields in shear at
-τ_y = Rp/√3 (von Mises).[^vm] With Rp = 1450 MPa, the lowest proof strength in AD-DS-201,[^alleima]
+τ_y = Rp/√3 (von Mises).[^vm] With Rp = 1450 MPa, the lowest proof strength of the steel strip in AD-DS-201,[^alleima]
 τ_y = 837 MPa.
 
 | Ordering code | 1:1 square A/F (mm) | **Square A/F a (mm)**[^s] | **T at shear yield (N·mm)**[^d1] | **Recommended max., S = 2 (N·mm)**[^d1] |
@@ -100,7 +99,7 @@ Screw the crown fully home on the thread before cutting the stem to length.
 ## Sources
 
 [^s]: Scale s = 41.4 mm / 25.60 mm = 1.617. 41.4 mm is the case diameter of the demonstration movement this series is made for; 25.60 mm is the ETA 2824-2 (11½‴), https://shopb2b.eta.ch/technicaldocuments/index/pdf/id/1883. Scaled length = 1:1 length × 1.617.
-[^sel]: Sellita, SW200-1 Documentation technique, rev 07 (2024): stem thread S 0.90; stem travel ("course de la tige") 0.80 mm; stem length 15.50 mm; crown-to-case gap ≤ 0.1 mm. Cited as facts only; the document is not reproduced (its drawing pages are marked confidential). https://www.sellita.ch/scripts/calibres/images/DocTec_SW200-1_7.pdf
+[^sel]: Sellita, SW200-1 Documentation technique, rev 07 (2024): stem thread S 0.90; stem travel ("course de la tige") 0.80 mm; stem length 15.50 mm; crown-to-case gap ≤ 0.1 mm. https://www.sellita.ch/scripts/calibres/images/DocTec_SW200-1_7.pdf
 [^ess]: Esslinger, crown assortment 83-015-9: Ø 4.0 to 7.0 mm, 0.90 mm thread, 2.0 and 2.5 mm tubes, https://www.esslinger.com/double-o-ring-waterproof-watch-crown-assortment-83-015-9-stainless-steel-12-pieces/
 [^p300]: Perrin, crown, tap 0.90 mm, square, Ø 3.00 mm, https://perrinwatchparts.com/collections/watch-case-parts-for-omega/products/omega-crown-waterproof-tap-090-mm-square-diameter-300-mm-see-all-case-numbers-in-description
 [^p500]: Perrin, crown TI-TIS21, fits stem tap 0.90 mm, Ø 5.00 mm, https://perrinwatchparts.com/en-us/products/tissot-crown-mido-style-ti-tis21-steel-medium-pipe-fits-a-stem-tap-090-mm
@@ -114,6 +113,6 @@ Screw the crown fully home on the thread before cutting the stem to length.
 [^alleima]: Alleima 20C, proof strength 1450 MPa (1.000 to < 1.575 mm), https://alleima.com/en/technical-center/material-datasheets/strip-steel/alleima-20c
 [^mil46374]: MIL-W-46374F, *Watch, Wrist, General Purpose* (US Army), §3.3.6 (p. 8, test §4.7.13): the crown withstands a pull of 5 ± 0.25 lb from the running to the setting position; §3.3.7 (p. 8, test §4.7.12): a fully wound watch is not damaged by 6 ± 0.5 in-oz at the crown. US government work, public domain. https://everyspec.com/MIL-SPECS/MIL-SPECS-MIL-W/download.php?spec=MIL-W-46374F.021322.PDF ; units: 1 lbf = 4.448 N (https://en.wikipedia.org/wiki/Pound_(force)), 1 in-oz = 7.06 N·mm (https://en.wikipedia.org/wiki/Ounce-force)
 [^gg113]: GG-W-113A (1967), §3.9.3: the same 6 ± ½ oz-in at the crown without damage. US government work, public domain. https://everyspec.com/FED_SPECS/G/download.php?spec=GG-W-113A.022400.PDF
-[^iso6425]: ISO 6425:2018, *Divers' watches*, §4.7.2: a force of 5 N applied perpendicular to the crown for 10 min (under overpressure). © ISO: cited as a fact only, not reproduced. https://www.iso.org/standard/66517.html
+[^iso6425]: ISO 6425:2018, *Divers' watches*, §4.7.2: a force of 5 N applied perpendicular to the crown for 10 min (under overpressure). https://www.iso.org/standard/66517.html
 [^d2]: Not published at this scale; derived as the 1:1 value × s² = 2.615 for forces and × s³ = 4.229 for torques (geometric similarity, same materials: the stresses are unchanged). Tolerances scale with the value.
 [^d1]: Not published; calculated as T = 0.208·a³·1450/√3 with the scaled a ([^uok], [^vm], [^alleima]). The recommended value divides by S = 2 (https://danotes.mech.uwa.edu.au/SSS/safety/safety.html).

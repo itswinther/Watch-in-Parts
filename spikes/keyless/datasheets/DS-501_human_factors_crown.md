@@ -8,8 +8,7 @@ at the actual crown diameter.
 |---|---|---|---|
 | VM-AN-501 | C | 2026-11-14 | Released |
 
-> **About this document.** Valtorre Microtechnique SA is a fictional supplier, used for this exercise
-> only. The measured torques, the pinch strengths, the friction values and the design limit for knobs
+> **About this document.** Valtorre Microtechnique SA, demonstration series. The measured torques, the pinch strengths, the friction values and the design limit for knobs
 > come from the cited studies and standards. The recommended winding torque (section 5) is
 > **calculated**, as its footnote states.
 

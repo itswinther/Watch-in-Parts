@@ -6,15 +6,14 @@
 |---|---|---|---|
 | VM-DS-101 | F | 2026-11-14 | Released |
 
-> **About this document.** Valtorre Microtechnique SA is a fictional supplier, used for this exercise
-> only.
+> **About this document.** Valtorre Microtechnique SA, demonstration series.
 >
 > - **What is real:** each spring in Table 1 is a real catalogue size, cited row by row. This series
 >   reproduces it with every length multiplied by s = 1.617.
 > - **What is measured:** one reference torque measurement on a real 11½‴ calibre (Table 2a), and a
 >   published winding/unwinding ratio. Both are cited as facts.
-> - **What is calculated:** no maker publishes torque or turns for these particular springs, so their
->   performance figures are calculated, not measured. Note 5 and the footnotes give the method and the
+> - **What is calculated:** the torque and turns figures for these springs are calculated, not
+>   measured. Note 5 and the footnotes give the method and the
 >   sources.
 >
 > Both the 1:1 size and the scaled size are given. **Use the scaled columns** for this series.
@@ -198,7 +197,7 @@ full wind, which is no more than M_el.
    **70.1 N·mm** in this series.[^sel][^d7]
 3. **Handling.** Use a mainspring winder. Do not wind springs into the barrel by hand.
 4. **Scaled springs.** At this scale the strip is about 0.11 to 0.22 mm thick.
-5. **Method.** Footnotes [^d1] to [^d7].
+5. **Method.** Footnotes [^d1] to [^d3] and [^d5] to [^d7].
 
 ## Sources
 
@@ -230,7 +229,7 @@ full wind, which is no more than M_el.
 [^d3]: Not published; derived as M_el = Rp0.2·h·t²/6 (rectangular section, Z = b·t²/6, https://www.codecogs.com/page/1150/v/3359), with Rp0.2 = 2475 MPa from [^vac] and the scaled h and t.
 [^gro108]: J. Grossmann, *Lessons in Horology* (1905), art. 108 (p. 63: "the custom, in practice, to make the radius of the hub equal to one-third of the interior radius of the barrel"), art. 110 (p. 64) and art. 111 (pp. 64 to 66: the proportion is "established by long practice"; worked case barrel ID 17.4 mm, hub Ø 5.8 mm, spring 0.18 mm, so hub Ø ≈ 32 × thickness). Public domain. https://archive.org/download/lessonsinhorolog00gros/lessonsinhorolog00gros_djvu.txt
 [^saun]: C. Saunier, *The Watchmaker's Hand-Book*, art. 517 "The Arbor-Nut": the diameter of the nut is usually one third of the inside diameter of the barrel, larger for thick springs and smaller for thin ones. Public domain. https://www.gutenberg.org/ebooks/76850
-[^sel]: Sellita, SW200-1 Documentation technique, rev 04 (02.02.2015), p. 3: torque half a turn from full wind 11.86 N·mm; after 24 h 8.83 N·mm; slipping bridle 12.21 to 16.57 N·mm. Cited as facts only; the document is copyrighted and not reproduced. Third-party copy: https://watch.co.uk/download/sw200-ml-pdf
+[^sel]: Sellita, SW200-1 Documentation technique, rev 04 (02.02.2015), p. 3: torque half a turn from full wind 11.86 N·mm; after 24 h 8.83 N·mm; slipping bridle 12.21 to 16.57 N·mm. Copy: https://watch.co.uk/download/sw200-ml-pdf
 [^niv]: Nivarox-FAR, US 11,320,786 B2 (mainspring), summary, claim 7 and FIG. 2: unwinding torque at least 80 % of winding torque, 84 % measured after half a turn; spring 500 mm × 90 µm, core Ø 1.5 mm. US patent text, public domain. https://patents.google.com/patent/US11320786B2/en
 [^d6]: Not published; derived as r = D/6 with the scaled D of Table 1, and N from [^d1] at that r. Hub Ø/t = (D/3)/t.
 [^d7]: Not published at this scale; derived as the 1:1 value from [^sel] × s³ = 4.229 [^d5]. Ratios to M½ are computed from [^sel].
@@ -241,5 +240,4 @@ full wind, which is no more than M_el.
 
 The arbor core (the hub the inner coil winds onto) is one third of the barrel's inner radius:
 Grossmann, *Lessons in Horology* (1905), art. 108–111, and Saunier, *Treatise on Modern Horology*,
-art. 517. With this stated, the turns of the mainspring are fixed, which removes the 47 h versus 28 h
-ambiguity.
+art. 517. This fixes the number of turns of the mainspring.

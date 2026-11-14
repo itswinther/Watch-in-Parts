@@ -6,7 +6,7 @@
 |---|---|---|---|
 | RL-DS-301 | D | 2026-11-14 | Released |
 
-> **About this document.** Rubis Lumen SA is a fictional supplier, used for this exercise only.
+> **About this document.** Rubis Lumen SA, demonstration series.
 >
 > - **What is real:** the 1:1 sizes are real catalogue items, cited per table. The tolerances and
 >   friction come from a real jewel-bearing maker.
