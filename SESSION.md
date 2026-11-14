@@ -9,7 +9,7 @@ table. Everything below "Session entries" is append-only, newest at the bottom.
 | ID | Workstream | Owner | Status | Last update |
 | --- | --- | --- | --- | --- |
 | A | Harness wiring | Mikael | session running. No starter kit exists (see 02:20 entry). Docker and Harbor 0.25.0 installed locally; building the Harbor task around B's grader next | 2026-11-14 02:20 |
-| B | Reference script and grader (H1) | itswinther | 6 of 6 agent attempts scored 1.0 (3 models, 2 with a clean context), each in under 8 minutes with one submission. H1 has NO GAP. Waiting for a human decision | 2026-11-14 02:27 |
+| B | Reference script and grader | itswinther | H1 has no gap (6 of 6 agents scored 1.0). NOW: building instance H2 (agent places four bodies, picks the assembly order, score is continuous on enclosure volume against a reference) | 2026-11-14 02:49 |
 | C | Hold the Line spike | unassigned | not started | |
 | D | Mentor questions, anchors, transcripts | unassigned | not started | |
 | E | Analysis, demo and story | Yoseph | paused: Yoseph is not working overnight | 2026-11-14 01:40 |
@@ -60,6 +60,7 @@ Append one line per decision: time, decision, who agreed.
 
 - 2026-11-14 00:50 Working plan is the second review, updated version. SPEC.md 0.1 is taken from it.
 - 2026-11-14 02:20 Organiser contract replaces the "starter kit wins" rule: the environment is a plain Harbor task (`instruction.md`, `task.toml`, `environment/Dockerfile`, `tests/`, `solution/`), run as `harbor run -p ./my-task -a opencode -m provider/model`, reward is one number 0..1 in `/logs/verifier/reward.txt`. Submission also needs at least one Harbor run log with its score and a short README. Source: organiser message relayed by Mikael.
+- 2026-11-14 02:49 H1 is retired as the judged instance: six agent attempts, three models, all scored 1.0. itswinther asked B to build instance H2 with four changes: continuous score against an optimised reference, agent-chosen placement of several bodies, agent-chosen assembly order, and the H1 loopholes closed. Agreed: itswinther.
 
 ## Proposed spec changes
 
@@ -247,3 +248,11 @@ Template:
 - Files changed: CLAUDE.md (internal note removed), `environment/tools_cli.py` (help text), `transcripts/agent1` to `agent6` (submitted files, agent scripts, grader details; full transcripts for 5 and 6), SESSION.md.
 - Need from others: a human decision on the open question "harden Board in a Box or move to Hold the Line".
 - Next: nothing built until that decision.
+
+### 2026-11-14 02:49 | B instance H2 (starting) | itswinther + Claude
+- Did: starting H2 on itswinther's instruction. Design: supplied bodies are board A (unchanged), a second board B with a card slot, the battery and a speaker. The agent chooses every body's final pose and the insertion order, and makes `base.stl` plus a flat `lid.stl`. Score = gates x (0.3 p^2 + 0.7 q if every check passes), where q falls linearly with the bounding-box volume of the printed parts, 1 at the reference volume. Code goes in `geometry/h2.py`, `solution/reference_h2.py`, `tests/grade_h2.py`; H1 files stay as they are.
+- Verified by (command and result): nothing yet.
+- Not verified, or assumed: whether H2 produces a gap. No agent runs until itswinther says so.
+- Files changed: SESSION.md.
+- Need from others: nothing.
+- Next: report when the reference and anchors pass.
