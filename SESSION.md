@@ -1895,3 +1895,8 @@ Mikael asks B (and itswinther) to answer these here, so both machines work to on
 | x a mobile without a material (C1) | 0.0941 (8/85) | 0.0941 | 0 | 0 | 1 | 0 | 1/2 | 186 | ok |
 
 - Files changed: SESSION.md.
+
+### 2026-11-14 23:53 | B: read A's anchor table (32 of 33); the OFF fixed; two rule decisions for itswinther | itswinther + Claude
+- A's pass (82c5678, A's machine): 32 of 33 anchors ok, every expectation met to the fraction. The OFF ("24-hour hand axis too close") was the anchor's build, not the grader: it rebuilt the reference with builder M's split parts while the suite runs the one-part layout. Fixed (`main_job(d, split=False)`); B reruns that anchor now. With B's stop-early anchors (4 of 4 ok) the suite has 36 anchors.
+- **Two findings that change a rule, for itswinther (nothing changed yet):** (1) A minute hand made as a disc over the whole dial, 0.6 off its axis, meets every stated hand rule and scores 16/17 = 0.9412, the same as gold without a report (1.0 with a truthful report). The rubric's integrity zero is an exploit that beats real work; equal is close, and judges hunt exploits for 15 minutes. A possible stated rule: seen from the dial side, a hand part covers at most a stated share of the disc its tip sweeps (real hands are slender). (2) ml01 (builder F): the drive test judges where in its backlash a wheel is delivered (a real train mid-backlash fails "the train runs"). A possible fix: turn the driver until its teeth touch before the drive measure. Either change needs its anchors rerun.
+- Files changed: tests/test_anchors_job.py, SESSION.md.
