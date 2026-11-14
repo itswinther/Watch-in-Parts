@@ -2,11 +2,14 @@
     python solution/reference_watch.py OUT_DIR
 writes OUT_DIR/stage1 .. OUT_DIR/stage4, each with movement.json and parts/*.step (stage4 also assembly.json).
     python solution/reference_watch.py OUT_DIR --job [--one-part-mobiles]
+    python solution/reference_watch.py OUT_DIR --job --keyless [--check]
 writes OUT_DIR as one delivery folder (Decisions 2026-11-14 15:44): movement.json (the stage-2 design: 8-hour
 barrel, with the 24-hour hand), variant_6h.json (the stage-3 design: same frame, 1/6 barrel turn per hour),
 assembly.json (order and paths for movement.json) and parts/*.step, one file per part name for both movements.
 In the delivery the going train and the minute wheel are brass wheels on steel pinion arbors, two parts each
 (split_wheels, part_materials); --one-part-mobiles keeps them one part each, as in the stage folders.
+--keyless: the five-part delivery, with crown winding (Part 5) from workstream A's keyless v2 reference
+(main_job_keyless); without it nothing changes.
 Parts are built on the CAD kernel (geometry/watch_gears_cad.py, CadQuery/OpenCASCADE) and written as STEP.
 Like an agent, each stage copies the part files it keeps from the stage before and writes only new ones.
 
@@ -336,16 +339,21 @@ ORDER = ["main_plate", "barrel", "barrel_cock", "third_54", "centre_36", "fourth
 ORDER_8H = [{"third_54": "third", "centre_36": "centre"}.get(n, n) for n in ORDER if n != "barrel_cock"]
 
 
-def build_assembly(folder, order=None):
-    """Every part comes straight down from above, in `order` (default ORDER)."""
+def build_assembly(folder, order=None, m=None, given=None):
+    """Every part comes straight down from above, in `order` (default ORDER).
+    m: the movement, already loaded (with its keyless parts attached when they are installed too); given:
+    {part: path} taken as they are (the keyless parts' paths from workstream A's fragment)."""
     order = ORDER if order is None else order
-    m = W.load_movement(folder)
-    allp = m.all_parts()
+    m = W.load_movement(folder) if m is None else m
+    allp = m.all_parts(keyless=True)
     if sorted(order) != sorted(allp):
         raise RuntimeError("assembly order does not list every part once: %s" % sorted(set(order) ^ set(allp)))
     lo, hi = m.assembly_box()
     paths = {}
     for n in order:
+        if given and n in given:
+            paths[n] = given[n]
+            continue
         bb = allp[n].bounding_box()
         lift = hi[2] + 0.5 - bb[2]
         k = int(math.ceil(lift / 0.19))
@@ -553,9 +561,106 @@ def main_job(out, split=True):
           "only in variant", sorted(set(names(doc3)) - set(names(doc2))), "only in movement", sorted(set(names(doc2)) - set(names(doc3))))
 
 
+# ---------------- the five-part delivery: the job reference plus workstream A's keyless v2 reference ----------------
+# A's script, run as it is (B neither copies nor edits it): spikes/keyless/reference_v2.py OUT --ref REF_JOB --deliver
+# DELIVERY writes the job reference with the keyless parts in parts/, the `keyless` section and the friction_on split
+# (cannon pinion and minute hand on the centre arbor) in movement.json, and A's fixed parts in `fixed` of both
+# movements; a part A cannot yet write as a STEP solid is a placeholder file with its solid in DELIVERY_solids/
+# (solution/keyless_v1_delivery.py's scheme). --assembly-only DELIVERY replays A's installation fragment (the keyless
+# parts after the going train, A's Q3 answer) and writes the merged order and A's paths to assembly_keyless.json.
+KEYLESS_V2 = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "spikes", "keyless",
+                          "reference_v2.py")
+REPORT_PARTS_KEYLESS = REPORT_PARTS + ("P5",)
+
+
+def _run_a(args, log):
+    """A's script in its own interpreter (subprocess: fork and exec at once, nothing of this process runs there)."""
+    import subprocess
+    with open(log, "a") as f:
+        f.write("$ %s\n" % " ".join(args))
+        f.flush()
+        p = subprocess.run([sys.executable] + args, stdout=f, stderr=subprocess.STDOUT)
+    if p.returncode != 0:
+        raise RuntimeError("%s exited %d (log: %s)" % (os.path.basename(args[0]), p.returncode, log))
+
+
+def _clean_split(doc):
+    """Each mobile's part_materials limited to that mobile's parts. A's split copies the centre mobile's entry (the
+    brass centre wheel) onto the new cannon mobile, which the format rejects (a part_materials key must be a part of
+    its mobile). Returns the names of the mobiles changed."""
+    changed = []
+    for name, mob in doc["mobiles"].items():
+        pm = mob.get("part_materials")
+        if pm is None:
+            continue
+        keep = {k: v for k, v in pm.items() if k in mob["parts"]}
+        if keep != pm:
+            changed.append(name)
+            if keep:
+                mob["part_materials"] = keep
+            else:
+                del mob["part_materials"]
+    return changed
+
+
+def main_job_keyless(out, split=True, check=False):
+    """The five-part delivery in OUT: main_job (Parts 1 to 4) in OUT_keyless_work/job, A's keyless v2 reference on it
+    (KEYLESS_V2 --deliver), A's assembly fragment merged after the going train into assembly.json (A's order and A's
+    paths for the keyless parts; B's straight-down paths for the rest, recomputed for the assembly box with the
+    keyless parts in it), and report.json claiming P1 to P5. A placeholder part file (one of A's parts not yet a STEP
+    solid) has its solid in OUT_solids/; grade such a delivery with `solution/keyless_v1_delivery.py grade-job`.
+    check: also run A's --check (collisions with B's parts, AT-0 on the joined model, the stem in every position)."""
+    import keyless_v1_delivery as KD
+    out = os.path.abspath(out)
+    work = out.rstrip("/") + "_keyless_work"
+    sol, wsol = out.rstrip("/") + "_solids", os.path.join(work, "delivery_solids")
+    for d in (work, out, sol):
+        if os.path.isdir(d):
+            shutil.rmtree(d)
+    os.makedirs(work)
+    log = os.path.join(work, "keyless_v2.log")
+    ref, dl, kv2 = os.path.join(work, "job"), os.path.join(work, "delivery"), os.path.join(work, "kv2")
+    main_job(ref, split)
+    _run_a([KEYLESS_V2, kv2, "--ref", ref] + (["--check"] if check else []) + ["--deliver", dl], log)
+    mp = os.path.join(dl, "movement.json")
+    with open(mp) as f:
+        doc = json.load(f)
+    cleaned = _clean_split(doc)
+    with open(mp, "w") as f:
+        json.dump(doc, f, indent=1)
+    _run_a([KEYLESS_V2, kv2, "--ref", ref, "--assembly-only", dl], log)
+    with open(os.path.join(work, "assembly_keyless.json")) as f:
+        frag = json.load(f)
+    if not frag["passed"]:
+        raise RuntimeError("A's assembly fragment does not replay cleanly: %s" % frag["failures"])
+    given = {n: np.array(v, float).reshape(-1, 4, 4).tolist() for n, v in frag["paths"].items()}
+    m = W.load_movement(dl, cache=KD.solids_cache(dl))
+    m.attach_keyless()
+    plan = build_assembly(dl, frag["order"], m=m, given=given)
+    with open(os.path.join(dl, "assembly.json"), "w") as f:
+        json.dump(plan, f)
+    with open(os.path.join(dl, "report.json"), "w") as f:
+        json.dump({"parts": {pid: "pass" for pid in REPORT_PARTS_KEYLESS}}, f, indent=1)
+    shutil.move(dl, out)
+    placeholders = sorted(f[:-4] for f in os.listdir(wsol)) if os.path.isdir(wsol) else []
+    if placeholders:
+        shutil.move(wsol, sol)
+    with open(os.path.join(work, "step_report.json")) as f:
+        steps = json.load(f)
+    print("five-part delivery", out, "| parts of the keyless section", len(m.keyless_names), "| order", len(plan["order"]),
+          "| part_materials limited to their mobile:", cleaned or "none",
+          "| placeholder part files (solids in %s):" % sol, placeholders or "none",
+          "| STEP failures:", {n: r.get("why") for n, r in steps.items() if not r.get("step")})
+    return placeholders
+
+
 if __name__ == "__main__":
-    args = [a for a in sys.argv[1:] if a not in ("--job", "--one-part-mobiles")]
-    if "--job" in sys.argv[1:]:
-        main_job(args[0] if args else "out_job", split="--one-part-mobiles" not in sys.argv[1:])
+    flags = ("--job", "--one-part-mobiles", "--keyless", "--check")
+    args = [a for a in sys.argv[1:] if a not in flags]
+    split = "--one-part-mobiles" not in sys.argv[1:]
+    if "--job" in sys.argv[1:] and "--keyless" in sys.argv[1:]:
+        main_job_keyless(args[0] if args else "out_job", split, check="--check" in sys.argv[1:])
+    elif "--job" in sys.argv[1:]:
+        main_job(args[0] if args else "out_job", split=split)
     else:
         main(args[0] if args else "out")

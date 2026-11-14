@@ -4,6 +4,7 @@ Not a reference: A's v1 does not fit B's frame rigidly (builder K's fitting pass
 
     python3 solution/keyless_v1_delivery.py build /abs/REF_JOB /abs/OUT [--layout under|above|below] [--diag]
     python3 solution/keyless_v1_delivery.py grade /abs/OUT [--force] [--jobs N] [--work /abs/DIR]
+    cd tests && python3 -I ../solution/keyless_v1_delivery.py grade-job /abs/OUT --reward R [--details D]
 
 build: REF_JOB is `python3 solution/reference_watch.py REF_JOB --job`. OUT gets a copy of it with, in movement.json,
   - the centre mobile split: `centre` (the centre wheel) and `cannon` (cannon pinion and minute hand,
@@ -20,7 +21,11 @@ build: REF_JOB is `python3 solution/reference_watch.py REF_JOB --job`. OUT gets 
 grade: loads OUT's movement.json with the part cache primed with those solids (key: name and the placeholder's
   bytes, as geometry/watch.py's cache keys them) and runs tests/grade_watch.py grade_keyless_part (Part 5 only,
   whatever KEYLESS_IN_JOB says). --force runs AT-1 to AT-6 even if the rest gate fails (diagnosis). Prints and
-  writes OUT_p5.json."""
+  writes OUT_p5.json.
+grade-job: tests/grade_watch.py's one-job command (every part KEYLESS_IN_JOB grades, reward and details files as
+  usual) on OUT with the same primed cache, for a delivery whose keyless part files are placeholders (for example
+  `solution/reference_watch.py OUT --job --keyless` while some of workstream A's parts are not yet STEP solids).
+  Prints the wall time and peak RSS (this process; the largest child)."""
 import hashlib
 import json
 import os
@@ -133,16 +138,56 @@ def build(ref, out, layout="under", diag=False):
     return info
 
 
-def grade(out, force=False, jobs=1, work=None):
+def solids_cache(out):
+    """The part cache primed with OUT_solids/<name>.stl, keyed as geometry/watch.py keys a part file (name and the
+    sha256 of the placeholder's bytes); {} when there is no OUT_solids folder (every part file is a real one)."""
     from geometry import watch as W
     from geometry import core
-    import grade_watch as G
     sol = out.rstrip("/") + "_solids"
     cache = {}
+    if not os.path.isdir(sol):
+        return cache
     for f in sorted(os.listdir(sol)):
         n = f[:-4]
         cache[(n, hashlib.sha256(_placeholder(n)).hexdigest())] = core.tris_to_manifold(
             core.read_stl(os.path.join(sol, f), W.MAX_TRIANGLES, W.MAX_STL_BYTES))
+    return cache
+
+
+def grade_job(argv):
+    """tests/grade_watch.py's one-job command (`main(argv)`, every part the switch grades) with the part cache primed
+    by solids_cache(): a placeholder part file reads as its solid. Without an OUT_solids folder this is the grader
+    as it is. Prints the wall time and the peak RSS of this process and of its children (the P5 interpreters)."""
+    import resource
+    from geometry import watch as W
+    import grade_watch as G
+    folder = [a for i, a in enumerate(argv) if not a.startswith("--") and (i == 0 or not argv[i - 1].startswith("--"))][0]
+    pre = solids_cache(folder)
+    print("primed part cache: %s" % (sorted(n for n, _ in pre) or "none (no placeholders)"), flush=True)
+    load = W.load_movement
+
+    def primed(folder_, name="movement.json", cache=None, **kw):
+        if cache is None:
+            cache = {}
+        for k, v in pre.items():
+            cache.setdefault(k, v)
+        return load(folder_, name, cache=cache, **kw)
+    W.load_movement = primed
+    t = time.time()
+    try:
+        rc = G.main(argv)
+    finally:
+        W.load_movement = load
+    me, ch = resource.getrusage(resource.RUSAGE_SELF), resource.getrusage(resource.RUSAGE_CHILDREN)
+    print(json.dumps({"wall_s": round(time.time() - t, 1), "peak_rss_mb_self": round(me.ru_maxrss / 1024, 1),
+                      "peak_rss_mb_largest_child": round(ch.ru_maxrss / 1024, 1)}), flush=True)
+    return rc
+
+
+def grade(out, force=False, jobs=1, work=None):
+    from geometry import watch as W
+    import grade_watch as G
+    cache = solids_cache(out)
     t = time.time()
     m = W.load_movement(out, cache=cache)
     print("movement.json loaded in %.0f s; keyless parts %s; friction %s" % (time.time() - t, m.keyless_names, m.friction))
@@ -165,6 +210,8 @@ def main(argv):
         layout = argv[argv.index("--layout") + 1] if "--layout" in argv else "under"
         build(os.path.abspath(argv[1]), os.path.abspath(argv[2]), layout, "--diag" in argv)
         return 0
+    if argv[:1] == ["grade-job"]:
+        return grade_job(argv[1:])
     if argv[:1] == ["grade"]:
         jobs = int(argv[argv.index("--jobs") + 1]) if "--jobs" in argv else 1
         work = os.path.abspath(argv[argv.index("--work") + 1]) if "--work" in argv else None
