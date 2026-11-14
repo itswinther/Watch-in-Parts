@@ -28,12 +28,14 @@ Values that belong to a supplied item are taken from that item's supplier docume
 | DS-W04 | Parts 1 and 3, check 14 |
 | VM-DS-101 | Parts 1 and 3, check 14 |
 | AD-DS-201 | Parts 1 and 3, check 14 |
+| VM-DS-401 | Part 5: the winding stem's travel from position 1 to position 2 (section 4, Table 2) |
 
 ## 3. Acceptance
 
-The inspection has four parts. Each part is judged on its own, even when another part fails. Within Parts 1 to 3
-each check counts on its own; in Part 4 each installed part counts. The delivery as a whole is accepted only when
-every condition and every check of all four parts passes: everything must work.
+The inspection has five parts. Each part is judged on its own, even when another part fails. Within Parts 1 to 3
+each check counts on its own; in Part 4 each installed part counts; in Part 5 each step counts on its own. The
+delivery as a whole is accepted only when every condition and every check and step of all five parts passes:
+everything must work.
 
 **Designer's statement.** The delivery may include the designer's own statement of the result of each part of this
 inspection, in the file `report.json` (layout in `/app/FORMAT.md`): `pass` (the part passes in full: every
@@ -48,8 +50,8 @@ by this table:
 | `not_tested` | 0.5 | 0.5 |
 
 A part that `report.json` leaves out counts as `not_tested`, and so does every part when `report.json` is absent
-or not valid. The statement's agreement score h is the mean of these points over the four parts, or 0 if that mean
-is below 0. The delivery's acceptance figure is its parts figure (the result of the four parts together) times
+or not valid. The statement's agreement score h is the mean of these points over the five parts, or 0 if that mean
+is below 0. The delivery's acceptance figure is its parts figure (the result of the five parts together) times
 (0.75 + 0.1 x h) / 0.85. The statement changes no other result of the inspection.
 
 
@@ -66,8 +68,9 @@ is below 0. The delivery's acceptance figure is its parts figure (the result of 
   The barrel is the mobile `barrel` (its drum and its arbor together, as one solid); its axis is the axis of the
   barrel as supplied (DS-W01, section 3).
 - **Speeds** are worked out from the tooth counts declared under `meshes`, as exact fractions, starting from the
-  barrel at the speed, and in the running sense, of the speed class that the work order gives for the build
-  being judged (DS-W01, section 4). Every declared mesh is external: its two mobiles turn in opposite directions.
+  barrel at the speed, and in the running sense, of the speed class that the work order gives for the build being
+  judged (DS-W01, section 4). Every declared mesh is external: its two mobiles turn in opposite directions. A
+  mobile declared `friction_on` turns with the mobile it names, at the same speed (`/app/FORMAT.md`).
 - **Computing time.** Each condition and each check has up to 1800 s of elapsed (wall-clock) time on the
   inspection machine, and the whole inspection has up to 7200 s; a condition or check that runs out of time, or
   that would start after the whole inspection's time has run out, fails.
@@ -228,6 +231,10 @@ the 6-hour variant.
 Conditions: C1 of Part 1 for `movement.json`, and `assembly.json` is valid JSON with a list `order` and an object
 `paths` (`/app/FORMAT.md`).
 
+The parts of `movement.json` include every part of its `keyless` section (Part 5), the stem's parts among them:
+each is put in, tested and counted below exactly as any other part, and one left out of `order` stands in its
+assembled position from the start.
+
 The parts of `movement.json` and the barrel are put in one at a time, in the order of `order`. A name in `order`
 that is not one of these parts is ignored; a name that appears more than once counts at its first place only. A
 part that is not in `order` is not installed and stands in its assembled position from the start, so every part
@@ -247,3 +254,85 @@ these rules:
 A part that breaks a rule is not installed, but it still stands in its assembled position for the parts that
 follow. Part 4 is judged by the share of the parts (the barrel included) that are installed; it passes in full
 when every part is installed.
+
+## 9. Part 5: crown winding (`movement.json`, its `keyless` section)
+
+The 8-hour build, with its crown-winding works, is used on a simulated test rig the way an owner uses a watch.
+
+Conditions. If one fails, Part 5 fails and none of its steps passes.
+
+- **C1 Files** of Part 1 for `movement.json`, and its `keyless` section and every part file the section names are
+  valid as `/app/FORMAT.md` describes.
+
+The test rig.
+
+- **Bodies.** The rig moves rigid bodies, each with one degree of freedom: the stem (the parts of `keyless.stem`),
+  which the rig turns about the stem's line and moves along it; the barrel arbor (the arbor of the supplied
+  barrel, DS-W01 section 3, with the parts of `keyless.arbor`), which turns about the barrel's axis; each mobile
+  of `keyless.mobiles`, as declared; and, turning freely about their axes, every mobile declared `friction_on` and
+  every mobile that the declared meshes drive from the barrel only through such a mobile. Everything else, the
+  frame, the barrel's drum and every other mobile of `mobiles`, is one fixed body: the going train stands while
+  the crown is used. The minute hand's mobile is called the minute mobile below.
+- **Positions and directions.** Position 1 (pushed in) is the stem as delivered. Position 2 (pulled out) is the
+  stem moved outwards along its line by the winding stem's travel from position 1 to position 2 (VM-DS-401,
+  section 4, Table 2, this series). Forward is turning the crown clockwise as seen from outside the case, looking
+  in along the stem; backward is the opposite. The arbor winds when it turns in the barrel's running sense
+  (DS-W01, section 4).
+- **Touching.** Two bodies touch, and do not interpenetrate, while they intersect by at most 0.0008456 mm3.
+- **Friction.** Clean, dry contacts, brass on steel: coefficient of friction static 0.51, sliding 0.44
+  (Engineering ToolBox, "Friction and Friction Coefficients"). A body pushed by another moves the least distance
+  along its degree of freedom that the contact, with static friction, allows; if friction prevents it from giving
+  way, it does not.
+- **Springs.** Spring-loaded mobiles (`spring`) are urged towards their rest side by springs much lighter than the
+  mainspring. They give way first when pushed; if they cannot give way, they are pushed along like any body. They
+  return towards rest until they touch something; their springs never drive other bodies.
+- **Mainspring.** The mainspring always urges the barrel arbor against winding. It is much stronger than any
+  spring and pushes whatever is in its way.
+- **The crown** is turned in steps of 3 degrees and pulled or pushed in steps of 0.04851 mm. A step that cannot
+  proceed is blocked, and nothing moves. While pulling or pushing, a blocked step is retried with the crown rocked
+  by up to 15 degrees either way, in steps of 1.5 degrees, to let teeth find their gaps.
+- **At the start** of each step below, bodies may overlap and settle by up to 0.4851 mm of surface travel.
+- **Starting states.** AT-1 starts from a let-down mainspring. AT-2 starts from a fresh movement whose barrel
+  arbor the rig has turned in the winding sense by 45 degrees itself (the arbor, not the crown). AT-3 starts where
+  AT-2 ends; AT-4, AT-5 and AT-6 each start from the state at the end of AT-2 (crown let go, in position 1).
+
+Steps. Each passes or fails on its own.
+
+0. **AT-0 Assemble.** At rest, as delivered, no two bodies intersect by more than 0.0008456 mm3. Every mobile of
+   `keyless.mobiles` and every freely turning mobile of the going train, moved 0.4851 mm across its axis in each
+   of two perpendicular directions (and, for one that turns, along its axis each way), intersects some other body
+   by more than 0.0008456 mm3. Every part of the `keyless` section except the stem's lies within the inner radius
+   of the case named in the work order (DS-W02, section 2, column "Inner radius (mm)") of the vertical line
+   through `case_centre`; the whole movement with these parts is no taller than the inner height of that case
+   (DS-W02, section 2, column "Inner height along the axis (mm)"); and stem material reaches at least 0.8085 mm
+   beyond that radius.
+1. **AT-1 Wind.** The crown, in position 1, is turned forward 1 turn. It is never blocked; it takes between 3 and
+   12 crown turns per turn of the barrel arbor (measured over this turn); the minute mobile moves at most 1
+   degree.
+2. **AT-2 Hold.** The crown is let go for 40 steps: it is free to turn, pushed like any free body, and the
+   mainspring pulls back. Every 5 steps the rig taps the movement: each free body moves up to 0.08085 mm (surface
+   travel) in the direction it can move furthest, and spring-loaded bodies return towards rest. The arbor runs
+   back at most 30 degrees in all, and over the last 10 steps it moves at most 0.3 degree: it is held.
+3. **AT-3 Run.** Fully wound, the mainspring stores the turns of the arbor that VM-DS-101 gives for the spring the
+   supplied barrel holds (Table 3, var. L, column "N at r = D/6"); the run-back measured in AT-2 is lost from
+   that, and while the watch runs the barrel turns at the speed class of the 8-hour build (DS-W01, section 4), so
+   the power reserve is (capacity - run-back) x the hours per barrel turn. It is at least 38 hours. The barrel is
+   free to run: with the crown in position 1, the arbor is turned in the winding sense by itself through 20
+   degrees in steps of 0.5 degree, and no step is blocked. It is still coupled: then the crown is turned forward
+   30 degrees; it is never blocked and the arbor winds by more than 1 degree.
+4. **AT-4 Backward.** The crown, in position 1, is turned backward 360 degrees. It is never blocked; the arbor
+   moves at most 1 degree in the winding sense and loses at most 4 degrees; the minute mobile moves at most 1
+   degree. Then the crown is turned forward 30 degrees: never blocked, and the arbor winds by more than 1 degree.
+5. **AT-5 Set.** The crown is pulled out to position 2, stopping at 5 evenly spaced positions (both ends
+   included). At each stop, from the same state, the crown is turned 24 degrees forward and, separately, 24
+   degrees backward. No test turn is blocked, and none drives both trains (the arbor winding by more than 1 degree
+   and the minute mobile moving by more than 1 degree). At position 1 the forward test turn winds and does not
+   set; at position 2 it sets and does not wind. Then, in position 2, the crown is turned 90 degrees forward and
+   90 degrees back: it is never blocked, the minute mobile turns at least 5 degrees each way, and the arbor never
+   loses more than 4 degrees.
+6. **AT-6 Return.** From position 2 the crown is pushed back in, stopping at the same positions in reverse order,
+   with the same test turns and the same rules (never blocked, never both trains). Then, in position 1, it is
+   turned forward 90 degrees: it is never blocked, and the arbor winds by more than 1 degree.
+
+Part 5 is judged by the steps that pass. The rig runs Part 5 as one, within at most 5400 s of the whole
+inspection's time; a step not finished by then fails.

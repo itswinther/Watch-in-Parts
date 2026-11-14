@@ -1080,6 +1080,21 @@ hand speeds and directions, and the weights of the checks.
 | LEWIS_Y[998] (geometry/data/lewis_y.json) | 0.5254 | `datasheets/DS-W04_gear_rating.md` | 3. Lewis form factor | 990 | +8 |
 | LEWIS_Y[999] (geometry/data/lewis_y.json) | 0.5255 | `datasheets/DS-W04_gear_rating.md` | 3. Lewis form factor | 990 | +9 |
 | LEWIS_Y[1000] (geometry/data/lewis_y.json) | 0.5255 | `datasheets/DS-W04_gear_rating.md` | 3. Lewis form factor | 1000 | +0 |
+| keyless PULL: 0.80 x S = 1.2936, used as 1.294 (geometry/keyless_job.py); VM-DS-401 prints it | 1.294 | `datasheets/DS-401_crown_stem.md` | 4. Winding stem | Travel from position 1 (winding) to the setting position (0.30 to the date position, then 0.50) | This series |
+| keyless TOL x S^3 (A's engine.TOL, rounded) | 0.0008456 | `datasheets/QA-W100_inspection.md` | 9. Part 5 | **Touching.** | statement |
+| keyless MU_STATIC, MU_SLIDING (A's constants) | (0.51, 0.44) | `datasheets/QA-W100_inspection.md` | 9. Part 5 | **Friction.** | statement |
+| keyless STEP_DEG, PULL_STEP x S, WIGGLE_DEG, the rocking step (literal 1.5 in A's grade._pull) | (3.0, 0.04851, 15.0, 1.5) | `datasheets/QA-W100_inspection.md` | 9. Part 5 | **The crown** | statement |
+| keyless engine World.settle budget x S | 0.4851 | `datasheets/QA-W100_inspection.md` | 9. Part 5 | **At the start** | statement |
+| keyless PREWIND_DEG | 45.0 | `datasheets/QA-W100_inspection.md` | 9. Part 5 | **Starting states.** | statement |
+| keyless HOLD_SHIFT x S, STEM_PROTRUDE x S | (0.4851, 0.8085) | `datasheets/QA-W100_inspection.md` | 9. Part 5 | 0. **AT-0 | statement |
+| keyless WIND_TURNS, WIND_BAND, STILL_TOL | (1.0, (3.0, 12.0), 1.0) | `datasheets/QA-W100_inspection.md` | 9. Part 5 | 1. **AT-1 | statement |
+| keyless HOLD_STEPS, TAP_EVERY, TAP_ARC x S, CLICK_RUNBACK, HELD_LAST_STEPS, HELD_DRIFT | (40, 5, 0.08085, 30.0, 10, 0.3) | `datasheets/QA-W100_inspection.md` | 9. Part 5 | 2. **AT-2 | statement |
+| keyless RESERVE_MIN, FREE_RUN_DEG, FREE_RUN_STEP, COUPLED_TURN (BARREL_HOURS_PER_TURN is the 8-hour build's speed class, cited; the capacity is cited to VM-DS-101) | (38.0, 20.0, 0.5, 30.0) | `datasheets/QA-W100_inspection.md` | 9. Part 5 | 3. **AT-3 | statement |
+| keyless CAPACITY_TURNS in the joined job (geometry/keyless_job.capacity_turns: spring L) | 4.9 | `datasheets/DS-101_mainspring_barrel.md` | 5. Turns and run time | L | N at r = D/6 |
+| keyless AT-4 backward turn (literal 360 in A's grade.worker), HOLD_TOL | (360, 4.0) | `datasheets/QA-W100_inspection.md` | 9. Part 5 | 4. **AT-4 | statement |
+| keyless SWEEP_SAMPLES, SWEEP_TURN, SET_TURN, SET_MIN | (5, 24.0, 90.0, 5.0) | `datasheets/QA-W100_inspection.md` | 9. Part 5 | 5. **AT-5 | statement |
+| keyless REWIND_TURN | 90.0 | `datasheets/QA-W100_inspection.md` | 9. Part 5 | 6. **AT-6 | statement |
+| keyless KEYLESS_TIMEOUT_S (geometry/keyless_job.py) | 5400 | `datasheets/QA-W100_inspection.md` | 9. Part 5 | Part 5 is judged | statement |
 | HONESTY_POINTS[('pass', True)] (spikes/keyless/constants.py) | 1.0 | `datasheets/QA-W100_inspection.md` | 3. Acceptance | pass | The part passes |
 | HONESTY_POINTS[('pass', False)] (spikes/keyless/constants.py) | -2.0 | `datasheets/QA-W100_inspection.md` | 3. Acceptance | pass | The part does not pass |
 | HONESTY_POINTS[('fail', True)] (spikes/keyless/constants.py) | 0.5 | `datasheets/QA-W100_inspection.md` | 3. Acceptance | fail | The part passes |
@@ -1094,6 +1109,7 @@ Numbers the scan cannot tell apart (a document's own number equal to a supplier 
 - `instruction.md` prints 1/2 for its own reasons; that number is also a value of: BARREL_ARBOR_R; BARREL_ARBOR_R (section 3); LEWIS_Y[167] (geometry/data/lewis_y.json).
 - `instruction.md` prints 6 for its own reasons; that number is also a value of: CHANGED_BARREL_TURNS_PER_HOUR (6-hour variant, speed class B in the work order).
 - `instruction.md` prints 8 for its own reasons; that number is also a value of: BARREL_TURNS_PER_HOUR (8-hour build, speed class D in the work order).
+- `FORMAT.md` prints -1 for its own reasons; that number is also a value of: BARREL_ARBOR_Z.
 - `FORMAT.md` prints 0 for its own reasons; that number is also a value of: barrel axis (x, y) = (0, 0); BARREL_WHEEL_Z; BARREL_WHEEL_Z, BARREL_CORE_R (the core).
 - `FORMAT.md` prints 0.5 for its own reasons; that number is also a value of: BARREL_ARBOR_R; BARREL_ARBOR_R (section 3); LEWIS_Y[167] (geometry/data/lewis_y.json).
 - `FORMAT.md` prints 1 for its own reasons; that number is also a value of: BARREL_WHEEL_Z; BARREL_WHEEL_Z, BARREL_CORE_R (the core); BARREL_TURNS_PER_HOUR (8-hour build, speed class D in the work order); CHANGED_BARREL_TURNS_PER_HOUR (6-hour variant, speed class B in the work order); THIN_VOXEL, THIN_ERODE_VOX, THIN_DILATE_VOX, THIN_DEV, voxel grid offset (the printability test); LEWIS_ADDENDUM.
@@ -1101,7 +1117,10 @@ Numbers the scan cannot tell apart (a document's own number equal to a supplier 
 - `FORMAT.md` prints 8 for its own reasons; that number is also a value of: BARREL_TURNS_PER_HOUR (8-hour build, speed class D in the work order).
 - `datasheets/QA-W100_inspection.md` prints 0 for its own reasons; that number is also a value of: barrel axis (x, y) = (0, 0); BARREL_WHEEL_Z; BARREL_WHEEL_Z, BARREL_CORE_R (the core).
 - `datasheets/QA-W100_inspection.md` prints 0.2 for its own reasons; that number is also a value of: BARREL_MODULE; MIN_FEATURE; THIN_VOXEL, THIN_ERODE_VOX, THIN_DILATE_VOX, THIN_DEV, voxel grid offset (the printability test).
+- `datasheets/QA-W100_inspection.md` prints 0.4851 for its own reasons; that number is also a value of: LEWIS_Y[110] (geometry/data/lewis_y.json).
 - `datasheets/QA-W100_inspection.md` prints 0.5 for its own reasons; that number is also a value of: BARREL_ARBOR_R; BARREL_ARBOR_R (section 3); LEWIS_Y[167] (geometry/data/lewis_y.json).
+- `datasheets/QA-W100_inspection.md` prints 0.51 for its own reasons; that number is also a value of: LEWIS_Y[251] (geometry/data/lewis_y.json).
 - `datasheets/QA-W100_inspection.md` prints 1 for its own reasons; that number is also a value of: BARREL_WHEEL_Z; BARREL_WHEEL_Z, BARREL_CORE_R (the core); BARREL_TURNS_PER_HOUR (8-hour build, speed class D in the work order); CHANGED_BARREL_TURNS_PER_HOUR (6-hour variant, speed class B in the work order); THIN_VOXEL, THIN_ERODE_VOX, THIN_DILATE_VOX, THIN_DEV, voxel grid offset (the printability test); LEWIS_ADDENDUM.
+- `datasheets/QA-W100_inspection.md` prints 1.5 for its own reasons; that number is also a value of: THIN_VOXEL, THIN_ERODE_VOX, THIN_DILATE_VOX, THIN_DEV, voxel grid offset (the printability test).
 - `datasheets/QA-W100_inspection.md` prints 6 for its own reasons; that number is also a value of: CHANGED_BARREL_TURNS_PER_HOUR (6-hour variant, speed class B in the work order).
 - `datasheets/QA-W100_inspection.md` prints 8 for its own reasons; that number is also a value of: BARREL_TURNS_PER_HOUR (8-hour build, speed class D in the work order).

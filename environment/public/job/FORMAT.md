@@ -50,12 +50,24 @@ Each is at most 1,048,576 bytes and names at most 60 parts.
   "fixed": ["part_name", ...],
   "mobiles": {
     "mobile_name": {"axis": [x, y], "parts": ["part_name", ...]},
+    "mobile_name": {"axis": [x, y], "parts": ["part_name", ...], "friction_on": "mobile_name"},
     ...
   },
   "meshes": [
     {"driver": "barrel", "driver_teeth": n, "driven": "mobile_name", "driven_teeth": n},
     ...
   ],
+  "keyless": {
+    "stem":  {"parts": ["part_name", ...], "point": [x, y, z], "direction": [dx, dy, 0]},
+    "arbor": {"parts": ["part_name", ...]},
+    "mobiles": {
+      "mobile_name": {"kind": "free", "dof": "rot", "point": [x, y, z], "direction": [dx, dy, dz],
+                      "parts": ["part_name", ...]},
+      "mobile_name": {"kind": "spring", "dof": "slide", "direction": [dx, dy, dz], "rest": 1, "on_stem": true,
+                      "parts": ["part_name", ...]},
+      ...
+    }
+  },
   "hands": {
     "hour":    {"mobile": "mobile_name", "part": "part_name"},
     "minute":  {"mobile": "mobile_name", "part": "part_name"},
@@ -84,7 +96,25 @@ Each is at most 1,048,576 bytes and names at most 60 parts.
   Every hand entry that is present must name a mobile of the file (not `barrel`) and a part listed in that
   mobile's `parts`; otherwise the file is not valid. A `day` entry that is left out, or that is `null`, counts
   as no 24-hour hand.
-- In one file a part is named only once (under `fixed` or in one mobile).
+- `friction_on` (optional, on a mobile of `mobiles`): a mobile may be declared as carried by friction on another
+  coaxial mobile, named here: their axes are the same within QA-W100's coaxial tolerance, and the other mobile is
+  not `barrel` and is not itself carried by friction. In the going train the two turn as one.
+- `keyless` (in `movement.json`): the crown-winding works (the crown-winding part of QA-W100). Its parts are part
+  files like any other, and each part is named once in the file, across `fixed`, `mobiles` and `keyless`; parts of
+  the crown-winding works that never move are listed under `fixed` (they belong to the frame). A `keyless` section
+  in `variant_6h.json` is read for its part names only.
+  - `stem`: the stem's parts (the crown included), a `point` on the stem's line and its `direction`, from
+    `case_centre` towards the crown. The line is horizontal (the direction's z is 0) and passes through
+    `case_centre` (within QA-W100's coaxial tolerance), so the stem is radial.
+  - `arbor`: the parts fixed to the arbor of the supplied barrel, which turn with it. May be empty.
+  - `mobiles`: every other moving part of the crown-winding works, one entry per rigid body. `kind`: `free` (it
+    moves only when pushed) or `spring` (a light spring urges it towards its rest side). `dof`: `rot` (it turns
+    about the line through `point` along `direction`) or `slide` (it moves along `direction`; `point` is not
+    needed). `direction`: three numbers, not all zero. `rest` (springs only): `1` or `-1`, the sign of the
+    mobile's own coordinate (angle about, or travel along, `direction`) that its spring urges it towards.
+    `on_stem` (optional, `true` or `false`): `true` for a slide along the stem's line that also turns with the
+    stem. A name here is not a name of `mobiles`, and not `barrel`, `stem` or `arbor`.
+- In one file a part is named only once (under `fixed`, in one mobile, or in the `keyless` section).
 
 ## `assembly.json`
 
@@ -94,6 +124,7 @@ At most 67,108,864 bytes.
 {"order": ["part_name", ...], "paths": {"part_name": [P, P, ...], ...}}
 ```
 
+The part names of `movement.json` include those of its `keyless` section; they are put in like every other part.
 `order` lists the part names of `movement.json`, and `barrel`, in the order they are put in. Each P is a 4x4
 matrix written as four rows of four numbers; it moves the part from its assembled position:
 world = R x assembled + t, with R the upper-left 3x3 block, t the first three numbers of the last column, and the

@@ -1,4 +1,4 @@
-# Work order: movement design, going train and hands, a 6-hour variant and an assembly plan
+# Work order: movement design, going train and hands, crown winding, a 6-hour variant and an assembly plan
 
 You are a movement designer at a watch manufacturer. The calibre is a demonstration-scale model, about 1.617
 times the size of a 25.6 mm (11 1/2-ligne class) movement, to be made by 3D printing or a similar process.
@@ -11,9 +11,10 @@ in the order, and its parts can be printed by the process the order names. The s
 faster running of the same barrel, on the same frame. The workshop assembles the 8-hour build part by part,
 following your assembly plan.
 
-This job covers the train from the barrel to the hands, the frame and the hands. The movement has no escapement
-and no winding or setting works: the barrel is the driver and turns at the steady speed of the speed class given
-in the order.
+This job covers the train from the barrel to the hands, the frame, the hands, and the crown-winding works: with
+the crown pushed in, turning it winds the mainspring through the arbor of the supplied barrel; pulled out, turning
+it sets the hands while the going train stands. The movement has no escapement: in the going train the barrel is
+the driver and turns at the steady speed of the speed class given in the order.
 
 ## Order
 
@@ -26,6 +27,7 @@ in the order.
 | 6-hour variant (`variant_6h.json`) | the same barrel BR-096-20, in the same place, speed class B (DS-W01) |
 | Materials | each mobile's material is chosen from the design allowables of AD-DS-201 (`DS-201_materials.md`, section 8) |
 | Going-train rating | this calibre is the base of a family that includes an automatic version; the going train is rated for that version's barrel load (QA-W100, gear strength) |
+| Winding stem | series VM-DS-401 (`DS-401_crown_stem.md`), with its travel to the setting position |
 
 ## Deliverables
 
@@ -33,7 +35,7 @@ Everything goes into the folder `/app/delivery/`. What is in it when you finish 
 
 | Path | Content |
 |---|---|
-| `/app/delivery/movement.json` | the 8-hour build, with hour, minute, seconds and 24-hour hands |
+| `/app/delivery/movement.json` | the 8-hour build, with hour, minute, seconds and 24-hour hands, and its crown-winding works (`keyless`) |
 | `/app/delivery/variant_6h.json` | the 6-hour variant: the same calibre on the same frame, with hour, minute, seconds and 24-hour hands |
 | `/app/delivery/assembly.json` | the order in which the parts of `movement.json` are put in, and the path of each |
 | `/app/delivery/parts/<name>.step` | every part of both movements, one STEP file per part; a part used in both movements is one file |

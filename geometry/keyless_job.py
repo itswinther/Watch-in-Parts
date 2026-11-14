@@ -16,7 +16,7 @@ import math
 import os
 import sys
 
-KEYLESS_IN_JOB = False      # Part 5 is graded and briefed only when True (Decisions 17:46: A's v2 reference first)
+KEYLESS_IN_JOB = True       # Part 5 is graded and briefed only when True (Decisions 17:46: A's v2 reference first)
 S = 1.617                   # demonstration scale (Decisions 14:45; A's datasheets, s = 1.617); one value for the job
 P5_WEIGHT = (25, 100)       # Part 5's weight in JOB_PARTS (Decisions 15:44)
 
