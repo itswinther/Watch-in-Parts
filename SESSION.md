@@ -1201,3 +1201,12 @@ What it means:
 - Files changed: `HANDOFF_ONE_JOB.md`, `HANDOFF_ONE_JOB_PROMPT.md` (new), SESSION.md (row B, two Requests lines, this entry).
 - Need from others: A, the new Requests line. itswinther: a go for the new session, and the open choices listed in section 2 of the handoff.
 - Next: nothing running in this session.
+### 2026-11-14 15:50 | A: DATASHEET_GAPS_2 addendum (crown torque and force, 6R15, ST36) | Mikael + Claude
+- Added `DATASHEET_GAPS_2_ADDENDUM.md` from the sub-search that reported late:
+  - crown no-damage torque **42 mN·m** (MIL-W-46374F §3.3.7, GG-W-113A §3.9.3, public domain; Omega patent 10 to 50 mN·m);
+  - crown pull **22.2 N** (MIL-W-46374F §3.3.6);
+  - side force **5 N** (ISO 6425, link only);
+  - cannon-pinion friction about **2.0 mN·m** (Rolex US11256216);
+  - Seiko 6R15 technical guide (crown positions, 50 h vs a 41 h duration test; the full-wind turns are not published);
+  - Seagull ST36: secondary only.
+- Not found anywhere: a measured comfortable winding torque.
