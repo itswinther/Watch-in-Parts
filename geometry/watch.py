@@ -104,6 +104,7 @@ for _cell, _code, _mpa, _kind in DS201_ALLOWABLE_ROWS:
     if _kind == "tensile":
         MATERIAL_ALLOWABLE_MPA[_code] = min(_mpa, MATERIAL_ALLOWABLE_MPA.get(_code, float("inf")))
 del _cell, _code, _mpa, _kind
+MATERIAL_DESIGNATIONS = tuple(sorted(MATERIAL_ALLOWABLE_MPA))   # what a mobile may declare (the format check's list)
 STRENGTH_SHEETS = {"DS-101": "DS-101_mainspring_barrel.md", "DS-201": "DS-201_materials.md"}
 # Lewis form factor: full-depth involute teeth cut by the standard basic rack (addendum 1.0 m, dedendum 1.25 m),
 # see lewis_form_factor(). LEWIS_Y is the table the grader uses (4 decimals, the values DS-W04 prints), frozen in

@@ -28,6 +28,7 @@ MAX_JSON_BYTES = __MAX_JSON_BYTES__
 MAX_ASSEMBLY_BYTES = __MAX_ASSEMBLY_BYTES__
 MIN_TEETH, MAX_TEETH = __MIN_TEETH__, __MAX_TEETH__
 MAX_NAME_LEN = __MAX_NAME_LEN__
+MATERIALS = __MATERIAL_DESIGNATIONS__
 NAME = re.compile(r"__NAME_RE__")
 MOVEMENT_FILES = ("movement.json", "variant_6h.json")
 
@@ -96,6 +97,9 @@ def movement_names(doc, rel):
             raise Bad("%s: bad mobile %r (letters, digits, _ and -, 1 to %d characters, not 'barrel')" % (rel, k, MAX_NAME_LEN))
         xy(m.get("axis"), "%s: mobile '%s' axis" % (rel, k))
         take(m.get("parts"), "mobile '%s'" % k)
+        if not isinstance(m.get("material"), str) or m["material"] not in MATERIALS:
+            raise Bad("%s: mobile '%s': 'material' must be the designation of a material with a bending (tensile) "
+                      "design allowable in DS-201 section 8" % (rel, k))
     if len(names) > MAX_PARTS:
         raise Bad("%s: more than %d parts" % (rel, MAX_PARTS))
     known = set(mob) | {"barrel"}
