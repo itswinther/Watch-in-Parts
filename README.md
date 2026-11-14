@@ -62,7 +62,7 @@ clutch, ratchet, click) with its own acceptance steps. On that task, run in Harb
 | Model, harness | Rewards |
 | --- | --- |
 | GPT-6.1-sol, Codex, first engine | 0.024, 0.022, 0.066 (plus a first smoke run at 0.024) |
-| GPT-6.1-sol, Codex, fixed engine (3 repeats regraded) | 0.421, 0.119, 0.110 (mean 0.217): the designs wind, then jam when the rig pre-winds the barrel for the hold test (one clutch that cannot slip; two jams still being traced) |
+| GPT-6.1-sol, Codex, fixed engine (3 repeats regraded) | 0.421, 0.119, 0.110 (mean 0.217): the designs wind, then jam when the rig pre-winds the barrel for the hold test (one clutch that cannot slip, a design fault; the other two jams traced by A at 00:40 to a simulator artifact, the engine's per-patch push floor, so those two are not the agent's mistake until the engine is fixed and they are regraded) |
 | Sonnet 5.5, OpenCode | 0.95, every step passing |
 
 These are few runs on a task that is still changing, so they are a signal, not a result. Crown winding joins

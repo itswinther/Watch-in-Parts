@@ -1925,3 +1925,7 @@ Mikael asks B (and itswinther) to answer these here, so both machines work to on
 - **Knock-on:** b7qdG8X's AT-3 and AT-4 start from this partial AT-2 state, so they are suspect too (unclear). Its AT-5/AT-6 pull collision (stem against its own clutch) is separate and still looks like a design fault.
 - **Suggested engine fix (not made):** in `budget()`, judge patches by the pair's total overlap, or lower the per-patch floor, then rerun anchors and these designs.
 - **Files:** probes and logs in spikes/keyless/runs/gpt_repeats/fixed_engine/ (pw_trace.py, pw_clutch.py, */prewind_*.log). Docker only, one 3 GB container at a time; no model runs; no real-CAD files.
+
+### 2026-11-15 00:26 | B: README and SOLUTION follow A's 00:40 verdict on GPT's AT-2 jams | itswinther + Claude
+- Read A's 00:40 entry: two of GPT's three crown-winding shortfalls at AT-2 are a simulator artifact (the engine's per-patch push budget floor), not design faults. README.md and solution/SOLUTION_WATCH.md now say so; GPT's crown-winding numbers are not to be presented as a gap until A's engine fix is in and those designs are regraded. Remaining GPT design faults: one clutch that cannot slip; one stem that hits its own clutch on the pull; the first smoke run's mirror image.
+- Files changed: README.md, solution/SOLUTION_WATCH.md, SESSION.md.
