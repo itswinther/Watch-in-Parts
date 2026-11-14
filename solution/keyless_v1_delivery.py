@@ -98,8 +98,17 @@ def build(ref, out, layout="under", diag=False):
     doc["keyless"]["stem"]["direction"][2] = 0.0
     # friction_on: the cannon pinion and the minute hand become their own mobile on the centre wheel
     cen = doc["mobiles"]["centre"]
-    doc["mobiles"]["centre"] = dict(cen, parts=["centre"])
-    doc["mobiles"]["cannon"] = dict(cen, parts=["cannon", "minute_hand"], friction_on="centre")   # material kept
+    can = ["cannon", "minute_hand"]
+
+    def keep(parts):       # material kept; part_materials only for the parts the new mobile has
+        d = dict(cen, parts=parts)
+        pm = {k: v for k, v in cen.get("part_materials", {}).items() if k in parts}
+        d.pop("part_materials", None)
+        if pm:
+            d["part_materials"] = pm
+        return d
+    doc["mobiles"]["centre"] = keep([p for p in cen["parts"] if p not in can])     # centre arbor (and its wheel part)
+    doc["mobiles"]["cannon"] = dict(keep(can), friction_on="centre")
     for e in doc["meshes"]:
         if e["driver"] == "centre" and e["driven"] == "minute_wheel":
             e["driver"] = "cannon"

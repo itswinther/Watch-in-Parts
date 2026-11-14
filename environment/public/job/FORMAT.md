@@ -70,9 +70,13 @@ Each is at most 1,048,576 bytes and names at most 60 parts.
 - `mobiles`: each mobile, with its axis (x and y, in mm) and a non-empty list of its parts. `barrel` is not listed;
   it exists already.
 - `material`: in each mobile, its material, as an ordering code of DS-201 (its table of ordering codes). Every
-  part of a mobile is of its material. The code must be one that has a design allowable for bending (a tensile,
-  yield-based allowable) in DS-201's table of design allowables; any other value, or a mobile without `material`,
-  makes the file not valid.
+  part of a mobile is of its material, except a part named in `part_materials`. The code must be one that has a
+  design allowable for bending (a tensile, yield-based allowable) in DS-201's table of design allowables; any
+  other value, or a mobile without `material`, makes the file not valid.
+- `part_materials` (optional): in a mobile, an object `{"part name": "ordering code"}` that gives some of its
+  parts another material than the mobile's `material`, for example a brass wheel on a steel pinion. Each key must
+  be a part listed in that mobile's `parts`, and each code must qualify as for `material`; anything else makes the
+  file not valid. A part not named here is of the mobile's `material`.
 - `meshes`: every pair of gears that drive one another: the two mobiles (`barrel` or a mobile name), and the tooth
   count of the gear on each (each `n` above stands for one). Tooth counts are integers from 3 to 1000.
 - `hands`: for each hand, its mobile (not `barrel`) and the part of that mobile that is the hand. `day` is the

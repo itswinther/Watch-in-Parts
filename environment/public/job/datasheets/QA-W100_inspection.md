@@ -176,10 +176,18 @@ Checks. Each passes or fails.
     - bending stress of each of the two gears, each with its own tooth count z (z_D or z_N): sigma = F / (b x m x
       Y(z)) (MPa, that is N/mm2), Y(z) the Lewis form factor of DS-W04, section 3, for z teeth.
 
-    *Allowable.* A gear's allowable stress is that of its mobile's `material`: the lowest design allowable that
-    DS-201 section 8 gives for that ordering code (a code with several rows, for example by stock thickness, is
-    rated at the lowest of them, since the delivery does not state stock thickness). Tooth bending puts the root
-    of the tooth in tension, so only a bending (tensile, yield-based) allowable applies: a row that gives a
+    *Which part holds a gear's teeth.* A mobile may be made of several parts, for example a wheel on a pinion
+    arbor. In a rated mesh, the part that holds a gear's teeth is the part of that gear's mobile that holds the
+    largest volume of the region the drive steps of the mesh test find for this mesh (the region that the
+    further-turned D shares with N and did not occupy before; a part of D taken in its further-turned position, a
+    part of N in its position at that step), that volume added over the drive steps. Where two parts hold the same
+    volume, it is the one listed first in the mobile's `parts`. A one-part mobile holds its teeth in that part.
+
+    *Allowable.* A gear's allowable stress is that of the material of the part that holds its teeth: the part's
+    entry in its mobile's `part_materials`, or else the mobile's `material`. It is the lowest design allowable
+    that DS-201 section 8 gives for that ordering code (a code with several rows, for example by stock thickness,
+    is rated at the lowest of them, since the delivery does not state stock thickness). Tooth bending puts the
+    root of the tooth in tension, so only a bending (tensile, yield-based) allowable applies: a row that gives a
     compressive allowable does not, and a code without a bending allowable in section 8 cannot be declared (C1).
 
     *Pass.* sigma <= the allowable for both gears of every rated mesh. The supplied barrel's own teeth are not
