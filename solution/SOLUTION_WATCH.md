@@ -38,11 +38,11 @@ Tolerances and limits of every check, with their constants, are in `SPEC.md` sec
 - **Reward 1.0** with every part passing and a truthful report. B measured this at 23:04 on main with every
   builder merged (571 s, peak RSS 1.70 GB, SESSION.md). A measured oracle 1.0 in Harbor at 17:50 and 18:58 on
   earlier builds.
-- The delivery has 22 part files: 20 per movement, of which 18 are shared. Only `third`/`third_wheel_60` (8 h)
-  and `centre_36`/`third_wheel_54` (6 h) differ. Part 4 installs 21 parts (20 and the barrel).
+- The delivery has 22 part files: 20 per movement, of which 18 are shared. Only `centre` and `third_wheel_60` (8 h)
+  and `centre_36` and `third_wheel_54` (6 h) differ; the steel `third` arbor is shared. Part 4 installs 21 parts (20 and the barrel).
 
 Its smallest margins, measured by builder W on 14 Nov with the grader's own functions on a fresh build
-(`strength_run` through `_job_movement`, and a full grading; details in section 2.1):
+(`strength_run` through `_job_movement`, and a full grading of the same folder):
 
 | Check | Limit | Reference, smallest margin | Where |
 |---|---|---|---|
@@ -56,7 +56,7 @@ Its smallest margins, measured by builder W on 14 Nov with the grader's own func
 | 5 tolerant (0.03 mm shift) | same | V / H / m² = 0.917 moved away (needs over 0.5); gap 0.0403 | day idler / day |
 | 6 nothing else collides | at most 0.01 mm3 | 0.0 | |
 | 10 coaxial | at most 0.01 mm | 0.0 | |
-| 11 hands, reach | at least 5.0 mm | seconds 5.009, hour 6.007, minute 9.005 | seconds hand |
+| 11 hands, reach | at least 5.0 mm | seconds 5.009, hour 6.007, minute 9.005 | seconds hand: the thinnest margin in the delivery, 0.009 mm |
 | 11 hands, centre of volume | at least 0.5 mm | 1.539 | seconds hand |
 | 12 case radius | at most 20.7 | 20.354 | |
 | 12 case height | at most 13.4 | 13.1 (z -1.7 to 11.4) | |
@@ -69,7 +69,7 @@ Its smallest margins, measured by builder W on 14 Nov with the grader's own func
 
 The drive figure is the grader's `smallest_drive_ratio`, V / H / m², passed when over 0.5
 (`Movement.drive_passes`). The thinnest mesh is the 24-hour pair, 10 / 40 at module 0.16, which is not rated
-for strength. A design that keeps the train honest has room: the closest margin is 0.917 against 0.5.
+for strength. Its smallest figure, 0.917 with the arbor moved away, is still well over 0.5.
 
 Full grading by builder W, same session: `cd tests && python3 -I grade_watch.py REF --reward R --details D`
 printed reward 1.0, every gate and check true for P1 to P4, P4 "21 of 21 installed", honesty factor 1,
