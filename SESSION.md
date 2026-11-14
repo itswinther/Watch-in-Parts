@@ -116,6 +116,14 @@ Append here. A human has to say yes before SPEC.md changes.
   - F1 is measured on a slice at z = -0.05, over the ring between dia 3.2 and dia 7. F4 is the exact minimum surface distance. F5 needs a 48 x 30 face horizontal in the final pose.
   - W1/W2 voxel margins: a wall of 1.6 always passes, the allowed deviation is 0.5 + one 0.2 voxel = 0.7. In exact maths a sharp 90-degree solid corner sits 0.586 from the opened shape, so the bare 0.5 in the spec would fail every sharp box corner.
   - Reference volume (base + door) is 15072.56 mm3, so the material budget is 17333.44 mm3.
+- 2026-11-14 09:44 **Make the staged watch harder through CAD difficulty.** Proposed by itswinther + Claude (B), after a search of 2026 CAD-agent benchmarks (sources in the entry of the same time). Status: awaiting a human yes/no per item; nothing is built. Ranked by expected effect for the build cost.
+  1. **Mass budget that forces skeletonised wheels and plates.** State a maximum volume per wheel (or for the whole movement) that solid discs cannot meet, plus a minimum radius for concave corners. Wheels need spokes and rims near the 0.2 thickness limit. Why: in last night's chains all three models said in their reports that they had not run the thickness test (and Sonnet not the collision test) and passed only because their parts were chunky. Cost: volume is one line in the grader; the corner rule reuses the voxel code; the reference needs spoked wheels.
+  2. **Assemble every part for real.** Drop the rule that parts of one mobile are not tested against each other at stage 4, and test "held" per part, not per mobile. Every wheel then needs a shoulder to sit on and something that retains it, designed at stage 1 and only tested at stage 4. Why: the only shortfall on two nights is a design that passes its own stage and cannot be assembled later. Cost: small in the grader, moderate in the reference.
+  3. **A winding stem at right angles (new stage).** A stem enters through the case side and must turn the barrel through a crown or bevel pair, inside the frozen movement. Teeth on non-parallel axes cannot be made by extruding a 2D profile; they need lofted or generated surfaces that survive the STEP validity check. Why: published benchmarks report the largest drops on loft and sweep features and on gear mechanisms. Cost: high (mesh test for arbitrary axes, a bevel maker for the reference); probe with one single-stage clean run before building the stage.
+  4. **The train must run with the arbors slightly out of place.** Repeat the mesh test with each driven arbor moved 0.03 towards and away from its driver. Why: it asks for real backlash and tooth depth, not nominal geometry; no published CAD benchmark tests tolerances. Cost: two more mesh runs per pair.
+  5. **An intermittent date ring (new stage).** A ring that advances one step per day and is locked in between (Geneva-type, rigid parts only), graded by finding the collision-free angle of the driven part at each step. Cost: high (a contact-driven replay is new engine code).
+  6. **Change request that edits geometry, with "kept" measured by volume.** Replace byte-identical kept files by the share of received material still in place, and choose a change that moves an axis (small seconds at 6 o'clock), so plates must be re-bored, not swapped. Fixes the open point that the kept share counts files.
+  Not proposed: drawings as input (the one benchmark that splits it shows image-to-CAD as its easiest track, and we do not know that the judged agent sees images); a physics or FEA grader (the agent cannot rebuild it exactly, so differences look like noise); judged rubrics; hidden requirements.
 
 ## Ideas for later
 
@@ -583,3 +591,18 @@ Template:
 - Files changed: `tests/pack_run.py` (compact packages), `transcripts/watch4_chain_fable`, `transcripts/watch4_chain_opus`, `transcripts/watch4_chain_sonnet` (new), SESSION.md (row B, Decisions, this entry).
 - Need from others: A, the two open requests. Humans, the five decisions above.
 - Next: nothing is running. `HANDOFF_OVERNIGHT.md` describes the state before tonight (three stages, 17 anchors); this entry and the Decisions list are the current state.
+
+### 2026-11-14 09:44 | B: research on CAD difficulty, six proposals | itswinther + Claude
+- Did: itswinther asked to keep the staged watch as the base and make it harder through CAD difficulty. Read A's `spikes/RESEARCH_GAPS.md`, searched for 2026 benchmarks of CAD-writing agents, and wrote six ranked proposals under "Proposed spec changes". Nothing was built or run.
+- What the search found (from search summaries only: `arxiv.org` and `icml.cc` are not reachable from this session, so no paper was read in full and the numbers are unchecked):
+  - CAD-bench (ICML 2026 workshop, cad-bench.github.io): 17 execution-based tasks including threaded mating pairs and gear assemblies, checked with rigid-body simulation; agents "still fail frequently on interfaces, standards-like details and mechanisms".
+  - Text2CAD-Bench (arXiv 2605.18430): four tiers; performance "degrades substantially" on the tier with sweep, loft and shell.
+  - CADEngBench (arXiv 2608.09296): of 2,400 generated programs 1,030 run and 432 of those pass the next engineering level; edits coupled to existing structure, exact face and edge grounding in assemblies and matched FEA stay hard.
+  - RealCADBench (arXiv 2609.03773): agents executed all 25 assembly tasks with surface overlap of about 0.10 to 0.12; execution gets repaired, fine structure and placement do not.
+  - Parametric CAD Bench v3 (arXiv 2611.02659): 100 FreeCAD tasks, agents with tools; best system 61%; text creation and create-and-edit in the low 40s for Opus 5.5 while image-to-CAD is above 80.
+  - "Done Is Not Correct" (arXiv 2611.10063): single-shot agents claimed completion on 98% of attempts and were silently wrong on 14.1%; a loop that forces measuring before claiming cut that to 3.2%.
+- Reading, together with A's notes and our runs: gaps close when the agent can measure exactly and cheaply. What stays open is geometry that is hard to construct in a kernel (non-extruded surfaces), checks that are expensive to run oneself, and consequences that appear stages later.
+- Not verified, or assumed: every number above is from a search summary. No proposal has been tried with a clean agent; by last night's rule each needs a clean run before it is trusted.
+- Files changed: SESSION.md (Proposed spec changes, this entry).
+- Need from others: a human yes/no per proposal; allow `arxiv.org` in the session's network settings if the papers should be read in full.
+- Next: nothing until a human chooses.
