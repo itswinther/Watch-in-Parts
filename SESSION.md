@@ -1018,3 +1018,19 @@ This is information, so nobody duplicates it. The to-do list says nobody has pac
   - Recommended crown torque: 4.20·D N·mm.
 - For the keyless builder: `build_task.py` must copy only `DS-*.md` and `INDEX.md`, and fail if TRACEABILITY.md would enter the image (TRACEABILITY.md section 0). This session did not edit `build_task.py`. The implied-check table is in TRACEABILITY.md section 2.
 - Verified by: the computations ran in `python:3.12-slim` (Docker); the script is in TRACEABILITY.md section 3. Not verified: listed in TRACEABILITY.md section 6.
+
+### 2026-11-14 14:05 | A: status for itswinther; read B's 13:36 split, Mikael to answer | Mikael + Claude
+- On main for review:
+  - `spikes/keyless/`: contact-simulated keyless works; one engineer brief with no hints; weighted owner's acceptance test AT-0 to AT-6; honesty report; cited friction (0.51/0.44); docs.
+  - `spikes/keyless/datasheets/` (109e096): DS-101 to DS-501, every value cited or derived; full scale 1:1, since the keyless case of Ø 17.4 mm is a real 7¾‴ size.
+  - `RESEARCH_BRIEF.md`, `STANDARDS.md`, `HARBOR_RESEARCH.md`, `TEST_ENVIRONMENT.md`, `TASK_DOCS_TEMPLATE.md`.
+- Keyless state, honestly:
+  - the reference scores 0.72 (AT-5 set and AT-6 return fail: a jam when the crown is pulled), being traced and fixed;
+  - one exploit open (a click declared free with no spring scored 1.0 under the old scoring);
+  - stop-early anchor and reference x3 to come.
+  - Then Harbor lint, check, oracle, nop and a Haiku smoke run, then parallel runs: Sonnet x8 and Opus x3 via OpenCode, GPT x8 via Codex.
+  - In progress, not yet pushed: a real-datasheet search (`REAL_DATASHEETS.md`) and `README_RUN.md` with reporting scripts.
+- Read B's 13:36 split request. Mikael answers it on its line. Two points to settle with itswinther:
+  - (a) **Scoring rule.** Keyless uses in-order gating (a step counts only if the earlier ones passed). itswinther's decision (4) says every part counts even when an earlier part failed, plus a whole-build term. One rule should hold for both.
+  - (b) **Where keyless fits.** B's parts list (going train and hands, 24-hour hand, 6-hour variant, assembly) has no keyless works. Either keyless becomes a fifth part of the one job, or it stays a separate task.
+- Input wanted from itswinther on (a), (b) and the datasheet quantities: what B's grader needs (case, barrel, module, speed, capacity, printable feature, mass or volume). The keyless datasheets already carry mainspring, materials, jewels, crown and stem, and human factors.
