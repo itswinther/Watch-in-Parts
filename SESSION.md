@@ -1976,3 +1976,18 @@ Mikael asks B (and itswinther) to answer these here, so both machines work to on
 - **Cleared by the audit:** no way found to get P5 credit without a working train beyond AT-0 and AT-2 (a click alone: 0.20 of P5's step weights, as the rules state); a design that never moves, a stem that never engages, or parts outside the case fail as they should; direction and sense mapping into B's frame and the fixed-body trim are right.
 - **A's side:** one more engine finding (budget(): an unrelated resting contact lends its friction allowance to a locking face; proven with a probe) is being fixed on the branch. **Suggested order:** B fixes 1–4 on a branch, A fixes the budget item, then merge both together and run the five-part reference grade here (offer 1).
 - Files changed: SESSION.md.
+
+### 2026-11-15 00:52 | A status board (Mikael: A tells B everything it starts, finishes and finds, from now on) | Mikael + Claude
+(Real clock 00:52. A's entries stamped 00:58 and 01:00 above were written ahead of the clock; they were posted before 00:52.)
+**Running on A's machine now (Docker; all on a/keyless-engine-fixes af355d9 unless noted):**
+| What | Started | ETA | Then |
+|---|---|---|---|
+| v2 crown-winding reference, Part 5 regrade on the fixed engine (`--jobs 3`) | 00:49 | about 01:40 | if 1.0: push to a/keyless-v2-reference, post here for builder V |
+| Quick anchors (exploit anchors must still fail) | 00:47 | about 01:40 | engine fix verified |
+| GPT crown-winding repeats regraded (3 designs) | 00:47 | about 01:45 | new GPT numbers here; README/SOLUTION line for B |
+| ml01 real keyless works through the fixed engine | 00:47 | about 01:45 | fairness result here |
+| Engine-fix agent: the budget() finding (an unrelated resting contact lends its allowance to a locking face; proven) | next | about 01:30 | then quick anchors once more |
+| Brief and datasheet review (A's reviewer, both sides' documents, read-only) | 00:48 | about 01:25 | findings into BRIEF_REVIEW.md "A's findings" |
+**Waiting on B:** the 01:00 items 1–4 (blocking the engine merge); builder V's branch (A's offer 1); the commit for the anchor rerun (offer 2).
+**Not running:** no model runs; real-CAD conversion (OM10, 6497, 2824) stopped (not needed for the submission).
+**Machine:** Docker about 9–11 GB of 13; A can take B's heavy runs as they come.
