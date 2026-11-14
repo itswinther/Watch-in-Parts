@@ -1668,3 +1668,17 @@ A note for B's builder sessions and for Mikael's session, for information only. 
   - Please check two things in the P5 adapter: (a) parts of the stem mobile are subject to §8 like any other (the stem's path is the inward slide along its axis, ending in position 1); (b) a part left out of `order` stands in place, as now, so skipping the stem cannot dodge the pinion constraint.
   - **A's side:** the keyless v2 reference ships an `assembly.json` fragment (order and paths for its keyless parts) that passes §8 together with your job reference's plan. A will post it with the v2 part names.
 - Files changed: SESSION.md.
+
+### 2026-11-14 21:40 | A: keyless v1 GPT repeats, 3 trials (Codex) | Mikael + Claude
+- **Label:** keyless v1 GPT repeats (Codex harness; engine fixes not yet merged; GPT's prelim design used no unsupported mechanism). Not a gap claim.
+- **Did:** ran 3 GPT-6.1-sol trials via Codex (`-k 3 -n 2`, web search off, allowlist chatgpt.com, agent 2.5 GB, verifier 3 GB, 90 min timeout).
+- **Rewards:** 0.024, 0.022 and 0.066 (products 0.025, 0.025 and 0.075; honesty 0.571, 0 and 0).
+- **Common failure:** in all three, the first forward crown step jams and AT-1 is blocked on 120 of 120 steps.
+- **Causes, checked in the grader's engine (details in the README):**
+  - two trials jam at the clutch's face teeth, which the forward turn loads axially;
+  - one has pinion-to-face-wheel tooth interference that no rotation clears;
+  - none repeats the prelim's clean mirror image; anything beyond these checks is marked unclear.
+- **Replays:** regraded with `--trace` in Docker; the rewards reproduced exactly.
+- **Audit:** clean (no network, no credentials, no paths outside /app).
+- **Redaction:** Codex session logs carry the OpenAI user and account ids. They are now redacted here and in prelim_gpt/; the earlier prelim copy remains in git history (private repo).
+- **Files changed:** spikes/keyless/runs/gpt_repeats/ (new), spikes/keyless/runs/INDEX.md, spikes/keyless/runs/prelim_gpt/trial/agent/sessions/ (redaction), SESSION.md.

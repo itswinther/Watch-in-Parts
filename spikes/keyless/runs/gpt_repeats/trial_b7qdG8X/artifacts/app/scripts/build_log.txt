@@ -1,0 +1,15 @@
+0.0s building gear cutters
+0.1s clean: 2 components; largest volumes [0.24687991, 0.0]
+0.1s writing parts
+0.1s crown_stem: 5192 triangles, 1 components, volume 1.40097
+0.1s winding_pinion: 4756 triangles, 1 components, volume 0.38599
+0.1s sliding_clutch: 2412 triangles, 1 components, volume 0.24688
+0.1s winding_transfer: 9352 triangles, 1 components, volume 1.50457
+0.1s setting_transfer: 9516 triangles, 1 components, volume 1.24402
+0.1s barrel_winding_wheel: 6960 triangles, 1 components, volume 32.38712
+0.1s retaining_click: 12 triangles, 1 components, volume 0.01239
+0.1s winding_bridge: 3124 triangles, 1 components, volume 0.76583
+0.2s pinion_bridge: 1206 triangles, 1 components, volume 0.42190
+0.2s setting_bridge: 1222 triangles, 1 components, volume 0.35490
+0.2s click_guide: 48 triangles, 1 components, volume 0.24550
+0.2s done

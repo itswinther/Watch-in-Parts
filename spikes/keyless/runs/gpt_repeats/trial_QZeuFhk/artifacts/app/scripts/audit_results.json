@@ -1,0 +1,181 @@
+{
+  "files": [
+    {
+      "name": "barrel_click",
+      "triangles": 12,
+      "binary_size_valid": true,
+      "watertight": true,
+      "components": 1,
+      "volume": 0.019649977934361757,
+      "max_case_radius": 4.712647727935185,
+      "z_min": 1.1399999856948853,
+      "z_max": 1.440000057220459
+    },
+    {
+      "name": "barrel_gear",
+      "triangles": 29374,
+      "binary_size_valid": true,
+      "watertight": true,
+      "components": 1,
+      "volume": 44.19143231492969,
+      "max_case_radius": 7.957358322193382,
+      "z_min": -0.5,
+      "z_max": 1.4299999475479126
+    },
+    {
+      "name": "click_guide",
+      "triangles": 28,
+      "binary_size_valid": true,
+      "watertight": true,
+      "components": 1,
+      "volume": 0.6111997175693853,
+      "max_case_radius": 5.253860266027859,
+      "z_min": 0.7900000214576721,
+      "z_max": 1.7899999618530273
+    },
+    {
+      "name": "crown_stem",
+      "triangles": 5280,
+      "binary_size_valid": true,
+      "watertight": true,
+      "components": 1,
+      "volume": 2.180649217529903,
+      "max_case_radius": 9.679100817619084,
+      "z_min": -0.75,
+      "z_max": 0.75
+    },
+    {
+      "name": "setting_axle",
+      "triangles": 1536,
+      "binary_size_valid": true,
+      "watertight": true,
+      "components": 1,
+      "volume": 0.4269579071691238,
+      "max_case_radius": 4.020002654632344,
+      "z_min": -2.5899999141693115,
+      "z_max": 0.6399999856948853
+    },
+    {
+      "name": "setting_intermediate",
+      "triangles": 11322,
+      "binary_size_valid": true,
+      "watertight": true,
+      "components": 1,
+      "volume": 7.558259092933628,
+      "max_case_radius": 5.950094220299771,
+      "z_min": -2.4000000953674316,
+      "z_max": 0.4399999976158142
+    },
+    {
+      "name": "sliding_clutch",
+      "triangles": 4560,
+      "binary_size_valid": true,
+      "watertight": true,
+      "components": 1,
+      "volume": 0.19333170053312707,
+      "max_case_radius": 1.0620588815659218,
+      "z_min": -0.5,
+      "z_max": 0.5
+    },
+    {
+      "name": "winding_left_bearing",
+      "triangles": 768,
+      "binary_size_valid": true,
+      "watertight": true,
+      "components": 1,
+      "volume": 0.11266339580590821,
+      "max_case_radius": 2.353720412592564,
+      "z_min": -0.5,
+      "z_max": 0.5
+    },
+    {
+      "name": "winding_pinion",
+      "triangles": 9782,
+      "binary_size_valid": true,
+      "watertight": true,
+      "components": 1,
+      "volume": 1.130439319783326,
+      "max_case_radius": 2.1350000217312672,
+      "z_min": -0.81516432762146,
+      "z_max": 0.81516432762146
+    },
+    {
+      "name": "winding_right_bearing",
+      "triangles": 768,
+      "binary_size_valid": true,
+      "watertight": true,
+      "components": 1,
+      "volume": 0.005488364391053056,
+      "max_case_radius": 0.8544003340698167,
+      "z_min": -0.30000001192092896,
+      "z_max": 0.30000001192092896
+    }
+  ],
+  "rest_overlap_failures": [],
+  "retention": [
+    {
+      "mobile": "winding_rotor",
+      "tested_directions": 34,
+      "minimum_largest_overlap": 0.05802695612888546,
+      "pass": true
+    },
+    {
+      "mobile": "crown_clutch",
+      "tested_directions": 32,
+      "minimum_largest_overlap": 0.026702660270358232,
+      "pass": true
+    },
+    {
+      "mobile": "setting_rotor",
+      "tested_directions": 34,
+      "minimum_largest_overlap": 0.04572779267835093,
+      "pass": true
+    },
+    {
+      "mobile": "holding_click",
+      "tested_directions": 32,
+      "minimum_largest_overlap": 0.009279982604988326,
+      "pass": true
+    }
+  ],
+  "gear_sweeps": [
+    {
+      "pair": [
+        "winding_pinion",
+        "barrel_gear"
+      ],
+      "sample_count": 121,
+      "maximum_overlap": 0.0,
+      "pass": true
+    },
+    {
+      "pair": [
+        "setting_intermediate",
+        "minute_wheel"
+      ],
+      "sample_count": 41,
+      "maximum_overlap": 1.5355256420161523e-05,
+      "pass": true
+    },
+    {
+      "pair": [
+        "crown_stem",
+        "setting_intermediate"
+      ],
+      "sample_count": 61,
+      "maximum_overlap": 0.0,
+      "pass": true
+    }
+  ],
+  "friction_screen": {
+    "mu_static": 0.51,
+    "mu_sliding": 0.44,
+    "locking_slope_threshold": 1.9607843137254901,
+    "clutch_coast_max_slope": 0.716197243913529,
+    "clutch_drive_min_slope": 5.042028597151244,
+    "click_coast_slope_approx": 0.5025945571323011,
+    "click_lock_slope_approx": 22.641074162427692,
+    "crossed_helical_drive_margin": 0.268082912512734
+  },
+  "assemble_pass": true
+}

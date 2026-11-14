@@ -1,0 +1,23 @@
+centres 1.5505410773038737 [8.40224613 0.        ] pinions 4.070541077303874 9.602246127321607
+face 42
+face mesh Error.NoError 33600
+winding_face_wheel Error.NoError 22296 17.52594631022017 solids 1
+watertight False euler 3 degenerate 6
+clean watertight True euler 0
+face 20
+face mesh Error.NoError 16000
+setting_face_wheel Error.NoError 12372 9.617006149673552 solids 1
+watertight True euler 0 degenerate 0
+winding_pinion Error.NoError 5058 0.7233103713321162 solids 1
+watertight True euler 0 degenerate 0
+sliding_clutch Error.NoError 3950 0.552737324162821 solids 1
+watertight True euler 0 degenerate 0
+stem Error.NoError 3004 1.4798831153638072 solids 1
+watertight True euler 2 degenerate 0
+barrel Error.NoError 4764 7.573295813309957 solids 1
+watertight True euler 2 degenerate 0
+barrel_click Error.NoError 28 0.07612793040894768 solids 1
+watertight True euler 2 degenerate 0
+bearing_bridge Error.NoError 4018 3.0338933429487978 solids 1
+watertight True euler 0 degenerate 0
+DONE
