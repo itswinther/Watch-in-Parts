@@ -28,7 +28,11 @@ speeds and directions, and the weights of the checks.
 | SAMPLES_PER_TOOTH, MESH_OFFGRID, ENGAGE_GAP, DRIVE_FRACTION, DRIVE_MIN_VOLUME, DRIVE_AREA_RATIO, every 4th/8th step | (8, (Fraction(1, 3), Fraction(1, 5)), 0.1, 0.25, 0.001, 0.5, 4, 8) | `PROMPT.md` | Part 1 | check 4, mesh test |
 | MESH_SHIFT | 0.03 | `PROMPT.md` | Part 1 | check 5 |
 | CLEAR_STEPS | 144 | `PROMPT.md` | Part 1 | check 6 |
-| HAND_REACH, HAND_CENTRE_MIN | (5.0, 0.5) | `PROMPT.md` | Part 1 | check 11 |
+| HAND_REACH, HAND_CENTRE_MIN; hand wholly above the frame (lowest point of the hand part no lower than the highest point of any fixed part, `Movement.hand_shape`, margin 0) | (5.0, 0.5, 0.0) | `PROMPT.md` | Part 1 | check 11 (and Part 2 check 2 for the 24-hour hand) |
+| C3: `hands.day` declared, its part not the hour, minute or seconds hand's part (Decisions 15:44, one-job grader) |  | `PROMPT.md` | Part 2 | C3 (also applied to `variant_6h.json` in Part 3) |
+| C4: `variant_6h.json` has the same `fixed` list (same names, same order) and the same `case_centre` as `movement.json` (Decisions 15:44, one-job grader) |  | `PROMPT.md` | Part 3 | C4 |
+| hands required by the loader (`Movement.__init__`): hour, minute, seconds; `day` optional |  | `FORMAT.md` and `PROMPT.md` | `hands` item; Part 1 | C1 |
+| TIMEOUT_S in `tests/grade_watch.py` (per condition and check, wall clock) | 600 | `PROMPT.md` | Terms used below | Computing time |
 | DAY_HAND_OFFSET, DAY_HAND_REACH | (6.0, 3.0) | `PROMPT.md` | Part 2 | check 2 |
 | ASM_STEP, ASM_CLEAR, ASM_MAX_POSES, pose tolerance | (0.2, 5.0, 1500, '1e-6') | `PROMPT.md` | Part 4 | rules 1 to 5 |
 | MAX_* sizes, NAME_RE, MIN_TEETH, MAX_TEETH, STEP_* meshing numbers, SELF_UNION_TOL |  | `FORMAT.md` |  | one statement each |

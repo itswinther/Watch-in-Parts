@@ -71,7 +71,10 @@ Each is at most 1,048,576 bytes and names at most 60 parts.
 - `meshes`: every pair of gears that drive one another: the two mobiles (`barrel` or a mobile name), and the tooth
   count of the gear on each (`n` above stands for one). Tooth counts are integers from 3 to 1000.
 - `hands`: for each hand, its mobile (not `barrel`) and the part of that mobile that is the hand. `day` is the
-  24-hour hand.
+  24-hour hand. `hour`, `minute` and `seconds` are required; `day` may be left out.
+  Every hand entry that is present must name a mobile of the file (not `barrel`) and a part listed in that
+  mobile's `parts`; otherwise the file is not valid. A `day` entry that is left out, or that is `null`, counts
+  as no 24-hour hand.
 - In one file a part is named only once (under `fixed` or in one mobile).
 
 ## `assembly.json`

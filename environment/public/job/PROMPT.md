@@ -1,15 +1,16 @@
 # Watch movement: going train and hands, a 6-hour variant and an assembly plan
 
 You are a movement designer at a watch manufacturer. The calibre is a demonstration-scale model, about 1.617
-times the size of an 11 1/2-ligne movement, to be made by 3D printing or a similar process; that process is why
-its smallest feature is 0.2 mm.
+times the size of a 25.6 mm (11 1/2-ligne class) movement, to be made by 3D printing or a similar process; that
+process is why its smallest feature is 0.2 mm.
 
 ## The goal
 
 The wearer reads the time from four hands: hours and minutes on a common centre, seconds, and a 24-hour hand that
 shows the hour of the day. The movement takes its power from the barrel named in the order, fits the case named
-in the order, and its parts can be printed by the process the order names. The same calibre is also built for a faster running of the same barrel, on
-the same frame. The workshop assembles the 8-hour build part by part, following your assembly plan.
+in the order, and its parts can be printed by the process the order names. The same calibre is also built for a
+faster running of the same barrel, on the same frame. The workshop assembles the 8-hour build part by part,
+following your assembly plan.
 
 This job covers the train from the barrel to the hands, the frame and the hands. The movement has no escapement
 and no winding or setting works: the barrel is the driver and turns at the steady speed given in the order.
@@ -61,8 +62,9 @@ Installed software: Python 3 with CadQuery 2.8.0 (OpenCASCADE, importable as `ca
 
 The delivery is inspected after you hand it in. What is in `/app/delivery/` when you finish is what is inspected.
 
-The inspection has four parts. Each part is judged on its own, even when another part fails. The delivery as a
-whole is accepted only when every condition and every check of all four parts passes: everything must work.
+The inspection has four parts. Each part is judged on its own, even when another part fails. Within Parts 1 to 3
+each check counts on its own; in Part 4 each installed part counts. The delivery as a whole is accepted only when
+every condition and every check of all four parts passes: everything must work.
 
 Terms used below:
 
@@ -78,6 +80,8 @@ Terms used below:
 - **Speeds** are worked out from the tooth counts declared under `meshes`, as exact fractions, starting from the
   barrel at the speed the order gives for the build being judged. Every declared mesh is external: its two
   mobiles turn in opposite directions.
+- **Computing time.** Each condition and each check has up to 600 s of elapsed (wall-clock) time on the
+  inspection machine; one that runs out of time fails.
 
 ### Part 1: going train and hands (`movement.json`)
 
@@ -85,8 +89,10 @@ The 8-hour build: the barrel turns clockwise once every 8 h.
 
 Conditions. If one fails, Part 1 fails and none of its checks passes.
 
-- **C1 Files.** `movement.json` and every part file it names are valid as `/app/FORMAT.md` describes.
-- **C2 Assembled.** In the drawn positions: taking the frame as one solid and each mobile (the barrel included)
+- **C1 Files.** `movement.json` and every part file it names are valid as `/app/FORMAT.md` describes. A hand
+  entry that is present and does not name a mobile of the file and one of that mobile's parts makes the file not
+  valid; `hour`, `minute` and `seconds` must be present.
+- **C2 Assembled.** In the assembled positions: taking the frame as one solid and each mobile (the barrel included)
   as one solid, no two of these solids intersect by more than 0.01 mm3; no two fixed parts intersect each
   other by more than 0.01 mm3; no two parts of one mobile intersect each other by more than 0.01 mm3. The fixed
   parts form one frame: two fixed parts are joined when their smallest distance is at most 0.01 mm, and every
@@ -97,10 +103,11 @@ Checks. Each passes or fails.
 1. **Free to turn.** Each mobile, the barrel included, turned through one full turn about its axis in 72 steps of
    5 degrees, never intersects the frame by more than 0.01 mm3.
 2. **Held.** Each mobile, the barrel included, is moved 0.3 mm along +x, -x, +y, -y, +z and -z in turn, and is
-   held in every one of the six directions. Moved in a direction, a mobile is held when it intersects the frame by
-   more than 0.01 mm3, or intersects by more than 0.01 mm3 a mobile whose axis is within 0.01 mm of its own
-   and which is itself held in that direction; this is worked out until nothing changes. A mobile whose axis is
-   further than 0.01 mm from its own never holds it.
+   held in every one of the six directions. Only the tested mobile moves; the frame and every other mobile stay
+   where they are. Moved in a direction, a mobile is held when it intersects the frame by more than 0.01 mm3, or
+   intersects by more than 0.01 mm3 a mobile whose axis is within 0.01 mm of its own and which is itself held
+   in that direction; this is worked out until nothing changes. A mobile whose axis is further than 0.01 mm
+   from its own never holds it.
 3. **Seated.** Every part of a mobile that has more than one part, moved 0.3 mm along +x, -x, +y and -y in turn,
    intersects the other parts of its mobile by more than 0.01 mm3 every time, and moved 0.3 mm along +z or along -z
    (at least one of the two) intersects them by more than 0.01 mm3. The parts of each such mobile form one piece:
@@ -110,10 +117,13 @@ Checks. Each passes or fails.
    meshes; every declared mesh passes the mesh test below; and every mobile is driven from the barrel through
    declared meshes that pass the mesh test.
 
-   *Mesh test.* For a declared mesh with driver D (z_D teeth) and driven mobile N (z_N teeth), starting from the
-   drawn positions, at step i (i = 0, 1, ..., 8 x max(z_D, z_N) - 1) D is turned counter-clockwise by
-   i x 360 / (8 x z_D) degrees about its axis, and N clockwise by that angle x z_D / z_N about its own axis.
-   Three conditions must hold:
+   *Mesh test.* For a declared mesh, D is the mobile that the declaration names as `driver` (z_D teeth, its
+   `driver_teeth`) and N the mobile it names as `driven` (z_N teeth, its `driven_teeth`), whichever way the power
+   flows in the movement. D and N are whole mobiles: every part of each (for `barrel`, the supplied barrel).
+   Starting from the assembled positions, at step i (i = 0, 1, ..., 8 x max(z_D, z_N) - 1) D is turned
+   counter-clockwise by i x 360 / (8 x z_D) degrees about its axis, and N clockwise by that angle x z_D / z_N
+   about its own axis. These turning senses are a convention of the test; they do not depend on the running sense
+   of the barrel. Three conditions must hold:
    - no jam: at every step, and at two more positions after every 8th step (i + 1/3 and i + 1/5 in the formula
      above, for i = 0, 8, 16, ...), D and N intersect by at most 0.01 mm3;
    - engaged: at every 4th step (i = 0, 4, 8, ...) at which their intersection is empty, their smallest
@@ -121,14 +131,14 @@ Checks. Each passes or fails.
    - the teeth drive: at every 8th step (i = 0, 8, 16, ...), D is turned a further 0.25 of its tooth pitch
      (90 / z_D degrees, counter-clockwise) while N stays where it is. V is the volume of the region that the
      turned D shares with N and that D did not occupy before this extra turn; H is the height in z of that region;
-     m = 2 x (distance between the two drawn axes) / (z_D + z_N) is the mesh's module. V is at least 0.001 mm3 and
-     V / H is more than 0.5 x m x m, at every one of these steps. (V / H is the area that the extra turn cuts into
-     N's teeth.)
+     m = 2 x (distance between the two axes in the assembled positions) / (z_D + z_N) is the mesh's module. V is
+     at least 0.001 mm3 and V / H is more than 0.5 x m x m, at every one of these steps. (V / H is the area that
+     the extra turn cuts into N's teeth.)
 5. **The train runs with its arbors slightly out of place.** Every declared mesh also passes the mesh test with
    the driven mobile N moved 0.03 mm straight away from D's axis, and with N moved 0.03 mm straight towards
    D's axis (N then turns about its moved axis; if the two axes coincide, "away" is +x and "towards" is -x). The
-   steps, the turning angles and m are those of the drawn position. This check does not change which meshes
-   drive the hands; that is decided in the drawn position only.
+   steps, the turning angles and m are those of the assembled positions. This check does not change which meshes
+   drive the hands; that is decided in the assembled positions only.
 6. **Nothing else collides.** Every pair of mobiles (the barrel included) that is not declared as a mesh is turned
    together, each at its speed from the declared tooth counts (a mobile that no declared mesh reaches from the
    barrel stands still): 144 equal steps covering one full turn of the faster of the two, then, if their speeds
@@ -161,7 +171,8 @@ Checks. Each passes or fails.
 The 8-hour build: the barrel turns clockwise once every 8 h.
 
 Conditions: C1 and C2 of Part 1, and **C3 24-hour hand declared**: `hands.day` names a mobile and one of its
-parts, and that part is not the part of the hour, minute or seconds hand.
+parts, and that part is not the part of the hour, minute or seconds hand. A movement file without a `day` entry
+fails C3.
 
 Checks:
 
