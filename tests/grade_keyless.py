@@ -163,7 +163,10 @@ def main(argv):
         res["fits_relieved"] = STATE["fits"]
         res["bodies"] = {d["name"]: {"kind": d["kind"], "dof": d.get("dof"), "triangles": int(parts[d["name"]].num_tri())}
                          for d in defs}
+        res["running"] = "assemble"         # AT-0's settle and phase can be long on a delivery with large overlaps
+        save()
         gates, conds, det = assemble(defs, parts, meta)
+        res.pop("running")
         res.update(gates=gates, conditions=conds, assemble=det)
         res["steps"]["assemble"] = gates["files"] and gates["rest"] and conds["held"] and conds["bounds"]
         res["phases_done"].append("assemble")
