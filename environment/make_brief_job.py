@@ -887,7 +887,6 @@ millimetres): the drum and the arbor together, as one mesh. In that position:
 | Arbor core (inside the drum's bore) | z {wz0} mm to z {wz1} mm, radius {cr} mm |
 | Spring chamber inside the drum (not modelled in the mesh) | inner diameter {ind} mm |
 | Winding square | z {sq0} mm to z {sq1} mm, side {sq} mm, sides parallel to x and y |
-| Tooth phase | one tooth centred on the +x direction ({ph} degrees from +x, measured on the supplied mesh) |
 | Volume of the mesh | {vol} mm3 |
 
 ## 4. Speed classes
@@ -897,7 +896,7 @@ The steady running speed of the barrel in the movement, for each speed class.
 | Speed class | {scol} | {sense} |
 |---|---|---|
 {classes}""".format(table=table, no=supplied_barrel_no(), wz0=num(W.BARREL_WHEEL_Z[0]), wz1=num(W.BARREL_WHEEL_Z[1]),
-                    az0=num(W.BARREL_ARBOR_Z[0]), az1=num(W.BARREL_ARBOR_Z[1]), ph=num(B["phase"]), vol=num(B["volume"]),
+                    az0=num(W.BARREL_ARBOR_Z[0]), az1=num(W.BARREL_ARBOR_Z[1]), vol=num(B["volume"]),
                     scol=SPEED_COL, sense=SENSE_COL, classes=classes, bore=num(W.BARREL_BORE_R), ar=num(W.BARREL_ARBOR_R),
                     cr=num(round(W.BARREL_CORE_R, 3)), ind=num(W.BARREL_INNER_D), sq0=num(W.BARREL_SQUARE_Z[0]),
                     sq1=num(W.BARREL_SQUARE_Z[1]), sq=num(W.BARREL_SQUARE_SIDE))

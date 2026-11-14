@@ -275,4 +275,5 @@ Read in full: instruction.md, FORMAT.md, QA-W100, DS-W01 to DS-W04, DS-101 Table
 | B1 | Load case stated down to the cell (QA-W100, DS-101 Note 2) | QA names the source (DS-101 Table 2a, the automatic version's bridle) but not row and column; DS-101 Note 2 no longer prints 70.1 | A (Mikael's go), for B to merge | branch a/brief-review-b-items |
 | B2 | QA-W100 "any other mesh off that path, is not rated" | sentence deleted (the path definition stays) | A, for B to merge | branch a/brief-review-b-items |
 | B3 | FORMAT.md layout block lacks `material` | example shows `"material": "ordering code"` and `"part_materials"` | A, for B to merge | branch a/brief-review-b-items |
-| B4-B8 | check_format codes, voxel recipe, off-grid poses, tooth phase, parts figure | no change (B's reviewer: keep or leave) | - | - |
+| B4-B6, B8 | check_format codes, voxel recipe, off-grid poses, parts figure | no change (B's reviewer: keep or leave) | - | - |
+| B7 | DS-W01 tooth phase row "measured on the supplied mesh" | row deleted; the generator still measures the phase and refuses a mesh with no tooth on +x. Not a traceability cell, so no check depends on it | B (itswinther's decision, 01:19) | branch b2 docs batch |
