@@ -117,6 +117,7 @@ class World:
     # a returning spring pushes free parts on its rest side (relax). A class attribute, so a caller whose
     # brief says springs never drive other bodies can set World.spring_push = False for every world.
     spring_push = True
+    _start = None                       # start-of-step poses while a step resolves (see resolve)
 
     def __init__(self, bodies):
         self.bodies = {b.name: b for b in bodies}
@@ -341,10 +342,19 @@ class World:
         best = 0.0
         fam = [b] + self.children(b)
         pairs = [(m, o) for m in fam for o in among if o is not b and o not in fam]
+        start = self._start
         for m, o in pairs:
             v = self.posed(m) ^ self.posed(o)
             if v.volume() <= 0.5 * TOL:
                 continue
+            v0 = None
+            if start is not None:           # the same pair at the start of this step
+                now = self.snapshot()
+                self.restore(start)
+                try:
+                    v0 = self.posed(m) ^ self.posed(o)
+                finally:
+                    self.restore(now)
             comps = v.decompose()
             # each separate contact patch; slivers under PATCH_FLOOR_FRAC x TOL are skipped only when the pair has a
             # larger patch: a light contact spread over many tiny patches (teeth touching along a whole
@@ -353,6 +363,13 @@ class World:
             if any(c.volume() > floor for c in comps):
                 comps = [c for c in comps if c.volume() > floor]
             for comp in comps:
+                if v0 is not None and not v0.is_empty():
+                    # a contact that was already there, no smaller, at the step's start does not push now
+                    lo, hi = np.asarray(comp.bounding_box()[:3]), np.asarray(comp.bounding_box()[3:])
+                    g = 2 * SCAN_ARC
+                    box = m3.Manifold.cube(list(hi - lo + 2 * g)).translate(list(lo - g))
+                    if (v0 ^ box).volume() >= comp.volume() - FORCE_EPS:
+                        continue
                 pts = np.asarray(comp.to_mesh().vert_properties, float)[:, :3]
                 if not len(pts):
                     continue
@@ -452,7 +469,7 @@ class World:
             try:
                 b.q = q1
                 self.dqs = {b.name: (abs(d), 0.0) if b.dof in ("rot", "stem") else (0.0, abs(d))}
-                ok = self.resolve() and self._max_travel() <= MAX_STEP_TRAVEL
+                ok = self.resolve(start=snap) and self._max_travel() <= MAX_STEP_TRAVEL
                 ok = ok and self.pen(b) <= TOL and all(self.pen(o) <= TOL for o in frozen)
                 if ok:      # it may not drive another spring away from that spring's own rest side
                     for o in self.order_spring:
@@ -479,9 +496,20 @@ class World:
         return [o for o in self.bodies.values() if o is not b and (
             any(self.dqs.get(o.name, (0.0, 0.0))) or (o.carrier and self.dqs.get(o.carrier, (0.0, 0.0))[0] > 0))]
 
-    def resolve(self, riders_yield=True):
+    def resolve(self, riders_yield=True, start=None):
         """Sweeps of pushes. Light springs yield first, then free bodies, then the mainspring arbor.
-        With riders_yield False, carried parts are pushed like any free part (see step())."""
+        With riders_yield False, carried parts are pushed like any free part (see step()).
+        start: the poses before this step's input move (a snapshot). With it, budget() lets only the
+        contacts that push in this step lend a friction allowance, not contacts that were already there
+        (a part resting on a fast surface does not slip through a face that should lock)."""
+        prev = self._start
+        self._start = start
+        try:
+            return self._resolve(riders_yield)
+        finally:
+            self._start = prev
+
+    def _resolve(self, riders_yield=True):
         self._rider_yielded = False
         fixed_names = {n for n, o in self.bodies.items() if o.kind == "fixed"}
         immovable = {n for n, o in self.bodies.items() if o.kind in ("fixed", "main", "driven")}
@@ -574,14 +602,14 @@ class World:
         d.q += dq
         d.p += dp
         self.dqs = {driver: (abs(dq), abs(dp))}
-        ok = self.resolve()
+        ok = self.resolve(start=snap)
         if not ok and self._rider_yielded:
             # a carried part gives way only if what it pushes can give way too; where the chain behind it
             # is held (a sliding pinion backed by the yoke, the yoke by the setting lever), it drives
             self.restore(snap)
             d.q += dq
             d.p += dp
-            ok = self.resolve(riders_yield=False)
+            ok = self.resolve(riders_yield=False, start=snap)
         if ok and _depth < 4 and self._max_travel() > MAX_STEP_TRAVEL:
             self.restore(snap)
             return (self.step(driver, dq / 2, dp / 2, main_try_arc / 2, _depth + 1)
@@ -602,7 +630,7 @@ class World:
                 dqm = sgn * b.coord_from_arc(main_try_arc * frac)
                 b.q += dqm
                 self.dqs = {b.name: (abs(dqm), 0.0)}
-                if self.resolve() and self._max_travel() <= MAX_STEP_TRAVEL:
+                if self.resolve(start=s2) and self._max_travel() <= MAX_STEP_TRAVEL:
                     for sb in self.order_spring:
                         self.relax(sb)
                     break

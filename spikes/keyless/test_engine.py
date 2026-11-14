@@ -275,6 +275,45 @@ def spring_push_switch():
     return abs(on - 1.9) < 0.02 and abs(off) < 1e-9
 
 
+def resting_rub_lends_no_allowance():
+    """A face steeper than the friction cone locks, even when the pushed part also rests (touching, within
+    TOL) on a fast-moving surface of the driver far from its axis: only contacts that push in this step
+    lend a friction allowance (audit P2-6, probe p4_budget)."""
+    def box(lo, hi):
+        return m3.Manifold.cube([hi[i] - lo[i] for i in range(3)]).translate(list(lo))
+    out = []
+    for rub in (False, True):
+        slope, c = 0.3, 0.5
+        face = m3.Manifold.extrude(m3.CrossSection([[(0.3, c - slope * 0.3), (1.0, c - slope * 1.0), (1.0, 1.5),
+                                                     (0.3, 1.5)]]), 0.5)
+        tooth = box((0.4, -0.5, 0.0), (0.9, 0.15, 0.5))
+        ann = (m3.Manifold.cylinder(0.1, 5.0, 5.0, 512) - m3.Manifold.cylinder(0.1, 3.5, 3.5, 512)).translate([0, 0, 1.0])
+        eps = 2.5e-4 if rub else -0.05
+        P = face + box((0.3, 1.4, 0.0), (1.0, 2.0, 0.5)) + box((0.3, 1.5, 0.0), (1.0, 2.0, 1.3)) + \
+            box((0.3, 1.5, 1.1 - eps), (4.2, 2.0, 1.3))
+        D = E.Body("D", tooth + ann, "driven", dof="stem", point=(0, 0, 0), direction=(0, 0, 1))
+        B = E.Body("P", P, "contact", dof="slide", direction=(1, 0, 0))
+        w = E.World([D, B])
+        blocked = 0
+        for _ in range(40):
+            if not w.step("D", dq=math.radians(0.5)):
+                blocked += 1
+                if blocked >= 3:
+                    break
+        print("locking face, rub=%s: driver %.1f deg, blocked %d, slid %.4f mm" % (rub, math.degrees(D.q), blocked, B.q))
+        out.append((blocked, B.q))
+    return all(bl >= 3 and q < 0.05 for bl, q in out)
+
+
+def pull_without_spec():
+    """grade.pull_of: no spec (a caller that builds the world itself) means the default pull."""
+    import constants as C
+    import grade as GR
+    ok = GR.pull_of(None) == C.PULL and GR.pull_of({}) == C.PULL and GR.pull_of({"pull": 0.6}) == 0.6
+    print("pull_of(None) = %s (PULL %s)" % (GR.pull_of(None), C.PULL))
+    return ok
+
+
 def touching_can_be_pushed():
     """A part resting on a fixed face with an overlap between TOL/2 and TOL (touching) can still be
     pushed along that face: one threshold, TOL."""
@@ -391,7 +430,7 @@ if __name__ == "__main__":
            "spring_through_link": spring_through_link(), "pull_moves_no_rider": pull_moves_no_rider(),
            "rider_gives_way": rider_gives_way(), "rider_drives_steep_face": rider_drives_steep_face(),
            "rider_drives_when_chain_blocked": rider_drives_when_chain_blocked(),
-           "many_tiny_patches": many_tiny_patches(), "spring_push_switch": spring_push_switch(), "main_try_from_constants": main_try_from_constants(),
+           "many_tiny_patches": many_tiny_patches(), "pull_without_spec": pull_without_spec(), "resting_rub_lends_no_allowance": resting_rub_lends_no_allowance(), "spring_push_switch": spring_push_switch(), "main_try_from_constants": main_try_from_constants(),
            "spring_carrier_stops_at_wheel_contact": spring_carrier_stops_at_wheel_contact(),
            "spring_pushes_while_touching_plate": spring_pushes_while_touching_plate(), "touching_can_be_pushed": touching_can_be_pushed(), "fit_clearance": fit_clearance(),
            "phase_gears": phase_gears(), "carried_wheel": carried_wheel(), "force_direction": force_direction(),

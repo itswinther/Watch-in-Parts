@@ -181,8 +181,9 @@ def load(sub, data):
 
 
 def pull_of(spec):
-    """Position 2: the stem's pull declared by the design (`pull`, within C.PULL_RANGE), else C.PULL."""
-    p = spec.get("pull")
+    """Position 2: the stem's pull declared by the design (`pull`, within C.PULL_RANGE), else C.PULL.
+    A caller without a keyless.json spec (spec None: B's joined job) gets C.PULL."""
+    p = spec.get("pull") if isinstance(spec, dict) else None
     if p is None:
         return C.PULL
     if isinstance(p, bool) or not isinstance(p, (int, float)) or not math.isfinite(p) \
