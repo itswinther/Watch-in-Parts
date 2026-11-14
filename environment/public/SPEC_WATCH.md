@@ -58,7 +58,7 @@ below uses:
   hold exactly one solid, valid by OpenCASCADE's shape check, and nothing outside
   that solid. A file with more than 500 flat three-sided faces is rejected as a
   faceted mesh rather than a CAD solid. Reading and meshing one file may take at
-  most 120 s. The solid is meshed with OpenCASCADE (`BRepMesh_IncrementalMesh`)
+  most 120 s and 4,096 MB of memory (it runs in its own process). The solid is meshed with OpenCASCADE (`BRepMesh_IncrementalMesh`)
   with a linear deflection of 0.001 mm (absolute) and an angular deflection of
   0.1 radians, and the triangles then go through the STL rule below. A meshed
   curved surface lies within 0.001 mm of the true one (inside a convex surface,
