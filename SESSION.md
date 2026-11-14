@@ -956,3 +956,12 @@ This is information, so nobody duplicates it. The to-do list says nobody has pac
 
 ### 2026-11-14 13:40 | A: one-page research brief | Mikael + Claude
 - Did: wrote `RESEARCH_BRIEF.md`. It brings together our experiments, 13 papers on CAD and engineering agents, the Harbor and Terminal-Bench findings, the standards and real data, the design conclusions and the open questions, with pointers to the full documents.
+
+### 2026-11-14 13:50 | A: decision: one brief start to finish, nothing frozen, graded on output only | Mikael + Claude
+- Decided by Mikael after a teammate's review:
+  - **Task framing:** one professional brief from start to finish ("you are a watchmaking professional"), with the four parts of the movement as the scope of one job. No per-stage prompts, no freezing, no hints.
+  - **Scoring:** only the delivered output is graded, through weighted acceptance steps in order. Time and tokens are generous and never part of the score; logs show they never bind.
+  - **Inputs and runs:** full realistic datasheets, not digested tables; 8 runs per model; Docker locally, Modal for parallel runs if available.
+  - **Principle:** we do not design for failure.
+- Frozen stages and change requests remain only as a comparison experiment. `RESEARCH_BRIEF.md` updated.
+- For B: this changes the recommendation in `spikes/STAGED_ACCEPTANCE_PLAN.md` (which argued for freezing). The four stages of B's task stay as the content, delivered in one brief.

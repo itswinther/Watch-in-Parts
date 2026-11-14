@@ -21,10 +21,11 @@ explain and grade fairly?
 3. **Published evidence agrees:** functional mechanisms are the weakest category. CAD-bench's right-angle
    gearbox builds 97 % of the time and scores 4 %; CADEngBench pin-slot joints passed 0 of 6 for every model.
    But most papers tested older models, no code execution, or hidden requirements.
-4. **So we grade the watch as a whole, by using it** (an owner's acceptance test, in order), we build it in
-   frozen stages, we add contact-driven mechanisms (keyless works), and we supply datasheets rather than
-   stated limits, as a real engineer would get. The headline score stays deterministic; the run log explains
-   failures.
+4. **So we give one brief from start to finish, as a professional would get it** (no per-stage prompts, no
+   freezing, no method hints), include contact-driven mechanisms (keyless works) and full real datasheets
+   rather than stated limits, and grade only the delivered output: the finished watch, used the way its owner
+   would, with weighted steps. The headline score stays deterministic; the run log explains failures. We do
+   not design for failure; we build a realistic task and measure (decision 14 Nov 13:50, below).
 
 ## 1. Our own experiments (sandboxed: Harbor, allowlist set to the model endpoint, separate offline verifier)
 
@@ -131,8 +132,11 @@ or OpenMovement CAD files (licence unclear).
 
 1. **Grade function, the way an owner accepts a watch:** assemble, wind, hold, run, backward, set, return, in
    order. Part checks are conditions on the whole, not points. *(Proposal 12:40, awaiting the team.)*
-2. **Build in frozen stages, or with change requests after delivery.** The full acceptance test is stated up
-   front and runs once, at the end, so foreseeing consequences is the skill tested.
+2. **One brief from start to finish, nothing frozen** (decision 13:50). The four parts of the movement (going
+   train, motion works, change of barrel speed, keyless works) are the scope of one job, not separate prompts.
+   The full acceptance test is stated up front and runs once on the delivered watch. Frozen stages and change
+   requests are kept only as a side experiment for comparison, because they produced our only shortfalls
+   (GPT 0.42, Sonnet 0.47), but judges could read them as forcing failure.
 3. **Contact-driven mechanisms (keyless works):** behaviour the agent cannot verify with arithmetic.
 4. **An engineer's brief:** a role, the goal, deliverables, real datasheets, and one blanket clause ("operate
    within the ratings in the supplied datasheets and accepted watchmaking practice"). No method hints. Every
@@ -146,6 +150,24 @@ or OpenMovement CAD files (licence unclear).
    - `harbor check` and `lint`, oracle 1.0, nop 0.0, anchors and an exploit hunt, a deliberate cheat run;
    - evidence that the timeout and memory never bind;
    - everything in Docker.
+
+## Decision, 14 Nov 13:50 (Mikael, after a teammate's review): output verification, realistic framing
+
+- **Grade only the delivered output.** Freezing or not, time and tokens are not part of the score. The
+  agent timeout is generous (about 3x the slowest successful run, at least 60 min) and logged per run to
+  prove it never binds. No cap on total tokens; the per-response output limit is set high enough that a
+  turn cannot end empty (the Haiku failure), checked in the smoke run.
+- **One professional brief from start to finish:** "You are a watchmaking professional...", the whole scope,
+  the datasheets, the acceptance test. No per-stage prompts, no freezing, no hints.
+- **Weighted acceptance steps:** each step has a weight that reflects how much it matters to the owner
+  (running at the right rate counts more than a smooth return of the crown). Weights and their reasons are
+  in `SOLUTION.md`, and the in-order rule stays: a step counts only if the steps before it passed.
+- **Full, realistic datasheets, not pre-digested tables.** A teammate notes that models hallucinate when
+  parsing long data while building a system. Reading the documents correctly is part of a real engineer's job,
+  and the grader checks the implied limits.
+- **Sandboxes:** Docker locally; Modal (Harbor `--env modal`) for 8 runs per model in parallel, if the team
+  gets an account.
+- **Principle, stated in CONTEXT.md:** we do not design for failure; we build a realistic task and measure.
 
 ## Open questions
 
