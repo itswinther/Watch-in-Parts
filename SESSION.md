@@ -180,6 +180,8 @@ Append one line per decision: time, decision, who agreed.
 
 - 2026-11-14 17:40 (B) SPEC.md is version 0.7: the one-job watch of Decisions 15:44 is on main and is the task under test. Old -> new: four frozen stages, one conversation each -> one brief, one delivery, one grader call; stage scores (0.5 p^2 + 0.5 all, product over stages) -> one reward, 0.5 x weighted part share (linear) + 0.5 x all pass, part weights P1 0.25, P2 0.10, P3 0.15, P4 0.25, renormalised over the parts graded; stage-2 `locked` and `day_declared` (new part vs previous stage) -> C3 (the day hand's part is not the hour, minute or seconds hand's part); stage-3 kept share 0.626 and `change_met` -> C4 (same `fixed` list in order, same `case_centre`); stage-4 `locked` -> none; `light` (355 and 278 mm3) -> dropped in one-job mode; whole-run limit new, `JOB_TIME_LIMIT_S` 3600 s, stated in the brief with the 600 s per check. Every other check and number is unchanged from 0.6.
 
+- 2026-11-14 18:00 Decided by Mikael (A), run budget for A's Harbor runs (OpenCode on the Anthropic key, about $19 left; the smoke runs cost about $4 to $5 per run): the keyless preliminary smoke runs (one GPT-6.1-sol via Codex, one Sonnet 5.5 via OpenCode) come first. After that, **no Opus runs**, and **at most 4 Sonnet runs via OpenCode**, only if the results call for them; GPT via Codex on Codex credits. Since B's first smoke run per model scored 1.0 on the four-part job, A holds paid Harbor batches on the four-part job and spends the budget on crown winding and the joined five-part job, where a gap is plausible. Organiser credits are being asked for; this changes if they come.
+
 ## Proposed spec changes
 
 Append here. A human has to say yes before SPEC.md changes.
