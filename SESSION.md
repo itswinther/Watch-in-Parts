@@ -1131,3 +1131,17 @@ This is information, so nobody duplicates it. The to-do list says nobody has pac
   - `PULL` = 1.29 at this scale;
   - the brief must state the barrel's core ratio (TRACEABILITY.md section 3).
 - Verified by: the computations ran in `python:3.12-slim` (Docker). Not verified: listed in TRACEABILITY.md section 6.
+
+### 2026-11-14 15:00 | A: mentor feedback on the watch idea (from Mikael's recording), and what it means for us | Mikael + Claude
+Source: a 7-minute recording of Mikael's team asking a hackathon mentor for feedback, transcribed locally (Whisper, in Docker; the audio and full transcript stay off the repo). Summary of what the mentor said:
+- **Hints and fidelity:** "a very fine line between unfairness and hiding too much from the agent, and being too verbose. Think about how it would work in real life." Implied requirements (e.g. "it must keep time") are fine if a real engineer would assume them. This matches our engineer brief plus datasheets plus stated acceptance test.
+- **Per-part grading and reward hacking:** "If you grade four different parts, the model might learn to skip one of the hardest parts and optimise the other three, and get 0.75 every time." Also: pointing out reward-hacking behaviour you observe counts in your favour.
+- **Harbor:** follow their cookbook; "use Docker Compose within Harbor", the easiest way to build an overall environment.
+- **Logs and screenshots of runs** ("pinpoint what went wrong"): "a great idea"; "you guys are on a good track".
+- The mentor is reachable on the Discord and in person tonight and early tomorrow morning.
+
+What it means:
+1. **The 0.75 concern is answered by the whole-build term, and we should say so in SOLUTION.md and the README.** With B's 14:08 scoring (0.5 × weighted parts + 0.5 × whole build), skipping the hardest part (crown winding, weight 0.25) gives 0.5 × 0.75 + 0 = 0.375, not 0.75, while finishing everything gives 1.0. The gap between "skip the hardest part" and "do it all" is 0.625, so the best strategy is still to do the whole job. Keep the whole-build term at 0.5 or more. Pure per-part averaging (no whole term) would have the problem the mentor describes. Add an anchor "every part except the hardest" to both halves and report its score.
+2. **Report observed reward hacking explicitly:** keep the reward-hacks count in the results, add the deliberate cheat run, and write up anything seen.
+3. **Docker Compose:** our tasks use a Dockerfile plus Harbor's separate verifier, which is the cookbook's single-container path. Compose matters if we add services (e.g. a sidecar). Check the cookbook's compose examples and follow them if we need more than one service. Not urgent.
+4. **Use the mentor** for the four organiser questions in TEST_ENVIRONMENT.md (judged model, timeout and rerun budget, Harbor version, credits) and for a quick look at failure analyses.
