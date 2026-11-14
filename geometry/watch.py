@@ -35,6 +35,11 @@ DAY_HAND_OFFSET = 6.0       # its axis is at least this far from the hour hand's
 ASM_STEP = 0.2              # mm any vertex may move between consecutive assembly poses
 ASM_MAX_POSES = 1500
 ASM_CLEAR = 5.0             # a part starts wholly outside the movement's bounding box grown by this
+MIN_FEATURE = 0.2           # smallest printable feature
+THIN_VOXEL = 0.05
+THIN_ERODE_VOX = 1.5        # ball radius 0.1 on the 0.05 grid, less half a voxel of margin
+THIN_DILATE_VOX = 1.0
+THIN_DEV = 0.2              # no point of a part may be further than this from what survives the opening
 MAX_PARTS = 60
 MAX_TRIANGLES = 200_000
 MAX_STL_BYTES = 32 * 1024 * 1024
@@ -378,3 +383,15 @@ def load_assembly(folder, movement):
         except (ValueError, TypeError):
             paths[n] = None
     return order, paths
+
+
+def thin(part):
+    """Open the part with a ball of radius MIN_FEATURE / 2 on a THIN_VOXEL grid. Returns
+    (pieces left, largest distance in mm from the part to what is left). Paper-thin walls vanish."""
+    h = THIN_VOXEL
+    bb = np.array(part.bounding_box())
+    lo = np.floor(bb[:3] / h).astype(int) - 2
+    hi = np.ceil(bb[3:] / h).astype(int) + 2
+    solid = core.voxelize(part, lo * h - 0.0137, tuple(int(v) for v in hi - lo), h)
+    n, dev = core.opening_test(solid, THIN_ERODE_VOX, THIN_DILATE_VOX)
+    return n, (dev * h if np.isfinite(dev) else 1e9)

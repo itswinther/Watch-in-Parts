@@ -12,6 +12,9 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 
 def main(run):
     total = 0.0
+    log = open(os.path.join(run, "chain.log")).read() if os.path.isfile(os.path.join(run, "chain.log")) else ""
+    exits = dict(re.findall(r"stage (\d) exit (\d+)", log))
+    prev_failed = set()
     for st in (1, 2, 3):
         d = os.path.join(run, "stage%d" % st)
         tr = os.path.join(run, "stage%d.jsonl" % st)
@@ -25,8 +28,11 @@ def main(run):
         outside = [c for c in calls if re.search(r"/home/user|\.\./\.\.|/root|scratchpad/(?!chains/%s/stage%d)" % (os.path.basename(run), st), c)]
         sub = os.path.join(d, "submission")
         line = "stage %d: " % st
-        if not res:
-            line += "still running or killed; "
+        code = exits.get(str(st))
+        if code == "124":
+            line += "KILLED BY THE TIME LIMIT; "
+        elif not res:
+            line += ("ended without a result (exit %s); " % code) if code else "still running; "
         else:
             line += "%.1f min, $%.2f; " % (res[-1].get("duration_ms", 0) / 60000, res[-1].get("total_cost_usd") or 0)
         line += "%d tool calls, %d outside; " % (len(calls), len(outside))
@@ -38,7 +44,15 @@ def main(run):
             g = json.loads(p.stdout.strip().splitlines()[-1])
             failed = [k for dd in (g["gates"], g["checks"]) for k, v in dd.items() if not v]
             total += g["reward"]
-            line += "SCORE %.4f (p %.3f) failed: %s" % (g["reward"], g["p"], ",".join(failed) or "-")
+            line += "SCORE %.4f (p %.3f)" % (g["reward"], g["p"])
+            if st == 2:
+                inherited = sorted(set(failed) & prev_failed)
+                new = sorted(set(failed) - prev_failed)
+                line += " inherited from stage 1: %s; new in stage 2: %s" % (",".join(inherited) or "-", ",".join(new) or "-")
+            else:
+                line += " failed: %s" % (",".join(failed) or "-")
+            if st == 1:
+                prev_failed = set(failed)
         else:
             line += "SCORE 0 (nothing complete submitted)"
         print(line)

@@ -155,6 +155,11 @@ def grade_design(folder, stage=1, prev=None):
              "seconds": hand("seconds"), "coaxial": coaxial, "hands": hands, "size": size}
     for k in weights:
         checks[k], details[k] = _run(table[k])
+    if os.environ.get("WATCH_THIN"):          # information only, not scored yet: the minimum-thickness measurement
+        def thin_info():
+            r = {n: W.thin(solid) for n, (solid, _) in m.all_parts().items()}
+            return True, {n: {"pieces": v[0], "max_deviation": v[1], "ok": v[0] >= 1 and v[1] <= W.THIN_DEV} for n, v in r.items()}
+        _, details["printable_info"] = _run(thin_info)
     return result()
 
 
