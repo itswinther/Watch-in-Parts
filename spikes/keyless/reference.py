@@ -145,7 +145,7 @@ def build(opts=None):
     zt, zr = rp - M_FACE, rp + 1.25 * M_FACE
     ring = G.face_gear(ZC, ZP, M_FACE, (xcw, 0.0), ri, ro, zr, zt, 0.0, cutter_thin=-BL, steps_per_pitch=16)
     web = S.cyl_z(xcw, 0, zr - 0.01, 1.3, ro, 128)
-    chub = S.cyl_z(xcw, 0, 1.29, 2.5, 0.9, 64)
+    chub = S.cyl_z(xcw, 0, 1.29, 2.5, min(0.9, M_SPUR * (ZS / 2 - 1.25) - 0.02), 64)
     cspur = G.spur(ZS, M_SPUR, 1.4, 1.9, thin=BL, phase=math.pi / ZS).translate([xcw, 0, 0])
     crown = S.union([ring, web, chub, cspur])
     crown = crown - S.cyl_z(xcw, 0, 1.0, 3.0, 0.36, 48) - S.cyl_z(xcw, 0, 1.4, 1.62, 0.66, 48)

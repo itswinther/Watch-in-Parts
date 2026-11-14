@@ -281,8 +281,11 @@ def worker(args):
             bl = _turn(w, fw * 360 * C.WIND_TURNS)
             s1 = _state(w)
             wound = _deg(s0, s1, "barrel", C.WIND_SENSE)
-            out["wind"] = {"blocked": bl, "barrel_deg": wound, "minute_deg": _deg(s0, s1, "minute_wheel")}
-            out["wind"]["ok"] = bl == 0 and wound >= C.WIND_MIN and abs(out["wind"]["minute_deg"]) <= C.STILL_TOL
+            ratio = (360.0 * C.WIND_TURNS / wound) if wound > 1e-9 else float("inf")
+            out["wind"] = {"blocked": bl, "barrel_deg": wound, "minute_deg": _deg(s0, s1, "minute_wheel"),
+                           "crown_turns_per_barrel_turn": round(ratio, 3) if math.isfinite(ratio) else None}
+            out["wind"]["ok"] = (bl == 0 and C.WIND_BAND[0] <= ratio <= C.WIND_BAND[1]
+                                 and abs(out["wind"]["minute_deg"]) <= C.STILL_TOL)
             # 2 HOLD: the crown is let go, so it is free to turn (pushed like any free body)
             _set_kind(w, "stem", "contact")
             for _ in range(C.HOLD_STEPS):
@@ -292,9 +295,9 @@ def worker(args):
             runback = -_deg(s1, s2, "barrel", C.WIND_SENSE)
             out["hold"] = {"runback_deg": runback, "crown_spun_back_deg": _deg(s1, s2, "stem", C.FORWARD),
                            "ok": runback <= C.CLICK_RUNBACK}
-            stored = max(0.0, (wound - max(runback, 0.0)) / 360.0)
-            # 3 RUN
-            reserve = min(stored, C.CAPACITY_TURNS) * C.BARREL_HOURS_PER_TURN
+            # 3 RUN: from full wind, the click's run-back is lost; the rest gives the reserve
+            stored = max(0.0, C.CAPACITY_TURNS - max(runback, 0.0) / 360.0)
+            reserve = stored * C.BARREL_HOURS_PER_TURN
             snap = w.snapshot()
             _set_kind(w, "barrel", "driven")
             n = int(round(C.FREE_RUN_DEG / C.FREE_RUN_STEP))
@@ -444,8 +447,18 @@ def honesty(sub, steps):
 
 
 # ---------- main ----------
+def _constants_hash():
+    import hashlib
+    h = hashlib.sha256()
+    for f in ("constants.py", "engine.py", "grade.py"):
+        h.update(open(os.path.join(HERE, f), "rb").read())
+    return h.hexdigest()[:16]
+
+
 def grade(sub, data, jobs=4):
-    det = {}
+    """Returns (product, gates, conds, steps, det). Every step is evaluated (for the honesty check);
+    the product counts only the steps passed in order from AT-0."""
+    det = {"grader_version": C.GRADER_VERSION, "constants_hash": _constants_hash(), "at_ids": C.AT_IDS}
     gates = {"files": False, "rest": False}
     conds = {"held": False, "bounds": False}
     steps = {k: False for k in C.STEPS}
@@ -462,8 +475,6 @@ def grade(sub, data, jobs=4):
         gates["rest"] = all(v <= E.TOL for v in pens.values())
     except Exception as e:  # noqa: BLE001
         det["rest"] = "%s: %s" % (type(e).__name__, e)
-    if not all(gates.values()):
-        return 0.0, gates, conds, steps, det
     try:
         ok, d = bounds_check(spec, parts)
         conds["bounds"], det["bounds"] = ok, d
@@ -475,37 +486,40 @@ def grade(sub, data, jobs=4):
         conds["held"] = all(v["ok"] for v in h.values())
     except Exception as e:  # noqa: BLE001
         det["held"] = "%s: %s" % (type(e).__name__, e)
+    steps["assemble"] = gates["files"] and gates["rest"] and conds["held"] and conds["bounds"]
     seq = {}
-    try:
-        _, first, err = worker(("first", (sub, data), defs, None))
-        if err:
-            raise RuntimeError(err)
-        state = first.pop("state")
-        seq.update({k: first[k] for k in ("wind", "hold", "run")})
-        with ProcessPoolExecutor(max_workers=max(1, min(jobs, 3))) as ex:
-            for ph, out, err in ex.map(worker, [(ph, (sub, data), defs, state) for ph in ("backward", "set", "return")]):
-                seq[ph] = out if err is None else {"error": err, "ok": False}
-    except Exception as e:  # noqa: BLE001
-        det["sequence_error"] = "%s: %s" % (type(e).__name__, e)
+    if gates["rest"]:
+        try:
+            _, first, err = worker(("first", (sub, data), defs, None))
+            if err:
+                raise RuntimeError(err)
+            state = first.pop("state")
+            seq.update({k: first[k] for k in ("wind", "hold", "run")})
+            with ProcessPoolExecutor(max_workers=max(1, min(jobs, 3))) as ex:
+                for ph, out, err in ex.map(worker, [(ph, (sub, data), defs, state)
+                                                    for ph in ("backward", "set", "return")]):
+                    seq[ph] = out if err is None else {"error": err, "ok": False}
+        except Exception as e:  # noqa: BLE001
+            det["sequence_error"] = "%s: %s" % (type(e).__name__, e)
     det["sequence"] = seq
-    n = 0
-    for k in C.STEPS:
+    for k in C.STEPS[1:]:
         try:
             steps[k] = bool(seq[k]["ok"])
         except Exception:  # noqa: BLE001
             steps[k] = False
+    product, passed = 0.0, []
     for k in C.STEPS:
         if not steps[k]:
             break
-        n += 1
-    score = n / len(C.STEPS)
-    for k, v in conds.items():
-        if not v:
-            score *= C.COND_FACTOR
-    if not math.isfinite(score):
-        score = 0.0
-    det["steps_passed_in_order"] = n
-    return score, gates, conds, steps, det
+        product += C.STEP_WEIGHTS[k]
+        passed.append(C.AT_IDS[k])
+    if not steps["wind"]:
+        product = 0.0       # AT-0 is a precondition: its weight is earned together with AT-1 (a movement that
+                            # assembles but does not wind is not accepted at all)
+    product = round(product, 6) if math.isfinite(product) else 0.0
+    det["passed_in_order"] = passed
+    det["first_failed"] = next((C.AT_IDS[k] for k in C.STEPS if not steps[k]), None)
+    return product, gates, conds, steps, det
 
 
 def main():
@@ -529,7 +543,8 @@ def main():
     if not math.isfinite(score):
         score = 0.0
     out = {"reward": score, "product": product, "honesty": hon, "honesty_detail": hdet, "gates": gates,
-           "conditions": conds, "steps": steps, "details": det, "seconds": round(time.time() - t, 1)}
+           "conditions": conds, "steps": steps, "at": {C.AT_IDS[k]: v for k, v in steps.items()},
+           "grader_version": C.GRADER_VERSION, "details": det, "seconds": round(time.time() - t, 1)}
     if a.details:
         json.dump(out, open(a.details, "w"), indent=1, default=str)
     with open(a.reward, "w") as f:

@@ -33,8 +33,8 @@ The reference is `../reference.py`. All numbers are in millimetres.
     gentle ramp per tooth.
   - A light spring pushes the sliding pinion towards the winding pinion (`rest: -1` along +x).
 - **Why.**
-  - Forward, the steep faces meet. A face steeper than about 63 degrees cannot be cleared by sliding
-    within the friction cone, so the winding pinion is driven.
+  - Forward, the steep faces meet. With static friction μ = 0.51 a face inclined more steeply than about
+    63 degrees to the sliding direction cannot be cleared by sliding, so the winding pinion is driven.
   - Backward, the ramps meet and the sliding pinion slips axially against its spring.
 - **Traps.**
   - Symmetric teeth (two ramps) slip both ways and never wind.

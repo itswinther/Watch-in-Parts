@@ -40,7 +40,7 @@ AGENTS = {
 }
 
 TASK_TOML = """schema_version = "1.3"
-artifacts = ["/app/submission"]
+artifacts = ["/app"]   # the submission, the agent's scripts and any images or renders it made
 
 [task]
 name = "junction/keyless-works"
@@ -97,8 +97,9 @@ def values():
         "MINUTE_X": g(C.MINUTE_AXIS[0]), "MINUTE_Y": g(C.MINUTE_AXIS[1]),
         "MAX_TRIANGLES": C.MAX_TRIANGLES, "TOL": g(E.TOL), "STEP_DEG": g(C.STEP_DEG), "PULL_STEP": g(C.PULL_STEP),
         "K": g(E.K), "CONE_DEG": "%d" % round(math.degrees(math.atan(E.K))), "RELAX_MAX": g(E.RELAX_MAX),
-        "MAIN_TRY": g(C.MAIN_TRY), "COND_FACTOR": g(C.COND_FACTOR), "HOLD_SHIFT": g(C.HOLD_SHIFT),
-        "STEM_PROTRUDE": g(C.STEM_PROTRUDE), "WIND_TURNS": g(C.WIND_TURNS), "WIND_MIN": g(C.WIND_MIN),
+        "MAIN_TRY": g(C.MAIN_TRY), "HOLD_SHIFT": g(C.HOLD_SHIFT), "MU": g(C.MU), "MU_STATIC": g(C.MU_STATIC), "MU_SLIDING": g(C.MU_SLIDING),
+        "STEM_PROTRUDE": g(C.STEM_PROTRUDE), "WIND_TURNS": g(C.WIND_TURNS), "WIND_LO": g(C.WIND_BAND[0]),
+        "WIND_HI": g(C.WIND_BAND[1]),
         "STILL_TOL": g(C.STILL_TOL), "HOLD_STEPS": C.HOLD_STEPS, "RUNBACK": g(C.CLICK_RUNBACK),
         "CAPACITY": g(C.CAPACITY_TURNS), "HOURS_PER_TURN": g(C.BARREL_HOURS_PER_TURN),
         "RESERVE_MIN": g(C.RESERVE_MIN), "FREE_RUN_DEG": g(C.FREE_RUN_DEG), "FREE_RUN_STEP": g(C.FREE_RUN_STEP),
@@ -106,6 +107,7 @@ def values():
         "SET_TURN": g(C.SET_TURN), "SET_MIN": g(C.SET_MIN), "REWIND_TURN": g(C.REWIND_TURN),
         "WIGGLE_DEG": g(C.WIGGLE_DEG), "W_PRODUCT": g(C.W_PRODUCT), "W_HONESTY": g(C.W_HONESTY),
         "W_SUM": g(C.W_PRODUCT + C.W_HONESTY),
+        **{"W_" + k.upper(): g(v) for k, v in C.STEP_WEIGHTS.items()},
     }
 
 
