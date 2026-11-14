@@ -154,17 +154,16 @@ Checks. Each passes or fails.
 
     *Load case.* This calibre is the base of a family that includes an automatic version, whose barrel has a
     slipping bridle; the going train is rated for that version's barrel load. T_barrel is the upper end of the
-    bridle's slipping torque, DS-101, Table 2a, row "Slipping torque of the bridle (min. to max.)", column for
-    this series (N·mm), whatever mainspring the barrel of this build holds. The going train is stalled at its end,
-    so each of its meshes carries the full torque that reaches it.
+    slipping torque of the automatic version's bridle (DS-101, Table 2a), whatever mainspring the barrel of this
+    build holds. The going train is stalled at its end, so each of its meshes carries the full torque that reaches
+    it.
 
     *Meshes rated.* The going train: the declared meshes on the path from the barrel to the mobile that carries
     the seconds hand, through declared meshes that pass the mesh test (check 4); where there is more than one such
     path, the one a breadth-first search from the barrel finds first when it takes the meshes in their declared
-    order (so the one with the fewest meshes). The motion work, and any other mesh off that path, is not rated. If
-    the seconds hand's mobile is not reached from the barrel that way, this check fails. For each rated mesh, with
-    D the mobile that the declaration names as `driver`, N the one it names as `driven`, and z_D and z_N their
-    declared tooth counts:
+    order (so the one with the fewest meshes). If the seconds hand's mobile is not reached from the barrel that
+    way, this check fails. For each rated mesh, with D the mobile that the declaration names as `driver`, N the
+    one it names as `driven`, and z_D and z_N their declared tooth counts:
 
     - torque at D: T_D = T_barrel x |n_barrel / n_D| (N·mm), with n the turns per hour that the declared tooth
       counts give through meshes that pass the mesh test (the same speeds as the hand checks);

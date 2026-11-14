@@ -693,7 +693,8 @@ Each is at most {jb} bytes and names at most {mp} parts.
   "case_centre": [x, y],
   "fixed": ["part_name", ...],
   "mobiles": {{
-    "mobile_name": {{"axis": [x, y], "parts": ["part_name", ...]}},
+    "mobile_name": {{"axis": [x, y], "parts": ["part_name", ...], "material": "ordering code",
+                     "part_materials": {{"part_name": "ordering code"}}}},
 {fmob}    ...
   }},
   "meshes": [

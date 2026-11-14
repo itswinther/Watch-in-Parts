@@ -139,14 +139,14 @@ def qa_strength_section(number=14, mesh_test="the mesh test (check 4)"):
         "**Gear strength.** The gears of the going train are strong enough in tooth bending.",
         "*Load case.* This calibre is the base of a family that includes an automatic version, whose barrel has a "
         "slipping bridle; the going train is rated for that version's barrel load. T_barrel is the upper end of the "
-        "bridle's slipping torque, DS-101, Table 2a, row \"Slipping torque of the bridle (min. to max.)\", column "
-        "for this series (N·mm), whatever mainspring the barrel of this build holds. The going train is stalled at "
+        "slipping torque of the automatic version's bridle (DS-101, Table 2a), whatever mainspring the barrel of this "
+        "build holds. The going train is stalled at "
         "its end, so each of its meshes carries the full torque that reaches it.",
         "*Meshes rated.* The going train: the declared meshes on the path from the barrel to the mobile that "
         "carries the seconds hand, through declared meshes that pass %s; where there is more than one such path, "
         "the one a breadth-first search from the barrel finds first when it takes the meshes in their declared "
-        "order (so the one with the fewest meshes). The motion work, and any other mesh off "
-        "that path, is not rated. If the seconds hand's mobile is not reached from the barrel that way, this check "
+        "order (so the one with the fewest meshes). If the seconds hand's mobile is not reached from the barrel "
+        "that way, this check "
         "fails. For each rated mesh, with D the mobile that the declaration names as `driver`, N the one it names "
         "as `driven`, and z_D and z_N their declared tooth counts:" % mesh_test,
     ]
