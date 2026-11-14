@@ -181,6 +181,12 @@ Each passes or fails. Weights in brackets; the total is 17.
   body. Ordinary gear teeth of module 0.12 or more pass; a wall, web or roof 0.2
   thick or less does not. How the grid lines up with your part is not fixed, so
   leave a little margin.
+- **Light [2].** The fixed parts together have a volume of at most 2117 mm3,
+  and all parts of your mobiles together (the supplied barrel not counted) at
+  most 512 mm3. The limits are the same at every stage. Volumes are those
+  of the solids the grader builds from your part files: for the fixed parts, the
+  volume of their union; for the mobiles, the sum of the volumes of every part
+  of every mobile, each part counted on its own.
 
 ## Score
 
