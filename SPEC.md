@@ -1,12 +1,21 @@
 # SPEC.md
 
-Version: 0.3 (2026-11-14).
+Version: 0.4 (2026-11-14).
 
-**The instance under test is Moving Day, flat-1.** Its specification, exactly as
-the agent sees it, is `environment/public/SPEC_MD.md` with the instance tables
-that `environment/make_bundle_md.py` generates from `geometry/md.py`. That pair is
-the source of truth: rules, limits, weights and score are all public. The only
-secret is the reference plan (`solution/reference_md.py`).
+**The task under test is the staged mechanical watch gear train.** Its
+specification, exactly as the agent sees it, is `environment/public/SPEC_WATCH.md`
+with its "Tools" section replaced by `environment/public/SPEC_WATCH_GIVEN_NOTOOLS.md`
+(`environment/make_bundle_watch.py` does this), plus the stage's
+`INSTRUCTION_WATCH_S1..S4.md`. Four stages, each a fresh agent conversation that
+inherits the previous stage's submission: 1 design, 2 extend (24-hour hand),
+3 change (the barrel turns once every 6 hours), 4 assemble. Every number the
+grader uses is a constant in `geometry/watch.py` and is stated in that spec. The
+only things not stated are what the hands of a watch do (in `tests/grade_watch.py`)
+and the reference (`solution/reference_watch.py`). The chain score is the product
+of the four stage scores (`tests/grade_chain.py`).
+
+Moving Day (version 0.3, `environment/public/SPEC_MD.md`) is a fallback, not the
+task under test.
 
 Board in a Box (H1 below, and H2 in `environment/public/SPEC_H2.md`) is scrapped
 as the challenge: clean agents scored 1.0 on both. The code stays as history.
