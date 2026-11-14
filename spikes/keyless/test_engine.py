@@ -182,6 +182,25 @@ def rider_drives_when_chain_blocked():
     return ok and math.degrees(ramp.q) > 5 and abs(arm.q) < 0.02
 
 
+def many_tiny_patches():
+    """A light contact split over many tiny patches (40 tips, each under PATCH_FLOOR_FRAC x TOL, together
+    above TOL) still counts when the engine works out how far the pushed part may move: it slides."""
+    tips = None
+    for k in range(40):
+        y = -0.98 + 0.05 * k
+        tip = S.box((-0.5, y, 0.4), (0.015, y + 0.02, 0.42))         # 0.015 x 0.02 x 0.02 into the block
+        tips = tip if tips is None else tips + tip
+    drv = E.Body("drv", tips, "driven", dof="stem", point=(0, 0, 0), direction=(1, 0, 0))
+    blk = _block("blk", (0.0, -1.0, 0.0), (1.0, 1.0, 1.0), "contact", dof="slide", direction=(1, 0, 0))
+    w = E.World([drv, blk])
+    v = w.posed(drv) ^ w.posed(blk)
+    sizes = [c.volume() for c in v.decompose()]
+    ok = all(w.step("drv", dp=0.01) for _ in range(5))
+    print("40 tiny patches (largest %.1e, total %.1e mm^3, TOL %.0e): pushed 0.05, ok=%s, block moved %.3f"
+          % (max(sizes), sum(sizes), E.TOL, ok, blk.q))
+    return max(sizes) < E.PATCH_FLOOR_FRAC * E.TOL and sum(sizes) > E.TOL and ok and blk.q > 0.04
+
+
 def touching_can_be_pushed():
     """A part resting on a fixed face with an overlap between TOL/2 and TOL (touching) can still be
     pushed along that face: one threshold, TOL."""
@@ -298,7 +317,7 @@ if __name__ == "__main__":
            "spring_through_link": spring_through_link(), "pull_moves_no_rider": pull_moves_no_rider(),
            "rider_gives_way": rider_gives_way(), "rider_drives_steep_face": rider_drives_steep_face(),
            "rider_drives_when_chain_blocked": rider_drives_when_chain_blocked(),
-           "touching_can_be_pushed": touching_can_be_pushed(), "fit_clearance": fit_clearance(),
+           "many_tiny_patches": many_tiny_patches(), "touching_can_be_pushed": touching_can_be_pushed(), "fit_clearance": fit_clearance(),
            "phase_gears": phase_gears(), "carried_wheel": carried_wheel(), "force_direction": force_direction(),
            "stem_protrudes_at_crown_end": stem_protrudes_at_crown_end(),
            "early_stop_bound": early_stop_bound()}

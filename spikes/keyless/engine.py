@@ -53,6 +53,8 @@ SETTLE_RELAX_ROUNDS = 40  # at the start, springs return (pushing what they may)
 RADIUS_FLOOR = 0.05     # a body's radius about its axis is taken as at least this (surface travel per radian)
 LEVER_FLOOR = 0.05      # budget(): a contact's lever arm about a rot body's axis is taken as at least this
 NEIGHBOUR_MARGIN = 0.05  # neighbours(): bounding boxes closer than this count as neighbours
+PATCH_FLOOR_FRAC = 0.05  # budget(): contact patches under this fraction of TOL are skipped if the pair has a
+                         # larger one (a fraction, so it follows TOL when TOL is scaled)
 MAX_STEP_TRAVEL = 0.06  # mm: a step in which any body's surface travels further is split in halves (up to 4 times),
                         # so the friction-cone rule always sees small steps compared with the features
 
@@ -339,9 +341,13 @@ class World:
             if v.volume() <= 0.5 * TOL:
                 continue
             comps = v.decompose()
-            for comp in comps:               # each separate contact patch
-                if comp.volume() <= 0.05 * TOL:
-                    continue
+            # each separate contact patch; slivers under PATCH_FLOOR_FRAC x TOL are skipped only when the pair has a
+            # larger patch: a light contact spread over many tiny patches (teeth touching along a whole
+            # crown) still counts, judged as a pair
+            floor = PATCH_FLOOR_FRAC * TOL
+            if any(c.volume() > floor for c in comps):
+                comps = [c for c in comps if c.volume() > floor]
+            for comp in comps:
                 pts = np.asarray(comp.to_mesh().vert_properties, float)[:, :3]
                 if not len(pts):
                     continue
