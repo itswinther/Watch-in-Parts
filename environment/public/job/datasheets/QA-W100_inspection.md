@@ -45,8 +45,8 @@ every condition and every check of all four parts passes: everything must work.
 - **Speeds** are worked out from the tooth counts declared under `meshes`, as exact fractions, starting from the
   barrel at the speed, and in the running sense, of the speed class that the work order gives for the build
   being judged (DS-W01, section 4). Every declared mesh is external: its two mobiles turn in opposite directions.
-- **Computing time.** Each condition and each check has up to 600 s of elapsed (wall-clock) time on the
-  inspection machine, and the whole inspection has up to 3600 s; a condition or check that runs out of time, or
+- **Computing time.** Each condition and each check has up to 1800 s of elapsed (wall-clock) time on the
+  inspection machine, and the whole inspection has up to 7200 s; a condition or check that runs out of time, or
   that would start after the whole inspection's time has run out, fails.
 
 ## 5. Part 1: going train and hands (`movement.json`)

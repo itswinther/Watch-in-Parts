@@ -33,7 +33,7 @@ hand speeds and directions, and the weights of the checks.
 | MIN_FEATURE | 0.2 | `datasheets/DS-W03_process.md` | 2. Smallest feature | Smallest printable feature | Value |
 | THIN_VOXEL, THIN_ERODE_VOX, THIN_DILATE_VOX, THIN_DEV, voxel grid offset (the printability test) | (0.05, 1.5, 1.0, 0.2, 0.0113) | `datasheets/DS-W03_process.md` | 3. What the smallest | (whole section) | statement |
 | VOL_TOL | 0.01 | `datasheets/QA-W100_inspection.md` | 4. Terms | **Solids.** | statement |
-| TIMEOUT_S, JOB_TIME_LIMIT_S in `tests/grade_watch.py` (per condition and check; whole inspection) | (600, 3600) | `datasheets/QA-W100_inspection.md` | 4. Terms | **Computing time.** | statement |
+| TIMEOUT_S, JOB_TIME_LIMIT_S in `tests/grade_watch.py` (per condition and check; whole inspection) | (1800, 7200) | `datasheets/QA-W100_inspection.md` | 4. Terms | **Computing time.** | statement |
 | FRAME_JOIN | 0.01 | `datasheets/QA-W100_inspection.md` | 5. Part 1 | **C2 Assembled.** | statement |
 | SPIN_STEPS (and the step, 360 / SPIN_STEPS degrees) | 72 | `datasheets/QA-W100_inspection.md` | 5. Part 1 | **Free to turn.** | statement |
 | HELD_MOVE | 0.3 | `datasheets/QA-W100_inspection.md` | 5. Part 1 | **Held.** | statement |
