@@ -1,0 +1,2 @@
+{"reward": 1.0, "p": 1.0, "gates": {"files": true, "assembled": true}, "checks": {"spin": true, "held": true, "train": true, "clear": true, "minute": true, "hour": true, "seconds": true, "coaxial": true, "hands": true, "size": true, "printable": true}, "skipped": []}
+grader exit 0

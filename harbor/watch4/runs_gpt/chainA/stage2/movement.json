@@ -1,0 +1,158 @@
+{
+  "case_centre": [
+    5,
+    0
+  ],
+  "fixed": [
+    "main_plate",
+    "barrel_cock_pillar",
+    "barrel_cock",
+    "seconds_lower_stop_pillar",
+    "seconds_lower_stop",
+    "minute_lower_stop_pillar",
+    "minute_lower_stop",
+    "hour_lower_stop_pillar",
+    "hour_lower_stop",
+    "hour_upper_stop_pillar",
+    "hour_upper_stop",
+    "transfer_cock_pillar",
+    "transfer_cock",
+    "seconds_transfer_lower_pillar",
+    "seconds_transfer_lower",
+    "seconds_transfer_cock_pillar",
+    "seconds_transfer_cock",
+    "minute_upper_stop_pillar",
+    "minute_upper_stop",
+    "seconds_cock_pillar",
+    "seconds_cock",
+    "day_bridge"
+  ],
+  "mobiles": {
+    "transfer": {
+      "axis": [
+        14.4,
+        0
+      ],
+      "parts": [
+        "transfer_shaft",
+        "barrel_pinion48",
+        "minute_driver96",
+        "hour_driver16",
+        "day_driver16",
+        "day_driver_extension"
+      ]
+    },
+    "hour": {
+      "axis": [
+        7.2,
+        0
+      ],
+      "parts": [
+        "hour_wheel48",
+        "hour_sleeve",
+        "hour_hand"
+      ]
+    },
+    "minute": {
+      "axis": [
+        7.2,
+        0
+      ],
+      "parts": [
+        "minute_wheel24",
+        "minute_sleeve",
+        "seconds_driver80",
+        "minute_hand"
+      ]
+    },
+    "seconds_transfer": {
+      "axis": [
+        7.2,
+        6.3
+      ],
+      "parts": [
+        "seconds_transfer_shaft",
+        "seconds_pinion10",
+        "seconds_driver75"
+      ]
+    },
+    "seconds": {
+      "axis": [
+        7.2,
+        0
+      ],
+      "parts": [
+        "seconds_shaft",
+        "seconds_wheel10",
+        "seconds_hand"
+      ]
+    },
+    "day": {
+      "axis": [
+        2.0,
+        -7.0
+      ],
+      "parts": [
+        "day_wheel96",
+        "day_shaft",
+        "day_hand"
+      ]
+    }
+  },
+  "meshes": [
+    {
+      "driver": "barrel",
+      "driver_teeth": 96,
+      "driven": "transfer",
+      "driven_teeth": 48
+    },
+    {
+      "driver": "transfer",
+      "driver_teeth": 96,
+      "driven": "minute",
+      "driven_teeth": 24
+    },
+    {
+      "driver": "transfer",
+      "driver_teeth": 16,
+      "driven": "hour",
+      "driven_teeth": 48
+    },
+    {
+      "driver": "minute",
+      "driver_teeth": 80,
+      "driven": "seconds_transfer",
+      "driven_teeth": 10
+    },
+    {
+      "driver": "seconds_transfer",
+      "driver_teeth": 75,
+      "driven": "seconds",
+      "driven_teeth": 10
+    },
+    {
+      "driver": "transfer",
+      "driver_teeth": 16,
+      "driven": "day",
+      "driven_teeth": 96
+    }
+  ],
+  "hands": {
+    "hour": {
+      "mobile": "hour",
+      "part": "hour_hand"
+    },
+    "minute": {
+      "mobile": "minute",
+      "part": "minute_hand"
+    },
+    "seconds": {
+      "mobile": "seconds",
+      "part": "seconds_hand"
+    },
+    "day": {
+      "mobile": "day",
+      "part": "day_hand"
+    }
+  }
+}
