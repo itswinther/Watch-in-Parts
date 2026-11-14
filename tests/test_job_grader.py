@@ -23,7 +23,13 @@ Quick cases for crown winding (Part 5's format, geometry/keyless_job.py; graded 
                   and fixed, twice in keyless) is a format error; the section's own rules; no section: as before
   friction_on     a friction_on mobile turns at its carrier's speed; bad carriers are format errors; P5's split
   keyless_assembly with P5 on, the keyless parts are parts of Part 4 (checks, replay, standing in place)
-  keyless_switch  the P5 row follows KEYLESS_IN_JOB; the scaled table agrees with A's files"""
+  keyless_switch  the P5 row follows KEYLESS_IN_JOB; the scaled table agrees with A's files
+  keyless_engine  the runner's loader stub (spec and sup empty dicts, pull_of works) and every SCALE_TABLE row at its
+                  job value in the runner; check_table() is [] (A's 01:00 items 1, 2)
+  keyless_phases  a crashed worker fails only its phase; a dead runner keeps the phases before it; on a timeout the
+                  finished phases are kept and the runner's process group is killed (items 3, 7)
+  keyless_minute  the minute mobile not friction_on: AT-5/AT-6 fail with the reason; free: held covers it; the stem
+                  protrudes at its crown end only (items 6, 7)"""
 import json
 import os
 import shutil
@@ -325,6 +331,194 @@ def case_keyless_switch(job, tmp):
     return "KEYLESS_IN_JOB %s, parts %s, scaled %s" % (KJ.KEYLESS_IN_JOB, rows, KJ.scaled())
 
 
+def _tiny_world(folder, minute_free=True):
+    """A small world in geometry/keyless_job.py write_world's format (a plate, the arbor, a stem, the minute mobile;
+    nothing meshes, so every step fails, quickly): Part 5's runner on it takes about a second a phase."""
+    import math
+    import manifold3d as m3
+    from geometry import keyless_job as KJ
+
+    def cyl(r, h, x, y, z):
+        return m3.Manifold.cylinder(h, r, circular_segments=32).translate([x, y, z])
+    bodies = []
+
+    def add(name, kind, solid, dof=None, point=None, direction=None, rest=None):
+        bodies.append(dict(name=name, kind=kind, dof=dof, point=point, direction=direction, rest=rest, carrier=None,
+                           solid=solid, role="test"))
+    add("fixed", "fixed", m3.Manifold.cube([30, 30, 1]).translate([-15, -15, -2]))
+    add("barrel", "main", cyl(2, 1, 0, 0, 0), dof="rot", point=(0, 0, 0), direction=(0, 0, 1),
+        rest=-KJ.WIND_SENSE * math.inf)
+    add("stem", "driven", m3.Manifold.cylinder(4, 0.5, circular_segments=16).rotate([0, 90, 0]).translate([8, 0, 3]),
+        dof="stem", point=(0, 0, 3), direction=(1, 0, 0))
+    if minute_free:
+        add(KJ.MINUTE, "contact", cyl(1.5, 1, -6, 6, 0), dof="rot", point=(-6, 6, 0), direction=(0, 0, 1))
+    else:
+        add(KJ.MINUTE, "fixed", cyl(1.5, 1, -6, 6, 0))
+    meta = {"minute_free": minute_free, "minute_mobile": "centre", "bounds": [True, {}]}
+    if not minute_free:
+        meta["setting_not_run"] = KJ.minute_not_free_reason("centre")
+    KJ.write_world(folder, bodies, meta)
+    return folder
+
+
+STUB_PROBE = r"""
+import json, sys
+sys.path.insert(0, sys.argv[1])
+import grade_keyless as GK
+from geometry import keyless_job as KJ
+GK.setup(sys.argv[2])
+E, G = GK.E, GK.G
+spec, parts, sup, defs = G.load(None, None)
+live = {}
+for row in KJ.SCALE_TABLE:
+    where, name = row[0], row[1]
+    if where == "constants":
+        v = getattr(G.C, name)
+    elif ":" in name:
+        cls, rest = name.split(".", 1)
+        fn, arg = rest.split(":")
+        v = getattr(getattr(E, cls), fn).__defaults__[0]
+    else:
+        v = getattr(E, name)
+    live[where + "." + name] = [list(v) if isinstance(v, tuple) else v, KJ.job_value(row)]
+ph, out, err = G.worker(("wind", (None, None), defs, None))
+print(json.dumps({"spec": spec, "sup": sup, "pull": G.pull_of(spec), "want_pull": KJ.scaled()["PULL"], "live": live,
+                  "worker_error": err}))
+"""
+
+
+def case_keyless_engine(job, tmp):
+    """A's 01:00 items 1 and 2: the runner's loader stub gives an empty dict for spec and sup, so A's worker reads the
+    pull with pull_of (the scaled PULL); every SCALE_TABLE row (MAIN_TRY in the engine, the floors, FORCE_EPS,
+    World.phase's budget, the fit rule's lengths, PULL_RANGE) is set to its job value in the runner's interpreter;
+    check_table() is [] against the merged engine (in a fresh interpreter, so this one's A modules stay unscaled)."""
+    from geometry import keyless_job as KJ
+    assert KJ.check_table() == [], KJ.check_table()
+    assert KJ.UNSCALED == ()
+    names = {r[0] + "." + r[1] for r in KJ.SCALE_TABLE}
+    for n in ("engine.MAIN_TRY", "engine.RADIUS_FLOOR", "engine.LEVER_FLOOR", "engine.NEIGHBOUR_MARGIN",
+              "engine.SPRING_PUSH_ARC", "engine.FORCE_EPS", "engine.World.phase:budget", "constants.FIT_CLEARANCE",
+              "constants.FIT_CENTRE_TOL", "constants.FIT_EMPTY_INSET", "constants.PULL_RANGE"):
+        assert n in names, n
+    assert "engine.World.step:main_try_arc" not in names
+    assert {r[1]: r[4] for r in KJ.SCALE_TABLE}["FORCE_EPS"] == 3
+    world = _tiny_world(os.path.join(tmp, "world"))
+    p = subprocess.run([sys.executable, "-I", "-c", STUB_PROBE, TESTS, world], capture_output=True, text=True, cwd=TESTS)
+    assert p.returncode == 0, p.stderr[-3000:]
+    r = json.loads(p.stdout.strip().splitlines()[-1])
+    assert r["spec"] == {} and r["sup"] == {}, r
+    assert r["pull"] == r["want_pull"] == 1.294, r
+    assert r["worker_error"] is None, r["worker_error"]
+    bad = {k: v for k, v in r["live"].items() if v[0] != v[1]}
+    assert not bad, bad
+    return "stub spec %s sup %s, pull %s; %d rows at their job values (MAIN_TRY %s, phase budget %s, FORCE_EPS %.3g)" % (
+        r["spec"], r["sup"], r["pull"], len(r["live"]), r["live"]["engine.MAIN_TRY"][0],
+        r["live"]["engine.World.phase:budget"][0], r["live"]["engine.FORCE_EPS"][0])
+
+
+def _group_gone(pgid, wait_s=10.0):
+    """True when no running (non-zombie) process is in process group pgid, within wait_s."""
+    t = time.time()
+    while True:
+        alive = []
+        for pid in os.listdir("/proc"):
+            if not pid.isdigit():
+                continue
+            try:
+                with open("/proc/%s/stat" % pid) as f:
+                    st = f.read().rsplit(")", 1)[1].split()
+            except OSError:
+                continue
+            if int(st[2]) == pgid and st[0] != "Z":
+                alive.append(pid)
+        if not alive:
+            return True
+        if time.time() - t > wait_s:
+            return False
+        time.sleep(0.2)
+
+
+def case_keyless_phases(job, tmp):
+    """A's 01:00 items 3 and 7: finished phases survive. (1) --jobs 3, the `set` worker crashes: every other phase is
+    recorded, set fails with the reason. (2) serial, the runner itself dies in `backward`: wind, hold and run are in
+    the result file already. (3) --jobs 3, `wind` never returns and the time limit is reached: the other phases are
+    kept, and the runner's whole process group (its spawned workers included) is killed."""
+    from geometry import keyless_job as KJ
+    world = _tiny_world(os.path.join(tmp, "world"))
+    steps = list(KJ.step_weights())
+    c1, d1 = G.keyless_run(world, jobs=3, extra=["--test-fault", "set:crash"])
+    seq = d1["sequence"]
+    assert d1.get("done") and set(seq) == set(steps[1:]), (d1.get("error"), sorted(seq))
+    assert "worker failed" in seq["set"]["error"] and not c1["set"], seq["set"]
+    assert all("error" not in seq[k] for k in steps[1:] if k != "set"), {k: seq[k].get("error") for k in seq}
+    assert set(d1["steps"]) == set(steps), d1["steps"]
+    c2, d2 = G.keyless_run(world, jobs=1, extra=["--test-fault", "backward:crash"])
+    assert d2["process"]["returncode"] == 70, d2["process"]
+    assert d2["phases_done"] == ["assemble", "wind", "first"] and set(d2["sequence"]) == {"wind", "hold", "run"}, d2
+    assert set(d2["steps"]) == {"assemble", "wind", "hold", "run"} and not d2.get("done"), d2["steps"]
+    t = time.monotonic()
+    c3, d3 = G.keyless_run(world, deadline=time.monotonic() + 20, jobs=3, extra=["--test-fault", "wind:hang"])
+    took = time.monotonic() - t
+    assert "timeout" in d3["process"].get("error", ""), d3["process"]
+    assert set(d3["phases_done"]) == {"assemble", "first", "backward", "set", "return"}, d3["phases_done"]
+    assert set(d3["steps"]) == set(steps) - {"wind"} and not c3["wind"], d3["steps"]
+    assert _group_gone(d3["process"]["pgid"]), "process group %d still has running processes" % d3["process"]["pgid"]
+    return ("crash in set (--jobs 3): %s; runner dies in backward (serial): kept %s; hang in wind: timeout after "
+            "%.0f s, kept %s, process group %d gone" % (seq["set"]["error"][:40], d2["phases_done"], took,
+                                                        d3["phases_done"], d3["process"]["pgid"]))
+
+
+def case_keyless_minute(job, tmp):
+    """A's 01:00 item 6, B's rule (Decisions 15:47 and the 17:46 line): the minute hand's mobile is a free contact
+    body in P5 only if it is friction_on (or driven only through one); otherwise build_world marks the setting steps
+    not run, and the runner fails AT-5 and AT-6 with that reason instead of letting "never both trains" pass
+    trivially. With the minute mobile free, AT-0's held check covers it (A's held_check skips the name minute_wheel).
+    Item 7: the stem protrudes at its crown end only."""
+    import types
+    import manifold3d as m3
+    from geometry import watch as W
+    from geometry import keyless_job as KJ
+    # build_world on the job: the reference's minute hand is on the centre mobile (no friction_on): fixed
+    f0 = _keyless_folder(job, tmp, "minute_fixed", friction=False)
+    m0 = W.load_movement(f0, cache=CACHE)
+    k0, s0 = KJ.load_keyless(m0)
+    b0, meta0 = KJ.build_world(m0, k0, s0)
+    kinds0 = {b["name"]: b["kind"] for b in b0}
+    assert kinds0[KJ.MINUTE] == "fixed" and not meta0["minute_free"] and "AT-5 and AT-6 fail" in meta0["setting_not_run"]
+    f1 = _keyless_folder(job, tmp, "minute_free", friction=True)
+    m1 = W.load_movement(f1, cache=CACHE)
+    k1, s1 = KJ.load_keyless(m1)
+    b1, meta1 = KJ.build_world(m1, k1, s1)
+    kinds1 = {b["name"]: b["kind"] for b in b1}
+    assert kinds1[KJ.MINUTE] == "contact" and meta1["minute_free"] and "setting_not_run" not in meta1, meta1
+    # the runner on a small world: minute fixed -> set and return not run, the others run
+    w0 = _tiny_world(os.path.join(tmp, "w_fixed"), minute_free=False)
+    c, d = G.keyless_run(w0)
+    seq = d["sequence"]
+    for k in KJ.SETTING_STEPS:
+        assert not c[k] and "hands cannot be set" in seq[k]["error"], seq[k]
+    assert all("error" not in seq[k] for k in ("wind", "hold", "run", "backward")), seq
+    assert KJ.MINUTE not in d["assemble"]["held"], d["assemble"]["held"]
+    w1 = _tiny_world(os.path.join(tmp, "w_free"), minute_free=True)
+    c, d = G.keyless_run(w1)
+    assert all("error" not in d["sequence"][k] for k in d["sequence"]), d["sequence"]
+    assert KJ.MINUTE in d["assemble"]["held"], d["assemble"]["held"]
+    # stem protrusion: only the crown end (the side the stem's direction points to) counts
+    fake = types.SimpleNamespace(case_centre=(0.0, 0.0), extent=lambda: {"z_min": 0.0, "z_max": 1.0})
+    k = {"stem": {"parts": ["st"], "direction": (1.0, 0.0, 0.0)}}
+
+    def stem(x0, x1):
+        return m3.Manifold.cylinder(x1 - x0, 0.3, circular_segments=16).rotate([0, 90, 0]).translate([x0, 0, 0.5])
+    far = KJ.bounds(fake, k, {"st": stem(-W.CASE_RADIUS - 1.3, 10.0)})
+    crown = KJ.bounds(fake, k, {"st": stem(-10.0, W.CASE_RADIUS + 1.3)})
+    assert not far[0] and far[1]["stem_protrude"] < 0, far
+    assert crown[0] and abs(crown[1]["stem_protrude"] - 1.3) < 0.01, crown
+    return ("minute on centre: %s, setting steps: %s; friction_on: %s, held covers it; stem past the far end only: "
+            "protrude %s (fails), at the crown: %s (passes)" % (kinds0[KJ.MINUTE], seq["set"]["error"][:60],
+                                                                 kinds1[KJ.MINUTE], far[1]["stem_protrude"],
+                                                                 crown[1]["stem_protrude"]))
+
+
 def case_reward_formula(job, tmp):
     # parts reward 0.5 x (1 - 0.15/0.75) = 2/5; the report claims P3 `pass` while it fails: points 1, 1, -2, 1,
     # mean 1/4, factor (0.75 + 0.10/4) / 0.85 = 31/34; reward 2/5 x 31/34 = 31/85
@@ -461,7 +655,9 @@ def case_f(job, tmp):
 
 QUICK = [("a", case_a), ("frame_gate", case_frame_gate), ("day_gate", case_day_gate), ("cache", case_cache), ("deadline", case_deadline),
          ("reward_formula", case_reward_formula), ("keyless_format", case_keyless_format), ("friction_on", case_friction_on),
-         ("keyless_assembly", case_keyless_assembly), ("keyless_switch", case_keyless_switch), ("honesty", case_honesty)]
+         ("keyless_assembly", case_keyless_assembly), ("keyless_switch", case_keyless_switch),
+         ("keyless_engine", case_keyless_engine), ("keyless_phases", case_keyless_phases),
+         ("keyless_minute", case_keyless_minute), ("honesty", case_honesty)]
 SLOW = [("b", case_b), ("c", case_c), ("d", case_d), ("e", case_e), ("f", case_f)]
 
 
