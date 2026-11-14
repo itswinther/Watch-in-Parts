@@ -15,9 +15,21 @@ from .core import FormatError, ivol, union
 PRESSURE_ANGLE = 25.0
 BARREL_TEETH = 96
 BARREL_MODULE = 0.2
-BARREL_WHEEL_Z = (0.0, 1.0)
-BARREL_ARBOR_Z = (-1.0, 1.6)
-BARREL_ARBOR_R = 0.5
+BARREL_WHEEL_Z = (0.0, 1.0)         # the toothed drum
+# The supplied barrel has two bodies on its axis (Decisions 2026-11-14 17:46, item 1): the toothed drum (the
+# mainspring turns it; it drives the train) and the arbor (it carries the mainspring's inner end and, on its
+# square, the ratchet the winding works turn). In the going-train checks (one-job parts P1 to P4) the two
+# bodies are one mobile `barrel`, the union of the two meshes (data/barrel.stl).
+BARREL_ARBOR_Z = (-1.0, 5.6)        # the whole arbor
+BARREL_ARBOR_R = 0.5                # the arbor's pivots and plain sections, below and above the drum
+BARREL_INNER_D = 17.0               # inside diameter of the drum's spring chamber (not modelled in the mesh):
+                                    # DS-101 Table 1 variants I and K at demonstration scale
+BARREL_CORE_R = BARREL_INNER_D / 6  # arbor core (hub) radius, one third of the inner radius (DS-101 section 1,
+                                    # Grossmann art. 108 to 111, Saunier art. 517); the core spans the drum's z
+BARREL_BORE_R = 2.85                # the drum's bore round the core: radial clearance 0.0167
+BARREL_SQUARE_SIDE = 1.4            # winding square on the arbor (a square prism on the barrel axis, sides
+BARREL_SQUARE_Z = (3.3, 4.9)        # parallel to x and y) that carries the ratchet; half-diagonal 0.99
+STAGE_BARREL_ARBOR_Z = (-1.0, 1.6)  # stage mode only (old runs): the one-body barrel of data/barrel_stage.stl
 BARREL_TURNS_PER_HOUR = Fraction(1, 8)          # clockwise
 CASE_RADIUS = 20.7         # reference reaches 20.354 at its largest stage, plus 0.3, rounded up to 0.05
 CASE_HEIGHT = 13.4         # reference is 13.1 tall, plus 0.3
@@ -84,16 +96,34 @@ def cyl(x, y, z0, z1, r, seg=48):
     return m3.Manifold.cylinder(z1 - z0, r, r, seg).translate([x, y, z0])
 
 
-_BARREL = None
+_MESHES = {}
+
+
+def _mesh(name):
+    if name not in _MESHES:
+        path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", name + ".stl")
+        _MESHES[name] = core.tris_to_manifold(core.read_stl(path, MAX_TRIANGLES, MAX_STL_BYTES))
+    return _MESHES[name]
 
 
 def barrel():
-    """The supplied mainspring barrel (meshes/barrel.stl): a 96-tooth wheel and its arbor, axis on x = y = 0."""
-    global _BARREL
-    if _BARREL is None:
-        path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "barrel.stl")
-        _BARREL = core.tris_to_manifold(core.read_stl(path, MAX_TRIANGLES, MAX_STL_BYTES))
-    return _BARREL
+    """The supplied mainspring barrel as one solid (data/barrel.stl, the agent's supplied/barrel.stl): the union
+    of the toothed drum and the arbor in their assembled position, axis on x = y = 0. The going-train checks
+    turn it as one mobile."""
+    return _mesh("barrel")
+
+
+def barrel_bodies():
+    """The two bodies of the supplied barrel, {"barrel_drum": solid, "barrel_arbor": solid} (data/barrel_drum.stl,
+    data/barrel_arbor.stl), for the crown-winding part: there the drum stands with the going train and the
+    arbor is wound."""
+    return {n: _mesh(n) for n in ("barrel_drum", "barrel_arbor")}
+
+
+def barrel_stage():
+    """Stage mode only (regrading old runs): the one-body barrel those runs were given (data/barrel_stage.stl,
+    byte for byte the former data/barrel.stl), arbor z STAGE_BARREL_ARBOR_Z."""
+    return _mesh("barrel_stage")
 
 
 # ---------------- movement ----------------
@@ -104,7 +134,7 @@ def rot_about(man, axis_xy, deg):
 class Movement:
     """A parsed movement: fixed solid, mobiles (name -> solid, axis), meshes, hands."""
 
-    def __init__(self, doc, load_stl):
+    def __init__(self, doc, load_stl, barrel_solid=None):
         if not isinstance(doc, dict):
             raise FormatError("movement.json: top level must be an object")
         cc = doc.get("case_centre")
@@ -137,7 +167,8 @@ class Movement:
         mob = doc.get("mobiles")
         if not isinstance(mob, dict) or not mob:
             raise FormatError("movement.json: 'mobiles' must be a non-empty object")
-        self.mobiles = {"barrel": {"axis": (0.0, 0.0), "solid": barrel(), "parts": {}}}
+        self.mobiles = {"barrel": {"axis": (0.0, 0.0), "solid": barrel() if barrel_solid is None else barrel_solid,
+                                   "parts": {}}}
         for name, m in mob.items():
             if not NAME_RE.match(str(name)) or name == "barrel":
                 raise FormatError("bad mobile name %r" % (name,))
@@ -523,11 +554,12 @@ def _near_cut(S, ax, O, ax_o):
     return S ^ keep
 
 
-def load_movement(folder, name="movement.json", cache=None):
+def load_movement(folder, name="movement.json", cache=None, barrel_solid=None):
     """folder holds movement.json and parts/<name>.step. Opens only the files movement.json names.
     name: the movement file in folder to read instead of movement.json (a plain file name, e.g. variant_6h.json).
     cache: an optional dict shared between calls; a part file whose name and bytes were loaded before is
-    taken from it instead of being read again (the same solid; the result does not depend on the cache)."""
+    taken from it instead of being read again (the same solid; the result does not depend on the cache).
+    barrel_solid: the supplied barrel's solid (default barrel(); the stage mode passes barrel_stage())."""
     if not isinstance(name, str) or os.path.basename(name) != name or not name.endswith(".json"):
         raise FormatError("bad movement file name %r" % (name,))
     path = inside(folder, os.path.join(folder, name))
@@ -564,7 +596,7 @@ def load_movement(folder, name="movement.json", cache=None):
         if key is not None:
             cache[key] = solid
         return solid
-    return Movement(doc, load)
+    return Movement(doc, load, barrel_solid)
 
 
 def inside(folder, path):

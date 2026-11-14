@@ -76,7 +76,8 @@ Terms used below:
   intersection of the two solids is at most 0.01 mm3.
 - **The frame** is the fixed parts of a movement, taken together.
 - **A mobile** is a set of parts that turn together as one rigid body about the vertical line through its axis.
-  The barrel is the mobile `barrel`, with its axis on x = 0 mm, y = 0 mm.
+  The barrel is the mobile `barrel` (its drum and its arbor together, as one solid), with its axis on
+  x = 0 mm, y = 0 mm.
 - **Speeds** are worked out from the tooth counts declared under `meshes`, as exact fractions, starting from the
   barrel at the speed the order gives for the build being judged. Every declared mesh is external: its two
   mobiles turn in opposite directions.

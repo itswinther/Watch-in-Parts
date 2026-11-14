@@ -5,7 +5,8 @@ parts/<name>.step; it is graded part by part (JOB_PARTS: P1 going train and hand
 P3 6-hour variant, P4 assembly), with no part frozen and no part gating another. See grade_job.
     python -I grade_watch.py /abs/submission_folder --stage 1|2|3|4 [--prev /abs/previous_stage_folder]
                              [--reward FILE] [--details FILE] [--skip CHECK,CHECK]
-Stage mode (kept to regrade old runs and for the stage anchors):
+Stage mode (kept to regrade old runs and for the stage anchors; it uses the one-body barrel those runs were given,
+geometry/data/barrel_stage.stl, and the one-job mode the two-body barrel, geometry/data/barrel.stl):
 --skip leaves named scored checks out (only for runs made before a check existed); the list is in the output.
 The grader reads no environment variables.
 Stage 1: design the movement. Stage 2: add a 24-hour hand to a frozen stage-1 movement (--prev).
@@ -275,7 +276,7 @@ def grade_design(folder, stage=1, prev=None, skip=()):
         return out
 
     def load():
-        st["m"] = W.load_movement(folder)
+        st["m"] = W.load_movement(folder, barrel_solid=W.barrel_stage())     # stage mode: the one-body barrel of old runs
         return True, {}
     gates["files"], details["files"] = _run(load)
     if not gates["files"]:
@@ -425,7 +426,7 @@ def grade_assembly(folder, prev):
     out = {"reward": 0.0, "p": 0.0, "gates": gates, "checks": {}, "details": details}
 
     def load():
-        st["m"] = W.load_movement(folder)
+        st["m"] = W.load_movement(folder, barrel_solid=W.barrel_stage())
         return True, {}
     gates["files"], details["files"] = _run(load)
     gates["locked"], details["locked"] = _run(lambda: locked_all(prev, folder))

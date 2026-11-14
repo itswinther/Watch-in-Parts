@@ -10,9 +10,12 @@ speeds and directions, and the weights of the checks.
 | BARREL_TEETH | 96 | DS-W01 | BR-096-20 | Teeth |
 | BARREL_MODULE | 0.2 | DS-W01 | BR-096-20 | Module |
 | PRESSURE_ANGLE | 25.0 | DS-W01 | BR-096-20 | Pressure angle |
-| BARREL_ARBOR_R | 0.5 | DS-W01 | BR-096-20 | Arbor radius |
-| BARREL_WHEEL_Z | (0.0, 1.0) | DS-W01 | section 3 | Toothed drum |
-| BARREL_ARBOR_Z | (-1.0, 1.6) | DS-W01 | section 3 | Arbor |
+| BARREL_ARBOR_R | 0.5 | DS-W01 | BR-096-20 | Arbor pivot radius |
+| BARREL_WHEEL_Z, BARREL_BORE_R | ((0.0, 1.0), 2.85) | DS-W01 | section 3 | Toothed drum |
+| BARREL_ARBOR_Z | (-1.0, 5.6) | DS-W01 | section 3 | Arbor |
+| BARREL_INNER_D | 17.0 | DS-W01 | BR-096-20 | Spring chamber inner diameter |
+| BARREL_CORE_R (= BARREL_INNER_D / 6) | 2.833 | DS-W01 | BR-096-20 | Arbor core radius |
+| BARREL_SQUARE_SIDE, BARREL_SQUARE_Z | (1.4, (3.3, 4.9)) | DS-W01 | section 3 | Winding square |
 | barrel axis (0, 0) | (0, 0) | DS-W01 | section 3 | Axis |
 | BARREL_TURNS_PER_HOUR | 1/8 | `PROMPT.md` | Order table | 8-hour build |
 | CHANGED_BARREL_TURNS_PER_HOUR | 1/6 | `PROMPT.md` | Order table | 6-hour variant |
