@@ -9,7 +9,7 @@ table. Everything below "Session entries" is append-only, newest at the bottom.
 | ID | Workstream | Owner | Status | Last update |
 | --- | --- | --- | --- | --- |
 | A | Harness wiring | Mikael | Harbor + Codex sandbox works. GPT-6.1-sol, sandboxed: five-step watch 1.0 x3; regulation 1.0 x3; regulation with a 100-minute budget mean 0.974 over 12 runs. No gap. See 06:00 entry | 2026-11-14 06:00 |
-| B | Reference script and grader | itswinther | Staged watch task: reference 1.0 at all three stages with the thickness check. Handoff written for an overnight orchestrator session (`HANDOFF_OVERNIGHT.md`, `HANDOFF_PROMPT.md`); that session takes over row B | 2026-11-14 04:47 |
+| B | Reference script and grader | itswinther | Overnight orchestrator session running (Fable 5.2). Two Opus builders started 04:55 in worktrees: TASK (change-request stage, tighter case, product score) and CAD (STEP submissions, CAD gear maker, trajectory packer). Nothing merged yet; main still holds the three-stage task with the reference at 1.0 | 2026-11-14 04:55 |
 | C | Hold the Line spike | unassigned | not started | |
 | D | Mentor questions, anchors, transcripts | unassigned | not started | |
 | E | Analysis, demo and story | Yoseph | paused: Yoseph is not working overnight | 2026-11-14 01:40 |
@@ -76,6 +76,10 @@ Append one line per decision: time, decision, who agreed.
 - 2026-11-14 04:13 Interface for A (staged watch): `python -I tests/grade_watch.py /abs/folder --stage N [--prev /abs/previous_stage_folder] --reward FILE`. Stage 3 adds `assembly.json` to the folder. `python environment/make_bundle_watch.py DIR --stage N [--prev FOLDER] --tools no` writes what the agent may see. `environment/run_clean_chain.sh RUN_DIR MODEL` runs the three stages headless; `python tests/grade_chain.py RUN_DIR` grades them.
 - 2026-11-14 04:34 Watch task: the minimum-thickness check is now a scored requirement ("printable", weight 1; stage 1 total 17, stage 2 total 21). Decided: itswinther. Runs made before this are graded with `WATCH_SKIP=printable`.
 - 2026-11-14 04:47 Overnight plan agreed by itswinther: a new Fable 5.2 session orchestrates two Opus builders in separate worktrees and a Sonnet reviewer, unattended. Builder TASK adds a change-request stage, tightens the case to fit the reference, and makes the chain score the product of the stage scores. Builder CAD moves submissions to STEP from a real CAD kernel (CadQuery or build123d) and packages each run as a trajectory record. Spec changes inside that scope are pre-approved; each must be logged here with old and new values.
+- 2026-11-14 04:55 (orchestrator, B) Deadline: the start message for this session says work until 10:00 Helsinki; the handoff file says 09:00. I use: stop building at 08:15, clean chains started by about 07:30 at the latest, everything finished before 10:00. Reason: the start message is the later instruction; the earlier stop for building is the conservative part of both.
+- 2026-11-14 04:55 (orchestrator, B) CAD kernel for the agent and the grader is CadQuery 2.8.0 only (cadquery-ocp 7.9.3.1.1). build123d is not used. Reason: `pip install cadquery==2.8.0 build123d==0.13.0` fails with ResolutionImpossible (cadquery pins cadquery-ocp 7.9.3.1, build123d pins cadquery-ocp-novtk 8.0.1.x); one kernel that installs is the conservative option. Note for A: the task image needs `cadquery==2.8.0`.
+- 2026-11-14 04:55 (orchestrator, B) Interfaces fixed before the builders started: stages are 1 design, 2 extend, 3 change (new), 4 assemble; grader call unchanged (`python3 -I tests/grade_watch.py /abs/folder --stage N [--prev /abs/prev] --reward FILE`); a part file is `parts/<name>.step`, or `parts/<name>.stl` until the reference is ported (`.step` wins if both exist); chain runs live in `RUN/stage1..stage4`.
+- 2026-11-14 04:55 (orchestrator, B) The exact change request of stage 3 is written in the one spec document that every stage's agent receives. Reason: the rubric gives zero for a gap that comes from withheld information; with the change stated, a stage-1 agent can plan for it but cannot test it, which is the mechanism the handoff asks for.
 
 ## Proposed spec changes
 
@@ -461,3 +465,13 @@ Template:
 - For B's overnight build: my five-step movement allowed revising earlier parts and showed no gap; this supports B's finding that freezing earlier stages is the lever.
 - Sandbox: zero network commands across all 12 runs.
 - Files changed: `spikes/regulate/` (budget variant, harbor_tasks_100min, runs_gpt_100min), `spikes/README.md`, ideas file, SESSION.md.
+
+### 2026-11-14 04:55 | B overnight orchestrator: builders started | itswinther + Claude (unattended)
+- Did: took over row B as the handoff describes. Synced (`git fetch origin && git rebase origin/main`: branch up to date with main at 7e004be). Installed the packages. Started the baseline anchor run on the inherited code. Started two Opus builder agents, each in its own git worktree, with stand-alone briefs: builder TASK (new change-request stage between extend and assemble, kept-parts factor, compacted reference and a case sized to it plus 0.3, chain score as the product, anchors and instruction file for the new stage) and builder CAD phase A (STEP submissions read with OCP and tessellated into manifold3d, agent-side STEP helpers and submit, a private CAD gear maker with a mesh test, `tests/pack_run.py`). Set a 30-minute heartbeat.
+- Verified by (command and result):
+  - `pip install manifold3d==3.5.5 scipy trimesh` then `pip install cadquery==2.8.0`: installed (cadquery-ocp 7.9.3.1.1). A CadQuery cylinder exported to STEP and imported again has volume 12.566. `pip install cadquery==2.8.0 build123d==0.13.0` fails: ResolutionImpossible (see Decisions).
+  - `git branch -r --no-merged origin/main` lists `claude/busy-davinci-idw73v` (content already on main by hand, see 02:05) and `claude/fervent-brown-cb0201` (`cala-tests/`, looks unrelated; request to its owner is still open).
+- Not verified, or assumed: nothing from the builders exists yet. The baseline anchor run had not finished when this was written.
+- Files changed: SESSION.md (row B, four Decisions lines, this entry).
+- Need from others: nothing yet. A: the STEP path will need `cadquery==2.8.0` in the task image; the grader call and artifact list follow once it is merged.
+- Next: merge TASK, then CAD phase A; run the reference and a bundle build; start CAD phase B and the Sonnet reviewer.
