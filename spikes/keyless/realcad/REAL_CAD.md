@@ -178,3 +178,120 @@ real keyless works.
      - optionally PULL.
    - **The `carrier` extension:** `RealWorld` generalises the engine's "a carrier answers for its
      riders" rule (`pen`, `budget`) from the stem to any carrier.
+
+### Adjustments made to the CAD, and why (each one is a finding about the simulator)
+
+1. **Bore clearance (4 µm radial).** CAD fits are line-to-line. Tessellated, a shaft in a bore of the
+   same nominal radius overlaps by the chord sag (crown wheel on its plate: 0.0012 mm³, above the
+   2e-4 mm³ touching tolerance), so the wheel can never turn. `convert_ml01.py` widens each mobile's
+   own pivot bore by 4 µm (real watch bearings run 5 to 15 µm). Affected: winding pinion, crown wheel,
+   click, yoke, setting-wheel lever, and the setting-wheel bore in its lever.
+2. **Endshake (5 µm).** The winding pinion's face is coplanar with the stem shoulder. That gives
+   1.3e-4 mm³ of overlap: inside the touching tolerance TOL = 2e-4, but above the 0.5·TOL that
+   `engine.push` must reach. A body resting at that overlap can never be pushed, so the first winding
+   step jammed. Moving the pinion 5 µm along x fixed it, and the crown then winds. **Engine
+   inconsistency:** "touching" is ≤ TOL, but a pushed body must clear to ≤ TOL/2, and it cannot do that
+   while it still touches something else that is not moving.
+3. **Phasing** (step 3 above). Real CAD assemblies are rarely phased. The brief's AT-0 Rest check
+   counts as-submitted tooth overlap as a failure.
+4. **Pose: position 1.** The CAD stem is pushed in, but the yoke, sliding pinion and setting-wheel
+   lever are drawn in their setting positions. The springs were relaxed to put them in position 1.
+5. **Springs.** The real springs are flexures (click spring, the Winkelhebelfeder jumper/yoke spring,
+   Zeigerstellungsfeder). They were removed and their parts declared `spring` mobiles.
+   - **The yoke spring acts on the sliding pinion through the yoke.** The rig's springs never push
+     other parts, so this cannot be declared. The sliding pinion was declared sprung as well; the two
+     then follow each other back, one contact at a time. That adds a spring the real watch does not
+     have.
+   - **The jumper sets the two stem positions,** and the format has no detent. Position 2 is the
+     brief's 0.9 mm. ml01's own is about 0.49 mm: its second jumper notch is a lever turn of about 14°
+     (`--pull` overrides it).
+6. **A wheel on a swinging lever** (setting wheel on the Zeigerstellhebel) needs a carrier other
+   than the stem. The public `keyless.json` cannot express it. `grade_real.py` adds `"carrier"` and
+   generalises the engine's stem-only carrier rule.
+7. **Winding sense.** The click locks the drum's negative rotation about +z (grader frame) and lets
+   crown wheel and drum wind positive, so WIND_SENSE = +1. That was checked by tracing:
+   - with +1, the mainspring's back-turn pulls the click into the teeth;
+   - with -1, it lifts the click.
+
+## 3. Results (staged run, 14 Nov, one process, 3,530 s; `results_ml01.json`)
+
+Command (Docker, keyless-grade, `--memory 3g`):
+`python -I realcad/grade_real.py SUB_PH DATA_PH --staged --details staged_ml01.json --wind-sense 1`
+(PULL = the brief's 0.9). `--staged` runs the same `grade.load`, `bounds_check`, `held_check` and
+`grade.worker` phases as `grade.grade()`, one after another. The `grade.py` used is the copy on disk
+at run time, which includes the new AT-2 drift rule (HELD_DRIFT).
+
+| Step | Result | Numbers | Reason |
+| --- | --- | --- | --- |
+| AT-0 Assemble | **fail** | Rest ok (max overlap 1e-4); bounds ok (stem protrudes 5.75); Held fails for yoke and setting_wheel_lever: shifted 0.3 mm in +z they hit nothing | Simulator/format: in ml01 these two levers are held down by the flexure springs' plates (Winkelhebelfeder, Zeigerstellungsfeder) and the dial, which had to be removed to declare the springs |
+| AT-1 Wind | **pass** | not blocked; 4.87 crown turns per barrel turn (band 3 to 12); minute wheel 0.0° | Real design works. The CAD ratio is 80/17 × (45/45) = 4.71; the extra comes from backlash and run-back while winding |
+| AT-2 Hold | **fail** | run-back 7.4° (≤ 30 ok), crown spun back 21°, but still drifting 1.85° over the last 10 steps (> HELD_DRIFT 0.3) | Probably the simulator: the click works on the crown wheel's ordinary gear teeth, and the engine judges lock only by the friction cone, not by the moment about the click pivot, so the mainspring keeps easing the click deeper. Not proven: a longer hold was not run |
+| AT-3 Run | **fail** | reserve 47.8 h (≥ 38 ok), barrel free to run (0 blocked), still coupled (+6.3°) | Fails only because AT-3 repeats AT-2's drift condition |
+| AT-4 Backward | **fail** | 111 of 120 steps blocked; arbor -4.8° | Simulator: the Breguet teeth must push the sliding pinion back against the yoke spring, through the yoke. With both declared as springs, the sprung sliding pinion cannot yield while the sprung yoke holds its groove, so the backward turn drags the winding train back until the click stops it. A traced single step shows exactly this (winding pinion, crown wheel and barrel pushed back) |
+| AT-5 Set | **fail** | position-1 test turns clean (wind 5.1°, no setting); pull blocked at p = 0.12 mm | Simulator: setting lever → yoke (spring) → sliding pinion (spring) cannot be resolved; residual overlap setting_lever/yoke 0.0053 mm³. The same block at μ = 0.15, so it is not friction. Engine detail: on a pure pull step (dp only), `resolve` counts a body carried by the stem as "moved" (`any(dqs[carrier])`), although a carried body does not follow the stem's slide; the sliding pinion then becomes a "pusher" the yoke must clear, which it cannot |
+| AT-6 Return | **fail** | could not reach position 2 | Same as AT-5 |
+
+Product score on the brief's weights: 0.10 (AT-1 only).
+
+## 4. Fairness verdict
+
+**The grader cannot pass a real watchmaker's keyless works today, and the failures are the
+simulator's, not the design's.**
+
+- **What works:** where the real mechanism is in the engine's vocabulary, it passes, and its numbers
+  match the drawing. AT-1 Wind passes without a block (4.87 turns per barrel turn against the drawn
+  4.71), the reserve is 47.8 h, the barrel runs free, and winding re-couples after the hold.
+- **What fails:** every other step fails at a point where ml01 uses something the rig cannot
+  represent. None of these failures points to a fault in Lang's design: the movement was built and
+  sold, and these are its standard mechanisms.
+  - **Flexure springs:** each spring has to become a declared `spring` mobile, so the flexure is lost
+    as a hold-down plate (AT-0 Held).
+  - **A spring acting through a linkage:** the yoke spring returns the sliding pinion through the
+    yoke (AT-4, AT-5, AT-6).
+  - **A wheel on a swinging lever:** this needed a format extension.
+  - **A click on gear teeth:** the click's hold depends on its moment, not on friction (AT-2,
+    probable).
+- **What it means for the agent:** our reference passes because it avoids every one of these real
+  features. It has no yoke, no setting lever, a sprung sliding pinion pulled by the stem shoulder,
+  and a setting wheel permanently in mesh. So the brief rewards a simplified mechanism the rig can
+  simulate, and penalises textbook keyless works. That is worth saying in the brief, or fixing (next
+  section).
+
+### Simulator limitations found, and what would fix them (no file outside realcad/ was changed)
+
+1. **Springs cannot push through a link.** In `engine.resolve`, a spring "never pushes" and yields only
+   if it clears every contact. Fix options:
+   - let a spring mobile push free and spring bodies on its rest side (a force, not just a stop);
+   - or allow `rest` on a free mobile that is linked to a spring.
+2. **Pure-slide steps treat carried bodies as moved** (`movers_now` uses `any(dqs[carrier])`). It
+   should use only the carrier's rotation, `dqs[carrier][0]`.
+3. **Touching vs pushable.** Touching is ≤ TOL, but `push` targets ≤ 0.5·TOL, so a body resting
+   between the two can never be pushed. Either measure the residual only against the pushers, or use
+   one threshold.
+4. **Line-to-line CAD fits** overlap after tessellation. The rig needs a stated clearance rule (or
+   tolerance), or real CAD will always need 4 to 5 µm of hand clearance.
+5. **AT-0 Rest on unphased gears.** Real assemblies are unphased; the rig's own settle could phase
+   them before the Rest check, as it already does before the sequence.
+6. **No carrier other than the stem** in `keyless.json` (`grade_real.py` shows a two-method extension
+   that works).
+7. **No detent:** position 2 is fixed at 0.9 mm; ml01's own pull is about 0.49 mm. Not the cause of
+   any failure here (the pull blocked at 0.12).
+8. **Click lock by moment (probable):** the friction-cone rule judges a click by the slope of the
+   contact face, not by whether the reaction pulls the click in. Not proven; a longer hold or a
+   moment-based test would settle it.
+9. **Speed:** with real meshes (crown wheel 193k triangles, sliding pinion 101k), the full run takes
+   59 minutes in one process (AT-1 alone 30 minutes). The two-worker run hit the 3 GB cap.
+
+## 5. Reproduce (Docker only; scratch paths; nothing is written in the repo)
+
+```
+curl (curlimages/curl) -> ml01_werk.stp   (sha256 34f001d6f98eeab4b9aacea1f0a47e145666c00a3549364959dbdf33d1f75991)
+python -I realcad/extract_step.py ml01_werk.stp EXT
+python -I realcad/convert_ml01.py EXT CONV
+python -I realcad/phase_ml01.py CONV/sub CONV/data CONV/sub_ph CONV/data_ph crown_wheel=3
+python -I realcad/grade_real.py CONV/sub_ph CONV/data_ph --probe
+python -I realcad/grade_real.py CONV/sub_ph CONV/data_ph --staged --details OUT.json --wind-sense 1 [--pull 0.49]
+```
+
+Not done: OM10 (needs an account); a run with `--pull 0.49` (it would not change the AT-5 block at
+0.12 mm); a longer AT-2 hold to tell a slow lock from no lock.

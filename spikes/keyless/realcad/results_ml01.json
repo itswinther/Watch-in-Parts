@@ -1,0 +1,164 @@
+{
+ "overrides": {
+  "CASE_CENTRE": [
+   0.0,
+   0.0
+  ],
+  "CASE_RADIUS": 17.0,
+  "CASE_Z": [
+   -4.0,
+   4.0
+  ],
+  "BARREL_AXIS": [
+   6.2,
+   8.1
+  ],
+  "MINUTE_AXIS": [
+   4.2429,
+   0.246
+  ],
+  "WIND_SENSE": 1.0,
+  "PULL": 0.9
+ },
+ "steps": {
+  "assemble": false,
+  "wind": true,
+  "hold": false,
+  "run": false,
+  "backward": false,
+  "set": false,
+  "return": false
+ },
+ "assemble": {
+  "rest_ok": true,
+  "rest_overlap": {
+   "stem": 0.0,
+   "sliding_pinion": 9e-05,
+   "winding_pinion": 8.4e-05,
+   "crown_wheel": 0.0001,
+   "click": 0.0001,
+   "setting_lever": 0.0,
+   "yoke": 9e-05,
+   "setting_wheel_lever": 8.7e-05,
+   "setting_wheel": 0.0,
+   "barrel": 0.0001,
+   "minute_wheel": 0.0
+  },
+  "bounds_ok": true,
+  "bounds": {
+   "beyond_case": 0.0,
+   "stem_protrude": 5.75
+  },
+  "held_ok": false,
+  "held_failures": {
+   "yoke": {
+    "ok": false,
+    "hits": {
+     "[0.0, 1.0, 0.0]": 0.14467,
+     "[-0.0, -1.0, -0.0]": 0.20165,
+     "[-1.0, 0.0, 0.0]": 0.24206,
+     "[1.0, -0.0, -0.0]": 0.36913,
+     "[0.0, 0.0, 1.0]": 0.0,
+     "[-0.0, -0.0, -1.0]": 8.00659
+    }
+   },
+   "setting_wheel_lever": {
+    "ok": false,
+    "hits": {
+     "[0.0, 1.0, 0.0]": 0.32719,
+     "[-0.0, -1.0, -0.0]": 0.30164,
+     "[-1.0, 0.0, 0.0]": 0.25977,
+     "[1.0, -0.0, -0.0]": 0.35062,
+     "[0.0, 0.0, 1.0]": 0.0001,
+     "[-0.0, -0.0, -1.0]": 4.40224
+    }
+   }
+  },
+  "ok": false,
+  "seconds": 3.5
+ },
+ "wind": {
+  "blocked": 0,
+  "barrel_deg": 73.92118945988324,
+  "minute_deg": 0.0,
+  "crown_turns_per_barrel_turn": 4.87,
+  "ok": true,
+  "seconds": 1820.5,
+  "evals": 242635
+ },
+ "hold": {
+  "prewind_blocked": 0,
+  "runback_deg": 7.381097756077068,
+  "last_steps_drift_deg": 1.8453,
+  "crown_spun_back_deg": -21.039431888217464,
+  "ok": false
+ },
+ "run": {
+  "stored_turns": 5.9795,
+  "reserve_h": 47.836,
+  "free_run_blocked": 0,
+  "then_winds_deg": 6.348,
+  "then_blocked": 0,
+  "ok": false
+ },
+ "backward": {
+  "blocked": 111,
+  "barrel_deg": -4.817103339266372,
+  "minute_deg": 0.0,
+  "then_winds_deg": 5.414,
+  "then_blocked": 0,
+  "ok": false,
+  "seconds": 203.0,
+  "evals": 29408
+ },
+ "set": {
+  "pull_blocked": 1,
+  "samples": [
+   {
+    "p": 0.0,
+    "fwd": {
+     "blocked": 0,
+     "barrel": 5.058,
+     "minute": 0.0
+    },
+    "back": {
+     "blocked": 0,
+     "barrel": -4.174,
+     "minute": 0.0
+    }
+   }
+  ],
+  "ok": false,
+  "seconds": 526.9,
+  "evals": 117823
+ },
+ "return": {
+  "pull_blocked": 1,
+  "samples": [],
+  "ok": false,
+  "seconds": 384.9,
+  "evals": 88926
+ },
+ "summary": {
+  "steps": {
+   "assemble": false,
+   "wind": true,
+   "hold": false,
+   "run": false,
+   "backward": false,
+   "set": false,
+   "return": false
+  },
+  "at": {
+   "AT-0": false,
+   "AT-1": true,
+   "AT-2": false,
+   "AT-3": false,
+   "AT-4": false,
+   "AT-5": false,
+   "AT-6": false
+  },
+  "product": 0.1,
+  "seconds": 3530.3
+ }
+}

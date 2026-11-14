@@ -1460,3 +1460,28 @@ A note for B's builder sessions and for Mikael's session, for information only. 
 - Read A's decision (Decisions "18:00", pushed at about 17:42): no paid Harbor batches on the four-part job. Agreed from B's side; B's go for the 8-per-model runs on the four-part job is not coming unless itswinther asks for it.
 - Did: stopped `/tmp/claude-0/runs/repeat.sh` before round 3 started (`kill` of its parent shell; round 3 never launched). Round 2 (one more run each for Fable, Opus, Sonnet, started 17:32, local `claude -p` on itswinther's account, not A's key) continues and is graded by the runner; results in the next entry. Reason: three of three first runs scored 1.0, a third round adds little on the four-part job, and the budget is better spent on the five-part job.
 - Files changed: SESSION.md.
+
+### 2026-11-14 17:45 | A: real watch CAD (Marco Lang ml01) through the keyless grader: fairness check | Mikael + Claude
+- Did: licences checked for openmovement OM10, Marco Lang, Dom's Sidequest (Gumroad) and printable-watch sites, with exact terms in `spikes/keyless/realcad/REAL_CAD.md`.
+  - **OM10:** CC BY-SA 3.0, but members-only download.
+  - **Gumroad:** CC BY-SA 4.0, but a $0 checkout needs an email, and the movement appears to be off the shelf.
+  - **Lang:** no licence, only "offen und kostenfrei teilen"; the download needs no account. Tested locally; no CAD or STL committed.
+  - Downloaded Lang's ml01 STEP in Docker (sha256 34f001d6…5991). Converted the real keyless works (stem, sliding and winding pinions, crown wheel, click, setting lever, yoke, setting wheel on its lever, barrel drum) and ran AT-0 to AT-6 with the new `realcad/grade_real.py`. It imports `grade.py` and `engine.py` unchanged and overrides the constants, the supplied parts and the carrier rule.
+- Verified by: `grade_real.py --staged` in keyless-grade (`--memory 3g`, one process, 3,530 s).
+  - **Results:**
+
+    | Step | Result | Numbers |
+    | --- | --- | --- |
+    | AT-1 | pass | 4.87 crown turns per barrel turn, not blocked |
+    | AT-0 | fail | Held: yoke and setting-wheel lever loose in +z once the flexure springs are removed |
+    | AT-2 | fail | drift 1.85° > 0.3 (run-back 7.4° ok) |
+    | AT-3 | fail | only the AT-2 drift (reserve 47.8 h, free run ok, coupled) |
+    | AT-4 | fail | 111 of 120 steps blocked |
+    | AT-5, AT-6 | fail | pull blocked at 0.12 mm |
+
+  - **Cause of AT-4 to AT-6, traced:** a spring cannot push through a link (lever → yoke → sliding pinion). Also, on a pure pull step `engine.resolve` counts the stem-carried sliding pinion as moved.
+  - **Verdict:** the failures are simulator limitations, not design faults; a real textbook keyless works cannot pass today. Fix list in REAL_CAD.md §4.
+- Not verified, or assumed: AT-2 click lock (friction-cone versus moment) is a probable cause, not proven; ml01's own pull of about 0.49 mm is estimated from the jumper notch; no run with `--pull`.
+- Files changed: new folder `spikes/keyless/realcad/` (REAL_CAD.md, grade_real.py, convert_ml01.py, extract_step.py, phase_ml01.py, results_ml01.json, `.harborignore` excluding everything). It is NOT-FOR-AGENT; `build_task.py` already excludes realcad/. No existing file edited.
+- Need from others: keyless builder: decide on the engine fixes in REAL_CAD.md §4 (spring through link, carried-body dp bug, TOL vs TOL/2). Mikael: download OM10 (needs an openmovement account) if a CC BY-SA real movement should be tested too.
+- Next: nothing running.
