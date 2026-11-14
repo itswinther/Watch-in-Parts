@@ -5,6 +5,7 @@
 --tools yes: the measuring tools and the public engine (stage 1 only; the stage tools are not built).
 Never included: the grader, the hand speeds, the gear maker, any reference, project documents."""
 import os
+import re
 import shutil
 import sys
 
@@ -16,7 +17,7 @@ def main(argv):
     out = argv[0]
     opts = dict(zip(argv[1:], argv[2:]))
     stage, prev, tools = int(opts.get("--stage", "1")), opts.get("--prev"), opts.get("--tools", "no")
-    for d in ("work/parts", "submission", "meshes", "tools"):
+    for d in ("work/parts", "submission", "meshes", "tools", "scripts"):
         os.makedirs(os.path.join(out, d), exist_ok=True)
     pub = os.path.join(ROOT, "environment", "public")
     shutil.copyfile(os.path.join(pub, "INSTRUCTION_WATCH_S%d.md" % stage), os.path.join(out, "INSTRUCTION.md"))
@@ -32,6 +33,11 @@ def main(argv):
             sub = f.read()
         sub = (sub.replace("__MAX_PARTS__", str(W.MAX_PARTS)).replace("__MAX_TRIANGLES__", str(W.MAX_TRIANGLES))
                .replace("__MAX_STL_BYTES__", str(W.MAX_STL_BYTES)).replace("__NAME_RE__", W.NAME_RE.pattern))
+        for k in ("MAX_STEP_BYTES", "STEP_LINEAR_DEFLECTION", "STEP_ANGULAR_DEFLECTION", "STEP_MAX_TRIANGLE_FACES",
+                  "STEP_TIMEOUT_S", "STEP_MEMORY_MB", "SELF_UNION_TOL", "MAX_SCRIPTS_BYTES", "MAX_SCRIPT_FILES"):
+            sub = sub.replace("__%s__" % k, repr(getattr(W, k)))
+        if re.search(r"__[A-Z_]+__", sub):
+            raise SystemExit("submit template has an unfilled placeholder")
         with open(os.path.join(out, "tools", "submit.py"), "w") as f:
             f.write(sub)
     else:

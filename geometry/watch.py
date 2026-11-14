@@ -48,6 +48,16 @@ MAX_TRIANGLES = 200_000
 MAX_STL_BYTES = 32 * 1024 * 1024
 MAX_JSON_BYTES = 1024 * 1024
 NAME_RE = re.compile(r"^[A-Za-z0-9_\-]{1,40}$")
+# STEP parts (read with OpenCASCADE, tessellated, then treated exactly like an STL)
+MAX_STEP_BYTES = 16 * 1024 * 1024
+STEP_LINEAR_DEFLECTION = 0.001  # mm, absolute chordal deviation of the tessellation
+STEP_ANGULAR_DEFLECTION = 0.1   # radians
+STEP_MAX_TRIANGLE_FACES = 500   # more flat three-edged faces than this: a faceted mesh, rejected
+STEP_TIMEOUT_S = 120            # per STEP file, read and tessellation, in a child process
+STEP_MEMORY_MB = 4096           # address-space limit of that child process
+SELF_UNION_TOL = 0.005          # relative volume change allowed under self-union
+MAX_SCRIPTS_BYTES = 4 * 1024 * 1024   # scripts/ copied with a submission (never opened by the grader)
+MAX_SCRIPT_FILES = 200
 
 
 # ---------------- supplied barrel and a cylinder helper ----------------
@@ -313,7 +323,7 @@ class Movement:
 
 
 def load_movement(folder):
-    """folder holds movement.json and parts/<name>.stl. Opens only the files movement.json names."""
+    """folder holds movement.json and parts/<name>.step or .stl. Opens only the files movement.json names."""
     path = os.path.join(folder, "movement.json")
     if os.path.getsize(path) > MAX_JSON_BYTES:
         raise FormatError("movement.json too large")
@@ -323,15 +333,32 @@ def load_movement(folder):
         except ValueError as e:
             raise FormatError("movement.json is not valid JSON") from e
 
-    def load_stl(name):
-        p = os.path.join(folder, "parts", name + ".stl")
-        if not os.path.isfile(p):
-            raise FormatError("part file parts/%s.stl not found" % name)
+    def load(name):
+        p = part_path(folder, name)
+        if p is None:
+            raise FormatError("part file parts/%s.step (or .stl) not found" % name)
         try:
-            return core.load_part(p, MAX_TRIANGLES, MAX_STL_BYTES, 0.005)
+            return load_part_file(p)
         except FormatError as e:
-            raise FormatError("parts/%s.stl: %s" % (name, e))
-    return Movement(doc, load_stl)
+            raise FormatError("parts/%s: %s" % (os.path.basename(p), e))
+    return Movement(doc, load)
+
+
+def part_path(folder, name):
+    """parts/<name>.step if it exists, else parts/<name>.stl if it exists, else None."""
+    for ext in (".step", ".stl"):
+        p = os.path.join(folder, "parts", name + ext)
+        if os.path.isfile(p):
+            return p
+    return None
+
+
+def load_part_file(p):
+    """One part file (.step or .stl) as a normalised Manifold, or FormatError."""
+    if p.endswith(".step"):
+        return core.load_step_part(p, MAX_STEP_BYTES, MAX_TRIANGLES, STEP_LINEAR_DEFLECTION, STEP_ANGULAR_DEFLECTION,
+                                   STEP_MAX_TRIANGLE_FACES, STEP_TIMEOUT_S, STEP_MEMORY_MB, SELF_UNION_TOL)
+    return core.load_part(p, MAX_TRIANGLES, MAX_STL_BYTES, SELF_UNION_TOL)
 
 
 def _asm_messages(name, solid, P, lo, hi):

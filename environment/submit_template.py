@@ -1,6 +1,8 @@
 """Format-only submit for the watch task. Checks structure, never runs a test.
     python3 tools/submit.py
-Reads ./work, copies movement.json, the parts it names and assembly.json (if present) to ./submission."""
+Reads ./work, copies movement.json, the parts it names and assembly.json (if present) to ./submission,
+and ./scripts (if present) to ./submission/scripts. Each part is parts/<name>.step, or parts/<name>.stl;
+when both exist the .step file is the part. Every part is loaded exactly as the grader loads it."""
 import json
 import math
 import os
@@ -14,12 +16,58 @@ import kernel
 MAX_PARTS = __MAX_PARTS__
 MAX_TRIANGLES = __MAX_TRIANGLES__
 MAX_STL_BYTES = __MAX_STL_BYTES__
+MAX_STEP_BYTES = __MAX_STEP_BYTES__
+STEP_LINEAR_DEFLECTION = __STEP_LINEAR_DEFLECTION__
+STEP_ANGULAR_DEFLECTION = __STEP_ANGULAR_DEFLECTION__
+STEP_MAX_TRIANGLE_FACES = __STEP_MAX_TRIANGLE_FACES__
+STEP_TIMEOUT_S = __STEP_TIMEOUT_S__
+STEP_MEMORY_MB = __STEP_MEMORY_MB__
+SELF_UNION_TOL = __SELF_UNION_TOL__
+MAX_SCRIPTS_BYTES = __MAX_SCRIPTS_BYTES__
+MAX_SCRIPT_FILES = __MAX_SCRIPT_FILES__
 NAME = re.compile(r"__NAME_RE__")
 WORK, SUBMIT = os.path.join(os.getcwd(), "work"), os.path.join(os.getcwd(), "submission")
+SCRIPTS = os.path.join(os.getcwd(), "scripts")
 
 
 class Bad(Exception):
     pass
+
+
+def part_file(n):
+    for ext in (".step", ".stl"):
+        p = os.path.join(WORK, "parts", n + ext)
+        if os.path.isfile(p):
+            return p
+    return None
+
+
+def load(p):
+    """The part as the grader builds it (a manifold3d solid)."""
+    if p.endswith(".step"):
+        return kernel.load_step_part(p, MAX_STEP_BYTES, MAX_TRIANGLES, STEP_LINEAR_DEFLECTION, STEP_ANGULAR_DEFLECTION,
+                                     STEP_MAX_TRIANGLE_FACES, STEP_TIMEOUT_S, STEP_MEMORY_MB, SELF_UNION_TOL)
+    return kernel.load_part(p, MAX_TRIANGLES, MAX_STL_BYTES, SELF_UNION_TOL)
+
+
+def script_files():
+    """Regular files under ./scripts (relative paths), within the size limits."""
+    out, total = [], 0
+    if not os.path.isdir(SCRIPTS):
+        return out
+    for root, dirs, files in os.walk(SCRIPTS):
+        dirs[:] = sorted(d for d in dirs if not os.path.islink(os.path.join(root, d)) and d != "__pycache__")
+        for f in sorted(files):
+            p = os.path.join(root, f)
+            if os.path.islink(p) or not os.path.isfile(p):
+                continue
+            total += os.path.getsize(p)
+            out.append(os.path.relpath(p, SCRIPTS))
+            if len(out) > MAX_SCRIPT_FILES:
+                raise Bad("scripts/ holds more than %d files" % MAX_SCRIPT_FILES)
+            if total > MAX_SCRIPTS_BYTES:
+                raise Bad("scripts/ holds more than %d bytes" % MAX_SCRIPTS_BYTES)
+    return out
 
 
 def xy(v, where):
@@ -73,14 +121,17 @@ def main():
             continue
         if not isinstance(e, dict) or e.get("mobile") not in mob or e.get("part") not in mob[e["mobile"]]["parts"]:
             raise Bad("hands.%s: needs 'mobile' and a 'part' that belongs to that mobile" % h)
+    files = {}
     for n in names:
-        p = os.path.join(WORK, "parts", n + ".stl")
-        if not os.path.isfile(p):
-            raise Bad("parts/%s.stl not found" % n)
+        p = part_file(n)
+        if p is None:
+            raise Bad("parts/%s.step (or .stl) not found" % n)
         try:
-            kernel.load_part(p, MAX_TRIANGLES, MAX_STL_BYTES, 0.005)
+            load(p)
         except kernel.FormatError as e:
-            raise Bad("parts/%s.stl: %s" % (n, e))
+            raise Bad("parts/%s: %s" % (os.path.basename(p), e))
+        files[n] = p
+    scripts = script_files()
     asm = os.path.join(WORK, "assembly.json")
     if os.path.isfile(asm):
         try:
@@ -94,11 +145,17 @@ def main():
         shutil.rmtree(SUBMIT)
     os.makedirs(os.path.join(SUBMIT, "parts"))
     shutil.copyfile(os.path.join(WORK, "movement.json"), os.path.join(SUBMIT, "movement.json"))
-    for n in names:
-        shutil.copyfile(os.path.join(WORK, "parts", n + ".stl"), os.path.join(SUBMIT, "parts", n + ".stl"))
+    for n, p in files.items():
+        shutil.copyfile(p, os.path.join(SUBMIT, "parts", os.path.basename(p)))
     if os.path.isfile(asm):
         shutil.copyfile(asm, os.path.join(SUBMIT, "assembly.json"))
-    print(json.dumps({"result": "accepted", "parts": len(names), "assembly": os.path.isfile(asm)}))
+    for rel in scripts:
+        dst = os.path.join(SUBMIT, "scripts", rel)
+        os.makedirs(os.path.dirname(dst), exist_ok=True)
+        shutil.copyfile(os.path.join(SCRIPTS, rel), dst)
+    kinds = sorted({os.path.splitext(p)[1] for p in files.values()})
+    print(json.dumps({"result": "accepted", "parts": len(names), "part_formats": kinds,
+                      "assembly": os.path.isfile(asm), "scripts": len(scripts)}))
 
 
 if __name__ == "__main__":
