@@ -142,6 +142,10 @@ The acceptance test is run on a simulated test rig:
 - **The crown** is turned in steps of $STEP_DEG degrees and pulled or pushed in steps of $PULL_STEP. A
   step that cannot proceed is blocked, and nothing moves.
 - **At the start**, parts may overlap by up to 0.3 (surface travel) and settle before the test begins.
+- **What the rig does not model.** Parts do not bend, so a flexing arm or blade is rigid on the rig. Every
+  axis and slide line is fixed in the frame, so a mobile cannot ride on another mobile (for example, a
+  wheel carried on a swinging lever). A spring acts only on its own mobile. A design that depends on any
+  of these will not behave on the rig as it would in metal.
 
 ## The acceptance test
 

@@ -37,7 +37,8 @@ HARBOR_SRC=/path/to/harbor spikes/keyless/report/run_all.sh anthropic/claude-opu
 1. **Builds the task.** It builds the builder image from `spikes/keyless/docker/Dockerfile` (CadQuery and
    manifold3d), then runs `build_task.py OUT/task --agent opencode` inside it. It refuses to go on unless
    `task.toml` has these settings:
-   - the agent network is an allowlist of `api.anthropic.com` only;
+   - the agent network is an allowlist of the model endpoints only (`api.anthropic.com`, `api.openai.com`,
+     `generativelanguage.googleapis.com`, `openrouter.ai`);
    - the verifier network is `no-network`.
 2. **Runs the reference agents.** It runs `harbor run -a oracle -k 3` (the reference solution, built by its
    generator script) and `harbor run -a nop -k 1` (an agent that does nothing).

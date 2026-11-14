@@ -38,8 +38,9 @@ COPY app/ /app/
 """
 
 AGENTS = {
-    "codex": ("npm install -g @openai/codex@0.169.0 && codex --version", "chatgpt.com"),
-    "opencode": ("npm install -g opencode-ai@1.19.5 && opencode --version", "api.anthropic.com"),
+    "codex": ("npm install -g @openai/codex@0.169.0 && codex --version", '"chatgpt.com", "api.openai.com"'),
+    # OpenCode: judges pick any provider with -m provider/model, so allow every major model endpoint (and only those).
+    "opencode": ("npm install -g opencode-ai@1.19.5 && opencode --version", '"api.anthropic.com", "api.openai.com", "generativelanguage.googleapis.com", "openrouter.ai"'),
 }
 
 TASK_TOML = """schema_version = "1.3"
@@ -73,7 +74,7 @@ storage_mb = 10240
 
 [environment]
 network_mode = "allowlist"
-allowed_hosts = ["{host}"]
+allowed_hosts = [{host}]
 build_timeout_sec = 1800.0
 cpus = 4
 memory_mb = 3072
@@ -168,7 +169,7 @@ def main(argv):
     out = os.path.abspath(argv[0])
     opts = dict(zip(argv[1:], argv[2:]))
     agent = opts.get("--agent", "codex")
-    host = opts.get("--host", AGENTS[agent][1])
+    host = '"%s"' % opts["--host"] if "--host" in opts else AGENTS[agent][1]
     if os.path.exists(out):
         shutil.rmtree(out)
     app = os.path.join(out, "environment", "app")

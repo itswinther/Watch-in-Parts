@@ -53,8 +53,9 @@ docker run --rm -m 2g -v "$PWD:/repo:ro" -v "$PWD/harbor/watch_one/out:/out" key
 
 `--agent` changes only `allowed_hosts`:
 
-- `api.anthropic.com` for opencode and oracle;
-- `chatgpt.com` for codex.
+- for opencode and oracle, the major model endpoints and nothing else: `api.anthropic.com`, `api.openai.com`,
+  `generativelanguage.googleapis.com` and `openrouter.ai`, so `-m provider/model` works for any of those providers;
+- `chatgpt.com` and `api.openai.com` for codex.
 
 Both OpenCode 1.19.5 and Codex 0.169.0 are installed in the image, so nothing is fetched at run
 time. The oracle runs on the same task as the OpenCode runs.
@@ -72,8 +73,8 @@ time. The oracle runs on the same task as the OpenCode runs.
 
 `task.toml` settings:
 
-- **Agent:** 3 h (`timeout_sec = 10800`; B's smoke runs took 33 to 61 min), 4 CPUs, 4 GB, `allowlist` to the model endpoint only.
-- **Verifier:** `separate`, `no-network`, 4 GB, 4500 s. The grader stops itself at 3600 s, so Harbor never cuts it off before it writes a reward.
+- **Agent:** 3 h (`timeout_sec = 10800`; B's smoke runs took 33 to 61 min), 4 CPUs, 4 GB, `allowlist` to the model endpoints only (no web, no package registries).
+- **Verifier:** `separate`, `no-network`, 4 GB, 7800 s for the one-job grader (it stops itself at 7200 s, 1800 s per check), so Harbor never cuts it off before it writes a reward.
 - **Metadata:** expert and junior hours, both marked as author estimates.
 - **Image pins:** python:3.12-slim, cadquery 2.8.0, manifold3d 3.5.5, scipy 1.18.1, numpy 2.5.4 and
   trimesh 5.2.1, plus `OPENCODE_EXPERIMENTAL_OUTPUT_TOKEN_MAX=64000`.

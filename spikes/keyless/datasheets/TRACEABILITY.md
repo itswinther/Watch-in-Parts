@@ -187,8 +187,8 @@ All scaled values computed in Docker (`python:3.12-slim`, 1 GB): s = 1.6172, s²
   can now bind for the smallest catalogue crown at i = 3**; it does not bind at i ≥ 4 (17.5 N·mm) or
   for crowns above Ø 5.56 mm (70.1/(3 × 4.20)). At M½ (50.2) it does not bind for any catalogue crown.
 - **Section 3, row 1 (core ratio settled).** With r = D/6, the stated core of the supplied barrels, K
-  (ETA 2801 size) gives 41 h against ETA's 42 h, and every variant gives ≥ 41 h, so all pass the 38 h
-  minimum. The 12·t / 16·t columns stay in DS-101 for comparison.
+  (ETA 2801 size) gives 41 h against ETA's 42 h, and every variant of Rev E gave ≥ 41 h. Rev F's thin spring L gives about 40 h in its listed
+  barrel, still above the 38 h minimum. The 12·t / 16·t columns stay in DS-101 for comparison.
 - **Keyless brief check:** `spikes/keyless/docs/PROMPT.md` on main (6d3dd6b) does **not** state a core
   radius 0.6 or an inner radius 1.8 (grep for core / one third / 1.8 finds none); `supplied.py` has an
   arbor cylinder of radius 0.6, which is not described as the spring core. So DS-101 states only the
@@ -295,3 +295,16 @@ the reference is in `../docs/SOLUTION.md`.
 - **Corrections:** DS-201's header now points to section 8 for allowables; DS-401 says 1450 MPa is the lowest
   proof strength *of the steel strip* in AD-DS-201 (brass is 220 MPa); DS-101 Note 5 lists the footnotes that
   exist ([^d1] to [^d3] and [^d5] to [^d7]; there is no [^d4]).
+
+## Datasheet audit, 14 Nov 2026, 21:00 (A; independent reviewer, sources fetched)
+About 400 derived cells recomputed: all right except three DS-101 Table 4 cells (B n=8, C n=6, N n=6), now fixed.
+Also fixed: INDEX lists Rev F; Table 2a values are Sellita's specification limits (M½ max, M24 min, bridle
+min-max; p. 1 = PDF p. 3), not measurements; the leftover "Arbor core radius" section after Sources (wrong
+Saunier title) is deleted; DS-501's pinch value is labelled ages 20 to 34 (the norms span 20 to 75+, lowest 7.9 lb);
+DS-401's 0.80 mm is the travel between adjacent positions (SW200-1 has three positions); research-note
+wording in DS-301 reworded. Open with B: the 70.1 N·mm load case against spring L, and the corundum
+safety factor (UWA item 9 suggests about S = 6 for brittle materials on ultimate strength, so about 450 MPa, not 900).
+Verified sources: Sellita SW200-1 rev 04, Alleima 20C, Wieland CW614N, Nivaflex 45/5 (typical values),
+Engineering ToolBox friction, Bird jewel data, Grossmann, Saunier Hand-Book art. 517, MIL-STD-1472H fig. 10,
+Imrhan 2013, Seo and Armstrong, UWA tiers, makeitfrom sapphire, springs L and N. Not verified: spring M
+(Patek 177), MIL-W-46374F (scanned), Sellita rev 07 stem values, ETA 2801/2824, EPFL thesis.
