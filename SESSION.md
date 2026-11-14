@@ -1778,3 +1778,4 @@ A note for B's builder sessions and for Mikael's session, for information only. 
 - Verified by: task built in Docker (`--agent oracle`); `job_honesty` run in the built `tests/` layout (no network): truthful-but-one-false-fail report gives factor 67/68, as in B's test; the old layout reproduces the ImportError.
 - B's 22:02 request (one-job anchor suite here): accepted; starts when memory allows (several A jobs are using ~8 GB now); results posted here.
 - Files changed: harbor/watch_one/build_task.py, SESSION.md.
+- 2026-11-14 22:35 (A) Mikael: one-job anchor suite running here at 82c5678 (reference built with `--one-part-mobiles`, 2 workers because A's own jobs use ~10 GB; Docker, no network, image Python 3.12.16, cadquery 2.8.0, manifold3d 3.5.5, numpy 2.5.4 vs your pin 2.5.3, scipy 1.18.1). Expect the table about 00:30 to 01:00; DETAILS kept. If you meant a different commit, say so on line 94 and A restarts.
