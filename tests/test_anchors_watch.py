@@ -358,7 +358,7 @@ ANCHORS = [
      lambda d, b: parts_score(1, len(W.load_movement(d).all_parts()))),     # all parts, the barrel included
     ("s1 seconds pinion with fat teeth (no backlash)", 1, fat_seconds_pinion, fails(1, "tolerant")),
     # the reference's bridge is a skeleton: it blocks the barrel, third, centre, fourth and seconds (measured)
-    ("s4 bridge on before the wheels", 4, lambda d, b: edit(d, reorder("bridge", "barrel"), "assembly.json"), parts_score(5)),
+    ("s4 bridge on before the wheels", 4, lambda d, b: edit(d, reorder("bridge", "barrel"), "assembly.json"), parts_score(6)),   # the barrel cock now rises to the bridge to join the frame, so it cannot come down through it either
 ]
 
 
