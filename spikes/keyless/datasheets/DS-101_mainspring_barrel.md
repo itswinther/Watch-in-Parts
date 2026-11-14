@@ -4,17 +4,16 @@
 
 | Document | Revision | Date | Status |
 |---|---|---|---|
-| VM-DS-101 | E | 2026-11-14 | Released |
+| VM-DS-101 | F | 2026-11-14 | Released |
 
-> **About this document.** Valtorre Microtechnique SA is a fictional supplier, used for this exercise
-> only.
+> **About this document.** Valtorre Microtechnique SA, demonstration series.
 >
 > - **What is real:** each spring in Table 1 is a real catalogue size, cited row by row. This series
 >   reproduces it with every length multiplied by s = 1.617.
-> - **What is measured:** one reference torque measurement on a real 11½‴ calibre (Table 2a), and a
->   published winding/unwinding ratio. Both are cited as facts.
-> - **What is calculated:** no maker publishes torque or turns for these particular springs, so their
->   performance figures are calculated, not measured. Note 5 and the footnotes give the method and the
+> - **What is specified by a maker:** the torque limits of a real 11½‴ calibre (Table 2a), and a
+>   published winding/unwinding ratio.
+> - **What is calculated:** the torque and turns figures for these springs are calculated, not
+>   measured. Note 5 and the footnotes give the method and the
 >   sources.
 >
 > Both the 1:1 size and the scaled size are given. **Use the scaled columns** for this series.
@@ -31,7 +30,7 @@
   - **A (automatic):** a slipping bridle, which slips in the barrel once the spring is fully wound.[^wiki]
 - **Barrels supplied with this series:** the arbor core (hub) radius is one third of the barrel's inner
   radius, r = D/6, the classical proportion "established by long practice".[^gro108][^saun] For the
-  strips of Table 1 this gives a hub diameter of 26 to 38 times the strip thickness, about the 32 × t of
+  strips of Table 1 this gives a hub diameter of 25 to 38 times the strip thickness, about the 32 × t of
   Grossmann's worked case.[^gro108][^d6]
 
 ## 2. Ordering code
@@ -53,6 +52,9 @@
 | I | A | 0.90 × 0.130 × 300 × 10.5 | [^rI] | 1.46 | 0.210 | 485 | 17.0 |
 | J | A | 1.45 × 0.100 × 380 × 10.0 | [^rJ] | 2.34 | 0.162 | 615 | 16.2 |
 | K | M (ETA 2801 size) | 1.23 × 0.134 × 400 × 10.5 | [^rK] | 1.99 | 0.217 | 647 | 17.0 |
+| L | M | 0.48 × 0.100 × 270 × 7.5 | [^rL] | 0.78 | 0.162 | 437 | 12.1 |
+| M | M | 0.60 × 0.100 × 310 × 8.0 | [^rM] | 0.97 | 0.162 | 501 | 12.9 |
+| N | M | 0.60 × 0.105 × 200 × 8.5 | [^rN] | 0.97 | 0.170 | 323 | 13.7 |
 
 All scaled values are the real value × s.[^s] The sellers list sizes as height × thickness × length ×
 barrel diameter.[^rdb] **Tolerances:** not published by the cited sellers, and none are stated here.
@@ -80,24 +82,27 @@ M_el is the torque at which the outer fibre of the strip reaches its proof stres
 | I | 26.5 | 8.3 |
 | J | 25.3 | 13.6 |
 | K | 38.5 | 10.7 |
+| L | 8.4 | 9.7 |
+| M | 10.5 | 11.1 |
+| N | 11.5 | 6.8 |
 
 M_el is the calculated torque at first yield of a straight, unstressed strip. It is **not** an upper
 bound on the torque a finished spring delivers: see Table 2a and Note 2.
 
 **Bridle slipping torque (type A):** not published for the springs of Table 1. The reference
-measurement in Table 2a gives the slipping band of a real 11½‴ automatic spring.
+specification in Table 2a gives the slipping band of a real 11½‴ automatic spring.
 
-## 4a. Reference measurement on a real 11½‴ calibre (Table 2a, measured)
+## 4a. Reference specification of a real 11½‴ calibre (Table 2a, maker's limits)
 
-Measured torque at the barrel arbor of a production automatic movement of the 11½‴ class (Sellita
-SW200-1).[^sel] The maker does not publish that spring's dimensions, so the measurement is given for the
+Specified torque limits at the barrel arbor of a production automatic movement of the 11½‴ class (Sellita
+SW200-1).[^sel] The maker does not publish that spring's dimensions, so the limits are given for the
 class, not for a variant of Table 1. The demonstration-scale value is the 1:1 value × s³ = 4.229.[^d5]
 
-| Quantity | 1:1 value (measured) | **This series (N·mm)**[^d7] |
+| Quantity | 1:1 value (maker's limit) | **This series (N·mm)**[^d7] |
 |---|---|---|
-| Torque half a turn from full wind, M½ | 11.86 N·mm | **50.2** |
-| Torque after 24 h of running, M24 | 8.83 N·mm (0.745 × M½) | **37.3** |
-| Slipping torque of the bridle | 12.21 to 16.57 N·mm (1.03 to 1.40 × M½) | **51.6 to 70.1** |
+| Torque half a turn from full wind, M½ (max.) | 11.86 N·mm | **50.2** |
+| Torque after 24 h of running, M24 (min.) | 8.83 N·mm (0.745 × M½) | **37.3** |
+| Slipping torque of the bridle (min. to max.) | 12.21 to 16.57 N·mm (1.03 to 1.40 × M½) | **51.6 to 70.1** |
 
 **Winding against unwinding:** the torque a spring delivers while unwinding is at least 80 % of the
 torque needed to wind it at the same state of wind (84 % measured half a turn from full wind, on a
@@ -125,6 +130,9 @@ the core of the barrels supplied with this series, and for two other core ratios
 | I | 2.83 | 13.5 | 6.2 | 50 | 2.52 | 7.0 | 56 | 3.36 | 4.9 | 39 |
 | J | 2.70 | 16.7 | 7.6 | 60 | 1.94 | 10.4 | 83 | 2.59 | 7.9 | 63 |
 | K | 2.83 | 13.1 | 5.2 | 41 | 2.60 | 5.8 | 47 | 3.47 | 3.5 | 28 |
+| L | 2.02 | 12.5 | 4.9 | 40 | 1.94 | 5.3 | 42 | 2.59 | 3.0 | 24 |
+| M | 2.16 | 13.3 | 5.2 | 42 | 1.94 | 6.0 | 48 | 2.59 | 3.7 | 30 |
+| N | 2.29 | 13.5 | 6.1 | 49 | 2.04 | 6.9 | 55 | 2.72 | 4.9 | 39 |
 
 How these were calculated:
 
@@ -158,8 +166,8 @@ full wind, which is no more than M_el.
 | Var. | n = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | at N (r = 12·t) |
 |---|---|---|---|---|---|---|---|---|---|
 | A | 0.9 | 1.9 | 2.8 | 3.7 | 4.7 | 5.6 | 6.5 | 7.5 | 7.5 |
-| B | 0.5 | 1.0 | 1.5 | 2.0 | 2.5 | 3.0 | 3.4 | 3.9 | 3.9 |
-| C | 1.2 | 2.5 | 3.7 | 5.0 | 6.2 | – | – | – | 8.0 |
+| B | 0.5 | 1.0 | 1.5 | 2.0 | 2.5 | 3.0 | 3.4 | – | 3.9 |
+| C | 1.2 | 2.5 | 3.7 | 5.0 | 6.2 | 7.5 | – | – | 8.0 |
 | D | 0.5 | 0.9 | 1.4 | 1.9 | 2.3 | 2.8 | 3.3 | 3.8 | 5.9 |
 | E | 1.2 | 2.5 | 3.7 | 5.0 | 6.2 | 7.5 | 8.7 | 10.0 | 11.5 |
 | F | 1.8 | 3.6 | 5.4 | 7.2 | 9.0 | 10.8 | 12.7 | 14.5 | 14.9 |
@@ -168,6 +176,9 @@ full wind, which is no more than M_el.
 | I | 3.2 | 6.4 | 9.6 | 12.8 | 16.1 | 19.3 | 22.5 | – | 22.6 |
 | J | 1.9 | 3.7 | 5.6 | 7.4 | 9.3 | 11.2 | 13.0 | 14.9 | 19.3 |
 | K | 3.6 | 7.2 | 10.8 | 14.4 | 18.0 | – | – | – | 21.0 |
+| L | 0.9 | 1.7 | 2.6 | 3.5 | 4.3 | – | – | – | 4.5 |
+| M | 0.9 | 1.9 | 2.8 | 3.8 | 4.7 | 5.7 | – | – | 5.7 |
+| N | 1.7 | 3.4 | 5.1 | 6.8 | 8.5 | 10.2 | – | – | 11.5 |
 
 ## Notes
 
@@ -180,13 +191,13 @@ full wind, which is no more than M_el.
    lowers the torque delivered.
    **Correction (Rev E):** Rev D called M_el a strict upper bound on the torque. It is not. Finished
    springs are set in manufacture and deliver more than the first-yield torque of a straight strip: the
-   measured 11½‴ reference (Table 2a) gives 11.86 N·mm at 1:1 half a turn from full wind, and its bridle
+   11½‴ reference (Table 2a) allows up to 11.86 N·mm at 1:1 half a turn from full wind, and its bridle
    slips at up to 16.57 N·mm, above the calculated M_el of every spring in Table 1 at 1:1 (largest: K,
    9.1 N·mm). The highest torque this sheet states for the 11½‴ class is the reference slipping torque,
    **70.1 N·mm** in this series.[^sel][^d7]
 3. **Handling.** Use a mainspring winder. Do not wind springs into the barrel by hand.
 4. **Scaled springs.** At this scale the strip is about 0.11 to 0.22 mm thick.
-5. **Method.** Footnotes [^d1] to [^d7].
+5. **Method.** Footnotes [^d1] to [^d3] and [^d5] to [^d7].
 
 ## Sources
 
@@ -208,6 +219,9 @@ full wind, which is no more than M_el.
 [^rI]: https://en.ressortdebarillet.ch/products/0-90-x-13-x-300-x-10-5-automatique
 [^rJ]: https://en.ressortdebarillet.ch/products/1-45-x-10-x-380-x-10-automatique
 [^rK]: 1.23 × 0.134 × 400 × 10.5, ETA 2801, https://en.ressortdebarillet.ch/products/1-23-x-134-x-400-x-10-5-eta-2801-mecanique
+[^rL]: 0.48 × 0.10 × 270 × 7.5, non-automatic (Vacheron Constantin 1003), https://en.ressortdebarillet.ch/products/0-48-x-10-x-270-x-7-5-vacheron-constantin1003-non-automatique ; the same size for Audemars Piguet 2003, https://en.ressortdebarillet.ch/products/0-48-x-10-x-270-x-7-5-audemars-piguet-2003-bride-special-tb
+[^rM]: 0.60 × 0.10 × 310 × 8, non-automatic (Patek Philippe 177), https://en.ressortdebarillet.ch/products/0-60-x-10-x-310-x-8-patek-177-non-automatique
+[^rN]: 0.60 × 0.105 × 200 × 8.5, non-automatic (Piaget 9P2), https://en.ressortdebarillet.ch/products/0-60-x-105-x-200-x-8-5-piaget-9p2-non-automatique
 [^sjx25]: Core ratio r/e: Defossez 16; modern minimum about 10; thickness correction 0.002 to 0.004 mm; maximum turns at half the area. https://watchesbysjx.com/2025/11/in-depth-balancing-mainspring-dimensions-inside-the-barrel.html
 [^gro]: J. Grossmann, *Lessons in Horology* (1905), art. 97 (M = E·h·e³·2πn/(12·L), n counted from the free spring) and art. 99 (worked example: 5,640 g·mm at full wind, less 389 g·mm per barrel turn). Public domain. https://archive.org/download/lessonsinhorolog00gros/lessonsinhorolog00gros_djvu.txt
 [^d1]: Not published; derived from conservation of strip area, L·t′ with t′ = t + 0.003·s mm (the correction from [^sjx25], scaled). Coils on the core: n_w = (√(r² + L·t′/π) − r)/t′. Coils against the wall: n_d = (R − √(R² − L·t′/π))/t′, with R = D/2. N = n_w − n_d. Inputs from Table 1; r from [^sjx25].
@@ -215,16 +229,8 @@ full wind, which is no more than M_el.
 [^d3]: Not published; derived as M_el = Rp0.2·h·t²/6 (rectangular section, Z = b·t²/6, https://www.codecogs.com/page/1150/v/3359), with Rp0.2 = 2475 MPa from [^vac] and the scaled h and t.
 [^gro108]: J. Grossmann, *Lessons in Horology* (1905), art. 108 (p. 63: "the custom, in practice, to make the radius of the hub equal to one-third of the interior radius of the barrel"), art. 110 (p. 64) and art. 111 (pp. 64 to 66: the proportion is "established by long practice"; worked case barrel ID 17.4 mm, hub Ø 5.8 mm, spring 0.18 mm, so hub Ø ≈ 32 × thickness). Public domain. https://archive.org/download/lessonsinhorolog00gros/lessonsinhorolog00gros_djvu.txt
 [^saun]: C. Saunier, *The Watchmaker's Hand-Book*, art. 517 "The Arbor-Nut": the diameter of the nut is usually one third of the inside diameter of the barrel, larger for thick springs and smaller for thin ones. Public domain. https://www.gutenberg.org/ebooks/76850
-[^sel]: Sellita, SW200-1 Documentation technique, rev 04 (02.02.2015), p. 3: torque half a turn from full wind 11.86 N·mm; after 24 h 8.83 N·mm; slipping bridle 12.21 to 16.57 N·mm. Cited as facts only; the document is copyrighted and not reproduced. Third-party copy: https://watch.co.uk/download/sw200-ml-pdf
+[^sel]: Sellita, SW200-1 Documentation technique, rev 04 (02.02.2015), p. 1 (PDF p. 3), specification limits: torque half a turn from full wind 11.86 N·mm; after 24 h 8.83 N·mm; slipping bridle 12.21 to 16.57 N·mm. Copy: https://watch.co.uk/download/sw200-ml-pdf
 [^niv]: Nivarox-FAR, US 11,320,786 B2 (mainspring), summary, claim 7 and FIG. 2: unwinding torque at least 80 % of winding torque, 84 % measured after half a turn; spring 500 mm × 90 µm, core Ø 1.5 mm. US patent text, public domain. https://patents.google.com/patent/US11320786B2/en
 [^d6]: Not published; derived as r = D/6 with the scaled D of Table 1, and N from [^d1] at that r. Hub Ø/t = (D/3)/t.
 [^d7]: Not published at this scale; derived as the 1:1 value from [^sel] × s³ = 4.229 [^d5]. Ratios to M½ are computed from [^sel].
 [^d5]: Geometric similarity: with every length × s, the stress σ = 6M/(h·t²) stays the same when M scales with s³, and M = E·h·t³·θ/(12·L) does scale with s³ for the same θ. N depends only on length ratios, so turns and hours do not change. https://www.codecogs.com/page/1150/v/3359 ; https://calculator.academy/spiral-torsion-spring-calculator/
-
-
-## Arbor core radius (stated)
-
-The arbor core (the hub the inner coil winds onto) is one third of the barrel's inner radius:
-Grossmann, *Lessons in Horology* (1905), art. 108–111, and Saunier, *Treatise on Modern Horology*,
-art. 517. With this stated, the turns of the mainspring are fixed, which removes the 47 h versus 28 h
-ambiguity.

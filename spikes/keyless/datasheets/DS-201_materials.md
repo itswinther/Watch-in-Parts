@@ -7,9 +7,9 @@
 **Demonstration-scale series, scale 1.617:1 to an 11½‴ calibre (s = 1.617).** Every value on this
 sheet is a material property and does not depend on size. It applies unchanged at any scale.
 
-> **About this document.** Aciers Duval SA is a fictional supplier, used for this exercise only. Every
+> **About this document.** Aciers Duval SA, demonstration series. Every
 > property below comes from the cited producer or reference datasheet. The design allowables in
-> section 7 are calculated from those properties, as their footnotes state.
+> section 8 are calculated from those properties, as their footnotes state.
 
 ## 1. Scope
 
@@ -83,7 +83,7 @@ The source states no proof stress for this condition.
 
 ## 6. Other materials
 
-**Co-Ni-Cr spring alloy, Nivaflex 45/5 type (AD-CoNiCr-45).** Composition, in weight %: Co 45, Ni 21,
+**Co-Ni-Cr spring alloy, Nivaflex 45/5 type (AD-CoNiCr-45).** Composition, in mass %: Co 45, Ni 21,
 Cr 18, Fe 5, W 4, Mo 4, Ti 1, Be 0.2.[^vac]
 
 | Cold work | Rm before / after aging (MPa) | Rp0.2 before / after aging (MPa) | HV after aging |

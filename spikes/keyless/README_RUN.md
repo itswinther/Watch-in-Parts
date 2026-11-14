@@ -37,7 +37,8 @@ HARBOR_SRC=/path/to/harbor spikes/keyless/report/run_all.sh anthropic/claude-opu
 1. **Builds the task.** It builds the builder image from `spikes/keyless/docker/Dockerfile` (CadQuery and
    manifold3d), then runs `build_task.py OUT/task --agent opencode` inside it. It refuses to go on unless
    `task.toml` has these settings:
-   - the agent network is an allowlist of `api.anthropic.com` only;
+   - the agent network is an allowlist of the model endpoints only (`api.anthropic.com`, `api.openai.com`,
+     `generativelanguage.googleapis.com`, `openrouter.ai`);
    - the verifier network is `no-network`.
 2. **Runs the reference agents.** It runs `harbor run -a oracle -k 3` (the reference solution, built by its
    generator script) and `harbor run -a nop -k 1` (an agent that does nothing).
@@ -171,7 +172,7 @@ setup. Harbor 0.26 sees that the pinned OpenCode (1.19.5) is already in the imag
 
 | Phase | Resources | Time |
 |---|---|---|
-| Agent container | 4 CPUs, 3 GB | Times out at 60 min (`[agent] timeout_sec = 3600`) |
+| Agent container | 4 CPUs, 3 GB | Times out at 90 min (`[agent] timeout_sec = 5400`; 3× the slowest run seen, at least 60 min) |
 | Verifier container | 4 CPUs, 4 GB, no network | Times out at 40 min; grading the reference takes about 160 s on 4 cores |
 | First image build | Installs CadQuery and OpenCode | A few minutes; cached after that |
 

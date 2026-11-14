@@ -5,7 +5,8 @@ parts/<name>.step; it is graded part by part (JOB_PARTS: P1 going train and hand
 P3 6-hour variant, P4 assembly), with no part frozen and no part gating another. See grade_job.
     python -I grade_watch.py /abs/submission_folder --stage 1|2|3|4 [--prev /abs/previous_stage_folder]
                              [--reward FILE] [--details FILE] [--skip CHECK,CHECK]
-Stage mode (kept to regrade old runs and for the stage anchors):
+Stage mode (kept to regrade old runs and for the stage anchors; it uses the one-body barrel those runs were given,
+geometry/data/barrel_stage.stl, and the one-job mode the two-body barrel, geometry/data/barrel.stl):
 --skip leaves named scored checks out (only for runs made before a check existed); the list is in the output.
 The grader reads no environment variables.
 Stage 1: design the movement. Stage 2: add a 24-hour hand to a frozen stage-1 movement (--prev).
@@ -34,13 +35,14 @@ WEIGHTS_2 = {"day_hand": 3, "day_place": 1}
 WEIGHTS = {"spin": 1, "held": 2, "train": 3, "clear": 1, "minute": 2, "hour": 2, "seconds": 2,
            "coaxial": 1, "hands": 1, "size": 1, "printable": 1, "tolerant": 2, "seated": 2, "light": 2}
 GATES = ("files", "assembled")
-TIMEOUT_S = 600
+TIMEOUT_S = 1800
 
 # ---- one-job mode (no --stage): one delivery folder, graded part by part, nothing frozen ----
 # The delivery: movement.json (barrel 1 turn per 8 h), variant_6h.json (the same calibre for the barrel at
 # 1 turn per 6 h), assembly.json (order and paths for movement.json), parts/<name>.step for both movements.
 JOB_MOVEMENT, JOB_VARIANT, JOB_ASSEMBLY = "movement.json", "variant_6h.json", "assembly.json"
 JOB_CHECKS_1 = {k: w for k, w in WEIGHTS.items() if k != "light"}      # P1: stage-1 checks without light
+JOB_CHECKS_1["strength"] = 2        # P1 and P3: gear strength (Decisions 17:56, option 2), one-job mode only
 JOB_CHECKS_2 = dict(WEIGHTS_2)                                          # P2: the 24-hour hand
 # The parts of the job: (id, what it is, weight, gates, check weights). Gates are the brief's conditions
 # (environment/public/job/PROMPT.md): files C1, assembled C2, day_declared C3, same_frame C4; P4's are C1 of
@@ -55,7 +57,7 @@ JOB_PARTS = (
      dict(JOB_CHECKS_1, **JOB_CHECKS_2)),
     ("P4", "assembly", Fraction(25, 100), ("files", "plan"), None),
 )
-JOB_TIME_LIMIT_S = 3600     # s, whole run: generous (the reference takes 7 to 10 min); once it has passed, every check not yet run fails, and a running check is stopped
+JOB_TIME_LIMIT_S = 7200     # s, whole run: generous (the reference takes 6 to 10 min on an idle 4-CPU machine; printable alone took 273 s at load 16); once it has passed, every check not yet run fails, and a running check is stopped
 
 
 class _Timeout(Exception):
@@ -249,7 +251,11 @@ def _check_table(m, runs, speeds, conflicts, driven, thin_cache=None):
         fixed, mobile = m.volumes()
         return fixed <= W.FIXED_VOLUME_MAX and mobile <= W.MOBILE_VOLUME_MAX, {"fixed_volume": fixed, "mobile_volume": mobile}
 
-    return {"seated": seated, "light": light, "printable": printable, "day_hand": day_hand, "day_place": day_place,
+    def strength():
+        """One-job mode only (needs the mobiles' materials): tooth bending under the load case, W.strength_run."""
+        return W.strength_run(m, runs, driven)
+
+    return {"seated": seated, "light": light, "strength": strength, "printable": printable, "day_hand": day_hand, "day_place": day_place,
             "spin": spin, "held": held, "train": train, "clear": clear, "minute": hand("minute"), "hour": hand("hour"),
             "seconds": hand("seconds"), "coaxial": coaxial, "hands": hands, "size": size, "tolerant": tolerant}
 
@@ -275,7 +281,7 @@ def grade_design(folder, stage=1, prev=None, skip=()):
         return out
 
     def load():
-        st["m"] = W.load_movement(folder)
+        st["m"] = W.load_movement(folder, barrel_solid=W.barrel_stage())     # stage mode: the one-body barrel of old runs
         return True, {}
     gates["files"], details["files"] = _run(load)
     if not gates["files"]:
@@ -425,7 +431,7 @@ def grade_assembly(folder, prev):
     out = {"reward": 0.0, "p": 0.0, "gates": gates, "checks": {}, "details": details}
 
     def load():
-        st["m"] = W.load_movement(folder)
+        st["m"] = W.load_movement(folder, barrel_solid=W.barrel_stage())
         return True, {}
     gates["files"], details["files"] = _run(load)
     gates["locked"], details["locked"] = _run(lambda: locked_all(prev, folder))
@@ -509,7 +515,7 @@ def _job_movement(folder, name, barrel_speed, keys, extra_gates, run, cache, thi
     checks = {k: False for k in keys}
 
     def load():
-        st["m"] = W.load_movement(folder, name, cache=cache)
+        st["m"] = W.load_movement(folder, name, cache=cache, materials=True)
         return True, {}
     gates["files"], details["files"] = run(load)
     if not gates["files"]:

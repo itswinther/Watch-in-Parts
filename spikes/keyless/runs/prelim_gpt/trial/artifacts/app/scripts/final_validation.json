@@ -1,0 +1,90 @@
+{
+  "parts": {
+    "click_guide": {
+      "triangles": 80,
+      "volume": 0.260039770610358,
+      "closed": true,
+      "components": 1
+    },
+    "winding_post": {
+      "triangles": 1198,
+      "volume": 0.740665251522978,
+      "closed": true,
+      "components": 1
+    },
+    "setting_post": {
+      "triangles": 1198,
+      "volume": 0.36100013445773094,
+      "closed": true,
+      "components": 1
+    },
+    "left_bearing": {
+      "triangles": 784,
+      "volume": 0.039961181063708905,
+      "closed": true,
+      "components": 1
+    },
+    "right_bearing": {
+      "triangles": 784,
+      "volume": 0.03862645569199493,
+      "closed": true,
+      "components": 1
+    },
+    "stem": {
+      "triangles": 4956,
+      "volume": 1.7095623931700035,
+      "closed": true,
+      "components": 1
+    },
+    "barrel_ratchet": {
+      "triangles": 9210,
+      "volume": 24.433101775706636,
+      "closed": true,
+      "components": 1
+    },
+    "winding_pinion": {
+      "triangles": 8752,
+      "volume": 0.6020343271527436,
+      "closed": true,
+      "components": 1
+    },
+    "winding_transfer": {
+      "triangles": 19106,
+      "volume": 1.2017853205467446,
+      "closed": true,
+      "components": 1
+    },
+    "setting_transfer": {
+      "triangles": 28496,
+      "volume": 1.6320123127996482,
+      "closed": true,
+      "components": 1
+    },
+    "sliding_clutch": {
+      "triangles": 6288,
+      "volume": 0.32237290979721384,
+      "closed": true,
+      "components": 1
+    },
+    "click": {
+      "triangles": 28,
+      "volume": 0.04424159678274905,
+      "closed": true,
+      "components": 1
+    }
+  },
+  "manifest": {
+    "parts": 12,
+    "mobiles": 7,
+    "triangles_total": 80880,
+    "stem_reaches_beyond_case": 0.8222108761046449,
+    "minimum_retention_overlap": 0.006025493386629968
+  },
+  "friction": {
+    "static_coefficient": 0.51,
+    "two_interface_release_limit_degrees": 35.95683681764592,
+    "clutch_ramp_worst_degrees": 28.87906354701666,
+    "clutch_drive_flank_min_degrees": 89.75248377224477,
+    "click_ramp_degrees": 20.178117370071963
+  }
+}

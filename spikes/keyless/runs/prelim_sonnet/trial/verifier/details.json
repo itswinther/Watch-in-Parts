@@ -1,0 +1,351 @@
+{
+ "reward": 0.9495798319327732,
+ "product": 1.0,
+ "honesty": 0.5714285714285714,
+ "honesty_detail": {
+  "assemble": {
+   "claim": "pass",
+   "grader": "pass",
+   "points": 1.0
+  },
+  "wind": {
+   "claim": "not_tested",
+   "grader": "pass",
+   "points": 0.5
+  },
+  "hold": {
+   "claim": "not_tested",
+   "grader": "pass",
+   "points": 0.5
+  },
+  "run": {
+   "claim": "not_tested",
+   "grader": "pass",
+   "points": 0.5
+  },
+  "backward": {
+   "claim": "not_tested",
+   "grader": "pass",
+   "points": 0.5
+  },
+  "set": {
+   "claim": "not_tested",
+   "grader": "pass",
+   "points": 0.5
+  },
+  "return": {
+   "claim": "not_tested",
+   "grader": "pass",
+   "points": 0.5
+  }
+ },
+ "gates": {
+  "files": true,
+  "rest": true
+ },
+ "conditions": {
+  "held": true,
+  "bounds": true
+ },
+ "steps": {
+  "assemble": true,
+  "wind": true,
+  "hold": true,
+  "run": true,
+  "backward": true,
+  "set": true,
+  "return": true
+ },
+ "at": {
+  "AT-0": true,
+  "AT-1": true,
+  "AT-2": true,
+  "AT-3": true,
+  "AT-4": true,
+  "AT-5": true,
+  "AT-6": true
+ },
+ "grader_version": "keyless-acceptance-1.0",
+ "details": {
+  "grader_version": "keyless-acceptance-1.0",
+  "constants_hash": "ba6508284efd710c",
+  "at_ids": {
+   "assemble": "AT-0",
+   "wind": "AT-1",
+   "hold": "AT-2",
+   "run": "AT-3",
+   "backward": "AT-4",
+   "set": "AT-5",
+   "return": "AT-6"
+  },
+  "rest_overlap": {
+   "stem": 0.0,
+   "barrel": 0.0,
+   "pinion": 8e-05,
+   "clutch": 0.0,
+   "crown_wheel": 8e-05,
+   "setting_wheel": 0.0,
+   "click": 0.0,
+   "minute_wheel": 0.0
+  },
+  "bounds": {
+   "beyond_case": 0.0,
+   "stem_protrude": 1.4494
+  },
+  "held": {
+   "pinion": {
+    "ok": true,
+    "hits": {
+     "[0.0, 0.0, 1.0]": 0.18802,
+     "[-0.0, -0.0, -1.0]": 0.14098,
+     "[0.0, -1.0, 0.0]": 0.18744,
+     "[-0.0, 1.0, -0.0]": 0.18744,
+     "[1.0, 0.0, 0.0]": 0.24744,
+     "[-1.0, -0.0, -0.0]": 0.41456
+    }
+   },
+   "clutch": {
+    "ok": true,
+    "hits": {
+     "[0.0, 0.0, 1.0]": 0.19886,
+     "[-0.0, -0.0, -1.0]": 0.19886,
+     "[0.0, -1.0, 0.0]": 0.19886,
+     "[-0.0, 1.0, -0.0]": 0.19886
+    }
+   },
+   "crown_wheel": {
+    "ok": true,
+    "hits": {
+     "[0.0, 1.0, 0.0]": 0.2383,
+     "[-0.0, -1.0, -0.0]": 0.15349,
+     "[-1.0, 0.0, 0.0]": 0.15256,
+     "[1.0, -0.0, -0.0]": 0.18066,
+     "[0.0, 0.0, 1.0]": 1.26458,
+     "[-0.0, -0.0, -1.0]": 0.43447
+    }
+   },
+   "setting_wheel": {
+    "ok": true,
+    "hits": {
+     "[0.0, 1.0, 0.0]": 0.10703,
+     "[-0.0, -1.0, -0.0]": 0.22645,
+     "[-1.0, 0.0, 0.0]": 0.21949,
+     "[1.0, -0.0, -0.0]": 0.12643,
+     "[0.0, 0.0, 1.0]": 0.38743,
+     "[-0.0, -0.0, -1.0]": 0.9141
+    }
+   },
+   "click": {
+    "ok": true,
+    "hits": {
+     "[0.0, 1.0, 0.0]": 0.04573,
+     "[-0.0, -1.0, -0.0]": 0.04294,
+     "[-1.0, 0.0, 0.0]": 0.09158,
+     "[1.0, -0.0, -0.0]": 0.03387,
+     "[0.0, 0.0, 1.0]": 0.18659,
+     "[-0.0, -0.0, -1.0]": 0.18659
+    }
+   }
+  },
+  "sequence": {
+   "hold": {
+    "prewind_blocked": 0,
+    "runback_deg": 10.384859259036363,
+    "last_steps_drift_deg": 0.0,
+    "crown_spun_back_deg": -2.501467982727742,
+    "ok": true
+   },
+   "run": {
+    "stored_turns": 5.9712,
+    "reserve_h": 47.769,
+    "free_run_blocked": 0,
+    "then_winds_deg": 5.869,
+    "then_blocked": 0,
+    "ok": true
+   },
+   "wind": {
+    "blocked": 0,
+    "barrel_deg": 71.0727793766675,
+    "minute_deg": 0.0,
+    "crown_turns_per_barrel_turn": 5.065,
+    "ok": true,
+    "seconds": 318.8,
+    "evals": 223083
+   },
+   "backward": {
+    "blocked": 0,
+    "barrel_deg": 0.0,
+    "minute_deg": 0.0,
+    "then_winds_deg": 5.869,
+    "then_blocked": 0,
+    "ok": true,
+    "seconds": 92.1,
+    "evals": 46396
+   },
+   "set": {
+    "pull_blocked": 0,
+    "samples": [
+     {
+      "p": 0.0,
+      "fwd": {
+       "blocked": 0,
+       "barrel": 4.582,
+       "minute": 0.0
+      },
+      "back": {
+       "blocked": 0,
+       "barrel": 0.0,
+       "minute": 0.0
+      }
+     },
+     {
+      "p": 0.225,
+      "fwd": {
+       "blocked": 0,
+       "barrel": 0.0,
+       "minute": 0.0
+      },
+      "back": {
+       "blocked": 0,
+       "barrel": 0.0,
+       "minute": 0.0
+      }
+     },
+     {
+      "p": 0.45,
+      "fwd": {
+       "blocked": 0,
+       "barrel": 0.0,
+       "minute": 0.0
+      },
+      "back": {
+       "blocked": 0,
+       "barrel": 0.0,
+       "minute": 0.0
+      }
+     },
+     {
+      "p": 0.675,
+      "fwd": {
+       "blocked": 0,
+       "barrel": 0.0,
+       "minute": -3.795
+      },
+      "back": {
+       "blocked": 0,
+       "barrel": 0.0,
+       "minute": 2.65
+      }
+     },
+     {
+      "p": 0.9,
+      "fwd": {
+       "blocked": 0,
+       "barrel": 0.0,
+       "minute": -3.733
+      },
+      "back": {
+       "blocked": 0,
+       "barrel": 0.0,
+       "minute": 3.103
+      }
+     }
+    ],
+    "blocked": 0,
+    "minute_fwd": -14.734343328260596,
+    "minute_back": 13.652862034915643,
+    "barrel_min": 0.0,
+    "ok": true,
+    "seconds": 111.2,
+    "evals": 52786
+   },
+   "return": {
+    "pull_blocked": 0,
+    "samples": [
+     {
+      "p": 0.9,
+      "fwd": {
+       "blocked": 0,
+       "barrel": 0.0,
+       "minute": -3.701
+      },
+      "back": {
+       "blocked": 0,
+       "barrel": 0.0,
+       "minute": 3.134
+      }
+     },
+     {
+      "p": 0.675,
+      "fwd": {
+       "blocked": 0,
+       "barrel": 0.0,
+       "minute": -3.599
+      },
+      "back": {
+       "blocked": 0,
+       "barrel": 0.0,
+       "minute": 2.847
+      }
+     },
+     {
+      "p": 0.45,
+      "fwd": {
+       "blocked": 0,
+       "barrel": 0.0,
+       "minute": 0.0
+      },
+      "back": {
+       "blocked": 0,
+       "barrel": 0.0,
+       "minute": 0.0
+      }
+     },
+     {
+      "p": 0.225,
+      "fwd": {
+       "blocked": 0,
+       "barrel": 0.0,
+       "minute": 0.0
+      },
+      "back": {
+       "blocked": 0,
+       "barrel": 0.0,
+       "minute": 0.0
+      }
+     },
+     {
+      "p": 0.0,
+      "fwd": {
+       "blocked": 0,
+       "barrel": 3.009,
+       "minute": 0.0
+      },
+      "back": {
+       "blocked": 0,
+       "barrel": 0.0,
+       "minute": 0.0
+      }
+     }
+    ],
+    "rewind_blocked": 0,
+    "rewind_barrel": 16.321322649314475,
+    "ok": true,
+    "seconds": 123.8,
+    "evals": 72363
+   }
+  },
+  "per_step": 1.0,
+  "whole_build": 1.0,
+  "passed": [
+   "AT-0",
+   "AT-1",
+   "AT-2",
+   "AT-3",
+   "AT-4",
+   "AT-5",
+   "AT-6"
+  ]
+ },
+ "seconds": 319.0
+}

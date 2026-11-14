@@ -8,8 +8,7 @@ at the actual crown diameter.
 |---|---|---|---|
 | VM-AN-501 | C | 2026-11-14 | Released |
 
-> **About this document.** Valtorre Microtechnique SA is a fictional supplier, used for this exercise
-> only. The measured torques, the pinch strengths, the friction values and the design limit for knobs
+> **About this document.** Valtorre Microtechnique SA, demonstration series. The measured torques, the pinch strengths, the friction values and the design limit for knobs
 > come from the cited studies and standards. The recommended winding torque (section 5) is
 > **calculated**, as its footnote states.
 
@@ -64,7 +63,7 @@ comfortable operation, not a crown rating.
 
 | Quantity | Value | Source |
 |---|---|---|
-| Tip pinch, women 20–24, left hand (lowest mean in the norms reproduced) | 10.5 lb = 46.7 N | [^tes][^lbf] |
+| Tip pinch, women 20–24, left hand (lowest mean for ages 20 to 34) | 10.5 lb = 46.7 N | [^tes][^lbf] |
 | Tip pinch, men 20–24, right hand | 18.0 lb = 80.1 N | [^tes][^lbf] |
 | Finger pad on aluminium, μ (mean, at 1 to 20 N) | 0.6 | [^seo] |
 | Change in μ from 1 to 20 N normal force | −46 % | [^seo] |
@@ -92,7 +91,7 @@ Table 1 (69 N·mm).[^imr]
 
 ## 6. Notes
 
-1. **This note covers adults of working age only.** The pinch norms reproduced cover ages 20 to 34.
+1. **This note covers adults of working age only.** The pinch value used is for ages 20 to 34; older adults pinch less (the same norms give 7.9 lb for women 75 and over).
 2. **Condition of the fingers.** Wet or gloved fingers change μ. Table 1 shows that knurling raises the
    maximum torque, but T_rec gives it no credit.
 

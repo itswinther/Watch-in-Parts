@@ -20,7 +20,7 @@ sys.path.insert(0, HERE)
 import constants as C  # noqa: E402
 import engine as E  # noqa: E402
 
-AGENT_MINUTES, STOP_MINUTES = 55, 60          # >= 60 min and about 3x the slowest spike run seen (19 min)
+AGENT_MINUTES, STOP_MINUTES = 85, 90          # >= 60 min and about 3x the slowest run seen (GPT prelim, 29 min)
 SECRET_DOCS = ("CONTEXT.md", "SOLUTION.md", "STEP_BY_STEP.md", "REVIEW_RUBRIC.md", "JUDGE_PROMPT.md")
 MARK = "NOT-FOR-AGENT"
 
@@ -28,7 +28,7 @@ DOCKERFILE = """FROM python:3.12-slim
 RUN apt-get update && apt-get install -y --no-install-recommends curl bash ripgrep ca-certificates nodejs npm \\
     libgl1 libglib2.0-0 libxrender1 libxext6 libsm6 \\
  && {agent_install} && rm -rf /var/lib/apt/lists/*
-RUN pip install --no-cache-dir cadquery==2.8.0 manifold3d==3.5.5 scipy==1.18.1 numpy trimesh \\
+RUN pip install --no-cache-dir cadquery==2.8.0 manifold3d==3.5.5 scipy==1.18.1 numpy==2.5.4 trimesh==5.2.1 \\
  && python -c "import cadquery, manifold3d, scipy; print('ok')"
 # OpenCode caps one response at 32,000 output tokens, and Anthropic's "max" thinking variant can spend
 # 31,999 of them on thinking, leaving an empty turn. Raise the cap so no turn can end empty.
@@ -38,8 +38,9 @@ COPY app/ /app/
 """
 
 AGENTS = {
-    "codex": ("npm install -g @openai/codex && codex --version", "chatgpt.com"),
-    "opencode": ("npm install -g opencode-ai@1.19.5 && opencode --version", "api.anthropic.com"),
+    "codex": ("npm install -g @openai/codex@0.169.0 && codex --version", '"chatgpt.com", "api.openai.com"'),
+    # OpenCode: judges pick any provider with -m provider/model, so allow every major model endpoint (and only those).
+    "opencode": ("npm install -g opencode-ai@1.19.5 && opencode --version", '"api.anthropic.com", "api.openai.com", "generativelanguage.googleapis.com", "openrouter.ai"'),
 }
 
 TASK_TOML = """schema_version = "1.3"
@@ -47,7 +48,7 @@ artifacts = ["/app"]   # the submission, the agent's scripts and any images or r
 
 [task]
 name = "junction/keyless-works"
-authors = ["Board in a Box team, Junction 2026 (workstream A)"]
+authors = [{ name = "Board in a Box team, Junction 2026 (workstream A)" }]
 description = "Design the keyless works of a mechanical watch as 3D parts; graded by a contact simulation that runs an owner's acceptance sequence: wind, hold, run, backward, set, return."
 keywords = ["mechanical-design", "cad", "watchmaking", "mechanism", "contact-simulation", "cadquery"]
 
@@ -61,19 +62,19 @@ junior_time_estimate_hours = 40
 timeout_sec = {agent_timeout}
 
 [verifier]
-timeout_sec = 2400.0
+timeout_sec = 3600.0
 environment_mode = "separate"
 network_mode = "no-network"
 
 [verifier.environment]
 build_timeout_sec = 1800.0
 cpus = 4
-memory_mb = 4096
+memory_mb = 3072
 storage_mb = 10240
 
 [environment]
 network_mode = "allowlist"
-allowed_hosts = ["{host}"]
+allowed_hosts = [{host}]
 build_timeout_sec = 1800.0
 cpus = 4
 memory_mb = 3072
@@ -169,7 +170,7 @@ def main(argv):
     out = os.path.abspath(argv[0])
     opts = dict(zip(argv[1:], argv[2:]))
     agent = opts.get("--agent", "codex")
-    host = opts.get("--host", AGENTS[agent][1])
+    host = '"%s"' % opts["--host"] if "--host" in opts else AGENTS[agent][1]
     if os.path.exists(out):
         shutil.rmtree(out)
     app = os.path.join(out, "environment", "app")

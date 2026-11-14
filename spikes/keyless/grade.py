@@ -581,7 +581,10 @@ def bounds_check(spec, parts):
         v = np.asarray(m.to_mesh().vert_properties, float)[:, :3]
         r = np.hypot(v[:, 0] - cx, v[:, 1] - cy)
         if n in stem_parts:
-            protrude = max(protrude, float(r.max()) - C.CASE_RADIUS)
+            # only material at the crown end (+x of the case centre) counts as protruding
+            out = r[v[:, 0] > cx]
+            if out.size:
+                protrude = max(protrude, float(out.max()) - C.CASE_RADIUS)
             # inside the case, the stem must stay within the z range
             if v[:, 2].min() < zlo - 1e-6 or v[:, 2].max() > zhi + 1e-6:
                 ok = False

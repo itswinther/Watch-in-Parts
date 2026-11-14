@@ -33,7 +33,7 @@ artifacts = ["/app/review.json"]
 
 [task]
 name = "junction/keyless-review"
-authors = ["Board in a Box team, Junction 2026 (workstream A)"]
+authors = [{ name = "Board in a Box team, Junction 2026 (workstream A)" }]
 description = "Process review of one keyless-works trial against a fixed rubric, with verbatim evidence."
 keywords = ["review", "rubric"]
 

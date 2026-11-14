@@ -63,7 +63,7 @@ Scaled value = 1:1 cited value × s, computed in Docker (`python:3.12-slim`, 2 G
 
 | Sheet | Quantity | 1:1 value (source) | Scaled |
 |---|---|---|---|
-| DS-101 | Strip h, t, L, D, variants A to K | ressortdebarillet.ch product pages (cited per row) | ×1.617 (Table 1) |
+| DS-101 | Strip h, t, L, D, variants A to N | ressortdebarillet.ch product pages (cited per row) | ×1.617 (Table 1) |
 | DS-101 | Thickness correction | 0.003 mm (watchesbysjx 2025: 0.002 to 0.004) | 0.0049 mm |
 | DS-101 | Core radius r | 12·t or 16·t (watchesbysjx 2025) | uses the scaled t |
 | DS-101 | N | geometric, scale-free | unchanged (checked: the same N at both scales) |
@@ -158,8 +158,8 @@ All scaled values computed in Docker (`python:3.12-slim`, 1 GB): s = 1.6172, s²
 | DS-101 T2a | M24 8.83 N·mm (0.745 × M½) | same | same | same | × s³ | 37.3 N·mm |
 | DS-101 T2a | Slipping bridle 12.21 to 16.57 N·mm (1.03 to 1.40 × M½) | same | same | same | × s³ | 51.6 to 70.1 N·mm |
 | DS-101 T2a | Unwinding ≥ 80 % of winding (84 % at ½ turn) | Nivarox-FAR US 11,320,786 B2, summary, claim 7, FIG. 2 | https://patents.google.com/patent/US11320786B2/en | PD (US patent) | ratio, none | same |
-| DS-101 §1, T3 | Hub radius = ⅓ barrel inner radius; hub Ø ≈ 32 t | Grossmann 1905 art. 108 (p. 63), 110 (p. 64), 111 (pp. 64 to 66); Saunier art. 517 | archive.org lessonsinhorolog00gros; https://www.gutenberg.org/ebooks/76850 | PD (verified by grep in `public_domain/`) | ratio, none | r = D/6: 1.89 to 2.83 mm; hub Ø/t 26 to 38 |
-| DS-101 T3 | N and run time at r = D/6 | derived (footnote d6) | — | — | turns unchanged | 5.2 to 8.5 turns, 41 to 68 h |
+| DS-101 §1, T3 | Hub radius = ⅓ barrel inner radius; hub Ø ≈ 32 t | Grossmann 1905 art. 108 (p. 63), 110 (p. 64), 111 (pp. 64 to 66); Saunier art. 517 | archive.org lessonsinhorolog00gros; https://www.gutenberg.org/ebooks/76850 | PD (verified by grep in `public_domain/`) | ratio, none | r = D/6: 1.89 to 2.83 mm; hub Ø/t 25 to 38 |
+| DS-101 T3 | N and run time at r = D/6 | derived (footnote d6) | — | — | turns unchanged | 4.9 to 8.5 turns, 40 to 68 h |
 | DS-301 T2b | Jewel OD tolerance 0 / +6 µm (NIHS 41-02) | Laurenczy, EPFL thesis 6665 (2015), p. 34, Tab. 3.2 p. 37 | https://infoscience.epfl.ch/record/210616/files/EPFL_TH6665.pdf?version=1 | © (tous droits réservés), facts only | × s | 0 / +9.7 µm |
 | DS-301 T2b | Interference about 10 µm | same, Figs. 6.3 to 6.5, pp. 84 to 87 | same | same | × s | 16.2 µm |
 | DS-301 T2b | Axial hold ≥ 15 N | same, Tab. 2.1, p. 12 (acceptance criterion for watch press fits, given for a screw-foot example; applied to jewels by analogy) | same | same | × s² | ≥ 39.2 N |
@@ -187,8 +187,8 @@ All scaled values computed in Docker (`python:3.12-slim`, 1 GB): s = 1.6172, s²
   can now bind for the smallest catalogue crown at i = 3**; it does not bind at i ≥ 4 (17.5 N·mm) or
   for crowns above Ø 5.56 mm (70.1/(3 × 4.20)). At M½ (50.2) it does not bind for any catalogue crown.
 - **Section 3, row 1 (core ratio settled).** With r = D/6, the stated core of the supplied barrels, K
-  (ETA 2801 size) gives 41 h against ETA's 42 h, and every variant gives ≥ 41 h, so all pass the 38 h
-  minimum. The 12·t / 16·t columns stay in DS-101 for comparison.
+  (ETA 2801 size) gives 41 h against ETA's 42 h, and every variant of Rev E gave ≥ 41 h. Rev F's thin spring L gives about 40 h in its listed
+  barrel, still above the 38 h minimum. The 12·t / 16·t columns stay in DS-101 for comparison.
 - **Keyless brief check:** `spikes/keyless/docs/PROMPT.md` on main (6d3dd6b) does **not** state a core
   radius 0.6 or an inner radius 1.8 (grep for core / one third / 1.8 finds none); `supplied.py` has an
   arbor cylinder of radius 0.6, which is not described as the spring core. So DS-101 states only the
@@ -219,6 +219,31 @@ textbook examples, not a named calibre. Never in the DS sheets, PROMPT.md or any
 
 Art. 169: 3 ratchet turns need 6.63 stem turns, about 2.2 stem turns per barrel turn (a pocket-watch
 value; modern NH35 about 6.9).
+
+## 4d. DS-101 Rev F: thin springs L, M, N for the supplied barrel's height (B 18:45, part c)
+
+The supplied drum is 1.0 tall at s (0.618 mm at 1:1); its spring chamber has inner radius 8.5 at s
+(Ø 10.51 mm at 1:1) and core radius 2.833 at s (1.752 mm at 1:1). Rev E's springs are 1.13 to 2.34
+tall at s, so none fitted.
+
+**Search.** The whole ressortdebarillet.ch catalogue (2,066 parsed sizes, Shopify `products.json`, read
+14 Nov) has only four sizes at or under 0.62 mm high, all for ultra-thin hand-wound calibres; the next
+are 0.63 (AP 2120/2121, automatic, D 9) and 0.65 to 0.70. Cousins UK still returns 403 to scripts;
+vintagewatchstraps.com gives no heights. No real spring at or under 0.62 mm high has a listed barrel Ø
+near 10.5 mm: the thin ones are listed for Ø 7.5 to 8.5.
+
+| Var. | Real size h × t × L × D (mm) | Calibre (seller's label) | Height at s | Height clearance at s | N at r = D/6 (own D) | N in the supplied chamber (R 8.5, r 2.833 at s) |
+|---|---|---|---|---|---|---|
+| L | 0.48 × 0.100 × 270 × 7.5 | VC 1003 / AP 2003 | 0.78 | 0.22 | 4.9 (40 h) | 7.5 (60 h) |
+| M | 0.60 × 0.100 × 310 × 8.0 | Patek 177 | 0.97 | 0.03 | 5.2 (42 h) | 7.8 (63 h) |
+| N | 0.60 × 0.105 × 200 × 8.5 | Piaget 9P2 | 0.97 | 0.03 | 6.1 (49 h) | 6.5 (52 h) |
+
+All derived in Docker (python:3.12-slim) with DS-101's footnotes d1 to d3 and d6; the same script
+reproduces Rev E's rows A and K exactly. Every row meets ≥ 4.75 turns (38 h at 8 h per turn) in the
+supplied chamber. **Open for A and B:** DS-101 Note 1 says to fit a spring only in a barrel of its
+listed D, and the supplied chamber (Ø 17.0 at s) is larger than L, M and N's listed Ø 12.1 to 13.7 at
+s. Either the supplied chamber matches a listed D (L: inner radius 6.06 at s, core 2.02), or Note 1 is
+relaxed with a source. Only L leaves a clear height margin in a 1.0 drum.
 
 ## 5. Sources and licensing
 
@@ -256,3 +281,30 @@ This is our reading, not legal advice.
 Grossmann (1905), art. 168–169, gives these counts: sliding pinion 16, setting wheels 27 and 18,
 minute wheel 30, cannon pinion 12, ratchet 44, crown wheel 42, winding pinion 18. The comparison with
 the reference is in `../docs/SOLUTION.md`.
+
+## Resolved 14 Nov 2026, 20:15 (A)
+- **Barrel chamber:** B shrank the spring chamber to spring L's listed size (inner diameter 12.12, core 2.02,
+  bore 2.0367 at s; commit 51568b7). The "Open for A and B" item above is closed: DS-101 Rev F ships as is,
+  and Note 1 (fit a spring only in a barrel of its listed D) holds for spring L in the supplied chamber.
+- **Meta wording moved here from the bundle** (B's fresh review, 20:08): the sheets no longer say the suppliers
+  are fictional, that cited documents are copyrighted or not reproduced, that no maker publishes torque for these
+  springs, or that the core radius removes a 47 h versus 28 h ambiguity. Those facts stay true and are recorded
+  here only: the suppliers are fictional; Sellita's SW200-1 documentation and ISO 6425 are copyrighted and cited
+  as facts only, not reproduced; no maker publishes torque or turns for springs L, M and N; and fixing the core at
+  one third of the inner radius settles the 47 h versus 28 h reading of the old sheet.
+- **Corrections:** DS-201's header now points to section 8 for allowables; DS-401 says 1450 MPa is the lowest
+  proof strength *of the steel strip* in AD-DS-201 (brass is 220 MPa); DS-101 Note 5 lists the footnotes that
+  exist ([^d1] to [^d3] and [^d5] to [^d7]; there is no [^d4]).
+
+## Datasheet audit, 14 Nov 2026, 21:00 (A; independent reviewer, sources fetched)
+About 400 derived cells recomputed: all right except three DS-101 Table 4 cells (B n=8, C n=6, N n=6), now fixed.
+Also fixed: INDEX lists Rev F; Table 2a values are Sellita's specification limits (M½ max, M24 min, bridle
+min-max; p. 1 = PDF p. 3), not measurements; the leftover "Arbor core radius" section after Sources (wrong
+Saunier title) is deleted; DS-501's pinch value is labelled ages 20 to 34 (the norms span 20 to 75+, lowest 7.9 lb);
+DS-401's 0.80 mm is the travel between adjacent positions (SW200-1 has three positions); research-note
+wording in DS-301 reworded. Open with B: the 70.1 N·mm load case against spring L, and the corundum
+safety factor (UWA item 9 suggests about S = 6 for brittle materials on ultimate strength, so about 450 MPa, not 900).
+Verified sources: Sellita SW200-1 rev 04, Alleima 20C, Wieland CW614N, Nivaflex 45/5 (typical values),
+Engineering ToolBox friction, Bird jewel data, Grossmann, Saunier Hand-Book art. 517, MIL-STD-1472H fig. 10,
+Imrhan 2013, Seo and Armstrong, UWA tiers, makeitfrom sapphire, springs L and N. Not verified: spring M
+(Patek 177), MIL-W-46374F (scanned), Sellita rev 07 stem values, ETA 2801/2824, EPFL thesis.

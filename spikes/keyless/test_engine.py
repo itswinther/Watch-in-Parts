@@ -239,6 +239,22 @@ def force_direction():
     return s == (-1.0,)
 
 
+def stem_protrudes_at_crown_end():
+    """bounds_check: stem material outside the case counts only at the +x end."""
+    import constants as C
+    import grade as GR
+    cx, cy = C.CASE_CENTRE
+    zm = 0.5 * (C.CASE_Z[0] + C.CASE_Z[1])
+    R = C.CASE_RADIUS
+    spec = {"mobiles": {"stem": {"parts": ["stem"]}}}
+    crown = S.cyl_x(cy, zm, cx + R - 2.0, cx + R + 1.0, 0.3, 32)
+    wrong = S.cyl_x(cy, zm, cx - R - 1.0, cx - R + 2.0, 0.3, 32)
+    ok_crown, d1 = GR.bounds_check(spec, {"stem": crown})
+    ok_wrong, d2 = GR.bounds_check(spec, {"stem": wrong})
+    print("stem out at +x: %s %s; out at -x only: %s %s" % (ok_crown, d1, ok_wrong, d2))
+    return ok_crown and not ok_wrong
+
+
 if __name__ == "__main__":
 
     t = time.time()
@@ -246,6 +262,7 @@ if __name__ == "__main__":
            "spring_through_link": spring_through_link(), "pull_moves_no_rider": pull_moves_no_rider(),
            "rider_gives_way": rider_gives_way(), "rider_drives_steep_face": rider_drives_steep_face(),
            "touching_can_be_pushed": touching_can_be_pushed(), "fit_clearance": fit_clearance(),
-           "phase_gears": phase_gears(), "carried_wheel": carried_wheel(), "force_direction": force_direction()}
+           "phase_gears": phase_gears(), "carried_wheel": carried_wheel(), "force_direction": force_direction(),
+           "stem_protrudes_at_crown_end": stem_protrudes_at_crown_end()}
     print(res, "%.1f s" % (time.time() - t))
     sys.exit(0 if all(res.values()) else 1)

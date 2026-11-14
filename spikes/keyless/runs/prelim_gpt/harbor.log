@@ -1,0 +1,28 @@
+Harbor could not determine or estimate the inference endpoint for agent 'codex'; no inference hosts were automatically added for this agent. Inference requests may be blocked. Use --allow-agent-host <hostname> to allow the required destination.
+  1/1 Mean: 0.024 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 0:32:49 0:00:00
+adhoc • codex • gpt-6.1-sol
+┏━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━┓
+┃ Trials ┃ Exceptions ┃  Mean ┃
+┡━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━┩
+│      1 │          0 │ 0.024 │
+└────────┴────────────┴───────┘
+
+┏━━━━━━━━━━┳━━━━━━━┓
+┃ Reward   ┃ Count ┃
+┡━━━━━━━━━━╇━━━━━━━┩
+│ 0.023739 │     1 │
+└──────────┴───────┘
+
+Job Info
+Total runtime: 32m 49s
+Results written to 
+/private/tmp/claude-501/-Users-mikbs-Desktop-dev-Junction/824d3067-e8b7-4116-993
+4-5c800c5f6483/scratchpad/kl/runs/prelim_gpt/jobs/2026-11-14__17-59-40/result.js
+on
+Inspect results by running `harbor view 
+/private/tmp/claude-501/-Users-mikbs-Desktop-dev-Junction/824d3067-e8b7-4116-993
+4-5c800c5f6483/scratchpad/kl/runs/prelim_gpt/jobs`
+Share results by running `harbor upload 
+/private/tmp/claude-501/-Users-mikbs-Desktop-dev-Junction/824d3067-e8b7-4116-993
+4-5c800c5f6483/scratchpad/kl/runs/prelim_gpt/jobs/2026-11-14__17-59-40`
+

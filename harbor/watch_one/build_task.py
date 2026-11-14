@@ -78,7 +78,7 @@ GRADERS = {
         "solution": ["solution/reference_watch.py", "geometry"],
         "reference": "PYTHONPATH=/solution python3 reference_watch.py /app/delivery --job",
         "reference_out": None,                              # written in place at /app/delivery
-        "verifier_timeout_sec": 4500.0,                     # B 17:40: >= 4500 s (grader self-limit 3600 s); measured below
+        "verifier_timeout_sec": 7800.0,                     # B 18:39: >= 7800 s (grader whole-run limit 7200 s, 1800 s per check)
         "verifier_memory_mb": 4096,
     },
 }
@@ -95,7 +95,9 @@ AGENT_TIMEOUT_SEC = 10800.0      # 3 h: about 3x the whole four-stage job as GPT
 PIP = "cadquery==2.8.0 manifold3d==3.5.5 scipy==1.18.1 numpy==2.5.4 trimesh==5.2.1"
 OPENCODE = "opencode-ai@1.19.5"
 CODEX = "@openai/codex@0.169.0"
-HOSTS = {"opencode": "api.anthropic.com", "codex": "chatgpt.com", "oracle": "api.anthropic.com"}
+# Judges run -a opencode -m provider/model with any provider: allow every major model endpoint (and only those).
+MODEL_HOSTS = '"api.anthropic.com", "api.openai.com", "generativelanguage.googleapis.com", "openrouter.ai"'
+HOSTS = {"opencode": MODEL_HOSTS, "codex": '"chatgpt.com", "api.openai.com"', "oracle": MODEL_HOSTS}
 
 AGENT_DOCKERFILE = CANARY_SH + """FROM python:3.12-slim
 RUN apt-get update && apt-get install -y --no-install-recommends curl bash ripgrep ca-certificates nodejs npm \\
@@ -179,7 +181,7 @@ storage_mb = 10240
 
 [environment]
 network_mode = "allowlist"
-allowed_hosts = ["{host}"]
+allowed_hosts = [{host}]
 build_timeout_sec = 1800.0
 cpus = 4
 memory_mb = 4096

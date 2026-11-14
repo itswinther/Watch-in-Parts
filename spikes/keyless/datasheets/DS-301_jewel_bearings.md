@@ -6,13 +6,13 @@
 |---|---|---|---|
 | RL-DS-301 | D | 2026-11-14 | Released |
 
-> **About this document.** Rubis Lumen SA is a fictional supplier, used for this exercise only.
+> **About this document.** Rubis Lumen SA, demonstration series.
 >
 > - **What is real:** the 1:1 sizes are real catalogue items, cited per table. The tolerances and
 >   friction come from a real jewel-bearing maker.
 > - **What this series changes:** it enlarges every length by s = 1.617.[^s] Both the 1:1 and the
 >   scaled values are given. **Use the scaled columns.**
-> - **What is calculated:** no source we found publishes load ratings, so section 5 calculates them.
+> - **What is calculated:** load ratings are not published for these jewels; section 5 calculates them.
 
 ## 1. Scope
 
@@ -70,7 +70,7 @@ practice reported in an EPFL thesis;[^epfl] lengths scale with s, forces with sÂ
 The jewel is held by friction in a straight plate hole slightly smaller than its outside
 diameter.[^epfl][^wrt2]
 
-**Load rating:** not published by any maker or standard we found. Section 5.3 is calculated.
+**Load rating:** not published for these jewels. Section 5.3 is calculated.
 
 ## 4. RL-B brass friction bushings (Table 3)
 

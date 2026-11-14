@@ -4,8 +4,10 @@ Run from the repository root. Without --slow only the quick cases run (seconds t
 folder through the real grader, and the gates and helpers on their own. --slow adds the full gradings (each
 runs the grader once, `python3 -I grade_watch.py` from tests/ in a fresh process, one at a time; a full
 delivery takes about 12 minutes on 4 CPUs, all six about an hour).
---base reuses the stage folders solution/reference_watch.py wrote; --job uses a job folder as it is (for when
-the reference writes one directly); with neither, the reference is built into a temporary folder (about 40 s).
+--job uses a job folder as it is (`python3 solution/reference_watch.py JOB --job`); with neither, that job
+folder is built into a temporary folder (about 1 min). --base builds the job folder from stage folders with
+tests/make_job_folder.py; since the two-body barrel (its arbor rises to z 5.6) those stage folders' barrel cock
+collides with the arbor, so --base no longer gives a reference that passes (use --job).
 Cases (the letters of the builder brief):
   a  empty folder: reward 0, every part 0, the reward file says 0
   b  the reference job folder: 1.0
@@ -238,14 +240,14 @@ def main(argv):
     try:
         if "--job" in opts:
             job = os.path.abspath(opts["--job"])
-        else:
-            base = opts.get("--base")
-            if not base:
-                base = os.path.join(tmp, "ref")
-                subprocess.run([sys.executable, os.path.join(ROOT, "solution", "reference_watch.py"), base], check=True,
-                               stdout=subprocess.DEVNULL)
+        elif "--base" in opts:
             job = os.path.join(tmp, "job")
-            print("job folder:", json.dumps(make_job_folder.make(os.path.abspath(base), job)))
+            print("job folder:", json.dumps(make_job_folder.make(os.path.abspath(opts["--base"]), job)))
+        else:
+            job = os.path.join(tmp, "job")
+            subprocess.run([sys.executable, os.path.join(ROOT, "solution", "reference_watch.py"), job, "--job"], check=True,
+                           stdout=subprocess.DEVNULL)
+            print("job folder:", job)
         failed = 0
         for name, fn in cases:
             sub = os.path.join(tmp, "case_" + name)

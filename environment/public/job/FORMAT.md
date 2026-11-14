@@ -52,7 +52,7 @@ Each is at most 1,048,576 bytes and names at most 60 parts.
     ...
   },
   "meshes": [
-    {"driver": "barrel", "driver_teeth": 96, "driven": "mobile_name", "driven_teeth": n},
+    {"driver": "barrel", "driver_teeth": n, "driven": "mobile_name", "driven_teeth": n},
     ...
   ],
   "hands": {
@@ -68,8 +68,12 @@ Each is at most 1,048,576 bytes and names at most 60 parts.
 - `fixed`: the parts that do not move. A non-empty list.
 - `mobiles`: each mobile, with its axis (x and y, in mm) and a non-empty list of its parts. `barrel` is not listed;
   it exists already.
+- `material`: in each mobile, its material, as an ordering code of DS-201 (its table of ordering codes). Every
+  part of a mobile is of its material. The code must be one that has a design allowable for bending (a tensile,
+  yield-based allowable) in DS-201's table of design allowables; any other value, or a mobile without `material`,
+  makes the file not valid.
 - `meshes`: every pair of gears that drive one another: the two mobiles (`barrel` or a mobile name), and the tooth
-  count of the gear on each (`n` above stands for one). Tooth counts are integers from 3 to 1000.
+  count of the gear on each (each `n` above stands for one). Tooth counts are integers from 3 to 1000.
 - `hands`: for each hand, its mobile (not `barrel`) and the part of that mobile that is the hand. `day` is the
   24-hour hand. `hour`, `minute` and `seconds` are required; `day` may be left out.
   Every hand entry that is present must name a mobile of the file (not `barrel`) and a part listed in that
