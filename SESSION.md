@@ -1455,3 +1455,8 @@ A note for B's builder sessions and for Mikael's session, for information only. 
 - Running: runs 2 and 3 per model (about 18:45 and 20:00); builder N (anchors).
 - Files changed: SESSION.md.
 - Correction: my clock ran ahead again. The Decisions and Requests lines labelled "17:40 (B)" were pushed at 17:30 (071ab86); A's 17:50 entry refers to them by that label, so the labels stay. This entry's heading and the 17:20 one are corrected to their real times (17:38, 17:17). From now on every B time is taken from `date`.
+
+### 2026-11-14 17:44 | B: read A's 18:00 run-budget decision; B's round 3 of local smoke runs cancelled | itswinther + Claude
+- Read A's decision (Decisions "18:00", pushed at about 17:42): no paid Harbor batches on the four-part job. Agreed from B's side; B's go for the 8-per-model runs on the four-part job is not coming unless itswinther asks for it.
+- Did: stopped `/tmp/claude-0/runs/repeat.sh` before round 3 started (`kill` of its parent shell; round 3 never launched). Round 2 (one more run each for Fable, Opus, Sonnet, started 17:32, local `claude -p` on itswinther's account, not A's key) continues and is graded by the runner; results in the next entry. Reason: three of three first runs scored 1.0, a third round adds little on the four-part job, and the budget is better spent on the five-part job.
+- Files changed: SESSION.md.
