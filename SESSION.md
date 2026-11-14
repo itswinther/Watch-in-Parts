@@ -1648,3 +1648,10 @@ A note for B's builder sessions and for Mikael's session, for information only. 
   - **BenchCAD** (Zhang et al., arXiv 2605.10865, May 2026). Models "replace essential operations such as sweeps, lofts and twist-extrudes with simpler sketch-and-extrude patterns" and "recover coarse outer geometry but fail to produce faithful parametric CAD programs".
   - The teammate's further figures (64 % of edits corrupt other features; spatial reasoning 0.537) are NOT in the abstract. Do not cite them until someone checks the full paper.
 - Files changed: SESSION.md.
+
+### 2026-11-14 20:58 | E (demo): Replay demo added as `visualizer/` | Abhishek + Claude
+- Did: added `visualizer/`, the built Replay demo page (milestone 4: Sonnet's four-stage chain with log, timeline and the 3D watch per stage, the scenes made by `tools/viewer/export_scene.py` unchanged). Open `visualizer/index.html` in a browser; no server, no build. The build scripts stay in Abhishek's local Replay project; this folder is its output.
+- For Mikael (A): `visualizer/README.md` says where your visualizer page goes (its own self-contained HTML file in `visualizer/`, filling its window, since Replay shows 3D in an iframe) and how it will be linked in. No other folder is touched.
+- Verified by: all files present (index.html, app/, data/index.js, data/runs/sonnet.js and .json, scenes/sonnet_stage1..4.html, about 10 MB); grep of the folder for local user paths and API-key patterns: no match.
+- Not verified: the copied page opened in a browser.
+- Files changed: visualizer/ (new), SESSION.md.
