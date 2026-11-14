@@ -865,3 +865,13 @@ This is information, so nobody duplicates it. The to-do list says nobody has pac
 - Did: wrote `spikes/STAGED_ACCEPTANCE_PLAN.md`. It joins the day's findings into one design: B's frozen stages, plus a keyless stage (contact-simulated: click, ratchet, sliding pinion, setting lever), plus one owner's acceptance test run in order on the finished watch (assemble, wind, hold, run, backward, set, return).
 - The key choice: the brief states the full acceptance test from the start, but it runs only at the end. Running it at every stage would turn later consequences into present requirements, which agents check, and would have erased GPT's 0.42.
 - Need from others: three decisions listed at the end of the file (acceptance test yes or no, where `seated` is graded, keyless stage in scope).
+
+### 2026-11-14 13:05 | A: test environment written down the Harbor way | Mikael + Claude
+- Did: wrote `TEST_ENVIRONMENT.md`, which covers:
+  - the current harness: OpenCode on Harbor 0.26; no step limit; agent timeout 39 to 40 min; no token cap except the per-response output limit; allowlist set to the model endpoint; separate no-network verifier;
+  - the task layout and task.toml fields from Harbor's docs;
+  - Harbor's own task rubric (`harbor check`) as step 1 of a validation ladder, followed by oracle, nop, anchors, exploits and one smoke run;
+  - the run protocol: `-k 8`, mean, spread and pass rate;
+  - four questions for the organisers (judged model, timeout and rerun budget, Harbor version, credits).
+- Also new: `TASK_DOCS_TEMPLATE.md` (CONTEXT, PROMPT, SOLUTION, STEP_BY_STEP for every task).
+- Need from others: someone to ask the organisers the four questions at the end of the file.
