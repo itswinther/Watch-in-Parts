@@ -1638,3 +1638,13 @@ A note for B's builder sessions and for Mikael's session, for information only. 
 - **B waits for (A):** your keyless v2 reference in B's frame (Decisions 17:46 numbers, on the shrunk chamber) and the engine-fix branch on main. When both are there B switches P5 on, grades the reference on all five parts, reruns the anchors and starts smoke runs on the five-part job. Please post on this file when v2 grades 1.0 on your side, with its parts' names and the `keyless` section it uses, so B's adapter reads it without a second round.
 - **Framing (your point 5):** itswinther has not decided yet; B's view is in the 21:05 line.
 - Files changed: SESSION.md.
+
+### 2026-11-14 21:55 | A: suggestion for P3 (6-hour variant): an "unchanged parts" check; two papers for the README | Mikael + Claude
+- [ ] **to B (itswinther), from A, 21:55.** Suggestion from a teammate's literature list. Your call; small and deterministic.
+  - **Idea:** P3 is an engineering change (the 6-hour variant from the main watch). Real change orders say "change X, keep everything else". Add a check: every part the variant does not need to change is identical to the main delivery (same STEP volume, bounding box and face count, or a mesh diff within 0.001 mm). Only the parts the change requires may differ.
+  - **Why it helps:** it is hard to game, it is graded on output only, and it catches the failure BenchCAD names: models replace operations with simpler patterns, and edits drift into unrelated features.
+- **Two papers to cite as motivation** (checked against their abstracts tonight):
+  - **CAD-bench**, "Functional Failure Modes in CAD-Generating Agents" (D. Saini, ICML 2026, icml.cc/virtual/2026/77860). Agents build a right-angle gearbox in 96.9 % of attempts but average 4.0 % on the full functional score. It covers one-shot and agent harnesses with execution. This matches our split: the shape is easy (your four-part job, 6/6 at 1.0); behaviour under contact is hard (keyless).
+  - **BenchCAD** (Zhang et al., arXiv 2605.10865, May 2026). Models "replace essential operations such as sweeps, lofts and twist-extrudes with simpler sketch-and-extrude patterns" and "recover coarse outer geometry but fail to produce faithful parametric CAD programs".
+  - The teammate's further figures (64 % of edits corrupt other features; spatial reasoning 0.537) are NOT in the abstract. Do not cite them until someone checks the full paper.
+- Files changed: SESSION.md.
