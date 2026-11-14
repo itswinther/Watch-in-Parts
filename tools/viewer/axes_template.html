@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Winding Works Viewer</title>
+<style>
+:root{--bg:#f4f3ef;--panel:#fff;--ink:#1d1d1b;--muted:#6b6a65;--line:#dddbd3;--accent:#2f6fb0;--scene:#e9e7e0;--ok:#2e7d4f;--bad:#b3402e}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#161615;--panel:#1f1f1d;--ink:#ecebe6;--muted:#9a9890;--line:#34332f;--accent:#6fa6dd;--scene:#262624;--ok:#5bb37f;--bad:#e0705d}}
+:root[data-theme="dark"]{--bg:#161615;--panel:#1f1f1d;--ink:#ecebe6;--muted:#9a9890;--line:#34332f;--accent:#6fa6dd;--scene:#262624;--ok:#5bb37f;--bad:#e0705d}
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:13px/1.45 system-ui,-apple-system,sans-serif}
+#app{display:grid;grid-template-columns:300px 1fr;height:100vh}aside{background:var(--panel);border-right:1px solid var(--line);padding:14px 16px;overflow:auto}
+#view{position:relative;background:var(--scene)}h1{font-size:15px;margin:0}h2{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:16px 0 6px}
+label{display:flex;gap:8px;align-items:center;margin:5px 0}input[type=range]{flex:1}button{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:4px 10px;cursor:pointer}
+button.on{background:var(--accent);color:#fff;border-color:var(--accent)}.sub{color:var(--muted);font-size:12px}.sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px}
+.ok{color:var(--ok)}.bad{color:var(--bad)}#hint{position:absolute;right:12px;top:10px;color:var(--muted);font-size:12px}
+@media (max-width:800px){#app{grid-template-columns:1fr;grid-template-rows:auto 65vh;height:auto}}
+</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+</head><body><div id="app"><aside>
+<h1>Winding works</h1><div class="sub" id="title"></div><div id="score" style="margin-top:6px"></div>
+<h2>What you are looking at</h2>
+<div class="sub">The crown (stem) comes in from the side along x. Turning it must wind the barrel arbor, which stands upright along z: a 90° turn in the motion. Coloured parts are the agent's design. The grey, see-through parts above are the frozen watch movement it had to fit under.</div>
+<h2>Motion</h2>
+<div><button id="run" class="on">Pause</button></div>
+<label>Speed <input type="range" id="spd" min="0.05" max="2" step="0.05" value="0.4"></label>
+<h2>View</h2>
+<label>Frozen movement <input type="range" id="fro" min="0" max="1" step="0.05" value="0.12"></label>
+<label><input type="checkbox" id="edges" checked> Outline edges</label>
+<div><button data-cam="iso">3/4</button> <button data-cam="side">Side</button> <button data-cam="top">From below</button></div>
+<h2>Moving parts</h2><div id="legend"></div>
+<h2>Gear meshes</h2><div id="meshes" class="sub"></div>
+<h2>Grader checks</h2><div id="checks" class="sub"></div>
+</aside><main id="view"><div id="hint">drag to orbit · right-drag to pan · scroll to zoom</div></main></div>
+<script type="module">
+import * as THREE from "three";import {OrbitControls} from "three/addons/controls/OrbitControls.js";
+const D=/*__DATA__*/null;const $=i=>document.getElementById(i);
+const CAT=["#e15759","#4e79a7","#f28e2b","#59a14f","#b07aa1","#76b7b2","#edc948"];
+const view=$("view");const r=new THREE.WebGLRenderer({antialias:true});r.setPixelRatio(Math.min(devicePixelRatio,2));view.appendChild(r.domElement);
+const scene=new THREE.Scene();const cam=new THREE.PerspectiveCamera(35,1,.05,2000);cam.up.set(0,0,1);const ctl=new OrbitControls(cam,r.domElement);ctl.enableDamping=true;
+scene.add(new THREE.HemisphereLight(0xffffff,0x445566,1.1));const L=new THREE.DirectionalLight(0xffffff,1.5);L.position.set(20,-30,-40);scene.add(L);const L2=new THREE.DirectionalLight(0xffffff,.7);L2.position.set(-20,20,30);scene.add(L2);
+const dec=(b,T)=>{const s=atob(b),u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);return new T(u.buffer)};
+const mobs=Object.keys(D.mobiles);const col={};mobs.forEach((m,i)=>col[m]=CAT[i%CAT.length]);
+const groups={};for(const m of mobs){const g=new THREE.Group();const M=D.mobiles[m];g.userData.p=new THREE.Vector3(...M.point);g.userData.d=new THREE.Vector3(...M.direction).normalize();scene.add(g);groups[m]=g}
+const fixedG=new THREE.Group();scene.add(fixedG);const box=new THREE.Box3();const frozenMats=[],edgeObjs=[];
+for(const p of D.parts){const g=new THREE.BufferGeometry();g.setAttribute("position",new THREE.BufferAttribute(dec(p.pos,Float32Array),3));g.setIndex(new THREE.BufferAttribute(dec(p.idx,Uint32Array),1));g.computeVertexNormals();
+ const c=p.frozen?"#9a9a96":p.mobile?col[p.mobile]:"#8fa3b8";const mat=new THREE.MeshStandardMaterial({color:c,metalness:.3,roughness:.5,side:THREE.DoubleSide,transparent:p.frozen,opacity:p.frozen?.12:1,depthWrite:!p.frozen});
+ const mesh=new THREE.Mesh(g,mat);if(!p.frozen){g.computeBoundingBox();box.union(g.boundingBox)}else frozenMats.push(mat);
+ const e=new THREE.LineSegments(new THREE.EdgesGeometry(g,35),new THREE.LineBasicMaterial({color:0,transparent:true,opacity:p.frozen?.05:.3}));edgeObjs.push(e);
+ const holder=p.mobile?groups[p.mobile]:fixedG;
+ if(p.mobile){const piv=groups[p.mobile].userData.p;mesh.position.copy(piv).negate();e.position.copy(mesh.position)}
+ holder.add(mesh);holder.add(e)}
+for(const m of mobs)groups[m].position.copy(groups[m].userData.p);
+const ctr=box.getCenter(new THREE.Vector3()),span=box.getSize(new THREE.Vector3()).length();
+function setCam(k){ctl.target.copy(ctr);const d=span*1.6;if(k==="side")cam.position.set(ctr.x,ctr.y-d,ctr.z);else if(k==="top")cam.position.set(ctr.x,ctr.y-.001,ctr.z-d);else cam.position.set(ctr.x+d*.6,ctr.y-d*.7,ctr.z-d*.5);ctl.update()}
+document.querySelectorAll("[data-cam]").forEach(b=>b.onclick=()=>setCam(b.dataset.cam));
+$("title").textContent=D.title;
+if(D.reward!=null)$("score").innerHTML=`<b class="${D.reward>=1?"ok":"bad"}">score ${D.reward.toFixed(3)}</b>`;
+$("legend").innerHTML=mobs.map(m=>`<div><span class="sw" style="background:${col[m]}"></span>${m}: ${D.mobiles[m].parts.join(", ")} <span class="sub">(${D.speed[m]!=null?Math.abs(D.speed[m]).toFixed(3)+" turns per stem turn":"not driven"})</span></div>`).join("")+`<div><span class="sw" style="background:#8fa3b8"></span>fixed: ${D.fixed.join(", ")||"none"}</div>`;
+$("meshes").innerHTML=D.meshes.map(m=>`${m.driver} (${m.driver_teeth} teeth) → ${m.driven} (${m.driven_teeth} teeth)`).join("<br>")+(D.speed.arbor?`<br><b>${(1/Math.abs(D.speed.arbor)).toFixed(1)} stem turns per arbor turn</b>`:"");
+$("checks").innerHTML=D.checks?Object.entries(D.checks).map(([k,v])=>`<span class="${v?"ok":"bad"}">${v?"✓":"✗"} ${k}</span>`).join("<br>"):"no grader details";
+$("fro").oninput=()=>frozenMats.forEach(m=>m.opacity=+$("fro").value);$("edges").oninput=()=>edgeObjs.forEach(e=>e.visible=$("edges").checked);
+let run=true,t=0,last=performance.now();$("run").onclick=()=>{run=!run;$("run").classList.toggle("on",run);$("run").textContent=run?"Pause":"Turn the crown"};
+function bg(){scene.background=new THREE.Color(getComputedStyle(document.documentElement).getPropertyValue("--scene").trim())}matchMedia("(prefers-color-scheme: dark)").addEventListener("change",bg);
+function resize(){const w=view.clientWidth,h=view.clientHeight||500;r.setSize(w,h);cam.aspect=w/h;cam.updateProjectionMatrix()}addEventListener("resize",resize);
+function frame(n){const dt=Math.min(.1,(n-last)/1000);last=n;if(run)t+=dt*+$("spd").value;
+ for(const m of mobs){const s=D.speed[m]||0;groups[m].quaternion.setFromAxisAngle(groups[m].userData.d,2*Math.PI*s*t)}
+ ctl.update();r.render(scene,cam);requestAnimationFrame(frame)}
+bg();resize();setCam("iso");requestAnimationFrame(frame);
+</script></body></html>

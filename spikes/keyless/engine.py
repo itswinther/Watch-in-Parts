@@ -20,7 +20,7 @@ Kinds
 
 Contact rule
 ------------
-Penetration of a body = sum of its intersection volumes with every other body (fixed-fixed pairs
+Penetration of a body = its largest intersection volume with any other body (fixed-fixed pairs
 and pairs inside one carrier family are not counted). A step is resolved when every penetration is at
 most TOL. A pushed body may move at most K times the surface travel (arc length at the body's
 outer radius) of the bodies touching it in this step; it moves the least distance that clears it.
@@ -105,6 +105,8 @@ class World:
         for b in bodies:
             self.family[b.name] = b.carrier or b.name
         self.evals = 0
+        self.pair_cache = {}
+        self.dqs = {}
 
     # ----- poses -----
     def matrix(self, b, q=None):
@@ -122,16 +124,18 @@ class World:
             T = rot_matrix(c.point, c.dir, c.q) @ T
         return T
 
-    def posed(self, b, q=None):
+    def posed(self, b, q=None, with_key=False):
         T = self.matrix(b, q)
-        key = tuple(np.round(T[:3, :4].ravel(), 9))
+        key = tuple(np.round(T[:3, :4].ravel(), 10))
         m = b._cache.get(key)
         if m is None:
-            m = b.man.transform(T[:3, :4].tolist())
-            if len(b._cache) > 400:
+            m = (b.man.transform(T[:3, :4].tolist()), None)
+            bb = m[0].bounding_box()
+            m = (m[0], bb)
+            if len(b._cache) > 600:
                 b._cache.clear()
             b._cache[key] = m
-        return m
+        return (m[0], m[1], key) if with_key else m[0]
 
     def pairs_ok(self, a, b):
         if a is b:
@@ -141,63 +145,68 @@ class World:
         return True
 
     def pen(self, b, q=None, only=None):
-        """Sum of overlaps of body b (at coordinate q) with every other body."""
-        mb = self.posed(b, q)
+        """Largest overlap of body b (at coordinate q) with any other body (each pair has its own TOL)."""
+        mb, A, kb = self.posed(b, q, with_key=True)
         if mb.is_empty():
             return 0.0
-        A = mb.bounding_box()
         tot = 0.0
         for o in self.bodies.values():
             if not self.pairs_ok(b, o) or (only is not None and o.name not in only):
                 continue
-            mo = self.posed(o)
+            mo, B, ko = self.posed(o, with_key=True)
             if mo.is_empty():
                 continue
-            B = mo.bounding_box()
             if not all(A[i] < B[i + 3] and B[i] < A[i + 3] for i in range(3)):
                 continue
-            self.evals += 1
-            v = (mb ^ mo).volume()
-            if not math.isfinite(v):
-                raise ArithmeticError("non-finite volume")
-            tot += v
+            ck = (b.name, kb, o.name, ko) if b.name < o.name else (o.name, ko, b.name, kb)
+            v = self.pair_cache.get(ck)
+            if v is None:
+                self.evals += 1
+                v = (mb ^ mo).volume()
+                if not math.isfinite(v):
+                    raise ArithmeticError("non-finite volume")
+                if len(self.pair_cache) > 200000:
+                    self.pair_cache.clear()
+                self.pair_cache[ck] = v
+            tot = max(tot, v)
         return tot
 
     def neighbours(self, b):
-        mb = self.posed(b)
-        A = mb.bounding_box()
+        _, A, _ = self.posed(b, with_key=True)
         out = []
         for o in self.bodies.values():
             if o is b or o.kind == "fixed":
                 continue
-            B = self.posed(o).bounding_box()
+            _, B, _ = self.posed(o, with_key=True)
             if all(A[i] < B[i + 3] + 0.05 and B[i] < A[i + 3] + 0.05 for i in range(3)):
                 out.append(o)
         return out
 
     # ----- elementary moves -----
-    def push(self, b, budget_arc):
-        """Move b the least distance (within budget) that clears its penetration. True if cleared."""
-        p0 = self.pen(b)
+    def push(self, b, dmax, only=None):
+        """Move b the least distance (at most dmax in its own coordinate) that clears its overlap
+        with `only` (all bodies when None). True if cleared."""
+        pen = lambda q=None: self.pen(b, q, only)  # noqa: E731
+        p0 = pen()
         if p0 <= TOL:
             return True
-        if budget_arc <= 0:
+        tgt = 0.5 * TOL
+        if dmax <= 0:
             return False
-        dmax = b.coord_from_arc(budget_arc)
         best = None
         for sgn in (1.0, -1.0):
-            n = 12
+            n = 8
             prev = 0.0
             for i in range(1, n + 1):
                 d = sgn * dmax * i / n
                 q = b.q + d
                 if q < b.lo or q > b.hi:
                     break
-                if self.pen(b, q) <= TOL:
+                if pen(q) <= tgt:
                     lo_, hi_ = prev, d          # bisect the first clearing distance
                     for _ in range(8):
                         mid = 0.5 * (lo_ + hi_)
-                        if self.pen(b, b.q + mid) <= TOL:
+                        if pen(b.q + mid) <= tgt:
                             hi_ = mid
                         else:
                             lo_ = mid
@@ -208,8 +217,63 @@ class World:
         if best is None:
             return False
         b.q += best
-        self.moved[b.name] = self.moved.get(b.name, 0.0) + b.arc(best)
+        self._add_dq(b, best)
         return True
+
+    # ----- per-step motion bookkeeping (for the friction cone at the contact point) -----
+    def _add_dq(self, b, d):
+        r, s_ = self.dqs.get(b.name, (0.0, 0.0))
+        if b.dof in ("rot",):
+            r += abs(d)
+        else:
+            s_ += abs(d)
+        self.dqs[b.name] = (r, s_)
+
+    def _axis_dist(self, point, direction, c):
+        rel = np.asarray(c) - point
+        return float(np.linalg.norm(rel - (rel @ direction) * direction))
+
+    def travel(self, o, c):
+        """Distance point c (on body o) travelled in this step because o moved."""
+        r, s_ = self.dqs.get(o.name, (0.0, 0.0))
+        t = s_
+        if o.dof == "rot":
+            t += r * self._axis_dist(o.point, o.dir, c)
+        elif o.dof == "stem":
+            t += r * self._axis_dist(o.point, o.dir, c)
+        if o.carrier:
+            cr = self.bodies[o.carrier]
+            t += self.dqs.get(cr.name, (0.0, 0.0))[0] * self._axis_dist(cr.point, cr.dir, c)
+        return t
+
+    def budget(self, b, among):
+        """Largest move of b (own coordinate) the friction cone allows, given the bodies in `among`
+        that overlap it now."""
+        mb = self.posed(b)
+        best = 0.0
+        for o in among:
+            if o is b:
+                continue
+            v = mb ^ self.posed(o)
+            if v.volume() <= 0.5 * TOL:
+                continue
+            comps = v.decompose()
+            for comp in comps:               # each separate contact patch
+                if comp.volume() <= 0.05 * TOL:
+                    continue
+                pts = np.asarray(comp.to_mesh().vert_properties, float)[:, :3]
+                if not len(pts):
+                    continue
+                c = pts.mean(axis=0)
+                t = self.travel(o, c) + self.travel(b, c)     # relative sliding at the contact
+                if t <= 0:
+                    continue
+                if b.dof == "rot":
+                    rb = max(self._axis_dist(b.point, b.dir, c), 0.05)
+                    best = max(best, K * t / rb)
+                else:
+                    best = max(best, K * t)
+        return best
 
     def relax(self, b):
         """Spring: return towards rest until contact (no pushing)."""
@@ -233,13 +297,13 @@ class World:
             q = b.q + d
             if q < b.lo or q > b.hi:
                 break
-            if self.pen(b, q) <= TOL:
+            if self.pen(b, q) <= 0.5 * TOL:
                 last_ok = d
             else:
                 lo_, hi_ = last_ok, d
                 for _ in range(6):
                     mid = 0.5 * (lo_ + hi_)
-                    if self.pen(b, b.q + mid) <= TOL:
+                    if self.pen(b, b.q + mid) <= 0.5 * TOL:
                         lo_ = mid
                     else:
                         hi_ = mid
@@ -249,19 +313,34 @@ class World:
 
     def resolve(self):
         """Sweeps of pushes. Light springs yield first, then free bodies, then the mainspring arbor."""
+        fixed_names = {n for n, o in self.bodies.items() if o.kind == "fixed"}
         for _ in range(SWEEPS):
             bad = False
+            before = {b.name: b.q for b in self.movers}
             for b in self.movers:
                 if self.pen(b) <= TOL:
                     continue
-                nb = self.neighbours(b)
-                incoming = max([self.moved.get(o.name, 0.0) for o in nb] + [0.0])
-                if not self.push(b, K * incoming):
+                movers_now = [o for o in self.bodies.values() if o is not b and (
+                    any(self.dqs.get(o.name, (0.0, 0.0))) or (o.carrier and any(self.dqs.get(o.carrier, (0.0, 0.0)))))]
+                if b.kind == "spring":
+                    # light: yields to anything it touches, if it can within the friction cone
+                    touching = [o for o in self.bodies.values() if o is not b and self.pairs_ok(b, o)]
+                    if not self.push(b, self.budget(b, touching)):
+                        bad = True
+                    continue
+                # pushed: clear the bodies that moved in this step (and the fixed ones); what it
+                # runs into downstream is resolved by those bodies in turn
+                pushers = {o.name for o in movers_now} | fixed_names
+                if self.pen(b, only=pushers) <= TOL:
+                    bad = True
+                    continue
+                if not self.push(b, self.budget(b, movers_now), only=pushers):
                     bad = True
             if not bad:
-                # every mover clear?
                 if all(self.pen(b) <= TOL for b in self.movers):
                     return True
+            elif all(abs(b.q - before[b.name]) < 1e-12 for b in self.movers):
+                return False            # no progress: blocked
         return all(self.pen(b) <= TOL for b in self.movers)
 
     def snapshot(self):
@@ -278,7 +357,7 @@ class World:
         d = self.bodies[driver]
         d.q += dq
         d.p += dp
-        self.moved = {driver: d.arc(dq) + abs(dp)}
+        self.dqs = {driver: (abs(dq), abs(dp))}
         ok = self.resolve()
         if not ok:
             self.restore(snap)
@@ -291,11 +370,11 @@ class World:
             if b.rest is None:
                 continue
             sgn = 1.0 if b.rest > b.q else -1.0
-            for frac in (1.0, 0.5, 0.25):
+            for frac in (1.0, 0.25):
                 s2 = self.snapshot()
                 dqm = sgn * b.coord_from_arc(main_try_arc * frac)
                 b.q += dqm
-                self.moved = {b.name: b.arc(dqm)}
+                self.dqs = {b.name: (abs(dqm), 0.0)}
                 if self.resolve():
                     for sb in self.order_spring:
                         self.relax(sb)
@@ -305,10 +384,10 @@ class World:
 
     def settle(self, budget=0.3):
         """Start: let every mover clear any overlap at its rest pose (up to `budget` mm of travel)."""
-        self.moved = {}
+        self.dqs = {}
         for _ in range(3):
             for b in self.movers:
-                self.push(b, budget)
+                self.push(b, b.coord_from_arc(budget))
         for _ in range(3):
             for b in self.order_spring:
                 self.relax(b)
