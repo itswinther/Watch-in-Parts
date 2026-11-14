@@ -1,100 +1,95 @@
 # Valtorre Microtechnique SA: Application note, finger torque at the crown
 
+**Demonstration-scale series, scale 1.617:1 to an 11½‴ calibre (s = 1.617).** Human strength does not
+scale with the movement: every value in this note applies unchanged to the demonstration-scale series,
+at the actual crown diameter.
+
 | Document | Revision | Date | Status |
 |---|---|---|---|
-| VM-AN-501 | A | 2026-11-14 | Released |
+| VM-AN-501 | B | 2026-11-14 | Released |
 
 > **About this document.** Valtorre Microtechnique SA is a fictional supplier, used for this exercise
-> only. The strength and friction data are from the cited studies. No study we found measured torque
-> on a watch-sized crown directly, so the torques in Table 3 are **calculated** from pinch strength and
-> fingertip friction, as their footnotes state.
+> only. The measured torques, the pinch strengths, the friction values and the design limit for knobs
+> come from the cited studies and standards. The recommended winding torque (section 5) is
+> **calculated**, as its footnote states.
 
 ## 1. Scope
 
-This note covers the torque that an adult can apply to a small round crown, held between the thumb
-and index finger. It also sets the recommended maximum winding torque at the crown, against which a
-keyless works is designed. It applies to crowns of Ø 2 to 7 mm, turned by hand without tools.
+This note covers the torque that adults apply to a small round crown with thumb and index finger. It
+also sets the recommended maximum winding torque at the crown, against which a keyless works is
+designed.
 
-## 2. Pinch strength of adults (Table 1)
+## 2. Measured maximum finger torque on small cylinders (Table 1)
 
-Mean values from the Milwaukee norms, 310 men and 328 women aged 20 to 94.[^math] They are converted
-from pounds-force at 1 lbf = 4.448 N.[^lbf]
+Mean maximum voluntary torque, finger pinch, from industrial workers (10 men, 13 women).[^imr] The
+torques were measured in in-oz and are converted at 1 in-oz = 7.06 N·mm.[^ozf]
 
-| Pinch | Age | Hand | Men (lb) | Men (N) | Women (lb) | Women (N) |
-|---|---|---|---|---|---|---|
-| Tip (2-point) | 20–24 | R | 18.0 | 80.1 | 11.0 | 48.9 |
-| Tip (2-point) | 20–24 | L | 17.0 | 75.6 | 10.5 | 46.7 |
-| Tip (2-point) | 25–29 | R | 18.3 | 81.4 | 11.2 | 49.8 |
-| Tip (2-point) | 25–29 | L | 17.5 | 77.8 | 10.8 | 48.0 |
-| Tip (2-point) | 30–34 | R | 17.6 | 78.3 | 11.5 | 51.2 |
-| Tip (2-point) | 30–34 | L | 17.6 | 78.3 | 11.2 | 49.8 |
-| Key (lateral) | 20–24 | R | 26.0 | 115.7 | 17.6 | 78.3 |
-| Palmar (3-point) | 20–24 | R | 26.6 | 118.3 | 17.2 | 76.5 |
+| Cylinder Ø | Group | Smooth, loosening | Smooth, tightening | Knurled, loosening | Knurled, tightening |
+|---|---|---|---|---|---|
+| 3.3 mm | Men | 100 N·mm | 114 N·mm | 150 N·mm | 203 N·mm |
+| 3.3 mm | Women | 74 N·mm | **69 N·mm** | 129 N·mm | 154 N·mm |
+| 5.0 mm | Men | 155 N·mm | 157 N·mm | 184 N·mm | 294 N·mm |
+| 5.0 mm | Women | 90 N·mm | 96 N·mm | 156 N·mm | 232 N·mm |
 
-The pound values are from a reproduction of the norm tables.[^tes] The newtons are converted.
+These are **maximal** efforts, not comfortable ones. The lowest value, 69 N·mm, is for women on a
+smooth 3.3 mm cylinder.[^imr]
 
-**Design basis:** tip pinch, the lowest mean in Table 1: **46.7 N** (women, 20–24, left hand). This note
-does not cover users over 34, whose norms are not reproduced here.
+## 3. Design limit for knobs (Table 2)
 
-## 3. Fingertip friction (Table 2)
+| Quantity | Value | Source |
+|---|---|---|
+| Fingertip-grasp knob, diameter | 10 to 100 mm | [^mil] |
+| Maximum torque resistance, knob Ø ≤ 25 mm | **32 mN·m (32 N·mm)** | [^mil] |
+| Maximum torque resistance, knob Ø > 25 mm | 42 mN·m | [^mil] |
 
-| Pair | μ | Conditions | Source |
-|---|---|---|---|
-| Finger pad on aluminium | 0.6 (mean) | Longitudinal pull at 1, 10 and 20 N normal force | [^seo] |
-| Finger pad on rubber hose | 0.9 (mean) | Same as above | [^seo] |
-| Skin on metals | 0.8 to 1.0 | Clean and dry | [^etb] |
+A crown is smaller than the standard's minimum knob, so 32 N·mm is an upper bound on the intended
+operating torque, not a crown rating.
 
-The friction coefficient fell by 46 % as the normal force rose from 1 to 20 N.[^seo] The design value
-is **μ = 0.6**, the lower of the two metal values.
+## 4. Pinch strength and fingertip friction (Table 3)
 
-## 4. Torque on a round crown
+| Quantity | Value | Source |
+|---|---|---|
+| Tip pinch, women 20–24, left hand (lowest mean in the norms reproduced) | 10.5 lb = 46.7 N | [^tes][^lbf] |
+| Tip pinch, men 20–24, right hand | 18.0 lb = 80.1 N | [^tes][^lbf] |
+| Finger pad on aluminium, μ (mean, at 1 to 20 N) | 0.6 | [^seo] |
+| Change in μ from 1 to 20 N normal force | −46 % | [^seo] |
+| Continuous effort, maximum share of maximum strength | 15 % | [^ergo] |
 
-Two opposed finger pads each press on the crown with the pinch force F. Each pad can carry a
-tangential friction force of μ·F before it slips (Coulomb friction).[^etb] Both forces act at the
-crown radius D/2, so the largest torque before the fingers slip is
+The pinch norms are from Mathiowetz et al. 1985.[^math]
 
-  **T = 2·μ·F·(D/2) = μ·F·D.**
+## 5. Recommended maximum winding torque at the crown (Table 4, calculated)
 
-**Recommended force for repeated use.** For continuous effort, a force should be at most 15 % of
-maximum strength (Rohmert's curve).[^ergo] The recommended design force is therefore
-0.15 × 46.7 N = **7.0 N**.
+Two opposed pads each press on a crown of diameter D with force F. Each carries μ·F before it slips,
+at radius D/2, so the torque before slipping is **T = μ·F·D**.[^etb] With F = 15 % × 46.7 N = 7.0 N
+and μ = 0.6, T = 4.20·D N·mm. The result is capped at the MIL-STD knob limit of 32 N·mm:
 
-## 5. Ratings (Table 3, calculated)
+  **T_rec = min(4.20·D, 32) N·mm**, with D in mm.[^d1]
 
-| Crown Ø D (mm) | Max. finger torque, women's mean, 46.7 N (N·mm) | Max. finger torque, men's mean, 80.1 N (N·mm) | **Recommended max. winding torque at the crown (N·mm)** |
-|---|---|---|---|
-| 2.0 | 56.0 | 96.1 | **8.4** |
-| 2.5 | 70.0 | 120.1 | **10.5** |
-| 3.0 | 84.1 | 144.1 | **12.6** |
-| 4.0 | 112.1 | 192.2 | **16.8** |
-| 5.0 | 140.1 | 240.2 | **21.0** |
-| 6.0 | 168.1 | 288.2 | **25.2** |
-| 7.0 | 196.1 | 336.3 | **29.4** |
+| Crown Ø D (mm) | 2 | 3 | 4 | 5 | 6 | 7 | ≥ 7.62 |
+|---|---|---|---|---|---|---|---|
+| **T_rec (N·mm)** | 8.4 | 12.6 | 16.8 | 21.0 | 25.2 | 29.4 | **32.0** |
 
-All columns are calculated.[^d1] For any other diameter:
+The winding torque needed at the crown must not exceed T_rec. That is the largest mainspring torque,
+divided by the gear ratio from crown to barrel arbor.
 
-- recommended maximum winding torque: **T_rec = 4.20·D** N·mm, with D in mm;
-- women's maximum finger torque: 28.0·D N·mm;
-- men's maximum finger torque: 48.0·D N·mm.
-
-The winding torque that the movement needs at the crown must not exceed T_rec. That includes the
-largest mainspring torque, divided by the gear ratio from crown to barrel arbor.
+**Cross-check.** At D = 3.3 mm, T_rec = 13.9 N·mm, which is 20 % of the lowest measured maximum in
+Table 1 (69 N·mm).[^imr]
 
 ## 6. Notes
 
-1. **The maximum columns are upper estimates.** μ falls as the normal force rises,[^seo] so near full
-   pinch force the real μ may be below 0.6. The recommended column uses 7.0 N, within the 1 to 20 N
-   range in which μ = 0.6 was measured.
-2. **Grip and condition.** A tip-pinch gauge is not a knurled cylinder, so the force on a crown may
-   differ. Wet or oily fingers, and gloves, change μ. A knurled or fluted crown edge is not credited
-   here.
+1. **This note covers adults of working age only.** The pinch norms reproduced cover ages 20 to 34.
+2. **Condition of the fingers.** Wet or gloved fingers change μ. Table 1 shows that knurling raises the
+   maximum torque, but T_rec gives it no credit.
 
 ## Sources
 
-[^math]: Mathiowetz V. et al., "Grip and pinch strength: normative data for adults", Arch Phys Med Rehabil 1985; 66(2): 69–74, https://pubmed.ncbi.nlm.nih.gov/3970660/
-[^tes]: Reproduction of the Mathiowetz 1985 tip, key and palmar pinch tables (means, lb), https://www.topendsports.com/testing/tests/pinch-grip-strength.htm
-[^lbf]: 1 lbf = 4.448 222 N, https://en.wikipedia.org/wiki/Pound_(force)
-[^seo]: Seo N.J. and Armstrong T.J., "Friction coefficients in a longitudinal direction between the finger pad and selected materials", Ergonomics 2009; 52(5): 609–616. μ 0.6 on aluminium, 0.9 on rubber, a 46 % fall from 1 to 20 N. https://stacks.cdc.gov/view/cdc/215047
-[^etb]: Engineering ToolBox, friction coefficients (skin on metals 0.8 to 1.0, clean and dry; F_f = μ·N), https://engineeringtoolbox.com/friction-coefficients-d_778.html
-[^ergo]: Ergoweb, static load: continuous effort at most 15 % of maximum strength (Rohmert), https://ergoweb.com/static-load/
-[^d1]: Not published; calculated as T = μ·F·D, with μ = 0.6 from [^seo]. F is 46.7 N (women's lowest mean tip pinch) or 80.1 N (men, 20–24, right), both from [^tes] converted with [^lbf]. For the recommended column, F = 0.15 × 46.7 N from [^ergo].
+[^imr]: Imrhan S. and Munoz-Vasa M., "Finger pinch loosening and tightening torques on small cylindrical handles among industrial workers", ISER 1(2), 2013, tables 2 and 3, https://westpointpressjournals.westpoint.edu/index.php/iser/article/download/20/Imrhan/112
+[^ozf]: 1 ozf = 0.278 N, so 1 in-oz = 0.278 N × 25.4 mm = 7.06 N·mm, https://en.wikipedia.org/wiki/Ounce-force
+[^mil]: MIL-STD-1472H, Human Engineering (15 Sep 2020), figure 10 "Knobs" (public domain, distribution A), https://everyspec.com/MIL-STD/MIL-STD-1400-1499/download.php?spec=MIL-STD-1472H.057041.pdf
+[^math]: Mathiowetz V. et al., Arch Phys Med Rehabil 1985; 66(2): 69–74, https://pubmed.ncbi.nlm.nih.gov/3970660/
+[^tes]: Reproduction of the Mathiowetz 1985 pinch tables (lb), https://www.topendsports.com/testing/tests/pinch-grip-strength.htm
+[^lbf]: 1 lbf = 4.448 N, https://en.wikipedia.org/wiki/Pound_(force)
+[^seo]: Seo N.J. and Armstrong T.J., Ergonomics 2009; 52(5): 609–616, https://stacks.cdc.gov/view/cdc/215047
+[^ergo]: Ergoweb, static load: at most 15 % of maximum strength for continuous effort (Rohmert), https://ergoweb.com/static-load/
+[^etb]: Coulomb friction F_f = μ·N, Engineering ToolBox, https://engineeringtoolbox.com/friction-coefficients-d_778.html
+[^d1]: Not published; calculated as T = μ·F·D, with μ = 0.6 [^seo] and F = 0.15 × 46.7 N [^ergo][^tes][^lbf], capped at 32 N·mm [^mil]. The cap applies from D = 32/4.20 = 7.62 mm.
