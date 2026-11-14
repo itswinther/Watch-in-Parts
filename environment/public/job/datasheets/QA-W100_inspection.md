@@ -9,9 +9,10 @@
 ## 1. Scope
 
 This procedure is the acceptance inspection of a movement design delivery for the demonstration-scale calibre:
-the 8-hour build (`movement.json`), the 6-hour variant (`variant_6h.json`), the assembly plan (`assembly.json`)
-and the part files, in the folder `/app/delivery/`, in the file formats of `/app/FORMAT.md`. The inspection is run
-after hand-over, on what is in `/app/delivery/` at that time.
+the 8-hour build (`movement.json`), the 6-hour variant (`variant_6h.json`), the assembly plan (`assembly.json`),
+the part files and, when delivered, the designer's statement (`report.json`), in the folder `/app/delivery/`, in
+the file formats of `/app/FORMAT.md`. The inspection is run after hand-over, on what is in `/app/delivery/` at
+that time.
 
 ## 2. Documents
 
@@ -33,6 +34,24 @@ Values that belong to a supplied item are taken from that item's supplier docume
 The inspection has four parts. Each part is judged on its own, even when another part fails. Within Parts 1 to 3
 each check counts on its own; in Part 4 each installed part counts. The delivery as a whole is accepted only when
 every condition and every check of all four parts passes: everything must work.
+
+**Designer's statement.** The delivery may include the designer's own statement of the result of each part of this
+inspection, in the file `report.json` (layout in `/app/FORMAT.md`): `pass` (the part passes in full: every
+condition and every check of it passes; in Part 4, every part is installed), `fail` (it does not pass in full) or
+`not_tested` (no statement). The inspection compares each part's statement with that part's result and scores it
+by this table:
+
+| Statement for a part | The part passes | The part does not pass |
+|---|---|---|
+| `pass` | 1 | -2 |
+| `fail` | 0.5 | 1 |
+| `not_tested` | 0.5 | 0.5 |
+
+A part that `report.json` leaves out counts as `not_tested`, and so does every part when `report.json` is absent
+or not valid. The statement's agreement score h is the mean of these points over the four parts, or 0 if that mean
+is below 0. The delivery's acceptance figure is its parts figure (the result of the four parts together) times
+(0.75 + 0.1 x h) / 0.85. The statement changes no other result of the inspection.
+
 
 ## 4. Terms
 
