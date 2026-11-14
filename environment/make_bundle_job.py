@@ -42,7 +42,7 @@ FORBIDDEN_WORDS = [r"reference_watch", r"reference[ _-]solution", r"reference[ _
                    r"reference[ _-]design", r"reference[ _-]run", r"reference[ _-]script",
                    r"the reference (?:scores|passes|grades|reaches|keeps|uses|declares)", r"reference's",
                    r"solution", r"\bstages?\b", r"hand_speed", r"1/12", r"1/24", r"60 turns",
-                   r"weight(?!\s*%)", r"anchor", r"board-in-a-box", r"session", r"\bkept\b", r"grade_watch", r"oracle",
+                   r"weight", r"anchor", r"board-in-a-box", r"session", r"\bkept\b", r"grade_watch", r"oracle",
                    r"traceab", r"NOT-FOR-AGENT"]
 NEUTRAL_STL_HEADER = b"supplied barrel, binary STL, millimetres".ljust(80, b" ")
 
