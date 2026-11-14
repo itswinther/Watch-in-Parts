@@ -82,6 +82,19 @@ def hands_required_text():
     return ", ".join(names[:-1]) + " and " + names[-1]
 
 
+
+def hand_speeds():
+    """What each hand must do, as the grader requires it (tests/grade_watch.py HAND_SPEED and DAY_SPEED, clockwise
+    turns per hour), in words; fails if the grader's values change. itswinther, 14 Nov about 20:15: state them."""
+    with open(GRADER, encoding="utf-8") as f:
+        src = f.read()
+    want = ('HAND_SPEED = {"hour": Fraction(1, 12), "minute": Fraction(1), "seconds": Fraction(60)}',
+            "DAY_SPEED = Fraction(1, 24)")
+    if not all(w in src for w in want):
+        raise SystemExit("tests/grade_watch.py changed: HAND_SPEED or DAY_SPEED; update make_brief_job.hand_speeds")
+    return {"hour": "one turn every 12 h", "minute": "one turn every hour", "seconds": "one turn every minute",
+            "day": "one turn every 24 h"}
+
 def grader_timeout_s():
     """The per-check time limit of tests/grade_watch.py, read from its source (tests/ is not imported here)."""
     with open(GRADER, encoding="utf-8") as f:
@@ -333,8 +346,9 @@ Checks. Each passes or fails.
    barrel stands still): {cs} equal steps covering one full turn of the faster of the two, then, if their speeds
    differ, {cs} equal steps covering one full turn of one relative to the other. At every step they intersect by
    at most {vt}.
-7. **Hour hand.** 8. **Minute hand.** 9. **Seconds hand.** The hands show the time: each of the three moves as
-   that hand of a watch does. A hand is driven only through declared meshes that pass the mesh test (a declared
+7. **Hour hand.** 8. **Minute hand.** 9. **Seconds hand.** The hands show the time, each turning clockwise at a
+   constant speed: the hour hand {hs[hour]}, the minute hand {hs[minute]}, the seconds hand {hs[seconds]}.
+   A hand is driven only through declared meshes that pass the mesh test (a declared
    mesh that fails it drives nothing), and no mobile may be given two different speeds by the declared meshes.
 10. **Hours and minutes on a common centre.** The axes of the hour hand's mobile and the minute hand's mobile are
     at most {coax} mm apart.
@@ -343,7 +357,7 @@ Checks. Each passes or fails.
     points: its centre of volume is at least {hcm} mm from its mobile's axis.
 {fits}
 {printable}
-{strength}""".format(vt=vt(), join=num(W.FRAME_JOIN), sp=sp, deg=num(360 / sp),
+{strength}""".format(hs=hand_speeds(), vt=vt(), join=num(W.FRAME_JOIN), sp=sp, deg=num(360 / sp),
            hm=num(W.HELD_MOVE), coax=num(W.COAX_TOL), touch=num(W.SEAT_TOUCH), zd="z_D", zn="z_N",
            spt=W.SAMPLES_PER_TOOTH, pe=L["push_every"], pe2=2 * L["push_every"], ge=L["gap_every"],
            ge2=2 * L["gap_every"], f1=str(W.MESH_OFFGRID[0]), f2=str(W.MESH_OFFGRID[1]), gap=num(W.ENGAGE_GAP),
@@ -372,13 +386,13 @@ fails C3.
 
 Checks:
 
-1. **24-hour hand.** It shows the hour of the day as a 24-hour hand does. It is driven only through declared
+1. **24-hour hand.** It shows the hour of the day, turning clockwise at a constant speed of {hs[day]}. It is driven only through declared
    meshes that pass the mesh test of Part 1, and no mobile may be given two different speeds by the declared
    meshes.
 2. **24-hour hand placement.** Its mobile's axis is at least {off} mm from the axis of the hour hand's mobile;
    the hand part reaches at least {reach} mm from its mobile's axis; it lies wholly above the frame; and its
    centre of volume is at least {hcm} mm from its mobile's axis.
-""".format(off=num(W.DAY_HAND_OFFSET), reach=num(W.DAY_HAND_REACH), hcm=num(W.HAND_CENTRE_MIN))
+""".format(off=num(W.DAY_HAND_OFFSET), reach=num(W.DAY_HAND_REACH), hcm=num(W.HAND_CENTRE_MIN), hs=hand_speeds())
 
 
 def part3(L, S=None):

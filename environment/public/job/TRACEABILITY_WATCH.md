@@ -22,16 +22,16 @@ hand speeds and directions, and the weights of the checks.
 | BARREL_MODULE | 0.2 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-20 | Module (mm) |
 | PRESSURE_ANGLE | 25.0 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-20 | Pressure angle |
 | BARREL_ARBOR_R | 0.5 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-20 | Arbor pivot radius |
-| BARREL_INNER_D | 17.0 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-20 | Spring chamber inner diameter |
-| BARREL_CORE_R (= BARREL_INNER_D / 6, to 3 decimals) | 2.833 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-20 | Arbor core radius |
+| BARREL_INNER_D | 12.12 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-20 | Spring chamber inner diameter |
+| BARREL_CORE_R (= BARREL_INNER_D / 6, to 3 decimals) | 2.02 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-20 | Arbor core radius |
 | BARREL_SQUARE_SIDE | 1.4 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-20 | Winding square side |
 | barrel axis (x, y) = (0, 0) | (0, 0) | `datasheets/DS-W01_barrel.md` | 3.  | Axis | Value |
 | BARREL_WHEEL_Z | (0.0, 1.0) | `datasheets/DS-W01_barrel.md` | 3.  | Toothed drum | Value |
 | BARREL_ARBOR_Z | (-1.0, 5.6) | `datasheets/DS-W01_barrel.md` | 3.  | Arbor | Value |
-| BARREL_BORE_R | 2.85 | `datasheets/DS-W01_barrel.md` | 3.  | Bore of the drum | Value |
+| BARREL_BORE_R | 2.0367 | `datasheets/DS-W01_barrel.md` | 3.  | Bore of the drum | Value |
 | BARREL_ARBOR_R (section 3) | 0.5 | `datasheets/DS-W01_barrel.md` | 3.  | Arbor, pivots and plain sections | Value |
-| BARREL_WHEEL_Z, BARREL_CORE_R (the core) | ((0.0, 1.0), 2.833) | `datasheets/DS-W01_barrel.md` | 3.  | Arbor core (inside the drum's bore) | Value |
-| BARREL_INNER_D (section 3) | 17.0 | `datasheets/DS-W01_barrel.md` | 3.  | Spring chamber inside the drum (not modelled in the mesh) | Value |
+| BARREL_WHEEL_Z, BARREL_CORE_R (the core) | ((0.0, 1.0), 2.02) | `datasheets/DS-W01_barrel.md` | 3.  | Arbor core (inside the drum's bore) | Value |
+| BARREL_INNER_D (section 3) | 12.12 | `datasheets/DS-W01_barrel.md` | 3.  | Spring chamber inside the drum (not modelled in the mesh) | Value |
 | BARREL_SQUARE_Z, BARREL_SQUARE_SIDE | ((3.3, 4.9), 1.4) | `datasheets/DS-W01_barrel.md` | 3.  | Winding square | Value |
 | BARREL_TURNS_PER_HOUR (8-hour build, speed class D in the work order) | 1/8 | `datasheets/DS-W01_barrel.md` | 4. Speed classes | D | Barrel speed, steady running |
 | CHANGED_BARREL_TURNS_PER_HOUR (6-hour variant, speed class B in the work order) | 1/6 | `datasheets/DS-W01_barrel.md` | 4. Speed classes | B | Barrel speed, steady running |

@@ -22,11 +22,11 @@ BARREL_WHEEL_Z = (0.0, 1.0)         # the toothed drum
 # bodies are one mobile `barrel`, the union of the two meshes (data/barrel.stl).
 BARREL_ARBOR_Z = (-1.0, 5.6)        # the whole arbor
 BARREL_ARBOR_R = 0.5                # the arbor's pivots and plain sections, below and above the drum
-BARREL_INNER_D = 17.0               # inside diameter of the drum's spring chamber (not modelled in the mesh):
-                                    # DS-101 Table 1 variants I and K at demonstration scale
+BARREL_INNER_D = 12.12              # inside diameter of the drum's spring chamber (not modelled in the mesh):
+                                    # DS-101 Rev F: thin spring L's listed barrel at demonstration scale (A, 19:50)
 BARREL_CORE_R = BARREL_INNER_D / 6  # arbor core (hub) radius, one third of the inner radius (DS-101 section 1,
                                     # Grossmann art. 108 to 111, Saunier art. 517); the core spans the drum's z
-BARREL_BORE_R = 2.85                # the drum's bore round the core: radial clearance 0.0167
+BARREL_BORE_R = 2.0367              # the drum's bore round the core: radial clearance 0.0167
 BARREL_SQUARE_SIDE = 1.4            # winding square on the arbor (a square prism on the barrel axis, sides
 BARREL_SQUARE_Z = (3.3, 4.9)        # parallel to x and y) that carries the ratchet; half-diagonal 0.99
 STAGE_BARREL_ARBOR_Z = (-1.0, 1.6)  # stage mode only (old runs): the one-body barrel of data/barrel_stage.stl

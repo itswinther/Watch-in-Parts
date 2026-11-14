@@ -7,9 +7,9 @@
 **Demonstration-scale series, scale 1.617:1 to an 11½‴ calibre (s = 1.617).** Every value on this
 sheet is a material property and does not depend on size. It applies unchanged at any scale.
 
-> **About this document.** Aciers Duval SA is a fictional supplier, used for this exercise only. Every
+> **About this document.** Aciers Duval SA, demonstration series. Every
 > property below comes from the cited producer or reference datasheet. The design allowables in
-> section 7 are calculated from those properties, as their footnotes state.
+> section 8 are calculated from those properties, as their footnotes state.
 
 ## 1. Scope
 

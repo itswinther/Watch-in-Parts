@@ -133,8 +133,9 @@ Checks. Each passes or fails.
    barrel stands still): 144 equal steps covering one full turn of the faster of the two, then, if their speeds
    differ, 144 equal steps covering one full turn of one relative to the other. At every step they intersect by
    at most 0.01 mm3.
-7. **Hour hand.** 8. **Minute hand.** 9. **Seconds hand.** The hands show the time: each of the three moves as
-   that hand of a watch does. A hand is driven only through declared meshes that pass the mesh test (a declared
+7. **Hour hand.** 8. **Minute hand.** 9. **Seconds hand.** The hands show the time, each turning clockwise at a
+   constant speed: the hour hand one turn every 12 h, the minute hand one turn every hour, the seconds hand one turn every minute.
+   A hand is driven only through declared meshes that pass the mesh test (a declared
    mesh that fails it drives nothing), and no mobile may be given two different speeds by the declared meshes.
 10. **Hours and minutes on a common centre.** The axes of the hour hand's mobile and the minute hand's mobile are
     at most 0.01 mm apart.
@@ -191,7 +192,7 @@ fails C3.
 
 Checks:
 
-1. **24-hour hand.** It shows the hour of the day as a 24-hour hand does. It is driven only through declared
+1. **24-hour hand.** It shows the hour of the day, turning clockwise at a constant speed of one turn every 24 h. It is driven only through declared
    meshes that pass the mesh test of Part 1, and no mobile may be given two different speeds by the declared
    meshes.
 2. **24-hour hand placement.** Its mobile's axis is at least 6 mm from the axis of the hour hand's mobile;
