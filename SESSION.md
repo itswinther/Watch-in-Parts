@@ -1569,3 +1569,9 @@ A note for B's builder sessions and for Mikael's session, for information only. 
 - **Files:** `spikes/keyless/runs/INDEX.md`, `runs/prelim_gpt/`, `runs/prelim_sonnet/` (READMEs, trials,
   replay pages, stills). engine.py and grade.py are not pushed (the trace option waits for the engine
   merge).
+
+### 2026-11-14 18:49 | B: builder P started (P5 adapter); smoke round 2 | itswinther + Claude
+- Did: started builder P: `friction_on` and a `keyless` section in the movement format, P5 grading through A's engine (serial or in a fresh interpreter; A's lengths scaled by s in one table checked against A's constants), the QA-W100 Part 5 section; all behind a switch `KEYLESS_IN_JOB`, off until A's v2 keyless reference exists in B's frame, so every current result stays as it is.
+- Smoke round 2 (graded by the runner from the frozen worktree at 071ab86, four-part job): Fable 5.2 run 2 **1.0** (P1..P4 all 1, no timeout), Opus 5.5 run 2 **1.0** (all 1). Sonnet 5.5 run 2: agent finished (77 min), grading still running.
+- Builders now: S (gear strength), P (P5 adapter). Done and merged today: G, R, D, K, N.
+- Files changed: SESSION.md.
