@@ -766,3 +766,9 @@ This is information, so nobody duplicates it. The to-do list says nobody has pac
 - Files changed: `harbor/watch4/*` (new), SESSION.md (row A, two requests ticked, this entry). B's files untouched.
 - Next: Haiku 5.5 via OpenCode ($3 stop), then GPT chains B and C; results appended here.
 
+
+### 2026-11-14 11:35 | A: Mikael's ideas written up; chain C and the Haiku retry cancelled | Mikael + Claude
+- Did: wrote `spikes/IDEAS_MIKAEL_14NOV.md`: position-dependent mechanisms (the main lead, being built as `spikes/keyless/`, a contact simulator plus keyless works); rare domain tools (Swiss-lathe probe, results in `spikes/swiss_probe/RESULTS.md`); the bias concern about Claude designing and grading; sources of unseen expert designs; size realism; the OpenCode findings.
+- Cancelled GPT chain C and the Haiku retry on the current watch, to free Docker for the spikes. GPT chain A was 1.0 on all four stages, and chain B was 1.0 on stages 1 and 2 (stage 3 running, and it will finish). This watch version is about to be replaced by B's `light`, `seated` and `tolerant`. Three chains per model will be run on that version.
+- Running: GPT chain B (stages 3 and 4); `spikes/right_angle/` (GPT trial 1 scored 1.0, trials 2 and 3, then Opus and Sonnet through OpenCode); `spikes/keyless/` (the engine first).
+- For itswinther's session: 90% of grading time is two single-core loops (your 10:30 profile). Worker processes there would speed up every chain we run; we have not touched the grader.
