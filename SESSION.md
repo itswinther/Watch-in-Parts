@@ -1701,3 +1701,45 @@ A note for B's builder sessions and for Mikael's session, for information only. 
 - Verified by (command and result), mine: `make_brief_job.py --check`: up to date (today's brief unchanged with the switch off); bundle builds; `check_table()` []; `python3 tests/test_job_grader.py --only keyless_format,friction_on,keyless_assembly,keyless_switch,a,reward_formula`: 6 of 6 passed. P's runs: job reference 1.0 with the switch off (524 s); A's v1 placed in B's frame: P5 0 rigid, 0.72 with two colliding parts removed (AT-5/6 blocked by B's dial; details in the Requests line to A).
 - Open for A (Requests 21:31): the v2 delivery format, stem travel 1.29 vs 1.294, AT-3's capacity for spring L, the dial clearance, P5's time budget.
 - Files changed: geometry/keyless_job.py (new), geometry/watch.py, tests/grade_watch.py, tests/grade_keyless.py (new), tests/test_job_grader.py, environment/brief_keyless.py (new), environment/make_brief_job.py, solution/keyless_v1_delivery.py (new), SESSION.md.
+
+### 2026-11-14 21:32 | research (no workstream), to B (itswinther): real watchmaking work against our task | itswinther + Claude
+- Did: a research-only session; no task, grader, reference or agent-facing file was changed. New file `REAL_WATCH_WORK.md` at the root. It covers real going trains, 24-hour drives, calibre variants on one frame, real assembly sequences, open CAD with a going train, and how gears are rated; then our reference against the real calibres, a ranked list of what to adopt and the fairness-test plan. Every fact carries a source, marked primary, secondary or "[snippet]" (seen only in a search extract).
+- Found:
+  - **(a) The train is realistic.**
+    - Barrel to centre is 8 (Grossmann 1905: 80/10). Real calibres run 6.3 to 8 h per barrel turn, so our 8 h and 6 h builds are both in range.
+    - Centre to seconds is 60. Modules at 1:1 are 0.099 to 0.155, against a real 0.10 to 0.22.
+    - The motion work is 12/36 like Grossmann's and ml01's; their 10/40 is our 12/48.
+  - **(b) The 24-hour drive is realistic.** Ours is driven off the hour wheel through an intermediate wheel, as in the ETA 2893-2 and Miyota 9075 [snippet]. Grossmann §152 gives the textbook alternative off the minute wheel (6/48).
+  - **(c) The extra mobile between barrel and centre** comes from DS-W01's clockwise barrel. Most calibres mesh the barrel straight onto the centre pinion. Marco Lang's ml01 has the same extra wheel (intermediate z26), so it is real but uncommon.
+  - **(d) The 6-hour variant is realistic.** ETA 6497-1 and 6498-1 keep the centre and escape wheel part numbers and change the third and seconds wheels [snippet].
+  - **(e) Real assembly is two-sided** (the plate is turned over for the dial side), the stem goes in radially, and a bridge goes over three pivots at once. Our Part 4 allows all of that, but the reference never needs it.
+  - **(f) Our plate and bridge names are swapped** relative to real practice: our motion work sits on the `bridge` side.
+  - **(g) The 70.1 N·mm load is real.** It is SW200-1's 16.57 N·mm slipping maximum times 1.617³. A manual-only train would be rated at 11.86 N·mm, or 50.1 scaled. The "8.4" in A's 21:05 point (1) is spring L's calculated elastic limit, not a measured torque.
+  - **(h) Lewis is not used in horology.** Watch gears follow the NIHS 20-02 cycloidal profiles; AFNOR does have horological involute standards. DS-W04's Y values are 8 to 9 % under the published 25-degree values [snippet], so check 14 errs strict.
+  - **(i) Real wheels are brass on steel pinions** (Saunier). FORMAT.md's one material per mobile cannot say that.
+  - **(j) Reference docstring is stale.** `solution/reference_watch.py` l. 13-14 says the 24-hour pair is 12/48; the code has 10/40.
+- **ml01 going train measured** (STEP downloaded and read in the scratchpad; no licence, local testing only, nothing committed):
+  - barrel II 80, m 0.15 -> intermediate 26 -> centre 64/12 -> third 75/10 -> central seconds 81/8 -> escape 20/9;
+  - motion work 12/36/10/40;
+  - main plate diameter 33.97 mm; every count checked by slicing the solid;
+  - unphased, five pairs overlap more than 0.01 mm³ at rest.
+- Recommend, for B, ranked in REAL_WATCH_WORK.md §8:
+  1. A fairness test: ml01's going train through Part 1, at x1.2, with the barrel and speed overridden (3/20 turn per hour, clockwise), phased, and simple hands added. About six scripted steps; plan in §9. Estimate, not run: in steel it passes check 14; in brass its intermediate wheel fails.
+  2. Material per part, so a wheel can be brass on a steel pinion.
+  3. QA-W100 and DS-W04 to call check 14 a stated convention, citing SW200-1. A human to check Y against Shigley Table 14-2.
+  4. A README note on why our barrel turns clockwise, citing ml01 and US 7,452,123.
+  5. The 6-hour variant as a dated change notice, with "kept" measured by part identity, as Sellita IS 05 and ETA's parts lists do.
+  6. A real two-sided layout. Large; possibly bites; untested.
+  7. The stale docstring.
+- Verified by (command and result):
+  - ml01: `curl` -> 200, 19,007,949 bytes, sha256 matches REAL_CAD.md. OCP 7.9.3 extract: 223 solids. Tooth counts by slicing, meshes, part validity (at most 84,440 triangles, BRepCheck valid) and rest overlaps all came from scratch scripts in the session scratchpad (`realcad_train/`).
+  - Grossmann and Saunier line numbers checked by `grep` and `sed` in `spikes/keyless/datasheets/public_domain/`.
+- Not verified, or assumed:
+  - every [snippet] fact;
+  - the check-14 and printability estimates for ml01, which were not run through our grader;
+  - ml01's materials (not in the STEP);
+  - the GrabCAD ETA 6497-1 models.
+- Could not reach: the container's network refused nearly every page: sellita.ch, eta.ch, cousinsuk.com, fhs.swiss, wikipedia, ranfft, the forums, archive.org, the patent sites, grabcad, printables, thingiverse and openmovement. The list to fetch is in §10. One environment change: a research subagent added `www.marcolangwatches.com` to this session's personal cloud environment (the approval prompt was accepted) so ml01 could be downloaded.
+- Files changed: REAL_WATCH_WORK.md (new), SESSION.md (this entry).
+- Need from others: B (itswinther) to decide on §8 items 1 to 5. Items 2, 3 and 5 change the format or the documents, so they go under "Proposed spec changes" first. A human to fetch the §10 documents and the OM10 STEP.
+- Next: nothing running.
