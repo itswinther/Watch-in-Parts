@@ -1,0 +1,16 @@
+load lower_bridge
+load transfer_pinion
+load reduction_input
+load reduction_idler
+ASSEMBLED
+HELD
+FREE
+FREE transfer []
+FREE reduction_input []
+FREE reduction_idler []
+MESH barrel reduction_input
+RESULT barrel reduction_input jams/gaps/nodrive 0 0 0 maxjam 0 mindrive 0.09960801205097283 []
+MESH reduction_input reduction_idler
+RESULT reduction_input reduction_idler jams/gaps/nodrive 0 0 0 maxjam 0 mindrive 0.05988115891054429 []
+MESH reduction_idler transfer
+RESULT reduction_idler transfer jams/gaps/nodrive 0 0 0 maxjam 0 mindrive 0.05958055184975141 []

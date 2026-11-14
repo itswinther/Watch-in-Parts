@@ -1,0 +1,75 @@
+ASSEMBLED
+HELD
+FREE
+FREE transfer []
+FREE minute []
+FREE fast_transfer []
+FREE seconds []
+FREE hour []
+FREE day []
+FREE reduction_input []
+FREE reduction_idler []
+FREE barrel []
+MESH barrel reduction_input
+RESULT barrel reduction_input jams/gaps/nodrive 0 0 0 maxjam 0 mindrive 0.09960801205097283 []
+MESH reduction_input reduction_idler
+RESULT reduction_input reduction_idler jams/gaps/nodrive 0 0 0 maxjam 0 mindrive 0.059881158910544345 []
+MESH reduction_idler transfer
+RESULT reduction_idler transfer jams/gaps/nodrive 0 0 0 maxjam 0 mindrive 0.059580551849751286 []
+MESH transfer minute
+RESULT transfer minute jams/gaps/nodrive 0 0 0 maxjam 0 mindrive 0.12494514261326627 []
+MESH transfer hour
+RESULT transfer hour jams/gaps/nodrive 0 0 0 maxjam 0 mindrive 0.04292440962138198 []
+MESH minute fast_transfer
+RESULT minute fast_transfer jams/gaps/nodrive 0 0 0 maxjam 0 mindrive 0.057012438401725346 []
+MESH fast_transfer seconds
+RESULT fast_transfer seconds jams/gaps/nodrive 0 0 0 maxjam 0 mindrive 0.02010445516170336 []
+MESH transfer day
+RESULT transfer day jams/gaps/nodrive 0 0 0 maxjam 0 mindrive 0.040683567837983714 []
+SPEEDS turns/hour {'barrel': Fraction(-1, 6), 'reduction_input': Fraction(1, 2), 'reduction_idler': Fraction(-1, 2), 'transfer': Fraction(1, 2), 'minute': Fraction(-1, 1), 'hour': Fraction(-1, 12), 'fast_transfer': Fraction(6, 1), 'seconds': Fraction(-60, 1), 'day': Fraction(-1, 24)}
+NONMESH transfer fast_transfer []
+NONMESH transfer seconds []
+NONMESH transfer reduction_input []
+NONMESH transfer barrel []
+NONMESH minute seconds []
+NONMESH minute hour []
+NONMESH minute day []
+NONMESH minute reduction_input []
+NONMESH minute reduction_idler []
+NONMESH minute barrel []
+NONMESH fast_transfer hour []
+NONMESH fast_transfer day []
+NONMESH fast_transfer reduction_input []
+NONMESH fast_transfer reduction_idler []
+NONMESH fast_transfer barrel []
+NONMESH seconds hour []
+NONMESH seconds day []
+NONMESH seconds reduction_input []
+NONMESH seconds reduction_idler []
+NONMESH seconds barrel []
+NONMESH hour day []
+NONMESH hour reduction_input []
+NONMESH hour reduction_idler []
+NONMESH hour barrel []
+NONMESH day reduction_input []
+NONMESH day reduction_idler []
+NONMESH day barrel []
+NONMESH reduction_idler barrel []
+SWEPT SIZE transfer 15.91718898805475
+SWEPT SIZE minute 17.15586956982297
+SWEPT SIZE fast_transfer 16.32610059376004
+SWEPT SIZE seconds 17.781426875360193
+SWEPT SIZE hour 18.07586972804863
+SWEPT SIZE day 20.179435748634468
+SWEPT SIZE reduction_input 17.47053458513265
+SWEPT SIZE reduction_idler 15.110984696238262
+SWEPT SIZE barrel 17.939410683454465
+FIXED SIZE bottom_plate 19.80000116485618
+FIXED SIZE lower_bridge 19.80000116485618
+FIXED SIZE upper_bridge 19.80000116485618
+FIXED SIZE middle_bridge 19.80000116485618
+FIXED SIZE minute_lower_stop 18.629974903035095
+FIXED SIZE seconds_cock 18.629974903035095
+FIXED SIZE day_cock 19.586583024404508
+HEIGHT 11.500000238418579
+BYTE IDENTICAL 20 of 22 ['bottom_plate', 'upper_bridge', 'middle_bridge', 'minute_lower_stop', 'seconds_cock', 'day_cock', 'transfer_minute', 'transfer_hour', 'day_pinion', 'minute_input', 'minute_output', 'minute_hand', 'seconds_transfer_input', 'seconds_transfer_output', 'seconds_pinion', 'seconds_hand', 'hour_wheel', 'hour_hand', 'day_wheel', 'day_hand']

@@ -1,0 +1,63 @@
+loaded bottom_plate
+loaded lower_bridge
+loaded upper_bridge
+loaded minute_seconds_stop
+loaded hour_lower_stop
+loaded seconds_cock
+loaded pillar_0
+loaded pillar_1
+loaded pillar_2
+loaded transfer_pinion
+loaded transfer_minute
+loaded transfer_hour
+loaded minute_input
+loaded minute_output
+loaded minute_hand
+loaded seconds_transfer_input
+loaded seconds_transfer_output
+loaded seconds_pinion
+loaded seconds_hand
+loaded hour_wheel
+loaded hour_hand
+ASSEMBLED
+COLLISION bottom_plate transfer 0.12561162471323772
+COLLISION lower_bridge pillar_0 0.4616226650164929
+COLLISION lower_bridge pillar_1 0.46162267823763337
+COLLISION lower_bridge pillar_2 0.4616227327080242
+COLLISION minute_seconds_stop hour_lower_stop 3.216107395600644
+COLLISION barrel transfer 3.038485268893179
+COLLISION minute fast_transfer 0.014446028135947706
+COLLISION minute seconds 0.7299377547507304
+COLLISION fast_transfer hour 0.8313914471577624
+HELD
+GEARS
+barrel transfer 0 jam 3.038485268893179 drive 2.989222044099219 gap 0
+barrel transfer 128 jam 3.038570213317627 drive 2.989222044099219 gap 0
+barrel transfer 256 jam 3.038570213317627 drive 2.989222044099219 gap 0
+barrel transfer 384 jam 3.038570213317627 drive 2.989222044099219 gap 0
+barrel transfer 512 jam 3.038570213317627 drive 2.989222044099219 gap 0
+barrel transfer 640 jam 3.038570213317627 drive 2.989222044099219 gap 0
+RESULT barrel transfer 3.038570213317627 2.989222044099219 0
+transfer minute 0 jam 0 drive 0.12494520989335674 gap 0.02758295690704347
+transfer minute 128 jam 0 drive 0.1249450551214114 gap 0.028009588955391924
+transfer minute 256 jam 0 drive 0.1249450551214114 gap 0.028009675699768567
+RESULT transfer minute 0 0.1249450551214114 0.028009675699768567
+transfer hour 0 jam 0 drive 0.04292453334909339 gap 0.02733634584046697
+transfer hour 128 jam 0 drive 0.04292441713441684 gap 0.027336564262723184
+transfer hour 256 jam 0 drive 0.04292441713441684 gap 0.027336564262723184
+transfer hour 384 jam 0 drive 0.04292441713441684 gap 0.027336787603300886
+transfer hour 512 jam 0 drive 0.04292441713441684 gap 0.027336787603300886
+transfer hour 640 jam 0 drive 0.04292441713441684 gap 0.027336787603300886
+RESULT transfer hour 0 0.04292441713441684 0.027336787603300886
+minute fast_transfer 0 jam 0.014446028135947706 drive 0.04493591600372989 gap 0
+minute fast_transfer 128 jam 0.014512495170039783 drive 0.04493583193938381 gap 0
+minute fast_transfer 256 jam 0.014512506234831824 drive 0.044935678792832175 gap 0
+minute fast_transfer 384 jam 0.014512506234831824 drive 0.044935678792832175 gap 0
+minute fast_transfer 512 jam 0.014512506234831824 drive 0.044935678792832175 gap 0
+RESULT minute fast_transfer 0.014512533964665859 0.044935678792832175 0
+fast_transfer seconds 0 jam 0 drive 0.03477671485105721 gap 0.02734235457239473
+fast_transfer seconds 128 jam 0 drive 0.034776657637514335 gap 0.027342651057106714
+fast_transfer seconds 256 jam 0 drive 0.034776609292175895 gap 0.027342723312125273
+fast_transfer seconds 384 jam 0 drive 0.034776609292175895 gap 0.027342960839554592
+fast_transfer seconds 512 jam 0 drive 0.034776572148283974 gap 0.027342960839554592
+RESULT fast_transfer seconds 0 0.034776572148283974 0.027342960839554592

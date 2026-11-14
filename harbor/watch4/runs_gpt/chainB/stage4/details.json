@@ -1,0 +1,221 @@
+{
+ "reward": 0.4232,
+ "p": 0.92,
+ "gates": {
+  "files": true,
+  "locked": true,
+  "plan": true
+ },
+ "checks": {
+  "barrel": true,
+  "bottom_plate": true,
+  "lower_bridge": false,
+  "upper_bridge": true,
+  "middle_bridge": true,
+  "minute_lower_stop": true,
+  "seconds_cock": true,
+  "day_cock": true,
+  "transfer_pinion": true,
+  "transfer_minute": true,
+  "transfer_hour": true,
+  "day_pinion": true,
+  "minute_input": true,
+  "minute_output": true,
+  "minute_hand": true,
+  "seconds_transfer_input": true,
+  "seconds_transfer_output": true,
+  "seconds_pinion": false,
+  "seconds_hand": true,
+  "hour_wheel": true,
+  "hour_hand": true,
+  "day_wheel": true,
+  "day_hand": true,
+  "reduction_input": true,
+  "reduction_idler": true
+ },
+ "details": {
+  "files": {},
+  "locked": {
+   "changed": []
+  },
+  "plan": {},
+  "parts": {
+   "hour_wheel": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 53
+   },
+   "transfer_minute": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 60
+   },
+   "middle_bridge": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 236
+   },
+   "upper_bridge": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 54
+   },
+   "hour_hand": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 41
+   },
+   "minute_hand": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 37
+   },
+   "minute_output": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 54
+   },
+   "minute_input": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 81
+   },
+   "seconds_pinion": {
+    "format_messages": [],
+    "worst_volume": 0.7614964998392139,
+    "pose_index": 59,
+    "hit": "minute_input",
+    "poses": 72
+   },
+   "minute_lower_stop": {
+    "format_messages": [],
+    "worst_volume": 0.0032496934969597656,
+    "pose_index": 46,
+    "hit": "seconds_pinion",
+    "poses": 50
+   },
+   "reduction_idler": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 53
+   },
+   "reduction_input": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 53
+   },
+   "seconds_transfer_output": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 48
+   },
+   "seconds_transfer_input": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 62
+   },
+   "transfer_pinion": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 69
+   },
+   "lower_bridge": {
+    "format_messages": [],
+    "worst_volume": 355.44653848017987,
+    "pose_index": 66,
+    "hit": "middle_bridge",
+    "poses": 85
+   },
+   "day_wheel": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 49
+   },
+   "barrel": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 45
+   },
+   "day_cock": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 48
+   },
+   "seconds_cock": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 48
+   },
+   "bottom_plate": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 31
+   },
+   "day_hand": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 171
+   },
+   "seconds_hand": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 168
+   },
+   "day_pinion": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 49
+   },
+   "transfer_hour": {
+    "format_messages": [],
+    "worst_volume": 0.0,
+    "pose_index": -1,
+    "hit": null,
+    "poses": 113
+   }
+  }
+ },
+ "skipped": []
+}

@@ -1,0 +1,9 @@
+Stage 3 submission: movement.json and 24 STEP parts. The input path is barrel 96 -> reduction_input 32, then two 24:24 external meshes to the original transfer mobile. Only received lower_bridge.step and transfer_pinion.step changed; 20/22 received part files remain byte-for-byte unchanged in their original roles and on their original driven mobile axes. The retention factor is 1.
+
+Verification used the supplied kernel's STEP tessellation and Manifold solids. Full specified mesh sampling passed for all eight declared meshes: zero jams, engagement gaps, or failed quarter-pitch drive tests. Assembled overlap, 72-position free rotation, six-direction retention, and both 144-position nonmesh collision sweeps passed. Exact fractions give clockwise hand periods of 12 hours, 1 hour, 1 minute, and 24 hours. Hand reach and day placement pass. The maximum swept radius is 20.17944 mm against 20.7 mm; total height is 11.50001 mm against 13.4 mm. All 24 parts passed the specified voxel printability operation at three grid offsets, 72 checks total; largest measured printable-body deviation was 0.12248 mm against 0.2 mm. tools/submit.py accepted the updated 24-part movement.
+
+Difficulties in order: the first survey script was named inspect.py and shadowed Python's inspect module; it was renamed. Duplicate consecutive gear-profile vertices initially prevented CAD extrusion; they were removed. The first physical checks found bearing arms crossing the added shafts and incorrect barrel-pinion phase causing jams. The arms were shortened and the pinion phase corrected; the full checks then passed. No unresolved specification ambiguity or failure of the provided tools was encountered. The optional shell command ps was unavailable; it was not needed.
+
+Validation details are in full_check.log, printability_all.log, hand_checks.log, and final_submit.log. rework.py reproduces the changed and new CAD parts from previous/.
+
+Outside access: none
