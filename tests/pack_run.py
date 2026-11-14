@@ -23,9 +23,10 @@ manifest.json:
     run              name of RUN_DIR (its basename only)
     model            model named in the first transcript's init event (or null)
     harness          --harness, else "claude-code <version> headless (claude -p, stream-json)"
-    chain_score      product of the stage rewards; a skipped stage counts 0; null if a run stage is ungraded
+    chain_score      product of the rewards of the expected stages 1 to 4 (EXPECTED_STAGES) and any other
+                     stage found; a skipped or missing stage counts 0; null if a stage that ran is ungraded
     stages_run       number of stages with a transcript
-    stages: list of {stage, ran, skipped, start, end, duration_s, exit_code, killed_by_time_limit,
+    stages: list of {stage, ran, skipped, missing, start, end, duration_s, exit_code, killed_by_time_limit,
                      tool_calls, num_turns, cost_usd, result_subtype, reward, p, failed_gates,
                      failed_checks, inherited_failures, new_failures}
         inherited_failures / new_failures: failed checks of this stage that also / did not fail
@@ -45,6 +46,7 @@ import shutil
 import sys
 
 MAX_FILE_BYTES = 64 * 1024 * 1024
+EXPECTED_STAGES = (1, 2, 3, 4)      # the chain; same list as STAGES in tests/grade_chain.py
 HOST = re.compile(r"(?:/home|/tmp|/root|/Users|/private|/var|/mnt|/workspace)(?:/[^\s\"'\\<>|:;,()\[\]{}`]*)*")
 
 
@@ -152,7 +154,7 @@ def main(argv):
                 exits[int(m.group(1))] = int(m.group(2))
     stages, prev_failed, model, version = [], None, None, None
     chain, ungraded = 1.0, False
-    for st in discover(run):
+    for st in sorted(set(EXPECTED_STAGES) | set(discover(run))):
         sd = os.path.join(run, "stage%d" % st)
         od = os.path.join(out, "stage%d" % st)
         tr = os.path.join(run, "stage%d.jsonl" % st)
@@ -185,14 +187,15 @@ def main(argv):
         failed = failed_gates + failed_checks
         inherited = sorted(set(failed) & prev_failed) if prev_failed is not None else []
         new = sorted(set(failed) - set(inherited))
-        if skipped:
+        missing = not ran and not os.path.isdir(sd) and reward is None
+        if skipped or missing:
             chain *= 0.0
         elif reward is None:
             ungraded = True
         else:
             chain *= reward
         code = exits.get(st)
-        stages.append({"stage": st, "ran": ran, "skipped": skipped, "start": start, "end": end,
+        stages.append({"stage": st, "ran": ran, "skipped": skipped, "missing": missing, "start": start, "end": end,
                        "duration_s": (end - start) if start is not None and end is not None else None,
                        "exit_code": code, "killed_by_time_limit": code == 124,
                        "tool_calls": facts["tool_calls"], "num_turns": facts["num_turns"], "cost_usd": facts["cost_usd"],

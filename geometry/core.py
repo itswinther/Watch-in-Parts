@@ -36,7 +36,10 @@ def read_stl(path, max_triangles, max_bytes):
         for line in text.splitlines():
             p = line.split()
             if len(p) == 4 and p[0] == "vertex":
-                vals.append((float(p[1]), float(p[2]), float(p[3])))
+                try:
+                    vals.append((float(p[1]), float(p[2]), float(p[3])))
+                except ValueError:
+                    raise FormatError("non-numeric vertex coordinate")
                 if len(vals) > 3 * max_triangles:
                     raise FormatError("more than %d triangles" % max_triangles)
         if not vals or len(vals) % 3:

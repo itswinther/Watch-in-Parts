@@ -48,9 +48,11 @@ The barrel is a mobile named `barrel`. You must hold it like any other mobile.
 A folder `work/` containing `movement.json` and one STEP file per part,
 `parts/<name>.step`, made with a CAD kernel (CadQuery 2.8.0 / OpenCASCADE is
 installed). STL part files are not accepted. Keep the scripts that made your
-parts in `scripts/`; they are copied with your submission and kept with it, but
-nothing in them is run or graded, and a later stage does not receive them (it
-gets `movement.json` and `parts/`, in `work/` and again in `previous/`).
+parts in `scripts/`; they are copied with your submission and archived with it,
+but nothing in them is run or graded. **A later stage does not receive your
+scripts**: the next engineer gets only `movement.json` and the `parts/` STEP
+files (in `work/` and again in `previous/`), and reworks the movement from
+those files alone.
 
 The supplied barrel is the one exception: it is given as a mesh,
 `meshes/barrel.stl` (binary STL, millimetres, in its place). You do not submit
@@ -58,15 +60,21 @@ it. To use it in your own checks, load it as a `manifold3d` solid, for example
 with `tools/kernel.py`: `kernel.tris_to_manifold(kernel.read_stl(path, 200000,
 33554432))`.
 
-Each part is in its assembled position. At most 60 parts. Part names use
-letters, digits, `_` and `-`. How a part file becomes the solid that every test
+Each part is in its assembled position. At most 60 parts. Part and mobile
+names use letters, digits, `_` and `-`, 1 to 40 characters; `barrel` is taken
+by the supplied barrel and may not name a part or another mobile. Tooth counts
+in `meshes` are integers from 3 to 1000. `movement.json` may be at most
+1,048,576 bytes and `assembly.json` at most 67,108,864 bytes. Every file the
+grader opens (`movement.json`, `assembly.json`, each part file, and the `parts/`
+folder) must be a real file or folder inside the submission folder: a symbolic
+link, or a file outside the folder, is a format error. How a part file becomes the solid that every test
 below uses:
 
 - At most 16,777,216 bytes. The file's length unit must be millimetre; a file
   in any other unit (inch, metre, ...) is rejected, not converted. It must hold
   exactly one solid, valid by OpenCASCADE's shape check, and nothing outside
-  that solid. A file with more than 500 flat three-sided faces is rejected as a
-  faceted mesh rather than a CAD solid. Reading and meshing one file may take
+  that solid. A file whose solid has more than 500 flat faces with exactly three
+  edges is rejected (the rule counts only such triangular faces). Reading and meshing one file may take
   at most 120 s and 4,096 MB of memory (it runs in its own process).
 - The solid is meshed with OpenCASCADE (`BRepMesh_IncrementalMesh`) with a
   linear deflection of 0.001 mm (absolute) and an angular deflection of 0.1

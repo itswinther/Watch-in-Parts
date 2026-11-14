@@ -24,6 +24,10 @@ STEP_MEMORY_MB = __STEP_MEMORY_MB__
 SELF_UNION_TOL = __SELF_UNION_TOL__
 MAX_SCRIPTS_BYTES = __MAX_SCRIPTS_BYTES__
 MAX_SCRIPT_FILES = __MAX_SCRIPT_FILES__
+MAX_JSON_BYTES = __MAX_JSON_BYTES__
+MAX_ASSEMBLY_BYTES = __MAX_ASSEMBLY_BYTES__
+MIN_TEETH, MAX_TEETH = __MIN_TEETH__, __MAX_TEETH__
+MAX_NAME_LEN = __MAX_NAME_LEN__
 NAME = re.compile(r"__NAME_RE__")
 WORK, SUBMIT = os.path.join(os.getcwd(), "work"), os.path.join(os.getcwd(), "submission")
 SCRIPTS = os.path.join(os.getcwd(), "scripts")
@@ -74,8 +78,11 @@ def xy(v, where):
 
 
 def main():
+    mj = os.path.join(WORK, "movement.json")
+    if os.path.isfile(mj) and os.path.getsize(mj) > MAX_JSON_BYTES:
+        raise Bad("movement.json larger than %d bytes" % MAX_JSON_BYTES)
     try:
-        with open(os.path.join(WORK, "movement.json")) as f:
+        with open(mj) as f:
             doc = json.load(f)
     except (OSError, ValueError):
         raise Bad("work/movement.json is missing or not valid JSON")
@@ -89,7 +96,9 @@ def main():
             raise Bad("%s: needs a non-empty list of part names" % where)
         for n in lst:
             if not isinstance(n, str) or not NAME.match(n):
-                raise Bad("%s: bad part name %r" % (where, n))
+                raise Bad("%s: bad part name %r (letters, digits, _ and -, 1 to %d characters)" % (where, n, MAX_NAME_LEN))
+            if n == "barrel":
+                raise Bad("%s: 'barrel' is the supplied barrel and cannot be a part name" % where)
             if n in names:
                 raise Bad("part '%s' is used more than once" % n)
             names.append(n)
@@ -99,7 +108,7 @@ def main():
         raise Bad("'mobiles' must be a non-empty object")
     for k, m in mob.items():
         if not NAME.match(str(k)) or k == "barrel" or not isinstance(m, dict):
-            raise Bad("bad mobile %r" % (k,))
+            raise Bad("bad mobile %r (letters, digits, _ and -, 1 to %d characters, not 'barrel')" % (k, MAX_NAME_LEN))
         xy(m.get("axis"), "mobile '%s' axis" % k)
         take(m.get("parts"), "mobile '%s'" % k)
     if len(names) > MAX_PARTS:
@@ -108,8 +117,9 @@ def main():
     for i, e in enumerate(doc.get("meshes") or []):
         if not isinstance(e, dict) or e.get("driver") not in known or e.get("driven") not in known or e.get("driver") == e.get("driven"):
             raise Bad("meshes[%d]: unknown or repeated mobile" % i)
-        if not all(isinstance(e.get(t), int) and 3 <= e[t] <= 1000 for t in ("driver_teeth", "driven_teeth")):
-            raise Bad("meshes[%d]: tooth counts must be integers from 3 to 1000" % i)
+        if not all(isinstance(e.get(t), int) and not isinstance(e.get(t), bool) and MIN_TEETH <= e[t] <= MAX_TEETH
+                   for t in ("driver_teeth", "driven_teeth")):
+            raise Bad("meshes[%d]: tooth counts must be integers from %d to %d" % (i, MIN_TEETH, MAX_TEETH))
     hands = doc.get("hands")
     if not isinstance(hands, dict):
         raise Bad("'hands' must be an object")
@@ -132,6 +142,8 @@ def main():
     scripts = script_files()
     asm = os.path.join(WORK, "assembly.json")
     if os.path.isfile(asm):
+        if os.path.getsize(asm) > MAX_ASSEMBLY_BYTES:
+            raise Bad("assembly.json larger than %d bytes" % MAX_ASSEMBLY_BYTES)
         try:
             with open(asm) as f:
                 a = json.load(f)

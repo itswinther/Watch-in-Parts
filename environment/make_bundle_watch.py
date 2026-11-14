@@ -35,8 +35,11 @@ def main(argv):
         sub = (sub.replace("__MAX_PARTS__", str(W.MAX_PARTS)).replace("__MAX_TRIANGLES__", str(W.MAX_TRIANGLES))
                .replace("__MAX_STL_BYTES__", str(W.MAX_STL_BYTES)).replace("__NAME_RE__", W.NAME_RE.pattern))
         for k in ("MAX_STEP_BYTES", "STEP_LINEAR_DEFLECTION", "STEP_ANGULAR_DEFLECTION", "STEP_MAX_TRIANGLE_FACES",
-                  "STEP_TIMEOUT_S", "STEP_MEMORY_MB", "SELF_UNION_TOL", "MAX_SCRIPTS_BYTES", "MAX_SCRIPT_FILES"):
+                  "STEP_TIMEOUT_S", "STEP_MEMORY_MB", "SELF_UNION_TOL", "MAX_SCRIPTS_BYTES", "MAX_SCRIPT_FILES",
+                  "MAX_JSON_BYTES", "MAX_ASSEMBLY_BYTES", "MIN_TEETH", "MAX_TEETH", "MAX_NAME_LEN"):
             sub = sub.replace("__%s__" % k, repr(getattr(W, k)))
+        if "{1,%d}" % W.MAX_NAME_LEN not in W.NAME_RE.pattern:
+            raise SystemExit("NAME_RE and MAX_NAME_LEN disagree")
         if re.search(r"__[A-Z_]+__", sub):
             raise SystemExit("submit template has an unfilled placeholder")
         with open(os.path.join(out, "tools", "submit.py"), "w") as f:
