@@ -70,9 +70,11 @@ def grader_timeout_s():
     with open(GRADER, encoding="utf-8") as f:
         src = f.read()
     m = re.search(r"^TIMEOUT_S = (\d+)\s*$", src, re.M)
-    if not m or "signal.setitimer(signal.ITIMER_REAL, TIMEOUT_S)" not in src:
-        raise SystemExit("tests/grade_watch.py changed: TIMEOUT_S or its per-check timer not found; update make_brief_job.py")
-    return int(m.group(1))
+    j = re.search(r"^JOB_TIME_LIMIT_S = (\d+)\s", src, re.M)
+    if not m or not j or "limit = min(limit, deadline - time.monotonic())" not in src \
+            or "signal.setitimer(signal.ITIMER_REAL, limit)" not in src:
+        raise SystemExit("tests/grade_watch.py changed: TIMEOUT_S, JOB_TIME_LIMIT_S or the timer not found; update make_brief_job.py")
+    return int(m.group(1)), int(j.group(1))
 
 
 def _literals():
@@ -416,7 +418,8 @@ Terms used below:
   barrel at the speed the order gives for the build being judged. Every declared mesh is external: its two
   mobiles turn in opposite directions.
 - **Computing time.** Each condition and each check has up to {tout} s of elapsed (wall-clock) time on the
-  inspection machine; one that runs out of time fails.
+  inspection machine, and the whole inspection has up to {jtout} s; a condition or check that runs out of time, or
+  that would start after the whole inspection's time has run out, fails.
 
 {parts}
 ## How you work
@@ -426,7 +429,7 @@ You work alone and unattended; nobody answers questions during the job. The job 
 Report what you did and whether you reached anything outside this container.
 """.format(scale=num(round(scale, 3)), mf=num(W.MIN_FEATURE), b8=hours(W.BARREL_TURNS_PER_HOUR),
            b6=hours(W.CHANGED_BARREL_TURNS_PER_HOUR), nw=words[n], frame=frame, vt=vt(), bn=supplied_barrel_no(),
-           real=num(REAL_CALIBRE_DIAMETER_MM), tout=grader_timeout_s(), hreq=hands_required_text(),
+           real=num(REAL_CALIBRE_DIAMETER_MM), tout=grader_timeout_s()[0], jtout=grader_timeout_s()[1], hreq=hands_required_text(),
            cn=ordered_case_no(),
            parts="\n".join(p(L) for p in PARTS))
 
@@ -724,7 +727,7 @@ def traceability(L, B):
          "`movement.json` (Decisions 15:44, one-job grader)", "", P, "Part 3", "C4"),
         ("hands required by the loader (`Movement.__init__`): %s; `day` optional" % ", ".join(HANDS_REQUIRED), "",
          "`FORMAT.md` and " + P, "`hands` item; Part 1", "C1"),
-        ("TIMEOUT_S in `tests/grade_watch.py` (per condition and check, wall clock)", grader_timeout_s(), P,
+        ("TIMEOUT_S, JOB_TIME_LIMIT_S in `tests/grade_watch.py` (per condition and check; whole inspection; wall clock)", grader_timeout_s(), P,
          "Terms used below", "Computing time"),
         ("DAY_HAND_OFFSET, DAY_HAND_REACH", (W.DAY_HAND_OFFSET, W.DAY_HAND_REACH), P, "Part 2", "check 2"),
         ("ASM_STEP, ASM_CLEAR, ASM_MAX_POSES, pose tolerance", (W.ASM_STEP, W.ASM_CLEAR, W.ASM_MAX_POSES, L["pose_tol"]),

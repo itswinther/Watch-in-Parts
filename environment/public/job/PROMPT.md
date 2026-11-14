@@ -81,7 +81,8 @@ Terms used below:
   barrel at the speed the order gives for the build being judged. Every declared mesh is external: its two
   mobiles turn in opposite directions.
 - **Computing time.** Each condition and each check has up to 600 s of elapsed (wall-clock) time on the
-  inspection machine; one that runs out of time fails.
+  inspection machine, and the whole inspection has up to 3600 s; a condition or check that runs out of time, or
+  that would start after the whole inspection's time has run out, fails.
 
 ### Part 1: going train and hands (`movement.json`)
 

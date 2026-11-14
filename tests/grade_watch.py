@@ -55,7 +55,7 @@ JOB_PARTS = (
      dict(JOB_CHECKS_1, **JOB_CHECKS_2)),
     ("P4", "assembly", Fraction(25, 100), ("files", "plan"), None),
 )
-JOB_TIME_LIMIT_S = 1500     # s, whole run: once it has passed, every check not yet run fails (kept well under a 30-minute verifier)
+JOB_TIME_LIMIT_S = 3600     # s, whole run: generous (the reference takes 7 to 10 min); once it has passed, every check not yet run fails, and a running check is stopped
 
 
 class _Timeout(Exception):

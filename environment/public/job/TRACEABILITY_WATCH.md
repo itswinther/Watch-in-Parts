@@ -32,7 +32,7 @@ speeds and directions, and the weights of the checks.
 | C3: `hands.day` declared, its part not the hour, minute or seconds hand's part (Decisions 15:44, one-job grader) |  | `PROMPT.md` | Part 2 | C3 (also applied to `variant_6h.json` in Part 3) |
 | C4: `variant_6h.json` has the same `fixed` list (same names, same order) and the same `case_centre` as `movement.json` (Decisions 15:44, one-job grader) |  | `PROMPT.md` | Part 3 | C4 |
 | hands required by the loader (`Movement.__init__`): hour, minute, seconds; `day` optional |  | `FORMAT.md` and `PROMPT.md` | `hands` item; Part 1 | C1 |
-| TIMEOUT_S in `tests/grade_watch.py` (per condition and check, wall clock) | 600 | `PROMPT.md` | Terms used below | Computing time |
+| TIMEOUT_S, JOB_TIME_LIMIT_S in `tests/grade_watch.py` (per condition and check; whole inspection; wall clock) | (600, 3600) | `PROMPT.md` | Terms used below | Computing time |
 | DAY_HAND_OFFSET, DAY_HAND_REACH | (6.0, 3.0) | `PROMPT.md` | Part 2 | check 2 |
 | ASM_STEP, ASM_CLEAR, ASM_MAX_POSES, pose tolerance | (0.2, 5.0, 1500, '1e-6') | `PROMPT.md` | Part 4 | rules 1 to 5 |
 | MAX_* sizes, NAME_RE, MIN_TEETH, MAX_TEETH, STEP_* meshing numbers, SELF_UNION_TOL |  | `FORMAT.md` |  | one statement each |
