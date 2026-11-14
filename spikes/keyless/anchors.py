@@ -105,6 +105,17 @@ def rep_bad_claim(d, p):
     json.dump({"steps": {k: "probably" for k in C.STEPS}, "summary": "x"}, open(p, "w"))
 
 
+def only_stem(j):
+    j["mobiles"] = {"stem": j["mobiles"]["stem"], "barrel": j["mobiles"]["barrel"]}
+    j["fixed"] = []
+
+
+def drop_click_and_setting(j):
+    for m in ("click", "setting_wheel"):
+        j["mobiles"].pop(m, None)
+    j["fixed"] = [f for f in j["fixed"] if f not in ("click_post", "setting_post")]
+
+
 def symlink_part(d):
     p = os.path.join(d, "parts", "click.stl")
     os.remove(p)
@@ -122,6 +133,11 @@ def open_mesh(d):
 ANCHORS = [
     # (name, build options or None for an empty folder, post-edit, want, how[, field])
     ("reference", {}, None, 1.0, "eq"),
+    ("reference, repeat 2", {}, None, 1.0, "eq"),
+    ("reference, repeat 3", {}, None, 1.0, "eq"),
+    ("stop early: only the stem and the barrel wheel", {}, edit_json(only_stem), 0.0, "eq"),
+    ("stop early: reference without the click and the setting train", {}, edit_json(drop_click_and_setting),
+     upto(2), "le"),
     ("do nothing (empty folder)", None, None, 0.0, "eq"),
     ("Breguet teeth symmetric (ramps both ways): cannot wind", {"breguet_steep": 0.5}, None, 0.0, "eq"),
     ("no click", {"click": False}, None, upto(2), "eq"),
@@ -146,9 +162,7 @@ ANCHORS = [
     ("X a part mesh with one triangle missing (open)", {}, open_mesh, 0.0, "eq"),
     ("X click a 0.002-thick sliver (passes through)", {"sliver_click": True}, None, upto(2), "le"),
     ("X click declared fixed (a permanent brake)", {}, edit_json(click_fixed), 0.0, "eq"),
-    # A pushed body moves only as far as it must, so a free click stays just clear of the tooth tip and
-    # catches the next steep face, like a sprung one. Same geometry, same work: allowed up to full marks.
-    ("X click declared free, no spring (same geometry as a sprung click)", {}, edit_json(click_free), 1.0, "le"),
+    ("X click declared free, no spring: the rig's taps in AT-2 move it out", {}, edit_json(click_free), upto(2), "le"),
     ("X click spring pointing away from the ratchet", {"rest_sign_click": -1}, None, upto(2), "le"),
     ("X a mobile named 'fixed' (shadowing the grader's body)", {}, edit_json(named_fixed), 0.0, "eq"),
     ("X a supplied part declared as a spring", {}, edit_json(supplied_spring), 0.0, "eq"),

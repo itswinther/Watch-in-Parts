@@ -35,6 +35,9 @@ RESERVE_MIN = 38.0               # ... the power reserve from full wind, less th
 FREE_RUN_DEG = 20.0              # ... and the arbor, turned forward by itself, must not be dragged or locked
 FREE_RUN_STEP = 0.5
 HOLD_STEPS = 40                  # AT-2: crown let go (free to turn) for this many steps
+TAP_EVERY = 5                    # AT-2: the rig taps the movement every 5 steps while the crown is let go ...
+TAP_ARC = 0.05                   # ... each tap moves every free part up to this far (surface travel) in the
+                                 # direction it can move furthest; sprung parts return, free parts do not
 CLICK_RUNBACK = 30.0             # ... the arbor may run back at most this much (2 teeth of a 24-tooth ratchet)
 HOLD_TOL = 4.0                   # AT-4 and AT-5: the arbor may lose at most this much
 STILL_TOL = 1.0                  # a train counts as driven if it moves more than this in a test turn
