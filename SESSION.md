@@ -9,7 +9,7 @@ table. Everything below "Session entries" is append-only, newest at the bottom.
 | ID | Workstream | Owner | Status | Last update |
 | --- | --- | --- | --- | --- |
 | A | Harness wiring | Mikael | starting: adding the organisers' starter kit to the repo | 2026-11-14 01:40 |
-| B | Reference script and grader (H1) | itswinther | reference scores 1.0, 14 anchors as expected; NOW: writing agent-facing spec + command-line tools, then a first agent attempt outside Harbor | 2026-11-14 02:04 |
+| B | Reference script and grader (H1) | itswinther | first agent attempt scored 1.0 in 5 minutes: H1 shows NO GAP as specified. Waiting for a human decision on how to make it harder | 2026-11-14 02:15 |
 | C | Hold the Line spike | unassigned | not started | |
 | D | Mentor questions, anchors, transcripts | unassigned | not started | |
 | E | Analysis, demo and story | Yoseph | paused: Yoseph is not working overnight | 2026-11-14 01:40 |
@@ -52,6 +52,7 @@ Write the answer and who gave it next to the question, then tick it.
 - [ ] When do the AfterQuery demo and rerun happen?
 - [ ] What does the scoring skeleton record when the verifier is killed or times out?
 - [ ] Can agent network access be limited to the model API?
+- [ ] H1 scored 1.0 on the first agent attempt (02:15). Do we harden Board in a Box, or move weight to Hold the Line? Needs a human answer before more is built.
 
 ## Decisions
 
@@ -182,3 +183,19 @@ Template:
 - Files changed: SESSION.md.
 - Need from others: nothing new.
 - Next: report the agent's score, what it failed and why.
+
+### 2026-11-14 02:15 | B first agent attempt (result) | itswinther + Claude
+- Did: gave a fresh agent (a subagent of this session, same model) a clean folder holding only `INSTRUCTION.md`, `SPEC_PUBLIC.md`, the supplied meshes and the tools (`tools_cli.py` plus `geometry/` without `checks.py`). Then graded what it submitted. Also measured grading time on a large submission.
+- Verified by (command and result):
+  - `cd tests && python3 -I grade.py .../agent1/submission/base.stl .../door.stl .../assembly.json` printed `"reward": 1.0, "p": 1.0, "strict": true`, all 5 gates and 19 checks true.
+  - The agent took 4 min 54 s, 7 tool calls, about 110,000 tokens, one 66-line build script, one submission. It did not iterate: the first build passed every measurement it ran.
+  - Its design matches the reference in every main decision: raised floor with the door lapped outside, tilt 16 degrees, slide +X, flatten, slide -X, drop 2.0. It located the board in +X with a block on the wall instead of pegs.
+  - Grading time: a 123,392-triangle base and 19,200-triangle door with 2,000 poses per body graded in 16.3 s and scored 1.0.
+- Finding: H1 as specified shows no gap against this model. The task is a fully stated numeric constraint problem with tools that measure every constraint, and the agent solved it in one pass.
+- Not verified, or assumed:
+  - The run was contaminated: the harness injects the repo's CLAUDE.md into subagents, and CLAUDE.md contains the "Internal note for workstream B" that describes the board path. The agent reported this itself. An uninformed agent might do worse, but one sentence of hint does not explain a 5-minute perfect score.
+  - The judged model and harness are unknown; this was not run in Harbor or OpenCode. One run only.
+- Issues the agent reported in the tools and spec: `constants.py` in the tools bundle shows check IDs, weights and the reference volume, and comments name `SESSION.md` and `solution/reference.py`; the tools help mentions a `--battery-pose` option that does not exist; `distance` stops at 5.0 and the spec does not say so; no tool gives the ring area or the lead distance directly; nothing requires the base to be a tub or the door to be retained.
+- Files changed: `transcripts/agent1/` (the agent's script, its three submitted files, grader details), SESSION.md.
+- Need from others: a human decision. Options: (a) rerun clean after removing the internal note from CLAUDE.md, to confirm; (b) make H1 harder; (c) give Hold the Line an owner now. See Open questions.
+- Next: nothing built until the decision.

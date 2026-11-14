@@ -1,0 +1,142 @@
+{
+ "reward": 1.0,
+ "p": 1.0,
+ "strict": true,
+ "gates": {
+  "G1": true,
+  "G2": true,
+  "G3": true,
+  "G4": true,
+  "G5": true
+ },
+ "checks": {
+  "A1": true,
+  "A2": true,
+  "A3": true,
+  "A4": true,
+  "F1": true,
+  "F2": true,
+  "F3": true,
+  "F4": true,
+  "F5": true,
+  "F6": true,
+  "K1": true,
+  "K2": true,
+  "K3": true,
+  "K4": true,
+  "W1": true,
+  "W2": true,
+  "S1": true,
+  "S2": true,
+  "M1": true
+ },
+ "details": {
+  "G1": {},
+  "G2": {
+   "max_outside": 0.0
+  },
+  "G3": {
+   "worst_volume": 0.0,
+   "pair": null
+  },
+  "G4": {
+   "messages": []
+  },
+  "G5": {
+   "outside_reaches_within": 2.25
+  },
+  "A1": {
+   "worst_volume": 0.0,
+   "pose_index": -1,
+   "with": null
+  },
+  "A2": {
+   "worst_volume": 0.0,
+   "pose_index": -1,
+   "with": null
+  },
+  "A3": {
+   "worst_volume": 0.0,
+   "pose_index": -1,
+   "with": null
+  },
+  "A4": {
+   "worst_volume": 0.0,
+   "pose_index": -1,
+   "with": null
+  },
+  "F1": {
+   "areas": [
+    18.770607282275268,
+    18.770607282275275,
+    18.770607282068504,
+    18.770607282068458
+   ]
+  },
+  "F2": {
+   "volumes": {
+    "+X": 2.7999785900118943,
+    "-X": 10.399999690055846,
+    "+Y": 22.399829101562375,
+    "-Y": 22.39999933242798,
+    "-Z": 53.329046074085774
+   }
+  },
+  "F3": {
+   "volumes": {
+    "+X": 121.49996337890634,
+    "-X": 86.40000915527342,
+    "+Y": 166.28994140624997,
+    "-Y": 138.2400146484375,
+    "+Z": 1296.0000000000005,
+    "-Z": 2304.000549316406
+   }
+  },
+  "F4": {
+   "gaps": {
+    "J1": 1.4,
+    "J2": 0.5,
+    "C1": 1.4,
+    "J4": 1.4
+   }
+  },
+  "F5": {
+   "volume_in_swell_space": 0.0
+  },
+  "F6": {
+   "distance": 18.35783211602067
+  },
+  "K1": {
+   "volume": 0.0
+  },
+  "K2": {
+   "volume": 0.0
+  },
+  "K3": {
+   "open_area": 96.875,
+   "limit": 130.5
+  },
+  "K4": {
+   "open_area": 69.20514621075799,
+   "limit": 78.5319312733193
+  },
+  "W1": {
+   "pieces": 1,
+   "max_deviation": 0.4898979485566356
+  },
+  "W2": {
+   "pieces": 1,
+   "max_deviation": 0.4898979485566356
+  },
+  "S1": {
+   "volume": 381.21612716469906
+  },
+  "S2": {
+   "volume": 77.63196381795339
+  },
+  "M1": {
+   "volume": 15005.896153130549,
+   "budget": 17333.444
+  }
+ }
+}
