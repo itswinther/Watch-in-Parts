@@ -1,0 +1,317 @@
+{
+ "spring_full_wind": {
+  "barrel_torque_nmm": 3.735,
+  "mu0.15": {
+   "seconds_torque_ideal_nmm": 0.00778125,
+   "seconds_torque_mean_nmm": 0.00712999817035757,
+   "seconds_torque_worst_nmm": 0.00655557860439774,
+   "overall_eff_mean": 0.9163049857487641,
+   "overall_eff_worst": 0.8424839973523199,
+   "meshes": [
+    {
+     "pair": "barrel/third",
+     "T_in_nmm": 3.735,
+     "peak_total_normal_n": 0.4616428031383738,
+     "grader_formula_force_n": 0.38906338801711843
+    },
+    {
+     "pair": "third/centre",
+     "T_in_nmm": 0.91787625,
+     "peak_total_normal_n": 0.14490660318830245,
+     "grader_formula_force_n": 0.1245017760342368
+    },
+    {
+     "pair": "centre/fourth",
+     "T_in_nmm": 0.45177869025,
+     "peak_total_normal_n": 0.056208745005483604,
+     "grader_formula_force_n": 0.04899190442225393
+    },
+    {
+     "pair": "fourth/seconds",
+     "T_in_nmm": 0.05860473169923,
+     "peak_total_normal_n": 0.007238434292732082,
+     "grader_formula_force_n": 0.006484486005306857
+    }
+   ],
+   "advances_if_seconds_load_below_nmm": 0.00655557860439774
+  },
+  "mu0.44": {
+   "seconds_torque_ideal_nmm": 0.00778125,
+   "seconds_torque_mean_nmm": 0.0059527876611303,
+   "seconds_torque_worst_nmm": 0.004948138766522952,
+   "overall_eff_mean": 0.765016888177388,
+   "overall_eff_worst": 0.6359053836495361,
+   "meshes": [
+    {
+     "pair": "barrel/third",
+     "T_in_nmm": 3.735,
+     "peak_total_normal_n": 0.5383781383737518,
+     "grader_formula_force_n": 0.38906338801711843
+    },
+    {
+     "pair": "third/centre",
+     "T_in_nmm": 0.886689,
+     "peak_total_normal_n": 0.162806725489301,
+     "grader_formula_force_n": 0.1245017760342368
+    },
+    {
+     "pair": "centre/fourth",
+     "T_in_nmm": 0.42299498744999997,
+     "peak_total_normal_n": 0.06152434938716405,
+     "grader_formula_force_n": 0.04899190442225393
+    },
+    {
+     "pair": "fourth/seconds",
+     "T_in_nmm": 0.051802786129709996,
+     "peak_total_normal_n": 0.007484644610712187,
+     "grader_formula_force_n": 0.006484486005306857
+    }
+   ],
+   "advances_if_seconds_load_below_nmm": 0.004948138766522952
+  },
+  "mu0.51": {
+   "seconds_torque_ideal_nmm": 0.00778125,
+   "seconds_torque_mean_nmm": 0.00568851060736474,
+   "seconds_torque_worst_nmm": 0.004593052316906715,
+   "overall_eff_mean": 0.73105357203081,
+   "overall_eff_worst": 0.5902717836988549,
+   "meshes": [
+    {
+     "pair": "barrel/third",
+     "T_in_nmm": 3.735,
+     "peak_total_normal_n": 0.5608840442225392,
+     "grader_formula_force_n": 0.38906338801711843
+    },
+    {
+     "pair": "third/centre",
+     "T_in_nmm": 0.879125625,
+     "peak_total_normal_n": 0.16802962587731812,
+     "grader_formula_force_n": 0.1245017760342368
+    },
+    {
+     "pair": "centre/fourth",
+     "T_in_nmm": 0.41622202715625,
+     "peak_total_normal_n": 0.06311849696835664,
+     "grader_formula_force_n": 0.04899190442225393
+    },
+    {
+     "pair": "fourth/seconds",
+     "T_in_nmm": 0.05022967423721625,
+     "peak_total_normal_n": 0.007566911466019053,
+     "grader_formula_force_n": 0.006484486005306857
+    }
+   ],
+   "advances_if_seconds_load_below_nmm": 0.004593052316906715
+  }
+ },
+ "spring_low_end": {
+  "barrel_torque_nmm": 0.747,
+  "mu0.15": {
+   "seconds_torque_ideal_nmm": 0.00155625,
+   "seconds_torque_mean_nmm": 0.0014259996340715143,
+   "seconds_torque_worst_nmm": 0.0013111157208795477,
+   "overall_eff_mean": 0.9163049857487643,
+   "overall_eff_worst": 0.8424839973523199,
+   "meshes": [
+    {
+     "pair": "barrel/third",
+     "T_in_nmm": 0.747,
+     "peak_total_normal_n": 0.09232856062767476,
+     "grader_formula_force_n": 0.07781267760342368
+    },
+    {
+     "pair": "third/centre",
+     "T_in_nmm": 0.18357525,
+     "peak_total_normal_n": 0.02898132063766049,
+     "grader_formula_force_n": 0.024900355206847365
+    },
+    {
+     "pair": "centre/fourth",
+     "T_in_nmm": 0.09035573805000001,
+     "peak_total_normal_n": 0.01124174900109672,
+     "grader_formula_force_n": 0.009798380884450784
+    },
+    {
+     "pair": "fourth/seconds",
+     "T_in_nmm": 0.011720946339846001,
+     "peak_total_normal_n": 0.0014476868585464164,
+     "grader_formula_force_n": 0.0012968972010613713
+    }
+   ],
+   "advances_if_seconds_load_below_nmm": 0.0013111157208795477
+  },
+  "mu0.44": {
+   "seconds_torque_ideal_nmm": 0.00155625,
+   "seconds_torque_mean_nmm": 0.00119055753222606,
+   "seconds_torque_worst_nmm": 0.0009896277533045904,
+   "overall_eff_mean": 0.765016888177388,
+   "overall_eff_worst": 0.6359053836495361,
+   "meshes": [
+    {
+     "pair": "barrel/third",
+     "T_in_nmm": 0.747,
+     "peak_total_normal_n": 0.10767562767475036,
+     "grader_formula_force_n": 0.07781267760342368
+    },
+    {
+     "pair": "third/centre",
+     "T_in_nmm": 0.1773378,
+     "peak_total_normal_n": 0.032561345097860205,
+     "grader_formula_force_n": 0.024900355206847365
+    },
+    {
+     "pair": "centre/fourth",
+     "T_in_nmm": 0.08459899749,
+     "peak_total_normal_n": 0.01230486987743281,
+     "grader_formula_force_n": 0.009798380884450784
+    },
+    {
+     "pair": "fourth/seconds",
+     "T_in_nmm": 0.010360557225941999,
+     "peak_total_normal_n": 0.0014969289221424375,
+     "grader_formula_force_n": 0.0012968972010613713
+    }
+   ],
+   "advances_if_seconds_load_below_nmm": 0.0009896277533045904
+  },
+  "mu0.51": {
+   "seconds_torque_ideal_nmm": 0.00155625,
+   "seconds_torque_mean_nmm": 0.0011377021214729482,
+   "seconds_torque_worst_nmm": 0.000918610463381343,
+   "overall_eff_mean": 0.7310535720308101,
+   "overall_eff_worst": 0.590271783698855,
+   "meshes": [
+    {
+     "pair": "barrel/third",
+     "T_in_nmm": 0.747,
+     "peak_total_normal_n": 0.11217680884450786,
+     "grader_formula_force_n": 0.07781267760342368
+    },
+    {
+     "pair": "third/centre",
+     "T_in_nmm": 0.175825125,
+     "peak_total_normal_n": 0.033605925175463625,
+     "grader_formula_force_n": 0.024900355206847365
+    },
+    {
+     "pair": "centre/fourth",
+     "T_in_nmm": 0.08324440543125,
+     "peak_total_normal_n": 0.012623699393671329,
+     "grader_formula_force_n": 0.009798380884450784
+    },
+    {
+     "pair": "fourth/seconds",
+     "T_in_nmm": 0.01004593484744325,
+     "peak_total_normal_n": 0.001513382293203811,
+     "grader_formula_force_n": 0.0012968972010613713
+    }
+   ],
+   "advances_if_seconds_load_below_nmm": 0.000918610463381343
+  }
+ },
+ "strength_stall_70.1": {
+  "barrel_torque_nmm": 70.1,
+  "mu0.15": {
+   "seconds_torque_ideal_nmm": 0.14604166666666665,
+   "seconds_torque_mean_nmm": 0.13381870729372575,
+   "seconds_torque_worst_nmm": 0.12303776711332838,
+   "overall_eff_mean": 0.9163049857487641,
+   "overall_eff_worst": 0.8424839973523199,
+   "meshes": [
+    {
+     "pair": "barrel/third",
+     "T_in_nmm": 70.1,
+     "peak_total_normal_n": 8.6643,
+     "grader_formula_force_n": 7.3021
+    },
+    {
+     "pair": "third/centre",
+     "T_in_nmm": 17.227075,
+     "peak_total_normal_n": 2.7196661,
+     "grader_formula_force_n": 2.3367
+    },
+    {
+     "pair": "centre/fourth",
+     "T_in_nmm": 8.479166315,
+     "peak_total_normal_n": 1.0549486010400002,
+     "grader_formula_force_n": 0.9195
+    },
+    {
+     "pair": "fourth/seconds",
+     "T_in_nmm": 1.0999174543818,
+     "peak_total_normal_n": 0.13585388056774267,
+     "grader_formula_force_n": 0.12170347228166283
+    }
+   ],
+   "advances_if_seconds_load_below_nmm": 0.12303776711332838
+  },
+  "mu0.44": {
+   "seconds_torque_ideal_nmm": 0.14604166666666665,
+   "seconds_torque_mean_nmm": 0.1117243413775727,
+   "seconds_torque_worst_nmm": 0.09286868207048433,
+   "overall_eff_mean": 0.765016888177388,
+   "overall_eff_worst": 0.6359053836495362,
+   "meshes": [
+    {
+     "pair": "barrel/third",
+     "T_in_nmm": 70.1,
+     "peak_total_normal_n": 10.1045,
+     "grader_formula_force_n": 7.3021
+    },
+    {
+     "pair": "third/centre",
+     "T_in_nmm": 16.64174,
+     "peak_total_normal_n": 3.05562288,
+     "grader_formula_force_n": 2.3367
+    },
+    {
+     "pair": "centre/fourth",
+     "T_in_nmm": 7.938942066999999,
+     "peak_total_normal_n": 1.15471402732,
+     "grader_formula_force_n": 0.9195
+    },
+    {
+     "pair": "fourth/seconds",
+     "T_in_nmm": 0.9722557718052666,
+     "peak_total_normal_n": 0.14047485601363435,
+     "grader_formula_force_n": 0.12170347228166283
+    }
+   ],
+   "advances_if_seconds_load_below_nmm": 0.09286868207048433
+  },
+  "mu0.51": {
+   "seconds_torque_ideal_nmm": 0.14604166666666665,
+   "seconds_torque_mean_nmm": 0.10676428208199953,
+   "seconds_torque_worst_nmm": 0.08620427507768692,
+   "overall_eff_mean": 0.73105357203081,
+   "overall_eff_worst": 0.5902717836988549,
+   "meshes": [
+    {
+     "pair": "barrel/third",
+     "T_in_nmm": 70.1,
+     "peak_total_normal_n": 10.5269,
+     "grader_formula_force_n": 7.3021
+    },
+    {
+     "pair": "third/centre",
+     "T_in_nmm": 16.4997875,
+     "peak_total_normal_n": 3.1536484000000007,
+     "grader_formula_force_n": 2.3367
+    },
+    {
+     "pair": "centre/fourth",
+     "T_in_nmm": 7.811824391875,
+     "peak_total_normal_n": 1.18463363788,
+     "grader_formula_force_n": 0.9195
+    },
+    {
+     "pair": "fourth/seconds",
+     "T_in_nmm": 0.9427309676114749,
+     "peak_total_normal_n": 0.14201887383344997,
+     "grader_formula_force_n": 0.12170347228166283
+    }
+   ],
+   "advances_if_seconds_load_below_nmm": 0.08620427507768692
+  }
+ }
+}
