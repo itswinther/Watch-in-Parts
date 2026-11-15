@@ -201,6 +201,15 @@ harbor run -p task -a nop                                              # do noth
 harbor run -p task -a opencode -m <provider/model> -k 3 --ak disable_web_search=true
 ```
 
+On Modal sandboxes, the same three steps with one command (it checks the Harbor version, the Modal login and
+the model key first, and prints each trial's reward):
+
+```bash
+uv tool install 'harbor[modal]' && modal token new                     # once
+harbor/watch_one/run_modal.sh                                          # oracle and nop
+OPENAI_API_KEY=... harbor/watch_one/run_modal.sh openai/gpt-6.1-sol 3  # then a model, 3 runs
+```
+
 `task/` is generated, not hand-written: `harbor/watch_one/build_task.py` writes it from the sources in this repo
 (`environment/`, `geometry/`, `tests/`, `solution/`) and refuses anything that would leak the solution into the
 agent's image. To rebuild it and run everything with one command (needs Docker, `uv` and a Harbor checkout in
