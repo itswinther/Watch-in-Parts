@@ -15,7 +15,7 @@
   const KIND_LABEL = {
     read: "reads", write: "writes", run: "runs", check: "checks", result: "→",
     error: "error", harness: "tool", wait: "waits", submit: "submit", say: "says",
-    think: "thinks", done: "done",
+    think: "thinks", done: "done", claim: "reports",
   };
   const PLAY_SECONDS_PER_SECTION = 18;   // a played section lasts about this long
 
@@ -56,6 +56,7 @@
 
   function showRun(run) {
     state.run = run;
+    $("xray").hidden = !run.sections.some((s) => s.xray);   // only runs built with X-ray pages
     state.scored = new Set(run.sections.map((_, i) => i));
     state.revealed = Infinity;
     const want = new URLSearchParams(location.hash.slice(1)).get("s");
@@ -77,8 +78,9 @@
       box.append(span);
     };
     item("model", r.model || r.label);
-    item("chain score", fmtScore(r.chain_score));
+    item(r.score_label || "chain score", fmtScore(r.chain_score));
     item("task", r.task_version);
+    if (r.harness) item("run with", r.harness);
     item("graded with", `${r.grader_version}${r.graded_at_commit ? " @ " + r.graded_at_commit : ""}`);
     if (r.cost_usd != null) item("cost", "$" + r.cost_usd.toFixed(2));
     if (r.current_spec && !String(r.task_version).includes(r.current_spec)) {
@@ -124,7 +126,8 @@
     const s = state.run.sections[state.sec];
     const showHarness = $("show-harness").checked;
     $("log-title").textContent = s.label;
-    $("log-meta").textContent =
+    $("log-meta").textContent = s.tool_calls == null && s.duration_s == null
+      ? "from the AI's own report.json · no transcript kept" :
       `${s.tool_calls ?? "?"} tool calls · ${fmtTime(s.duration_s)}` +
       (s.cost_usd != null ? ` · $${s.cost_usd.toFixed(2)}` : "");
 
@@ -182,17 +185,29 @@
   function updateScene() {
     const s = state.run.sections[state.sec];
     const fr = $("scene");
-    if (!s.scene) { fr.hidden = true; sceneSrc = null; return; }
-    if (sceneSrc !== s.scene) {
-      sceneSrc = s.scene; sceneReady = false;
+    const xray = state.xray && s.xray;
+    document.querySelector(".stage").classList.toggle("xray", !!xray);
+    const src = xray ? s.xray : s.scene;
+    if (!src) { fr.hidden = true; sceneSrc = null; return; }
+    if (sceneSrc !== src) {
+      sceneSrc = src; sceneReady = false;
       fr.classList.remove("ready");
       fr.hidden = false;
-      fr.src = s.scene + "#embed=1&cam=iso";
-      return; // sends its state when the scene says it is ready
+      if (xray) {
+        // Mikael's X-ray page runs on its own; it sends no ready message
+        fr.onload = () => fr.classList.add("ready");
+        fr.src = src;
+      } else {
+        fr.onload = null;
+        fr.src = src + "#embed=1&cam=iso";
+      }
+      return; // the build scene sends its state when it says it is ready
     }
+    if (xray) return;
     if (sceneReady) {
       fr.contentWindow.postMessage({ type: "replay", progress: sceneProgress(),
-        mode: s.scene_mode, newParts: s.new_parts }, "*");
+        mode: s.scene_mode, newParts: s.new_parts,
+        failParts: state.scored.has(state.sec) ? (s.fail_parts || []) : [] }, "*");
     }
   }
 
@@ -213,11 +228,16 @@
     top.append(el("div", "vp-label", s.label));
     const big = el("div", "vp-big" + (shown && failed(s) ? " fail" : ""), shown ? fmtScore(s.reward) : "· · ·");
     big.title = shown ? `from ${s.score_source}` : "";
+    const said = s.claim ? `the AI reported: ${s.claim.replace("_", " ")}` : null;
     const sub = el("div", "vp-sub",
-      shown ? `section score · p = ${fmtScore(s.p)} (share of checks passed)` : "the AI is working");
+      shown ? [said, `grader: p = ${fmtScore(s.p)} (share of checks passed)`].filter(Boolean).join(" · ")
+            : (said || "the AI is working"));
     top.append(big, sub);
+    const failNote = shown && s.fail_parts && s.fail_parts.length
+      ? ` Red: ${s.fail_parts.join(", ")}.` : "";
     const note = s.scene
-      ? (s.scene_mode === "assembly" ? "The AI's own assembly paths, replayed. Drag to turn."
+      ? (s.scene_mode === "assembly" ? "The AI's own assembly paths, replayed. Drag to turn." + failNote
+         : s.fail_parts ? `The delivered movement. Drag to turn.${failNote}`
          : `${s.new_parts.length} part${s.new_parts.length === 1 ? "" : "s"} added in this section. Drag to turn.`)
       : "No 3D for this section. Run python3 build.py with the .venv set up.";
     box.append(top, el("div", "vp-note", note));
@@ -235,6 +255,7 @@
       const why = el("div", "why");
       const parts = [];
       if (f.introduced_in_section) parts.push(`this part was added in Stage ${f.introduced_in_section}`);
+      if (s.score_key) parts.push(`${s.score_key}.checks.${f.name}`);
       parts.push(`grader output: ${s.score_source}`);
       why.textContent = parts.join(" · ");
       d.append(why);
@@ -328,6 +349,11 @@
     sel.addEventListener("change", () => { history.replaceState(null, "", "#run=" + sel.value); loadRun(sel.value); });
     $("play").addEventListener("click", () => (state.playing ? stop() : play()));
     $("show-harness").addEventListener("change", () => state.run && renderSection());
+    $("xray").addEventListener("click", () => {
+      state.xray = !state.xray;
+      $("xray").setAttribute("aria-pressed", String(state.xray));
+      if (state.run) updateScene();
+    });
     document.addEventListener("keydown", (e) => {
       if (!state.run || e.target.tagName === "SELECT") return;
       if (e.key === "ArrowRight") { stop(); select(state.sec + 1); }

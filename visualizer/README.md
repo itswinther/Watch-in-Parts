@@ -13,8 +13,13 @@ It needs no build step, no server and no Python: open `index.html` in a browser.
 | `scenes/` | the 3D watch for each section of a run, shown in the page's frame |
 | `README.md` | this file |
 
-This is the built output of Abhishek's Replay project (milestone 4: Sonnet's four-stage
-run with log, timeline and the 3D watch from `tools/viewer/`), copied here on 14 Nov.
+This is the built output of Abhishek's Replay project, copied here on 15 Nov. It shows one
+run: GPT-6.1-sol's lowest score of its six runs on the final task (0.427, Harbor + Codex,
+graded at 3d5d96f; files on branch `a/final-runs`, `runs/final_3d5d96f/gpt-6.1-sol/task__owFDECg`).
+Per graded part (P1 to P4) it sets the agent's own `report.json` against the grader, and the
+3D view shows in red the parts behind each failed check: the hour, seconds and 24-hour hands
+below the top of the frame, and the pieces of two wheels that are not seated. Harbor kept no
+agent transcript for this run, so the log is the report. The earlier Sonnet run is removed.
 The build scripts stay in Abhishek's Replay project; a rebuild there does not update
 this folder, so a new build has to be copied in again.
 
