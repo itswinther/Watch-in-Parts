@@ -676,6 +676,7 @@ def grade(sub, data, jobs=4, stop_le=None):
         w = make_world(parts, sup, defs)
         det["rest_overlap_as_submitted"] = {n: round(w.pen(b), 6) for n, b in w.bodies.items() if b.kind != "fixed"}
         w.phase()
+        det["rest_phase"] = dict(w.phase_stats)
         det["rest_settle_moves"] = {n: round(b.q, 6) for n, b in w.bodies.items() if b.kind != "fixed" and abs(b.q) > 1e-9}
         pens = {n: round(w.pen(b), 6) for n, b in w.bodies.items() if b.kind != "fixed"}
         det["rest_overlap"] = pens
