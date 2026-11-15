@@ -9,9 +9,21 @@ What the switch changes (all in the agent-facing documents; tests/grade_watch.py
     a new section 9 states the thickness target (geometry/watch.py THIN_TARGET_MM) and the score formula.
   - The work order gets a Thickness row, a longer report.json row and one acceptance sentence.
   - FORMAT.md's report.json section gets the optional top-level key `height_mm`.
-The probe's reward is computed afterwards by spikes/thin_probe/score.py from the grader's details file."""
+The probe's reward is computed afterwards by spikes/thin_probe/score.py from the grader's details file.
+
+Two wordings of the thickness requirement, chosen by geometry/watch.py THIN_TARGET_STATED:
+  off (default)  Thickness is scored against the height the house design reaches (W.THIN_REFERENCE_MM). QA-W100 is
+                 rev C: section 9, the work order's Thickness row and its Acceptance paragraph say that the calibre
+                 is for a slim watch, that thickness is compared with the manufacturer's own design, that a movement
+                 as thin as that design or thinner earns the full thickness score and a thicker one loses score, and
+                 how H is measured. They print neither that height, the exponent nor the formula; secret_patterns()
+                 lists what must therefore not appear in the agent's folder (make_bundle_job.py refuses it).
+  on             (WATCH_THIN_TARGET_STATED=1) rev B: section 9 states the target W.THIN_TARGET_MM and the formula,
+                 the documents of b/thin-4mm 92d9622 byte for byte."""
 import os
+import re
 import sys
+from decimal import Decimal
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 sys.path.insert(0, ROOT)
@@ -19,7 +31,7 @@ from geometry import watch as W        # noqa: E402
 
 THIN_IN_BRIEF = True       # the probe branch (b/thin-probe) turns this on; False gives main's brief unchanged
 
-QA_REVISION = "B"
+QA_REVISION = "B" if W.THIN_TARGET_STATED else "C"    # rev C: thickness against the house design, no figure
 QA_DATE = "2026-11-15"
 SECTION = "9"              # QA-W100's thickness section (after Part 4, section 8)
 SECTION_TITLE = "Thickness"
@@ -53,6 +65,14 @@ def share_text():
 
 def check():
     errs = []
+    if not W.THIN_TARGET_STATED:
+        if not (0 < W.THIN_REFERENCE_MM < W.CASE_HEIGHT):
+            errs.append("THIN_REFERENCE_MM must lie between 0 and CASE_HEIGHT")
+        if W.THIN_SCORE_EXPONENT < 1:
+            errs.append("THIN_SCORE_EXPONENT below 1: the score would not fall fastest next to the house design")
+        if W.THIN_SCORE_SHARE * 2 != 1:
+            errs.append("THIN_SCORE_SHARE is not 1/2 (the grader's parts reward is 1/2 share + 1/2 [all pass])")
+        return errs
     if not (0 < W.THIN_TARGET_MM < W.CASE_HEIGHT):
         errs.append("THIN_TARGET_MM must lie between 0 and CASE_HEIGHT")
     if float(target_text()) != W.THIN_TARGET_MM:
@@ -172,7 +192,27 @@ Requirements.
                      strength=strength)
 
 
+def secret_patterns():
+    """Regular expressions (case-insensitive) that must match nothing in the agent's folder while the thickness
+    target is not stated: the house design's height, the score formula and the wording of a stated target. The
+    height is refused as printed (W.THIN_REFERENCE_MM, e.g. 3.35 and 3.350) and as any longer decimal that rounds to
+    it (3.345... to 3.354..., which covers the reference's measured 3.3491). The number must start at the match:
+    13.35 and 0.3.35 do not match, and neither does 3.36 or 3.355."""
+    if W.THIN_TARGET_STATED:
+        return []
+    v = Decimal(repr(W.THIN_REFERENCE_MM))
+    if v.as_tuple().exponent >= 0:
+        raise SystemExit("THIN_REFERENCE_MM must be written with decimals (the leak patterns need its precision)")
+    q = Decimal(1).scaleb(v.as_tuple().exponent)          # one unit of its last printed decimal
+    start, hi, lo = r"(?<![0-9.])", re.escape(str(v)), re.escape(str(v - q))
+    return [start + hi + r"(?![0-9])", start + hi + r"[0-4][0-9]*", start + lo + r"[5-9][0-9]*",
+            r"\(1 - x\)", r"\bx = \(H", r"thickness target", r"\btarget is\b", r"\bexponent\b",
+            r"(?:fourth|%dth) power" % W.THIN_SCORE_EXPONENT]
+
+
 def section9(B, L, S=None):
+    if not W.THIN_TARGET_STATED:
+        return section9_house(B)
     t = target_text()
     return """## {sec}. {title}
 
@@ -193,8 +233,38 @@ and `variant_6h.json` counts. The target is **{t} mm**.
                       "movement file that does not load counts as no thickness score (s = 0).".format(h=share_text())))
 
 
+def figure_sentence():
+    return ("The acceptance figure is {h} x (the result of Parts 1 to 4 together) + {h} x [every condition and every "
+            "requirement of Parts 1 to 4 is met] x (the thickness score), times the statement factor of section 3."
+            .format(h=share_text()))
+
+
+def section9_house(B):
+    """Section 9 when thickness is scored against the house design: what is measured, what it is compared with and
+    when it counts. No figure, no exponent, no formula for the thickness score."""
+    paras = [
+        "The calibre is for a slim watch. The order asks for a movement that is as thin as possible.",
+        "**How thickness is measured.** The movement's height H is the highest point minus the lowest point of "
+        "every part of the movement and of the barrel, in the assembled positions, along the axis. It is measured "
+        "for `movement.json` and for `variant_6h.json`, and the taller of the two counts. A movement file that does "
+        "not load earns no thickness score.",
+        "**What it is compared with.** H is compared with the height of the manufacturer's own design of this "
+        "calibre. That height is not stated in this procedure or in any other document of the order. A movement as "
+        "thin as that design, or thinner, earns the full thickness score. A thicker movement earns less: the score "
+        "falls steeply with every tenth of a millimetre by which the movement is thicker than that design. Thinner "
+        "is never worse: making a movement thinner never lowers its thickness score.",
+        "**When it counts.** Thickness counts only when every condition and every requirement of Parts 1 to 4 is "
+        "met; a thin movement that fails any of them earns nothing for its thickness. " + figure_sentence(),
+    ]
+    return "## %s. %s\n\n" % (SECTION, SECTION_TITLE) + "\n\n".join(B.wrap(p) for p in paras) + "\n"
+
+
 # ------------------------------------------------------------------ the work order
 def order_row():
+    if not W.THIN_TARGET_STATED:
+        return ("| Thickness | the calibre is for a slim watch: make the movement as thin as possible. Thickness is "
+                "compared with the manufacturer's own design of this calibre; how it is measured and how it counts "
+                "are in QA-W100, section %s |\n" % SECTION)
     return ("| Thickness | the calibre is for a slim watch: make the movement as thin as you can. The thickness target "
             "and how thickness is scored are in QA-W100, section %s |\n" % SECTION)
 
@@ -205,6 +275,11 @@ def deliverable_row(report):
 
 
 def acceptance_sentence():
+    if not W.THIN_TARGET_STATED:
+        return (" Thickness counts only when every part passes everything. The movement's thickness is then compared "
+                "with the manufacturer's own design of this calibre (QA-W100, section %s): a movement as thin as "
+                "that design, or thinner, earns the full thickness score, and a thicker one loses score steeply "
+                "with every tenth of a millimetre. Thinner is never worse." % SECTION)
     return (" When every part passes everything, the thickness score of QA-W100, section %s, scales the half of the "
             "acceptance figure that full acceptance earns." % SECTION)
 
@@ -243,6 +318,9 @@ def trace_rows(B, rows):
     if missing:
         raise SystemExit("brief_thin: make_brief_job.py trace rows renamed: %s" % missing)
     Q, sec = "datasheets/" + B.QA_FILE, "%s. %s" % (SECTION, SECTION_TITLE)
+    if not W.THIN_TARGET_STATED:        # the share has a home cell; the house design's height and the exponent have none
+        return out + [B.cell("THIN_SCORE_SHARE (thickness score; also the grader's parts reward split, Fraction(1, 2))",
+                             W.THIN_SCORE_SHARE, Q, sec, "The acceptance figure is", None, [share_text()])]
     out += [
         B.cell("THIN_TARGET_MM (thinness probe)", W.THIN_TARGET_MM, Q, sec, "The target is", None, [target_text()]),
         B.cell("THIN_SCORE_EXPONENT (thinness probe)", W.THIN_SCORE_EXPONENT, Q, sec, None, None,
@@ -256,6 +334,17 @@ def trace_rows(B, rows):
 
 
 def traceability_note():
+    if not W.THIN_TARGET_STATED:
+        return ("\nThinness probe (environment/brief_thin.py THIN_IN_BRIEF on): QA-W100 rev %s states requirements "
+                "only. These test-method numbers of the grader are not stated anywhere the agent can read: "
+                % QA_REVISION + "; ".join(NOT_STATED) + ".\n"
+                "\nThickness (geometry/watch.py THIN_TARGET_STATED off): the thickness score is measured against the "
+                "house design, and QA-W100 section %s says so in words. Not stated anywhere the agent can read, by "
+                "decision: THIN_REFERENCE_MM (%s mm, the height the house design reaches, at and below which the "
+                "thickness score is 1), THIN_SCORE_EXPONENT (%s) and the score formula. THIN_TARGET_MM (%s) is not "
+                "used. `environment/make_bundle_job.py` refuses a bundle in which any of "
+                "`brief_thin.secret_patterns()` matches.\n"
+                % (SECTION, W.THIN_REFERENCE_MM, W.THIN_SCORE_EXPONENT, W.THIN_TARGET_MM))
     return ("\nThinness probe (environment/brief_thin.py THIN_IN_BRIEF on): QA-W100 rev B states requirements only. "
             "These test-method numbers of the grader are not stated anywhere the agent can read: "
             + "; ".join(NOT_STATED) + ".\n")

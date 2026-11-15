@@ -7,11 +7,14 @@ H is measured here from the delivered STEP parts and the supplied barrel (geomet
 grader loads them: barrel included, the same meshing): for movement.json and for variant_6h.json, the highest
 point minus the lowest point along z of every part of the movement and of the barrel in the assembled positions;
 the taller of the two counts. A movement file that does not load gives no thickness score (s = 0).
-    x = (H - THIN_TARGET_MM) / (CASE_HEIGHT - THIN_TARGET_MM), clamped to 0..1;  s = (1 - x) ** THIN_SCORE_EXPONENT
+    x = (H - H0) / (CASE_HEIGHT - H0), clamped to 0..1;  s = (1 - x) ** THIN_SCORE_EXPONENT
+with H0 = geometry/watch.py thin_full_score_height(): the height the house design reaches (THIN_REFERENCE_MM), or the
+stated target THIN_TARGET_MM while THIN_TARGET_STATED is on (WATCH_THIN_TARGET_STATED=1, to rescore runs of the
+stated-target brief). A movement at H0 or thinner has s = 1. The score itself is geometry/watch.py thin_score().
     probe reward = (THIN_SCORE_SHARE x share + THIN_SCORE_SHARE x [all pass] x s) x statement factor
 with share and [all pass] taken from the details file: the grader's parts reward is THIN_SCORE_SHARE x share +
 THIN_SCORE_SHARE x [all pass], so share term = parts_reward - THIN_SCORE_SHARE x [all pass]. The constants are
-geometry/watch.py's (the ones QA-W100 rev B section 9 prints). Also printed: the size check's z extent from the
+geometry/watch.py's. Also printed: the size check's z extent from the
 details file (P1, P3) as a cross-check, and the agent's own claim, report.json height_mm, if present."""
 import json
 import math
@@ -40,11 +43,16 @@ def height(folder, name):
 
 
 def score(H):
-    if H is None:
-        return 1.0, 0.0
-    x = (H - W.THIN_TARGET_MM) / (W.CASE_HEIGHT - W.THIN_TARGET_MM)
-    x = min(1.0, max(0.0, x))
-    return x, (1.0 - x) ** W.THIN_SCORE_EXPONENT
+    return W.thin_score(H)
+
+
+def reward(parts_reward, all_pass, s, factor):
+    """The probe reward as an exact Fraction: (share term + THIN_SCORE_SHARE x [all pass] x s) x statement factor,
+    with share term = parts_reward - THIN_SCORE_SHARE x [all pass] (the grader's parts reward without its
+    all-pass half)."""
+    half = W.THIN_SCORE_SHARE
+    share_term = Fraction(parts_reward) - (half if all_pass else 0)
+    return (share_term + (half * Fraction(s) if all_pass else 0)) * Fraction(factor)
 
 
 def claimed_height(folder):
@@ -88,13 +96,13 @@ def main(argv):
     pr = Fraction(d["parts_reward_exact"]) if "parts_reward_exact" in d else Fraction(d.get("parts_reward", 0.0))
     hon = d.get("honesty") or {}
     factor = Fraction(hon["factor_exact"]) if "factor_exact" in hon else Fraction(hon.get("factor", 0.0))
-    half = W.THIN_SCORE_SHARE
-    share_term = pr - (half if A else 0)
-    probe = (share_term + (half * Fraction(s) if A else 0)) * factor
+    share_term = pr - (W.THIN_SCORE_SHARE if A else 0)
+    probe = reward(pr, A, s, factor)
     print("details size z extent  P1 %s  P3 %s" % tuple(
         "%.4f" % v if v is not None else "none" for v in (details_size(d, "P1"), details_size(d, "P3"))))
-    print("H %s  target %s  case height %s  x %.4f  s %.6f" % (
-        "%.4f" % H if H is not None else "none", W.THIN_TARGET_MM, W.CASE_HEIGHT, x, s))
+    print("H %s  %s %s  case height %s  x %.4f  s %.6f" % (
+        "%.4f" % H if H is not None else "none", "target" if W.THIN_TARGET_STATED else "house design",
+        W.thin_full_score_height(), W.CASE_HEIGHT, x, s))
     print("all_pass %s  parts_reward %.6f  share term %.6f  statement factor %.6f" % (
         A, float(pr), float(share_term), float(factor)))
     print("grader reward %s  probe reward %.6f" % (d.get("reward"), float(probe)))
