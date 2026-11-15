@@ -29,13 +29,14 @@ The full rules are in [SPEC.md](SPEC.md) (version 0.7). The brief is
 We checked the task against real watches (`REAL_WATCH_WORK.md`):
 
 - The ratios are real. Barrel to centre is 8, as in Grossmann's textbook train. Real barrels run 6.3 to 8 hours
-  per turn, so our 8-hour and 6-hour builds are both in range.
+  per turn (`REAL_WATCH_WORK.md`, section 1), so our 8-hour and 6-hour builds are both in range.
 - The 24-hour hand is driven off the hour wheel through an intermediate wheel, as in the ETA 2893-2 and the
   Miyota 9075.
 - The 6-hour variant changes one gear pair on an unchanged frame. ETA's 6497-1 and 6498-1 do the same: one
   frame family, the centre and escape wheels kept.
 - Wheels are brass on steel pinions, as Saunier describes.
-- The gear load, 70.1 N·mm, is the Sellita SW200-1's bridle slipping torque (16.57 N·mm) scaled to our size.
+- The gear load, 70.1 N·mm, is the Sellita SW200-1's bridle slipping torque (16.57 N·mm) scaled to our size
+  (`REAL_WATCH_WORK.md`, section 6).
 
 We also ran a real professional design through our checks: Marco Lang's ml01 going train, from his public
 CAD file (`REAL_ML01_FAIRNESS.md`). It passes most checks. Where it fails, the file says whether the fault is
@@ -50,31 +51,45 @@ turning sense.
 
 ## What we found so far
 
-**The going-train job is solved by frontier models.** Nine local runs, nine scores of 1.0: Fable 5.2, Opus 5.5
-and Sonnet 5.5, three each. Six ran on the early brief, which restated every number. Three ran on the brief
-that cites the documents instead and adds the gear strength check. In the first round each model rebuilt the
-acceptance test from the brief and checked its own design against it. These ran in Claude Code, headless,
-outside Harbor.
+**The going-train job is solved by frontier models.** Ten local runs, ten scores of 1.0: Fable 5.2 and Opus 5.5
+three each, Sonnet 5.5 four. Six ran on the early brief, which restated every number. Three ran on the brief
+that cites the documents instead and adds the gear strength check. The last (Sonnet) ran on the current brief,
+with a material per part and the report statement, and wrote a truthful report. In the first round each model
+rebuilt the acceptance test from the brief and checked its own design against it. These ran in Claude Code,
+headless, outside Harbor. Nobody has run GPT on this job yet.
 
-**The gap signal is in crown winding.** Workstream A built a winding and hand-setting mechanism (crown, stem,
-clutch, ratchet, click) with its own acceptance steps. On that task, run in Harbor:
+**A judge rehearsal found three ways to score 1.0 with a watch that does not work** (`JUDGE_REHEARSAL.md`,
+section 4): false tooth counts that get a weak pinion past the strength check, a minute hand that hits the
+seconds hand once an hour, and a wheel locked by a pawl that still passes "free to turn". With the known
+off-centre disc hand, that makes four. None scores above 1.0. The rules that close them are decided and being
+built (see "Open work").
 
-| Model, harness | Rewards |
-| --- | --- |
-| GPT-6.1-sol, Codex, first engine | 0.024, 0.022, 0.066 (plus a first smoke run at 0.024) |
-| GPT-6.1-sol, Codex, fixed engine (3 repeats regraded) | 0.421, 0.119, 0.110 (mean 0.217): the designs wind, then jam when the rig pre-winds the barrel for the hold test (one clutch that cannot slip, a design fault; the other two jams traced by A at 00:40 to a simulator artifact, the engine's per-patch push floor, so those two are not the agent's mistake until the engine is fixed and they are regraded) |
-| Sonnet 5.5, OpenCode | 0.95, every step passing |
+**Crown winding is not in the judged job.** Workstream A built a winding and hand-setting mechanism (crown,
+stem, clutch, ratchet, click) as its own task, with its own acceptance steps (`spikes/keyless/`). Its grader is
+in this job's code but switched off (`KEYLESS_IN_JOB = False`, `geometry/keyless_job.py`), so the judges' job is
+Parts 1 to 4. Runs of A's task, in Harbor:
 
-These are few runs on a task that is still changing, so they are a signal, not a result. Crown winding joins
-this job as Part 5 when A's reference passes in our frame; the grader code for it is in, switched off.
+| Model, harness | Engine | Rewards |
+| --- | --- | --- |
+| GPT-6.1-sol, Codex | first | 0.024, 0.022, 0.066 (plus a first smoke run at 0.024) |
+| GPT-6.1-sol, Codex | fixed engine (c44b69b, the same designs regraded) | **0.992** for imWnpTP (every step passes; it was failed twice by engine bugs); b7qdG8X and QZeuFhk have real design faults (a stem that hits its own clutch on pull; a clutch that will not slip backward), regrades stopped. GPT can solve crown winding. |
+| Sonnet 5.5, OpenCode | first | 0.95, every step passing |
 
-This matches two published findings. CAD-bench (Saini, ICML 2026) reports that agents build a right-angle
-gearbox's shape in 96.9 percent of attempts but average 4.0 percent on its functional score. BenchCAD (Zhang et
-al., arXiv 2605.10865) reports that models replace sweeps and lofts with simpler extrudes. In our runs too, the
-static shape is easy and the moving contact is where models fall short.
+The rows used different engines, and Sonnet was graded on the first one only. On the fixed engine GPT's
+designs wind, then jam when the rig pre-winds the barrel for the hold test. One of those jams is a design fault
+(a clutch that cannot slip). A traced the other two to the simulator (the engine skips contact patches below
+a size floor, and these contacts were split into many tiny ones), so they are not the model's mistake. A's
+engine fix is on a branch, not merged. Until it is in and the designs are regraded, these numbers are not a
+gap.
+
+Two published results point the same way: the static shape is easy and the moving contact is hard. CAD-bench
+reports that agents build a right-angle gearbox's shape in 96.9 percent of attempts but average 4.0 percent on
+its functional score (link and notes: `HARBOR_RESEARCH.md`, section 3.4, and `spikes/RESEARCH_GAPS.md`; we could
+not confirm where it was published). BenchCAD (Zhang et al., arXiv 2605.10865) reports that models replace
+sweeps and lofts with simpler extrudes. On our job, so far, frontier models get the moving contact right too.
 
 All numbers and run logs are in [SESSION.md](SESSION.md) and in the results table of
-[solution/SOLUTION_WATCH.md](solution/SOLUTION_WATCH.md).
+[solution/SOLUTION_WATCH.md](solution/SOLUTION_WATCH.md) (section 9).
 
 ## How it is scored
 
@@ -97,30 +112,46 @@ Tested on Python 3.13 (the task image uses 3.12).
 pip install -r requirements.txt
 ```
 
-The reference, as one delivery folder (about 40 s):
+All commands run from the repo root. The reference, as one delivery folder (about 40 s):
 
 ```bash
 python3 solution/reference_watch.py /tmp/ref --job
 ```
 
-Grade a delivery folder (absolute path; about 10 minutes):
+Grade a delivery folder (absolute path; 4 min 35 s on an idle 4-CPU machine, allow 10):
 
 ```bash
-cd tests
-python3 -I grade_watch.py /tmp/ref --reward /tmp/ref_reward.txt --details /tmp/ref_details.json
+(cd tests && python3 -I grade_watch.py /tmp/ref --reward /tmp/ref_reward.txt --details /tmp/ref_details.json)
 ```
 
-The anchor suite (each anchor is the reference with one change, and its expected reward), from the repo root:
+The do-nothing baseline: the same command on an empty folder gives reward 0 (under a second):
+
+```bash
+mkdir -p /tmp/empty && (cd tests && python3 -I grade_watch.py /tmp/empty --reward /tmp/empty_reward.txt)
+```
+
+Build the folder the agent gets (brief, datasheets, supplied barrel, kernel, format checker, empty
+`delivery/`; a few seconds). It refuses any file that leaks the solution:
+
+```bash
+python3 environment/make_bundle_job.py /tmp/bundle
+```
+
+The anchor suite: each anchor is the reference with one change, and its expected reward. The full suite (36
+anchors) takes about 1 h 40 min with 2 workers. The stop-early baseline alone (a delivery stopped after Part 1,
+after Parts 1 and 2, and after Parts 1 to 3; expected 0.157, 0.220, 0.333) took 10 min 24 s in our judge
+rehearsal:
 
 ```bash
 python3 tests/test_anchors_job.py 2
+python3 tests/test_anchors_job.py 2 --only "job stop-early"
 ```
 
 The Harbor task, with one command (needs Docker and a Harbor 0.26 checkout; see
 [harbor/watch_one/README.md](harbor/watch_one/README.md)):
 
 ```bash
-SKIP_MODEL=1 harbor/watch_one/run_all.sh none 0                         # oracle and do-nothing only
+SKIP_MODEL=1 harbor/watch_one/run_all.sh none 0                         # oracle and do-nothing only (oracle verifier 3 min 26 s)
 KEY_FILE=~/anthropic.key harbor/watch_one/run_all.sh anthropic/claude-sonnet-5-5 3
 AGENT=codex CODEX_FORCE_AUTH_JSON=1 harbor/watch_one/run_all.sh openai/gpt-6.1-sol 3
 ```
@@ -151,6 +182,8 @@ environment/run_clean_job.sh /path/outside/repo/run1 claude-sonnet-5-5
 | `tools/viewer/` | scripts that make the 3D pages |
 | `transcripts/` | earlier agent runs with grader output |
 | `SESSION.md` | shared log: decisions, requests, every result |
+| `JUDGE_REHEARSAL.md`, `BRIEF_REVIEW.md` | a mock judging of the repo, and a review of everything the agent reads |
+| `docs/history/` | handoffs between sessions and the first watch idea write-up, kept for the record |
 
 ## What we tried before this
 
@@ -168,11 +201,16 @@ regrade old runs (`grade_watch.py FOLDER --stage N`).
 
 ## Open work
 
-- Part 5 (crown winding) in this job: A's reference in our frame, then the switch on.
+- Grader rules decided and being built, each with an anchor that must score low: a hand may cover at most a
+  quarter of the disc its tip sweeps (closes the disc hand); the drive test starts from flank contact (the ml01
+  backlash finding, `REAL_ML01_FAIRNESS.md`); "nothing else collides" tested over every pair of angles;
+  "free to turn" tested off the 5-degree grid too; declared tooth counts must match the teeth on the part. Then
+  a full anchor rerun.
+- Regrade our ten saved 1.0 deliveries with those rules.
+- Part 5 (crown winding) in this job: A's engine fix merged, A's reference at 1.0 in our frame, then the switch
+  on.
 - Harbor runs on the submitted job: several per model, including GPT, with reward, part scores, time and cost.
-- Stop-early anchors and the full anchor run on the current grader.
-- Known strict or loose spots, all logged in `SOLUTION_WATCH.md`: the drive test depends on where in its
-  backlash a wheel is delivered; a minute hand drawn as a big disc meets every stated hand rule.
+- Known strict or loose spots are logged in `solution/SOLUTION_WATCH.md`, section 8.
 
 ## Team
 

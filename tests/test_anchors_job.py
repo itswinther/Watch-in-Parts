@@ -525,6 +525,16 @@ def b_disc_off_centre(d):
     _disc_hand(d, 0.6)
 
 
+def b_broad_hand(d):
+    """The minute hand a broad flat bar: x from -1 to +9 about the centre axis, y +-3, same z and bore."""
+    ref, P, lo, hi = _ref()
+    from geometry import watch_gears_cad as GC
+    cx, cy = P["centre"]
+    bar = GC.cut(GC.box((cx - 1.0, cy - 3.0, 10.7), (cx + 9.0, cy + 3.0, 11.0)),
+                 GC.cyl(cx, cy, 10.0, 11.5, 0.35 + ref.FIT))
+    _write(d, "minute_hand", bar)
+
+
 def b_barrel_as_part(d):
     _edit(d, "movement.json", lambda doc: doc["mobiles"]["third"]["parts"].append("barrel"))
 
@@ -532,6 +542,16 @@ def b_barrel_as_part(d):
 def b_third_brass(d):
     def fn(doc):
         doc["mobiles"]["third"]["material"] = "AD-CW614N"
+    _both(d, fn)
+
+
+def b_false_teeth_brass(d):
+    """The judge rehearsal's attempt 1 (JUDGE_REHEARSAL.md section 4, e1_false_teeth.py): the third mobile made
+    brass and the barrel/third mesh declared 48:12 on the 96:24 geometry (same ratio), in both movements."""
+    def fn(doc):
+        doc["mobiles"]["third"]["material"] = "AD-CW614N"
+        doc["mobiles"]["third"].pop("part_materials", None)
+        _set_teeth("barrel", "third", 48, 12)(doc)
     _both(d, fn)
 
 
@@ -783,6 +803,25 @@ ANCHORS = [
      X(P1={"checks": ["strength"]}, P3={"checks": ["strength"]}),
      [detail(["P1", "details", "strength", "meshes", 0, "gears", "third", "material"], lambda v: v == "AD-CW614N", "AD-CW614N"),
       detail(["P1", "details", "strength", "meshes", 0, "gears", "third", "margin"], lambda v: -0.2 < v < 0, "about -0.12")]),
+    # The judge rehearsal's attempt 1: the same brass third, and the barrel/third mesh declared 48:12 on the 96:24
+    # parts (same ratio, so every declared speed is unchanged). Before the tooth-count condition (Decisions
+    # 2026-11-15 01:19, A3) the strength check took m and z from the declaration (m 0.4, z 12) and passed (89.6
+    # MPa against 110), and the delivery scored 1.0. Now the mesh test counts 96 (the barrel, its stated count) and
+    # 24 (the third's section at the meeting height) against 48 and 12 declared: the barrel/third mesh fails and
+    # drives nothing, in both movements. Nothing downstream of it is driven from the barrel: P1 fails train 3,
+    # tolerant 2, hour 2, minute 2, seconds 2, strength 2 (no going train) = 13 of 23; clear still passes (it
+    # turns mobiles at their declared speeds, unchanged). P2 fails day_hand 3 of 4 (the day mobile is not driven).
+    # P3 fails the same as P1 and day_hand = 16 of 27. P4 passes (geometry unchanged).
+    # D = (1/4)(13/23) + (1/10)(3/4) + (3/20)(16/27) = 2527/8280; R = 1/2 - 2527/12420 = 3683/12420;
+    # x 16/17 = 14732/52785 = 0.279095
+    ("job rehearsal attempt 1: false 48:12 on the 96:24 barrel/third pair, third brass", b_false_teeth_brass,
+     X(P1={"checks": ["train", "tolerant", "hour", "minute", "seconds", "strength"]},
+       P2={"checks": ["day_hand"]},
+       P3={"checks": ["train", "tolerant", "hour", "minute", "seconds", "day_hand", "strength"]}),
+     [mesh_fact("P1", "barrel/third", "teeth_match", lambda v: v is False, "False"),
+      mesh_fact("P1", "barrel/third", "measured_teeth", lambda v: v == {"barrel": 96, "third": 24}, "barrel 96, third 24"),
+      mesh_fact("P3", "barrel/third", "measured_teeth", lambda v: v == {"barrel": 96, "third": 24}, "barrel 96, third 24"),
+      mesh_fact("P1", "third/centre", "teeth_match", lambda v: v is True, "True")]),
 
     # ---- 5. Part 2 ----
     # hands.day names the hour hand's mobile and part: C3 fails, s2 = 0. P2's checks still run and both fail:
@@ -813,13 +852,14 @@ ANCHORS = [
     ("job variant = the 8-hour movement unchanged", b_variant_is_movement,
      X(P3={"checks": ["hour", "minute", "seconds", "day_hand"]}),
      [detail(["P3", "details", "minute", "clockwise_turns_per_hour_through_working_meshes"], lambda v: v == "4/3", "4/3")]),
-    # The variant declares third/centre 54/36 but names the 8-hour parts third and centre (cut 60/30): turned
-    # at 54/36 the teeth jam, the mesh drives nothing, so every hand stands and the seconds mobile is not driven
+    # The variant declares third/centre 54/36 but names the 8-hour parts third and centre (cut 60/30): the teeth
+    # are counted 60 and 30 against 54 and 36 declared (and turned at 54/36 they also jam), the mesh drives nothing, so every hand stands and the seconds mobile is not driven
     # from the barrel: train 3, tolerant 2, hour 2, minute 2, seconds 2, day_hand 3, strength 2 = 16 of 27.
     # D = (3/20)(16/27) = 4/45; R = 1/2 - 8/135 = 119/270; x 16/17 = 56/135 = 0.414815
     ("job variant with 6-hour tooth counts on the 8-hour parts", b_variant_paper_counts,
      X(P3={"checks": ["train", "tolerant", "hour", "minute", "seconds", "day_hand", "strength"]}),
-     [mesh_fact("P3", "third/centre", "passes", lambda v: v is False, "False")]),
+     [mesh_fact("P3", "third/centre", "passes", lambda v: v is False, "False"),
+      mesh_fact("P3", "third/centre", "measured_teeth", lambda v: v == {"third": 60, "centre": 30}, "third 60, centre 30")]),
     # The variant's main_plate renamed plate_6h (a byte copy): C4 fails, s3 = 0; every P3 check still passes.
     # R = 2/5; x 16/17 = 32/85 = 0.376471
     ("job variant with one fixed part renamed", b_variant_plate_renamed,
@@ -855,15 +895,28 @@ ANCHORS = [
 
     # ---- 8. exploit-style and format ----
     # The minute hand replaced by a disc r 18 (0.3 thick) on the centre axis, over the whole dial: it reaches
-    # and lies above the frame but its centre of volume is on the axis (< 0.5): Hands fails in P1 and P3 (1).
-    # 24296/52785 = 0.460282
+    # and lies above the frame but its centre of volume is on the axis (< 0.5), and seen from the dial it covers
+    # (pi 18^2 - pi 0.355^2) / (pi 18^2) = 0.9996 > 0.25 of its swept disc: Hands fails in P1 and P3 (1).
+    # D = (1/4)(1/23) + (3/20)(1/27) = 17/1035; R = 3037/6210; x 16/17 = 24296/52785 = 0.460282
     ("x minute hand is a disc over the whole dial (centred)", b_disc_centred,
      X(P1={"checks": ["hands"]}, P3={"checks": ["hands"]}),
-     [detail(["P1", "details", "hands", "minute", "centre_from_axis"], lambda v: v < 0.5, "< 0.5")]),
+     [detail(["P1", "details", "hands", "minute", "centre_from_axis"], lambda v: v < 0.5, "< 0.5"),
+      detail(["P1", "details", "hands", "minute", "area_share_of_swept_disc"], lambda v: v > 0.99, "about 0.9996")]),
     # The same disc 0.6 off-centre: reach 18.6 (+1.72 to the case centre = 20.32 <= 20.7), above the frame,
-    # centre of volume 0.6 from the axis: every stated rule holds, so the rule gives R = 1; x 16/17 = 0.941176.
-    # FINDING (reported 18:39): a hand may be a disc that hides the seconds and 24-hour hands; no stated rule stops it.
-    ("x minute hand is a disc over the whole dial, 0.6 off-centre (FINDING)", b_disc_off_centre, X(), []),
+    # centre of volume 0.6 from the axis, but seen from the dial it covers (pi 18^2 - pi 0.355^2) / (pi 18.6^2)
+    # = 1017.5 / 1086.9 = 0.936 > 0.25 of its swept disc (HAND_AREA_MAX_SHARE, B Decisions 00:50, 15 Nov; before
+    # that rule it scored R = 1, the finding of 18:39). Only Hands fails, in P1 and P3 (1), as for the centred
+    # disc: D = (1/4)(1/23) + (3/20)(1/27) = 17/1035; R = 3037/6210; x 16/17 = 24296/52785 = 0.460282
+    ("x minute hand is a disc over the whole dial, 0.6 off-centre", b_disc_off_centre,
+     X(P1={"checks": ["hands"]}, P3={"checks": ["hands"]}),
+     [detail(["P1", "details", "hands", "minute", "centre_from_axis"], lambda v: abs(v - 0.6) < 0.01, "0.6"),
+      detail(["P1", "details", "hands", "minute", "area_share_of_swept_disc"], lambda v: 0.93 < v < 0.94, "about 0.936")]),
+    # The minute hand a broad flat bar, x -1 to +9 and y -3 to +3 about the centre axis (same z 10.7-11.0 and bore
+    # 0.355; inside the disc above, which cleared every other part and was installed): reach sqrt(9^2 + 3^2) =
+    # 9.487 >= 5, centre of volume 4.0 from the axis, seen from the dial (60 - pi 0.355^2) / (pi 90) = 59.60 /
+    # 282.74 = 0.211 <= 0.25. Every rule holds: R = 1; x 16/17 = 16/17 = 0.941176
+    ("x minute hand a broad bar (0.21 of its swept disc)", b_broad_hand, X(),
+     [detail(["P1", "details", "hands", "minute", "area_share_of_swept_disc"], lambda v: 0.2 < v < 0.22, "about 0.211")]),
     # movement.json lists 'barrel' as a part of the third mobile: a format error (C1), so P1, P2 and P4 score 0;
     # the variant still passes (C4 reads movement.json's fixed list and case centre only).
     # R = 1/2 - (2/3)(3/5) = 1/10; x 16/17 = 8/85 = 0.094118

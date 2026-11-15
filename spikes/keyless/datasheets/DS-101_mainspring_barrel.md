@@ -193,8 +193,8 @@ full wind, which is no more than M_el.
    springs are set in manufacture and deliver more than the first-yield torque of a straight strip: the
    11½‴ reference (Table 2a) allows up to 11.86 N·mm at 1:1 half a turn from full wind, and its bridle
    slips at up to 16.57 N·mm, above the calculated M_el of every spring in Table 1 at 1:1 (largest: K,
-   9.1 N·mm). The highest torque this sheet states for the 11½‴ class is the reference slipping torque,
-   **70.1 N·mm** in this series.[^sel][^d7]
+   9.1 N·mm). The highest torque this sheet states for the 11½‴ class is the slipping torque of the bridle in
+   Table 2a.[^sel][^d7]
 3. **Handling.** Use a mainspring winder. Do not wind springs into the barrel by hand.
 4. **Scaled springs.** At this scale the strip is about 0.11 to 0.22 mm thick.
 5. **Method.** Footnotes [^d1] to [^d3] and [^d5] to [^d7].
