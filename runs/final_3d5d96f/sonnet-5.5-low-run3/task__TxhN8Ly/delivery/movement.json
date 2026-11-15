@@ -1,0 +1,214 @@
+{
+ "barrel": "BR-096-30",
+ "case_centre": [
+  -2.5676829268292694,
+  -0.8348678861170057
+ ],
+ "fixed": [
+  "PL",
+  "MP",
+  "TP"
+ ],
+ "mobiles": {
+  "I": {
+   "axis": [
+    -10.767682926829268,
+    -0.8348678861170057
+   ],
+   "parts": [
+    "I_shaft",
+    "I_c"
+   ],
+   "material": "AD-C100-HT"
+  },
+  "M": {
+   "axis": [
+    -2.5676829268292694,
+    -0.8348678861170057
+   ],
+   "parts": [
+    "M_shaft",
+    "M_dd",
+    "M_p",
+    "M_din",
+    "minute_hand"
+   ],
+   "material": "AD-C100-HT",
+   "part_materials": {
+    "minute_hand": "AD-CW614N"
+   }
+  },
+  "H": {
+   "axis": [
+    -2.5676829268292694,
+    -0.8348678861170057
+   ],
+   "parts": [
+    "H_tube",
+    "hour_hand"
+   ],
+   "material": "AD-C100-HT",
+   "part_materials": {
+    "hour_hand": "AD-CW614N"
+   }
+  },
+  "X1": {
+   "axis": [
+    2.067357860202963,
+    0.41268848637589073
+   ],
+   "parts": [
+    "X1"
+   ],
+   "material": "AD-C100-HT"
+  },
+  "X2": {
+   "axis": [
+    5.059740824537622,
+    2.414099037652095
+   ],
+   "parts": [
+    "X2"
+   ],
+   "material": "AD-C100-HT"
+  },
+  "X3": {
+   "axis": [
+    4.523599094224602,
+    5.73104824513432
+   ],
+   "parts": [
+    "X3"
+   ],
+   "material": "AD-C100-HT"
+  },
+  "S": {
+   "axis": [
+    1.1147666971853707,
+    4.853402707974944
+   ],
+   "parts": [
+    "S_shaft",
+    "sec_hand"
+   ],
+   "material": "AD-C100-HT",
+   "part_materials": {
+    "sec_hand": "AD-CW614N"
+   }
+  },
+  "J": {
+   "axis": [
+    -5.7311431138527755,
+    4.026461113767408
+   ],
+   "parts": [
+    "J"
+   ],
+   "material": "AD-C100-HT"
+  },
+  "K": {
+   "axis": [
+    -5.755989880735928,
+    -7.021652088565839
+   ],
+   "parts": [
+    "K"
+   ],
+   "material": "AD-C100-HT"
+  },
+  "D": {
+   "axis": [
+    -0.978404451941679,
+    -7.484985090382963
+   ],
+   "parts": [
+    "D_shaft",
+    "day_hand"
+   ],
+   "material": "AD-C100-HT",
+   "part_materials": {
+    "day_hand": "AD-CW614N"
+   }
+  }
+ },
+ "meshes": [
+  {
+   "driver": "barrel",
+   "driver_teeth": 96,
+   "driven": "I",
+   "driven_teeth": 12
+  },
+  {
+   "driver": "I",
+   "driver_teeth": 40,
+   "driven": "M",
+   "driven_teeth": 40
+  },
+  {
+   "driver": "M",
+   "driver_teeth": 36,
+   "driven": "X1",
+   "driven_teeth": 12
+  },
+  {
+   "driver": "X1",
+   "driver_teeth": 36,
+   "driven": "X2",
+   "driven_teeth": 12
+  },
+  {
+   "driver": "X2",
+   "driver_teeth": 30,
+   "driven": "X3",
+   "driven_teeth": 12
+  },
+  {
+   "driver": "X3",
+   "driver_teeth": 32,
+   "driven": "S",
+   "driven_teeth": 12
+  },
+  {
+   "driver": "M",
+   "driver_teeth": 14,
+   "driven": "J",
+   "driven_teeth": 42
+  },
+  {
+   "driver": "J",
+   "driver_teeth": 12,
+   "driven": "H",
+   "driven_teeth": 48
+  },
+  {
+   "driver": "H",
+   "driver_teeth": 48,
+   "driven": "K",
+   "driven_teeth": 24
+  },
+  {
+   "driver": "K",
+   "driver_teeth": 12,
+   "driven": "D",
+   "driven_teeth": 48
+  }
+ ],
+ "hands": {
+  "hour": {
+   "mobile": "H",
+   "part": "hour_hand"
+  },
+  "minute": {
+   "mobile": "M",
+   "part": "minute_hand"
+  },
+  "seconds": {
+   "mobile": "S",
+   "part": "sec_hand"
+  },
+  "day": {
+   "mobile": "D",
+   "part": "day_hand"
+  }
+ }
+}
