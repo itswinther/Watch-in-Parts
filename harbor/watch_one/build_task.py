@@ -36,6 +36,16 @@ import tempfile
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
 
+
+def supplied_meshes(G):
+    """The barrel meshes the agent's /app/supplied/ must hold: the stage placeholder's one barrel.stl, or (one-job,
+    b/thin-cat) one <part no.>.stl per barrel of the catalogue, geometry/watch.py BARREL_IDS."""
+    if G["bundle_map"]:
+        return ["supplied/barrel.stl"]
+    sys.path.insert(0, REPO)
+    from geometry import watch as W
+    return ["supplied/%s.stl" % b for b in W.BARREL_IDS]
+
 # ---------------------------------------------------------------------------------------------
 # The switch (or --grader, or GRADER= for run_all.sh).
 GRADER = "one-job"           # B's one-delivery grader is on main (071ab86, SPEC 0.7); "spec06-stage1" is the old placeholder
@@ -255,7 +265,7 @@ def bundle(app, G):
         for f in sorted(os.listdir(pd)):
             if f.endswith((".txt", ".pdf")) or f == "README.md":
                 shutil.copyfile(os.path.join(pd, f), os.path.join(ds, "public_domain", f))
-    need = ["supplied/barrel.stl", "tools/kernel.py"] + ([] if G["bundle_map"] else ["tools/check_format.py"])
+    need = supplied_meshes(G) + ["tools/kernel.py"] + ([] if G["bundle_map"] else ["tools/check_format.py"])
     for n in need:
         if not os.path.isfile(os.path.join(app, n)):
             raise SystemExit("B's bundle builder did not produce %s (interface of Decisions 15:44)" % n)
@@ -309,7 +319,7 @@ def assert_clean(env_dir, G):
             if hashlib.sha256(data).hexdigest() in bad or MARK in data:
                 raise SystemExit("REFUSED: %s matches a file that must never reach the agent" % rel)
             n += 1
-    for need in ("supplied/barrel.stl", "tools/kernel.py", "delivery", "datasheets"):
+    for need in supplied_meshes(G) + ["tools/kernel.py", "delivery", "datasheets"]:
         if not os.path.exists(os.path.join(app, need)):
             raise SystemExit("REFUSED: %s missing from the agent image" % need)
     if os.listdir(os.path.join(app, "delivery")):
