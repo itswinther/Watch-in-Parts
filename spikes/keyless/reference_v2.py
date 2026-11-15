@@ -63,7 +63,8 @@ P = dict(
     groove_r=0.35, groove_c=0.015, finger_w=0.2, neck_r=0.85,     # yoke: stem groove, finger, pinion neck
     spur_chamfer=0.0,           # cone on the sliding pinion's leading tooth ends (entry into the setting wheel)
     breguet_refine=0.03,        # facet length of the Breguet teeth's warp (v1: 0.03)
-    yoke_y=(1.5, 2.9), yoke_z=(-0.3, 0.45), stud_r=0.25, guide_r=0.6,
+    yoke_y=(1.5, 2.9), yoke_z=(-0.3, 0.45), stud_r=0.25,
+    head_t=0.25,                # post and stud heads: thicker than B's printable minimum (MIN_FEATURE 0.2, THIN_DEV)
     breguet_n=8, breguet_h=0.2, clear=0.012,
     # pivots (DS-301 Table 3 bushings)
     bore_crown=0.647, bore_inter=0.647, bore_click=0.485, bore_set=0.485,
@@ -415,8 +416,9 @@ def build(bV):
     gI, _ = clear_phase(inter, [ratchet])
     gI = gI - S.cyl_z(I[0], I[1], zI[0] - 1, zI[1] + 1, r_bI, 48)
     parts["intermediate_wheel"] = gI
-    parts["intermediate_post"] = S.union([S.cyl_z(I[0], I[1], z_plate[1], zI[1] + 0.09, r_pI, 48),
-                                          S.cyl_z(I[0], I[1], zI[1] + 0.02, zI[1] + 0.09, 0.6, 48)])
+    ht = P["head_t"]
+    parts["intermediate_post"] = S.union([S.cyl_z(I[0], I[1], z_plate[1], zI[1] + 0.02 + ht, r_pI, 48),
+                                          S.cyl_z(I[0], I[1], zI[1] + 0.02, zI[1] + 0.02 + ht, 0.6, 48)])
     fixed.append("intermediate_post")
 
     # ---- crown wheel: face ring (28) facing the winding pinion, spur (24) meshing the intermediate wheel
@@ -451,8 +453,8 @@ def build(bV):
         sh = X.fuse(sh, X.cyl_z(K[0], K[1], zr - 0.01, zCs[1], 1.2))
         return X.one_solid(X.cut(sh, X.cyl_z(K[0], K[1], 0, 3, r_bK)))
     EXACT["crown_wheel"] = crown_exact
-    parts["crown_post"] = S.union([S.cyl_z(K[0], K[1], z_plate[1], zCs[1] + 0.12, r_pK, 48),
-                                   S.cyl_z(K[0], K[1], zCs[1] + 0.02, zCs[1] + 0.12, 0.6, 48)])
+    parts["crown_post"] = S.union([S.cyl_z(K[0], K[1], z_plate[1], zCs[1] + 0.02 + ht, r_pK, 48),
+                                   S.cyl_z(K[0], K[1], zCs[1] + 0.02, zCs[1] + 0.02 + ht, 0.6, 48)])
     fixed.append("crown_post")
 
     # ---- winding pinion (spur teeth phased into the crown ring, Breguet teeth facing +x)
@@ -532,6 +534,16 @@ def build(bV):
     parts["setting_post"] = S.union([S.cyl_z(S1[0], S1[1], z_dial, -zr - 0.05, r_pS, 48),
                                      S.cyl_z(S1[0], S1[1], z_dial, zH[0] - 0.02, 0.5, 48)])      # shoulder
     fixed.append("setting_post")
+    # setting cover: B's skeleton dial has nothing over S1, so the setting post would stand apart from the frame
+    # (B 02:41). A plate under the dial, between the motion work and the dial, joins the setting post's shoulder
+    # to the setting idler's headed post (which the seat ties to the keyless bridge): one frame. It holds both
+    # posts by their sides (bores 0.005 over their 0.5 radius) and is put in last, from the dial side.
+    cover = S.union([S.cyl_z(p_[0], p_[1], z_dial, zH[0] - 0.02, 0.8, 48) for p_ in (S1, S2)])
+    cover = m3.Manifold.batch_hull([cover])
+    for p_ in (S1, S2):
+        cover = cover - S.cyl_z(p_[0], p_[1], z_dial - 1, zH[0] + 1, 0.505, 48)
+    parts["setting_cover"] = cover
+    fixed.append("setting_cover")
 
     def spin(sg):
         return G.pinion_along_x(zp, mf, st0, st1, 0.0, 0.0, phase=sg * phiS * zf / zp)
@@ -571,13 +583,11 @@ def build(bV):
         S.cyl_x(0, 0, g1, t_face + 0.01, P["stem_r"], 48),
         S.cyl_x(0, 0, t_face, t_face + P["crown_len"], P["crown_d"] / 2, 96),
     ])
-    # stem bridge (inner bearing, holds the winding pinion axially) and stem guide (case tube side)
+    # stem bridge (inner bearing, holds the winding pinion axially). No stem guide: in a cased watch the case tube
+    # carries the stem's outer end; a guide out there would be a fixed part apart from the frame (B 02:41)
     parts["stem_bridge"] = S.box([xw0 - 0.5 * k, -0.8 * k, -0.9], [xw0 - 0.12 * k, 0.8 * k, z_plate[0]]) \
         - S.cyl_x(0, 0, xw0 - 2, xw0 + 1, P["stem_in_r"] + 0.026, 48)
     fixed.append("stem_bridge")
-    parts["stem_guide"] = S.box([19.0, -0.6 * k, -0.8 * k], [19.6, 0.6 * k, 0.8 * k]) \
-        - S.cyl_x(0, 0, 18, 21, P["guide_r"], 48)
-    fixed.append("stem_guide")
 
     # ---- keyless bridge under B's bridge: carries the crown, intermediate and click posts and the stem bridge
     # ---- yoke: a slide on two shouldered studs; one finger in the stem's groove, one in the sliding pinion's neck.
@@ -604,7 +614,7 @@ def build(bV):
     parts["yoke"] = yoke
     for nm, xs in (("yoke_stud_a", sa), ("yoke_stud_b", sb)):
         parts[nm] = S.union([S.cyl_z(xs, ys, yz0 - 0.05, z_plate[0], P["stud_r"], 48),
-                             S.cyl_z(xs, ys, yz0 - 0.15, yz0 - 0.05, 0.45, 48)])
+                             S.cyl_z(xs, ys, yz0 - 0.05 - P["head_t"], yz0 - 0.05, 0.45, 48)])
         fixed.append(nm)
 
     Bbar = bar_point(K)
@@ -995,9 +1005,10 @@ def mesh_to_shape(man, ang_tol=1e-9, d_tol=2e-5):
 # ---------------------------------------------------------------- B's delivery format and B's runners
 KEYLESS_AFTER = {   # installation order, merged into B's job plan (QA-W100 section 8); REAL_WATCH_WORK.md section 4
     "seconds": ["ratchet", "click_post", "click", "intermediate_post", "intermediate_wheel", "crown_post",
-                "crown_wheel", "keyless_bridge", "stem_bridge", "winding_pinion", "sliding_pinion", "stem_guide",
+                "crown_wheel", "keyless_bridge", "stem_bridge", "winding_pinion", "sliding_pinion",
                 "stem", "yoke", "yoke_stud_a", "yoke_stud_b"],
-    "bridge": ["setting_wheel", "setting_post", "setting_idler_seat", "setting_idler", "setting_idler_post"],
+    "bridge": ["setting_wheel", "setting_post", "setting_idler_seat", "setting_idler", "setting_idler_post",
+               "setting_cover"],
 }
 AXIAL = ("winding_pinion", "sliding_pinion", "stem")     # come in along the stem line from outside the case
 

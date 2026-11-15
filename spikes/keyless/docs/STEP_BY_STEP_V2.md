@@ -163,10 +163,15 @@ geometry/data/lewis_y.json.
   - The setting idler sits on a seat that stands on the keyless bridge. A headed post (0.5 head) goes in through
     it from the dial side, after it.
   - The setting wheel's post comes in from the dial side after the wheel. It has a shoulder above the wheel and
-    no head below: the winding pinion holds the wheel from below. It is a fixed part with nothing over it in B's
-    frame, like the stem guide.
-  - Heads are at least 0.5 thick, more than B's HOLD_SHIFT 0.485, so the held test's jump lands in them. The click
-    post's head goes down to 0.05 over the ratchet for the same reason.
+    no head below: the winding pinion holds the wheel from below.
+  - A setting cover joins the two posts into B's frame (B 02:41: the setting post stood apart, so the `assembled`
+    gate failed). It is a plate under the dial, between the motion work and the dial (z 8.42 to 8.8), round the
+    setting post's shoulder and the idler post's head, each in a bore 0.005 over its radius. It goes in last.
+  - The idler post's head is 0.5 thick, more than B's HOLD_SHIFT 0.485, so the held test's jump lands in it. The
+    click post's head goes down to 0.05 over the ratchet for the same reason.
+  - The heads of the crown-wheel and intermediate posts and of the yoke's studs are 0.25 thick (`head_t`): at 0.07
+    to 0.1 they failed B's printable check (MIN_FEATURE 0.2, deviations 0.22 to 0.36 against THIN_DEV 0.2). Now
+    every keyless fixed part opens within 0.16.
 - **Cannon.** Split from the centre mobile as `friction_on: centre` (Decisions 15:47), with the minute hand.
 
 ## 8. Fixed parts and how they meet B's frame
@@ -176,9 +181,11 @@ geometry/data/lewis_y.json.
   - It carries the crown-wheel post, the intermediate post, the click post, the stem bridge, the yoke's two
     studs and the setting idler's seat.
   - Every post and stud only touches it: no overlap, so each can be installed on its own.
-- **Stem guide.** At 19.0 to 19.6 along the stem, it stands for the case tube. The case is not modelled, so
-  it touches nothing in B's frame (open point).
-- **Setting posts.** Hung from the dial underside, at z 8.8.
+- **No stem guide.** v2 had one at 19.0 to 19.6 along the stem, for the case tube. The case is not modelled, so
+  it touched nothing in B's frame and failed the `assembled` gate (B 02:41). It is gone: the stem is held by the
+  stem bridge, the winding pinion's bore and the sliding pinion's square (AT-0 held: no failure).
+- **Setting posts and cover.** Hung from the dial side, joined by the setting cover (section 7). B's frame check
+  (`Movement.frame()`) finds one frame of all fixed parts.
 
 ## 8a. Installation order (QA-W100 section 8)
 
@@ -193,8 +200,9 @@ This follows REAL_WATCH_WORK.md section 4 (Unitas/ETA 6497) where B's frame allo
   they sit under the keyless bridge, which goes on after them. B's frame has no barrel bridge over the barrel.
 - **The merged order.** B's job order (`ORDER_8H`), with:
   - after `seconds`: ratchet, click_post, click, intermediate_post, intermediate_wheel, crown_post, crown_wheel,
-    keyless_bridge, stem_bridge, winding_pinion, sliding_pinion, stem_guide, stem, yoke, yoke_stud_a, yoke_stud_b;
-  - after `bridge`: setting_wheel, setting_post, setting_idler_seat, setting_idler, setting_idler_post.
+    keyless_bridge, stem_bridge, winding_pinion, sliding_pinion, stem, yoke, yoke_stud_a, yoke_stud_b;
+  - after `bridge`: setting_wheel, setting_post, setting_idler_seat, setting_idler, setting_idler_post,
+    setting_cover.
 - **Paths.** The pinions and the stem translate along the stem direction, from wholly outside the box grown by
   5 mm. Every other part comes straight down from above, as in B's plan. The steps are 0.19 mm.
 - **Check.** `reference_v2.py OUT --ref REF --assembly-only DELIVERY` merges the parts and replays the plan
