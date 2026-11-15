@@ -48,10 +48,13 @@ hand speeds and directions, and the weights of the checks.
 | COAX_TOL (also Part 1 check 10) | 0.01 | `datasheets/QA-W100_inspection.md` | 5. Part 1 | **Held.** | statement |
 | SEAT_TOUCH | 0.02 | `datasheets/QA-W100_inspection.md` | 5. Part 1 | **Seated.** | statement |
 | ENGAGE_GAP | 0.1 | `datasheets/QA-W100_inspection.md` | 5. Part 1 | **The train runs.** | statement |
+| TEETH_MIN_DEPTH (mesh test, teeth as declared; the barrel's count is BARREL_TEETH, cited from DS-W01) | 0.1 | `datasheets/QA-W100_inspection.md` | 5. Part 1 | **The train runs.** | statement |
 | DRIVE_FRACTION (and 360 x DRIVE_FRACTION degrees) | 0.25 | `datasheets/QA-W100_inspection.md` | 5. Part 1 | **The train runs.** | statement |
 | DRIVE_MIN_VOLUME | 0.001 | `datasheets/QA-W100_inspection.md` | 5. Part 1 | **The train runs.** | statement |
 | DRIVE_AREA_RATIO | 0.5 | `datasheets/QA-W100_inspection.md` | 5. Part 1 | **The train runs.** | statement |
 | MESH_SHIFT | 0.03 | `datasheets/QA-W100_inspection.md` | 5. Part 1 | **Runs with its arbors | statement |
+| VOL_TOL on the swept solids (`Movement.clear_swept`; CLEAR_STEPS is stage mode only) | 0.01 | `datasheets/QA-W100_inspection.md` | 5. Part 1 | **Nothing else collides.** | statement |
+| SWEEP_DZ (swept solids, `_swept_bands`) | 0.02 | `datasheets/QA-W100_inspection.md` | 5. Part 1 | *Swept solid.* | statement |
 | HAND_REACH | 5.0 | `datasheets/QA-W100_inspection.md` | 5. Part 1 | **Hands.** | statement |
 | HAND_CENTRE_MIN (also Part 2 check 2) | 0.5 | `datasheets/QA-W100_inspection.md` | 5. Part 1 | **Hands.** | statement |
 | hand wholly above the frame (`Movement.hand_shape`, margin 0) | 0.0 | `datasheets/QA-W100_inspection.md` | 5. Part 1 | **Hands.** | statement |
@@ -1094,7 +1097,7 @@ hand speeds and directions, and the weights of the checks.
 | THIN_SCORE_SHARE (thinness probe; also the grader's parts reward split, Fraction(1, 2)) | 1/2 | `datasheets/QA-W100_inspection.md` | 9. Thickness | The acceptance figure is | statement |
 | CASE_HEIGHT cited in the thickness formula (no value printed) |  | `datasheets/QA-W100_inspection.md` | 9. Thickness | With C the inner height | statement |
 
-Thinness probe (environment/brief_thin.py THIN_IN_BRIEF on): QA-W100 rev B states requirements only. These test-method numbers of the grader are not stated anywhere the agent can read: SPIN_STEPS (and the step, 360 / SPIN_STEPS degrees); SAMPLES_PER_TOOTH, MESH_OFFGRID, every 4th and 8th step; CLEAR_STEPS.
+Thinness probe (environment/brief_thin.py THIN_IN_BRIEF on): QA-W100 rev B states requirements only. These test-method numbers of the grader are not stated anywhere the agent can read: SPIN_STEPS (and the step, 360 / SPIN_STEPS degrees); SPIN_OFFGRID (and the positions, SPIN_STEPS x (1 + its length)); SAMPLES_PER_TOOTH, MESH_OFFGRID, every 4th and 8th step; TEETH_RAYS (mesh test, teeth as declared: directions of a section's outline).
 
 Numbers the scan cannot tell apart (a document's own number equal to a supplier value):
 

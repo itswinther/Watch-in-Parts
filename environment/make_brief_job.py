@@ -120,7 +120,18 @@ def _literals():
     src_thin = inspect.getsource(W.thin)
     src_asm = inspect.getsource(W._asm_messages)
     need = [(src_mesh, "i % 4 == 0"), (src_mesh, "i % 8 == 0"), (src_asm, "> 1e-6"),
-            (inspect.getsource(W.Movement.clear_run), "if abs(wa - wb) > 1e-12")]
+            (inspect.getsource(W.Movement.spin), "for f in (Fraction(0),) + tuple(offgrid)"),
+            (inspect.getsource(W._swept_bands), "/ SWEEP_DZ - 1e-9))) if k > 0 else 1"),
+            (inspect.getsource(W._swept_bands), "S.slice(0.5 * (b0 + b1))"),
+            (inspect.getsource(W.Movement.clear_swept), "_swept_ivol(self.swept_profile(a), self.swept_profile(b), d)"),
+            # the mesh test's tooth-count condition, as QA-W100 states it
+            (src_mesh, "teeth = self.tooth_counts(a, ta, b, tb)"),
+            (inspect.getsource(W.Movement.mesh_passes), 'return x["teeth_match"] and'),
+            (inspect.getsource(W.Movement.tooth_counts), "got[name] = BARREL_TEETH"),
+            (inspect.getsource(W.count_teeth), "up = r > (lo + hi) / 2.0"),
+            (inspect.getsource(W.count_teeth), "if hi - lo < TEETH_MIN_DEPTH:"),
+            (inspect.getsource(W.meet_height), "key=lambda i: (-(zs[i + 1] - zs[i]), zs[i])"),
+            (inspect.getsource(W.meet_height), "if reach(A, ax_a, z) + reach(B, ax_b, z) > d:")]
     for src, text in need:
         if text not in src:
             raise SystemExit("geometry/watch.py changed: %r not found; update make_brief_job.py" % text)
@@ -311,8 +322,10 @@ Conditions. If one fails, Part 1 fails and none of its checks passes.
 
 Checks. Each passes or fails.
 
-1. **Free to turn.** Each mobile, the barrel included, turned through one full turn about its axis in {sp} steps of
-   {deg} degrees, never intersects the frame by more than {vt}.
+1. **Free to turn.** Each mobile, the barrel included, is turned about its axis through one full turn in {sp} steps
+   of {deg} degrees: at step i (i = 0, 1, ..., {sp} - 1) it is turned i x {deg} degrees, and after every step it is
+   also turned (i + {sf1}) x {deg} and (i + {sf2}) x {deg} degrees. At none of these {spn} positions does it intersect
+   the frame by more than {vt}.
 2. **Held.** Each mobile, the barrel included, is moved {hm} mm along +x, -x, +y, -y, +z and -z in turn, and is
    held in every one of the six directions. Only the tested mobile moves; the frame and every other mobile stay
    where they are. Moved in a direction, a mobile is held when it intersects the frame by more than {vt}, or
@@ -334,7 +347,18 @@ Checks. Each passes or fails.
    Starting from the assembled positions, at step i (i = 0, 1, ..., {spt} x max({zd}, {zn}) - 1) D is turned
    counter-clockwise by i x 360 / ({spt} x {zd}) degrees about its axis, and N clockwise by that angle x {zd} / {zn}
    about its own axis. These turning senses are a convention of the test; they do not depend on the running sense
-   of the barrel. Three conditions must hold:
+   of the barrel. Four conditions must hold:
+   - teeth as declared: each declared tooth count must be the number of teeth of that gear, counted on its section
+     at the height where the two gears meet ({zd} for D, {zn} for N; for `barrel`, the teeth of its catalogue
+     data, DS-W01, section 2, not counted). That height is found in the assembled positions on D and N as whole
+     mobiles: the heights at which the mesh of D or of N has a vertex cut the z range that both cover into layers,
+     and it is the middle of the thickest layer (the lowest of equals) at whose middle the largest distance of D's
+     section from D's axis and the largest distance of N's section from N's axis add up to more than the distance
+     between the two axes (if no layer qualifies, this condition fails). A section's teeth are counted on its
+     outline about its mobile's axis: in each of {rays} equally spaced directions from the axis (one along +x), the
+     distance to the furthest point of the section in that direction (0 where there is none). Going once round,
+     the count is the number of times that distance rises from at most to above the value halfway between its
+     smallest and its largest value; if those two differ by less than {tdepth} mm, the section has no teeth;
    - no jam: at every step, and at two more positions after every {pe}th step (i + {f1} and i + {f2} in the formula
      above, for i = 0, {pe}, {pe2}, ...), D and N intersect by at most {vt};
    - engaged: at every {ge}th step (i = 0, {ge}, {ge2}, ...) at which their intersection is empty, their smallest
@@ -350,11 +374,19 @@ Checks. Each passes or fails.
    D's axis (N then turns about its moved axis; if the two axes coincide, "away" is +x and "towards" is -x). The
    steps, the turning angles and m are those of the assembled positions. This check does not change which meshes
    drive the hands; that is decided in the assembled positions only.
-6. **Nothing else collides.** Every pair of mobiles (the barrel included) that is not declared as a mesh is turned
-   together, each at its speed from the declared tooth counts (a mobile that no declared mesh reaches from the
-   barrel stands still): {cs} equal steps covering one full turn of the faster of the two, then, if their speeds
-   differ, {cs} equal steps covering one full turn of one relative to the other. At every step they intersect by
-   at most {vt}.
+6. **Nothing else collides.** No two mobiles (the barrel included) that are not declared as a mesh may meet at any
+   pair of angles, whatever their speeds. They are tested on their swept solids: the swept solid of a mobile is
+   every point that some point of the mobile passes through while it makes one full turn about its axis (the
+   mobile turned to every angle at once). For every such pair, the swept solids of the two mobiles intersect by at
+   most {vt}. Two mobiles on the same axis are tested in the same way.
+
+   *Swept solid.* It is worked out from horizontal sections of the mobile, all its parts together, in the
+   assembled position. The heights at which the mobile has a vertex cut it into height ranges. Inside a range
+   that no face crosses that is neither vertical nor horizontal, the section is the same at every height; inside
+   any other range, the range is cut into the fewest equal bands no higher than {dz} mm. Each range of the first
+   kind, and each band, is given by the section at its middle height: through that whole range or band, the swept
+   solid holds every point whose distance from the axis is the distance from the axis of some point of that
+   section. The swept solid is therefore a solid of revolution, with exact circles round the axis.
 7. **Hour hand.** 8. **Minute hand.** 9. **Seconds hand.** The hands show the time, each turning clockwise at a
    constant speed: the hour hand {hs[hour]}, the minute hand {hs[minute]}, the seconds hand {hs[seconds]}.
    A hand is driven only through declared meshes that pass the mesh test (a declared
@@ -373,9 +405,10 @@ Checks. Each passes or fails.
            spt=W.SAMPLES_PER_TOOTH, pe=L["push_every"], pe2=2 * L["push_every"], ge=L["gap_every"],
            ge2=2 * L["gap_every"], f1=str(W.MESH_OFFGRID[0]), f2=str(W.MESH_OFFGRID[1]), gap=num(W.ENGAGE_GAP),
            frac=num(W.DRIVE_FRACTION), push=num(W.DRIVE_FRACTION * 360), dmin=num(W.DRIVE_MIN_VOLUME),
-           ratio=num(W.DRIVE_AREA_RATIO), shift=num(W.MESH_SHIFT), cs=W.CLEAR_STEPS, reach=num(W.HAND_REACH),
-           hcm=num(W.HAND_CENTRE_MIN), has=num(W.HAND_AREA_MAX_SHARE), speed=SPEED_CITE,
-           fits=fits_text(), printable=printable_req_text(), strength=strength)
+           ratio=num(W.DRIVE_AREA_RATIO), tdepth=num(W.TEETH_MIN_DEPTH), rays=num(W.TEETH_RAYS), shift=num(W.MESH_SHIFT),
+           dz=num(W.SWEEP_DZ), reach=num(W.HAND_REACH), hcm=num(W.HAND_CENTRE_MIN), has=num(W.HAND_AREA_MAX_SHARE),
+           sf1=str(W.SPIN_OFFGRID[0]), sf2=str(W.SPIN_OFFGRID[1]), spn=W.SPIN_STEPS * (1 + len(W.SPIN_OFFGRID)),
+           speed=SPEED_CITE, fits=fits_text(), printable=printable_req_text(), strength=strength)
 
 
 def fits_text():
@@ -1166,6 +1199,9 @@ def traceability_rows(L, B, S=None):
         cell("FRAME_JOIN", W.FRAME_JOIN, Q, p1, "**C2 Assembled.**", None, [num(W.FRAME_JOIN)]),
         cell("SPIN_STEPS (and the step, 360 / SPIN_STEPS degrees)", W.SPIN_STEPS, Q, p1, "**Free to turn.**", None,
              [W.SPIN_STEPS, num(360 / W.SPIN_STEPS)]),
+        cell("SPIN_OFFGRID (and the positions, SPIN_STEPS x (1 + its length))", (W.SPIN_OFFGRID, W.SPIN_STEPS), Q, p1,
+             "**Free to turn.**", None, [str(W.SPIN_OFFGRID[0]), str(W.SPIN_OFFGRID[1]),
+                                         W.SPIN_STEPS * (1 + len(W.SPIN_OFFGRID))]),
         cell("HELD_MOVE", W.HELD_MOVE, Q, p1, "**Held.**", None, [num(W.HELD_MOVE)]),
         cell("COAX_TOL (also Part 1 check 10)", W.COAX_TOL, Q, p1, "**Held.**", None, [num(W.COAX_TOL)]),
         cell("SEAT_TOUCH", W.SEAT_TOUCH, Q, p1, "**Seated.**", None, [num(W.SEAT_TOUCH)]),
@@ -1173,12 +1209,18 @@ def traceability_rows(L, B, S=None):
              Q, p1, "*Mesh test.*", None, [W.SAMPLES_PER_TOOTH, str(W.MESH_OFFGRID[0]), str(W.MESH_OFFGRID[1]),
                                           pe, 2 * pe, ge, 2 * ge]),
         cell("ENGAGE_GAP", W.ENGAGE_GAP, Q, p1, "*Mesh test.*", None, [num(W.ENGAGE_GAP)]),
+        cell("TEETH_MIN_DEPTH (mesh test, teeth as declared; the barrel's count is BARREL_TEETH, cited from DS-W01)",
+             W.TEETH_MIN_DEPTH, Q, p1, "*Mesh test.*", None, [num(W.TEETH_MIN_DEPTH)]),
+        cell("TEETH_RAYS (mesh test, teeth as declared: directions of a section's outline)", W.TEETH_RAYS, Q, p1,
+             "*Mesh test.*", None, [num(W.TEETH_RAYS)]),
         cell("DRIVE_FRACTION (and 360 x DRIVE_FRACTION degrees)", W.DRIVE_FRACTION, Q, p1, "*Mesh test.*", None,
              [num(W.DRIVE_FRACTION), num(W.DRIVE_FRACTION * 360)]),
         cell("DRIVE_MIN_VOLUME", W.DRIVE_MIN_VOLUME, Q, p1, "*Mesh test.*", None, [num(W.DRIVE_MIN_VOLUME)]),
         cell("DRIVE_AREA_RATIO", W.DRIVE_AREA_RATIO, Q, p1, "*Mesh test.*", None, [num(W.DRIVE_AREA_RATIO)]),
         cell("MESH_SHIFT", W.MESH_SHIFT, Q, p1, "**The train runs with", None, [num(W.MESH_SHIFT)]),
-        cell("CLEAR_STEPS", W.CLEAR_STEPS, Q, p1, "**Nothing else collides.**", None, [W.CLEAR_STEPS]),
+        cell("VOL_TOL on the swept solids (`Movement.clear_swept`; CLEAR_STEPS is stage mode only)", W.VOL_TOL, Q, p1,
+             "**Nothing else collides.**", None, [num(W.VOL_TOL)]),
+        cell("SWEEP_DZ (swept solids, `_swept_bands`)", W.SWEEP_DZ, Q, p1, "*Swept solid.*", None, [num(W.SWEEP_DZ)]),
         cell("HAND_REACH", W.HAND_REACH, Q, p1, "**Hands.**", None, [num(W.HAND_REACH)]),
         cell("HAND_CENTRE_MIN (also Part 2 check 2)", W.HAND_CENTRE_MIN, Q, p1, "**Hands.**", None,
              [num(W.HAND_CENTRE_MIN)]),

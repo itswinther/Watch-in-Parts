@@ -76,12 +76,12 @@ Scaled value = 1:1 cited value × s, computed in Docker (`python:3.12-slim`, 2 G
 | DS-301 | F_max | p·d·ℓ, with p not scaled | the 1:1 values × 2.615 |
 | DS-401 | Crowns 3.00 to 7.0 | Perrin, Esslinger | 4.85 to 11.32 |
 | DS-401 | Tube 2.0 / 2.5 | Esslinger | 3.23 / 4.04 |
-| DS-401 | Thread S 0.90; stem length 15.50; travel 0.80; crown gap ≤ 0.1 | Sellita SW200-1 DocTec (link-only, confidential drawings, not reproduced) | 1.455; 25.07; **1.29**; 0.16 |
+| DS-401 | Thread S 0.90; stem length 15.50; travel 0.80; crown gap ≤ 0.1 | Sellita SW200-1 DocTec (link-only, confidential drawings, not reproduced) | 1.455; 25.07; **1.294**; 0.16 |
 | DS-401 | Stem squares 0.50 / 0.60 / 0.70 (Valtorre's offer, not cited) | — | 0.809 / 0.970 / 1.132; T_y 92.1 / 159.1 / 252.6 N·mm |
 | DS-501 | All values | — | not scaled (human) |
 
-**For the builder:** the stem travel at demonstration scale is 1.29 mm (0.80 × s). The keyless
-constant `PULL` should become 1.29 at this scale. The 0.9 × 1.6 = 1.44 in `INTERFACE_FOR_B.md` was based
+**For the builder:** the stem travel at demonstration scale is 1.294 mm (0.80 × s). The keyless
+constant `PULL` should become 1.294 at this scale. The 0.9 × 1.6 = 1.44 in `INTERFACE_FOR_B.md` was based
 on the v1 pull and on 1.6 rather than 1.617.
 
 ## 3. Implied checks → datasheet value → formula → source
@@ -95,7 +95,7 @@ on the v1 pull and on 1.6 rather than 1.617.
 | 5a | Pivot fit | DS-301 Tables 1 and 3; clearance 0.016 mm at about 0.226 mm | Catalogue hole; 0 < hole − pivot; recommended ≈ 0.016 mm (band at the builder's choice) | Watch Repair Talk (secondary); H.S. Walsh; Otto Frei |
 | 5b | Pivot load | DS-301 §5.3: p_max 900 / 110 N/mm² | F_radial ≤ p_max·d·ℓ | Engineers Edge; makeitfrom; Wieland; UWA |
 | 6 | Stem torque | DS-401 Table 3 | M_el/i ≤ the recommended value for the square size a | UoK notes; von Mises; Alleima |
-| 7 | Stem positions | DS-401: travel 1.29 mm | `PULL` = 1.29 | Sellita (fact only) |
+| 7 | Stem positions | DS-401: travel 1.294 mm | `PULL` = 1.294 | Sellita (fact only) |
 
 **Row 1, which variants pass:**
 
@@ -141,7 +141,7 @@ The discriminating rows remain 1 (choosing the spring at the right core ratio), 
 | **Grossmann's torque law** M = E·h·e³·2πn/(12L), n from the free state; worked example 5,640 g·mm, −389 g·mm per turn | Grossmann 1905, art. 97 and 99 (PD; text in `public_domain/`, verified by grep) | DS-101 now cites it as the primary source of the formula. Note 2 corrected: n counts from the free spring, so a real spring has torque at let-down. Table 4 is relabelled "torque gained above let-down", and M_el remains the bound |
 | **MIL-STD-1472H:** knob max **32 mN·m** for Ø ≤ 25 mm (42 above); fingertip knob Ø 10 to 100 mm | everyspec copy of MIL-STD-1472H fig. 10 (PD) | DS-501: T_rec is now capped at 32 N·mm |
 | **Imrhan 2013:** MVC finger torque **69 to 155 mN·m** (smooth Ø 3.3 to 5.0 mm, women's tightening to men's loosening) | westpointpressjournals ISER 1(2) (link-only) | **Corrected DS-501:** the earlier friction-model "maximum finger torque" columns (e.g. 140 N·mm for women at Ø 5) overstated the measured 90 to 96. They are removed and replaced by Imrhan's measured table. The recommended limit (20 % of the lowest measured maximum at 3.3 mm) is consistent |
-| **Sellita SW200-1 / SW215-1: stem travel 0.80 mm**, S 0.90, stem 15.50 mm, crown gap ≤ 0.1 mm | Sellita DocTec SW200-1 rev 07 (**link-only; drawing pages marked confidential; values cited as facts, document not reproduced or shipped**) | **Corrected DS-401:** the travel was "about 1 mm" (watchesbysjx, secondary); it is now 0.80 mm (primary) × s = 1.29 mm |
+| **Sellita SW200-1 / SW215-1: stem travel 0.80 mm**, S 0.90, stem 15.50 mm, crown gap ≤ 0.1 mm | Sellita DocTec SW200-1 rev 07 (**link-only; drawing pages marked confidential; values cited as facts, document not reproduced or shipped**) | **Corrected DS-401:** the travel was "about 1 mm" (watchesbysjx, secondary); it is now 0.80 mm (primary) × s = 1.294 mm |
 | **ETA 6497-2: 53 h; ETA 6498-1: 46 h** | ETA CT 6497-2 and 6498-1 (heritage-site mirrors, link-only) | DS-101 comparison table. Corrects STANDARDS.md 3.5's "6497-1, 46 h" (that figure is the 6498-1's) |
 | ETA 2801-2: 42 h | ETA CT 2801-2, https://shopb2b.eta.ch/technicaldocuments/index/pdf/id/1626 | Calibrates DS-101's core ratio (variant K) |
 | Wieland CuZn39Pb3: R430 Rp0.2 220 MPa; E 96 GPa; density 8.46 g/cm³ | Wieland Z32/Z33 | **Corrected DS-201:** the brass design minimum was 230 MPa (Aalco); it is now 220 MPa, so the allowable is 110 MPa (was 115), and the DS-301 bushing p_max is 110 |

@@ -29,13 +29,16 @@ CASE_HEIGHT_COL = "Inner height along the axis (mm)"
 
 # Trace rows of main's QA-W100 that are test method, not requirement: the probe's QA-W100 does not state them.
 NOT_STATED = ("SPIN_STEPS (and the step, 360 / SPIN_STEPS degrees)",
+              "SPIN_OFFGRID (and the positions, SPIN_STEPS x (1 + its length))",
               "SAMPLES_PER_TOOTH, MESH_OFFGRID, every 4th and 8th step",
-              "CLEAR_STEPS")
+              "TEETH_RAYS (mesh test, teeth as declared: directions of a section's outline)")
 # Rows whose statement anchor moves in the probe's Part 1: {constant: new anchor}
 ANCHORS = {"ENGAGE_GAP": "**The train runs.**",
            "DRIVE_FRACTION (and 360 x DRIVE_FRACTION degrees)": "**The train runs.**",
            "DRIVE_MIN_VOLUME": "**The train runs.**",
            "DRIVE_AREA_RATIO": "**The train runs.**",
+           "TEETH_MIN_DEPTH (mesh test, teeth as declared; the barrel's count is BARREL_TEETH, cited from DS-W01)":
+               "**The train runs.**",
            "MESH_SHIFT": "**Runs with its arbors"}
 
 
@@ -120,6 +123,9 @@ Requirements.
    meshes, and every mobile is driven from the barrel through declared meshes that drive. Every declared mesh
    drives. A declared mesh, D its `driver` (z_D teeth) and N its `driven` (z_N teeth), drives when, as D turns N
    at the ratio z_D / z_N through a full turn of the larger gear:
+   - the declared tooth counts are right: z_D and z_N are the numbers of teeth of the two gears, counted round
+     the section of each at the height where the two gears meet (a tooth is at least {tdepth} mm deep); for
+     `barrel`, the count is the one of its catalogue data (DS-W01, section 2);
    - the two never collide;
    - they stay in mesh: wherever they do not touch, they are at most {gap} mm apart;
    - the teeth carry the drive: from every position of that turn, turning D a further {frac} of its tooth pitch
@@ -132,8 +138,19 @@ Requirements.
    of the mesh test are the positions from which D is turned the further {frac} of its tooth pitch.
 5. **Runs with its arbors slightly out of place.** Every declared mesh also drives with N's axis moved {shift} mm
    straight towards D's axis, and with it moved {shift} mm straight away.
-6. **Nothing else collides.** As the movement runs, at any time of day, no two mobiles that are not declared as a
-   mesh ever collide with each other.
+6. **Nothing else collides.** No two mobiles (the barrel included) that are not declared as a mesh may meet at any
+   pair of angles, whatever their speeds: the swept solids of the two collide by no more than {vt}. The swept
+   solid of a mobile is every point that some point of the mobile passes through while it makes one full turn
+   about its axis (the mobile turned to every angle at once). Two mobiles on the same axis are treated the same
+   way.
+
+   *Swept solid.* It is worked out from horizontal sections of the mobile, all its parts together, in the
+   assembled position. The heights at which the mobile has a vertex cut it into height ranges. Inside a range
+   that no face crosses that is neither vertical nor horizontal, the section is the same at every height; inside
+   any other range, the range is cut into the fewest equal bands no higher than {dz} mm. Each range of the first
+   kind, and each band, is given by the section at its middle height: through that whole range or band, the swept
+   solid holds every point whose distance from the axis is the distance from the axis of some point of that
+   section. The swept solid is therefore a solid of revolution, with exact circles round the axis.
 7. **Hour hand.** 8. **Minute hand.** 9. **Seconds hand.** The hands show the time, each turning clockwise at a
    constant speed: the hour hand {hs[hour]}, the minute hand {hs[minute]}, the seconds hand {hs[seconds]}.
    A hand is driven only through declared meshes that pass the mesh test (a declared
@@ -149,7 +166,8 @@ Requirements.
 {strength}""".format(speed=B.SPEED_CITE, join=n(W.FRAME_JOIN), hm=n(W.HELD_MOVE), coax=n(W.COAX_TOL),
                      touch=n(W.SEAT_TOUCH), gap=n(W.ENGAGE_GAP), frac=n(W.DRIVE_FRACTION),
                      push=n(W.DRIVE_FRACTION * 360), dmin=n(W.DRIVE_MIN_VOLUME), ratio=n(W.DRIVE_AREA_RATIO),
-                     shift=n(W.MESH_SHIFT), hs=B.hand_speeds(), reach=n(W.HAND_REACH), hcm=n(W.HAND_CENTRE_MIN),
+                     shift=n(W.MESH_SHIFT), tdepth=n(W.TEETH_MIN_DEPTH), vt=B.vt(), dz=n(W.SWEEP_DZ),
+                     hs=B.hand_speeds(), reach=n(W.HAND_REACH), hcm=n(W.HAND_CENTRE_MIN),
                      has=n(W.HAND_AREA_MAX_SHARE), fits=B.fits_text(), printable=B.printable_req_text(),
                      strength=strength)
 
