@@ -1,0 +1,401 @@
+{
+ "label": "c2_6.6mm",
+ "design": "/d/c2",
+ "barrel_stl": "/w/geometry/data/barrel.stl",
+ "barrel_torque_nmm": 70.1,
+ "engine_tol_mm3": 5e-05,
+ "probe_arc_mm": 0.004,
+ "mu_sliding": 0.44,
+ "mu_static": 0.51,
+ "meshes": [
+  {
+   "pair": "barrel/third",
+   "teeth": [
+    96,
+    24
+   ],
+   "module": 0.2,
+   "T_in_nominal_nmm": 70.1,
+   "grader_force_n": 7.3021,
+   "engine_jams": 0,
+   "runtime_s": 5.9,
+   "engine_evals": 3216,
+   "rate_min_max_vs_ideal": [
+    3.967,
+    4.0378,
+    4.0
+   ],
+   "steps_touching": "79/80",
+   "mu0.00": {
+    "eff_mean": 1.0003,
+    "eff_min": 0.9906,
+    "eff_max": 1.01,
+    "max_normal_n": 8.0562,
+    "mean_normal_n": 5.6625,
+    "force_jam_steps": 0,
+    "max_contacts": 2,
+    "max_total_normal_n": 8.1434,
+    "axial_patch_steps": 0
+   },
+   "mu0.15": {
+    "eff_mean": 0.9834,
+    "eff_min": 0.9699,
+    "eff_max": 1.0003,
+    "max_normal_n": 8.6405,
+    "mean_normal_n": 5.6532,
+    "force_jam_steps": 0,
+    "max_contacts": 2,
+    "max_total_normal_n": 8.6744,
+    "axial_patch_steps": 0
+   },
+   "mu0.44": {
+    "eff_mean": 0.9507,
+    "eff_min": 0.9243,
+    "eff_max": 1.0046,
+    "max_normal_n": 10.1067,
+    "mean_normal_n": 5.6916,
+    "force_jam_steps": 0,
+    "max_contacts": 2,
+    "max_total_normal_n": 10.1463,
+    "axial_patch_steps": 0
+   },
+   "mu0.51": {
+    "eff_mean": 0.9428,
+    "eff_min": 0.9131,
+    "eff_max": 1.0063,
+    "max_normal_n": 10.5383,
+    "mean_normal_n": 5.7126,
+    "force_jam_steps": 0,
+    "max_contacts": 2,
+    "max_total_normal_n": 10.5797,
+    "axial_patch_steps": 0
+   },
+   "max_fixed_overlap_mm3": 0.0
+  },
+  {
+   "pair": "third/centre",
+   "teeth": [
+    60,
+    30
+   ],
+   "module": 0.25,
+   "T_in_nominal_nmm": 17.525,
+   "grader_force_n": 2.3367,
+   "engine_jams": 0,
+   "runtime_s": 8.2,
+   "engine_evals": 3226,
+   "rate_min_max_vs_ideal": [
+    1.9919,
+    2.0069,
+    2.0
+   ],
+   "steps_touching": "79/80",
+   "mu0.00": {
+    "eff_mean": 1.0002,
+    "eff_min": 0.9936,
+    "eff_max": 1.0069,
+    "max_normal_n": 2.5791,
+    "mean_normal_n": 1.8367,
+    "force_jam_steps": 0,
+    "max_contacts": 2,
+    "max_total_normal_n": 2.5979,
+    "axial_patch_steps": 0
+   },
+   "mu0.15": {
+    "eff_mean": 0.9845,
+    "eff_min": 0.974,
+    "eff_max": 0.9995,
+    "max_normal_n": 2.7551,
+    "mean_normal_n": 1.8202,
+    "force_jam_steps": 0,
+    "max_contacts": 2,
+    "max_total_normal_n": 2.7693,
+    "axial_patch_steps": 0
+   },
+   "mu0.44": {
+    "eff_mean": 0.9545,
+    "eff_min": 0.9324,
+    "eff_max": 1.0018,
+    "max_normal_n": 3.214,
+    "mean_normal_n": 1.8081,
+    "force_jam_steps": 0,
+    "max_contacts": 2,
+    "max_total_normal_n": 3.2306,
+    "axial_patch_steps": 0
+   },
+   "mu0.51": {
+    "eff_mean": 0.9473,
+    "eff_min": 0.922,
+    "eff_max": 1.0028,
+    "max_normal_n": 3.3487,
+    "mean_normal_n": 1.8092,
+    "force_jam_steps": 0,
+    "max_contacts": 2,
+    "max_total_normal_n": 3.3659,
+    "axial_patch_steps": 0
+   },
+   "max_fixed_overlap_mm3": 0.0
+  },
+  {
+   "pair": "centre/fourth",
+   "teeth": [
+    90,
+    12
+   ],
+   "module": 0.2118,
+   "T_in_nominal_nmm": 8.7625,
+   "grader_force_n": 0.9195,
+   "engine_jams": 0,
+   "runtime_s": 74.2,
+   "engine_evals": 38540,
+   "rate_min_max_vs_ideal": [
+    7.4104,
+    7.5717,
+    7.5
+   ],
+   "steps_touching": "79/80",
+   "mu0.00": {
+    "eff_mean": 1.0006,
+    "eff_min": 0.9869,
+    "eff_max": 1.016,
+    "max_normal_n": 1.0148,
+    "mean_normal_n": 0.8021,
+    "force_jam_steps": 0,
+    "max_contacts": 2,
+    "max_total_normal_n": 1.029,
+    "axial_patch_steps": 0
+   },
+   "mu0.15": {
+    "eff_mean": 0.9734,
+    "eff_min": 0.9464,
+    "eff_max": 0.9996,
+    "max_normal_n": 1.0903,
+    "mean_normal_n": 0.8031,
+    "force_jam_steps": 0,
+    "max_contacts": 2,
+    "max_total_normal_n": 1.0903,
+    "axial_patch_steps": 0
+   },
+   "mu0.44": {
+    "eff_mean": 0.9199,
+    "eff_min": 0.8602,
+    "eff_max": 0.9993,
+    "max_normal_n": 1.2739,
+    "mean_normal_n": 0.8173,
+    "force_jam_steps": 0,
+    "max_contacts": 2,
+    "max_total_normal_n": 1.2739,
+    "axial_patch_steps": 0
+   },
+   "mu0.51": {
+    "eff_mean": 0.9067,
+    "eff_min": 0.8382,
+    "eff_max": 0.9992,
+    "max_normal_n": 1.3279,
+    "mean_normal_n": 0.8234,
+    "force_jam_steps": 0,
+    "max_contacts": 2,
+    "max_total_normal_n": 1.3279,
+    "axial_patch_steps": 0
+   },
+   "max_fixed_overlap_mm3": 0.0
+  },
+  {
+   "pair": "fourth/seconds",
+   "teeth": [
+    96,
+    12
+   ],
+   "module": 0.2,
+   "T_in_nominal_nmm": 1.1683,
+   "grader_force_n": 0.1217,
+   "engine_jams": 0,
+   "runtime_s": 3.0,
+   "engine_evals": 3824,
+   "rate_min_max_vs_ideal": [
+    7.8134,
+    8.0555,
+    8.0
+   ],
+   "steps_touching": "79/80",
+   "mu0.00": {
+    "eff_mean": 1.0006,
+    "eff_min": 0.987,
+    "eff_max": 1.0167,
+    "max_normal_n": 0.1343,
+    "mean_normal_n": 0.1062,
+    "force_jam_steps": 0,
+    "max_contacts": 2,
+    "max_total_normal_n": 0.1364,
+    "axial_patch_steps": 0
+   },
+   "mu0.15": {
+    "eff_mean": 0.9733,
+    "eff_min": 0.9459,
+    "eff_max": 0.9999,
+    "max_normal_n": 0.1443,
+    "mean_normal_n": 0.1064,
+    "force_jam_steps": 0,
+    "max_contacts": 2,
+    "max_total_normal_n": 0.1443,
+    "axial_patch_steps": 0
+   },
+   "mu0.44": {
+    "eff_mean": 0.9196,
+    "eff_min": 0.8614,
+    "eff_max": 0.9992,
+    "max_normal_n": 0.1688,
+    "mean_normal_n": 0.1082,
+    "force_jam_steps": 0,
+    "max_contacts": 2,
+    "max_total_normal_n": 0.1688,
+    "axial_patch_steps": 0
+   },
+   "mu0.51": {
+    "eff_mean": 0.9064,
+    "eff_min": 0.8399,
+    "eff_max": 0.999,
+    "max_normal_n": 0.176,
+    "mean_normal_n": 0.109,
+    "force_jam_steps": 0,
+    "max_contacts": 2,
+    "max_total_normal_n": 0.176,
+    "axial_patch_steps": 0
+   },
+   "max_fixed_overlap_mm3": 0.0
+  }
+ ],
+ "overall": {
+  "mu0.00": {
+   "eff_mean_product": 1.0017,
+   "eff_worst_product": 0.9587
+  },
+  "mu0.15": {
+   "eff_mean_product": 0.9172,
+   "eff_worst_product": 0.8457
+  },
+  "mu0.44": {
+   "eff_mean_product": 0.7676,
+   "eff_worst_product": 0.6386
+  },
+  "mu0.51": {
+   "eff_mean_product": 0.734,
+   "eff_worst_product": 0.5927
+  }
+ },
+ "layer_check_closest_pairs": [
+  {
+   "a": "barrel",
+   "b": "centre",
+   "barrel_deg": 0.0,
+   "overlap_mm3": 0.0,
+   "gap_mm": 0.05
+  },
+  {
+   "a": "barrel",
+   "b": "bridge",
+   "barrel_deg": 0.0,
+   "overlap_mm3": 0.0,
+   "gap_mm": 0.05
+  },
+  {
+   "a": "third",
+   "b": "bridge",
+   "barrel_deg": 0.0,
+   "overlap_mm3": 0.0,
+   "gap_mm": 0.05
+  },
+  {
+   "a": "centre",
+   "b": "bridge",
+   "barrel_deg": 0.0,
+   "overlap_mm3": 0.0,
+   "gap_mm": 0.05
+  },
+  {
+   "a": "fourth",
+   "b": "bridge",
+   "barrel_deg": 0.0,
+   "overlap_mm3": 0.0,
+   "gap_mm": 0.05
+  },
+  {
+   "a": "seconds",
+   "b": "bridge",
+   "barrel_deg": 0.0,
+   "overlap_mm3": 0.0,
+   "gap_mm": 0.05
+  },
+  {
+   "a": "barrel",
+   "b": "main_plate",
+   "barrel_deg": 0.0,
+   "overlap_mm3": 0.0,
+   "gap_mm": 0.09981
+  },
+  {
+   "a": "seconds",
+   "b": "dial",
+   "barrel_deg": 1.7,
+   "overlap_mm3": 0.0,
+   "gap_mm": 0.09982
+  },
+  {
+   "a": "third",
+   "b": "main_plate",
+   "barrel_deg": 1.7,
+   "overlap_mm3": 0.0,
+   "gap_mm": 0.09988
+  },
+  {
+   "a": "centre",
+   "b": "main_plate",
+   "barrel_deg": 0.9,
+   "overlap_mm3": 0.0,
+   "gap_mm": 0.09988
+  },
+  {
+   "a": "fourth",
+   "b": "main_plate",
+   "barrel_deg": 2.6,
+   "overlap_mm3": 0.0,
+   "gap_mm": 0.09988
+  },
+  {
+   "a": "seconds",
+   "b": "main_plate",
+   "barrel_deg": 1.7,
+   "overlap_mm3": 0.0,
+   "gap_mm": 0.09988
+  },
+  {
+   "a": "barrel",
+   "b": "fourth",
+   "barrel_deg": 0.0,
+   "overlap_mm3": 0.0,
+   "gap_mm": 0.1
+  },
+  {
+   "a": "barrel",
+   "b": "dial",
+   "barrel_deg": 0.0,
+   "overlap_mm3": 0.0,
+   "gap_mm": 0.1
+  },
+  {
+   "a": "third",
+   "b": "fourth",
+   "barrel_deg": 0.0,
+   "overlap_mm3": 0.0,
+   "gap_mm": 0.1
+  },
+  {
+   "a": "centre",
+   "b": "dial",
+   "barrel_deg": 0.0,
+   "overlap_mm3": 0.0,
+   "gap_mm": 0.1
+  }
+ ],
+ "runtime_s": 108.3
+}
