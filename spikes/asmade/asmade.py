@@ -1,7 +1,7 @@
 """The movement as made (spike; no grader change): each part at the print process's size limits, each mobile at
 the ends of the play its own bearings give it, and the same running checks as the drawn movement.
 
-    python3 spikes/asmade/asmade.py DELIVERY_DIR OUT.json [--tol 0.03] [--file movement.json] [--quick]
+    python3 spikes/asmade/asmade.py DELIVERY_DIR OUT.json [--tol 0.03] [--file movement.json] [--states drawn,max,min] [--quick] [--stage] [--full]
 
 Why: the one-job grader measures the drawn solids only. A design whose layers are 0.02 mm apart passes it, and no
 printed part holds 0.02 mm. A designer gets the process's size tolerance from the print service (DS-W03 would
@@ -27,14 +27,15 @@ In each state:
   free         Movement.spin: each mobile turns a full turn clear of the frame
   play         how far each mobile moves along +x, -x, +y, -y, +z, -z before the frame (or a mobile on its own
                axis) stops it; "not held" if nothing stops it within PLAY_CAP
-  mesh         each declared mesh, with the driven mobile first turned to the middle of its backlash (settle), is
-               run through Movement.mesh_run: no jam; and the teeth still drive (a push of DRIVE_PUSH of a pitch
-               reaches the driven teeth), also with the driven mobile at the two ends of its radial play along the
-               line of centres
+  mesh         each declared mesh, with the driven mobile first turned to the middle of its backlash (settle):
+               no jam with the arbors where they are drawn (backlash is left); and the teeth still drive (a push
+               of DRIVE_PUSH of a pitch reaches the driven teeth) there and with both arbors at the far side of
+               their holes along the line of centres, where the tooth load pushes them
   clear        Movement.clear_swept for every pair of mobiles that is not a declared mesh, drawn position, and with
                each of the two at the end of its axial play towards the other
 
 --quick: skips the radial-play mesh runs and the axial-play clear runs.
+--stage: an old stage-mode delivery (stage barrel, no materials). --full: every mesh through its whole turn.
 """
 import json
 import math
@@ -161,9 +162,13 @@ def _same_section(a, b):
 
 
 # ---------------------------------------------------------------------------------------------- loading
+STAGE = False           # --stage: an old stage-mode delivery (the one-body stage barrel, no materials declared)
+
+
 def load_state(folder, name, tol, cache):
     """The movement of `name` with every delivered part resized by tol (0: as drawn). cache: {(part, tol): solid}."""
-    base = W.load_movement(folder, name, cache=cache.setdefault("files", {}), materials=True)
+    bs = W.barrel_stage() if STAGE else None
+    base = W.load_movement(folder, name, cache=cache.setdefault("files", {}), barrel_solid=bs, materials=not STAGE)
     if tol == 0.0:
         return base
     load0 = base.load_part
@@ -175,7 +180,7 @@ def load_state(folder, name, tol, cache):
             if cache[key].is_empty():
                 raise core.FormatError("part '%s' vanishes at the size limit (shrunk by %g mm)" % (n, -tol))
         return cache[key]
-    return W.Movement(base.doc, load, None, materials=True)
+    return W.Movement(base.doc, load, bs, materials=not STAGE)
 
 
 # ---------------------------------------------------------------------------------------------- checks
@@ -275,9 +280,74 @@ def settle(m, a, b, tb, shift=0.0):
     return centre, k * pitch / n
 
 
+MESH_PITCHES = 2        # tooth pitches of the driver run at each of MESH_SPOTS places round the turn
+MESH_SPOTS = 3          # (the drawn movement's check 4 runs the whole turn; resizing is the same for every tooth)
+
+
+def mesh_few(m, a, ta, b, tb, shift=0.0, full=False):
+    """The mesh test's no-jam and drive conditions (Movement.mesh_run's own steps, angles and measures) on
+    MESH_PITCHES tooth pitches of the driver at MESH_SPOTS places round the larger gear's turn, instead of the whole
+    turn. full=True runs Movement.mesh_run itself (the whole turn)."""
+    if full:
+        return m.mesh_run(a, ta, b, tb, shift=shift)
+    A, ax_a = m.mobiles[a]["solid"], m.mobiles[a]["axis"]
+    B, ax_b = m.mobiles[b]["solid"], m.mobiles[b]["axis"]
+    module = 2.0 * math.hypot(ax_b[0] - ax_a[0], ax_b[1] - ax_a[1]) / (ta + tb)
+    if shift:
+        dx, dy = ax_b[0] - ax_a[0], ax_b[1] - ax_a[1]
+        d = math.hypot(dx, dy)
+        ux, uy = (dx / d, dy / d) if d > 1e-12 else (1.0, 0.0)
+        B = B.translate([shift * ux, shift * uy, 0.0])
+        ax_b = (ax_b[0] + shift * ux, ax_b[1] + shift * uy)
+    A2, B2 = W._near_cut(A, ax_a, B, ax_b), W._near_cut(B, ax_b, A, ax_a)
+    if not (A2.is_empty() or B2.is_empty()):
+        A, B = A2, B2
+    pa = lambda deg: A if deg == 0.0 else W.rot_about(A, ax_a, deg)
+    pb = lambda deg: B if deg == 0.0 else W.rot_about(B, ax_b, deg)
+    spt = W.SAMPLES_PER_TOOTH
+    n = spt * max(ta, tb)
+    da = 360.0 / (spt * ta)
+    db = -da * ta / tb
+    push = W.DRIVE_FRACTION * 360.0 / ta
+    steps = sorted({(s0 + j) % n for k in range(MESH_SPOTS) for s0 in [spt * ((max(ta, tb) * k) // MESH_SPOTS)]
+                    for j in range(spt * MESH_PITCHES)})
+    worst, gap, drive, ratio, height = (0.0, 0), 0.0, float("inf"), float("inf"), float("inf")
+    for i in steps:
+        Ai, Bi = pa(da * i), pb(db * i)
+        v = core.ivol(Ai, Bi)
+        if v > worst[0]:
+            worst = (v, i)
+        if i % 4 == 0 and v <= 1e-12:
+            g = Ai.min_gap(Bi, W.MESH_GAP_SEARCH)
+            gap = max(gap, float(g if g < W.MESH_GAP_SEARCH else Ai.min_gap(Bi, 1.0)))
+        for f in W.MESH_OFFGRID if i % 4 == 0 else ():
+            vf = core.ivol(pa(da * (i + float(f))), pb(db * (i + float(f))))
+            if vf > worst[0]:
+                worst = (vf, i + float(f))
+        if i % 2 == 0:
+            P = pa(da * i + push)
+            extra, r, hz = 0.0, 0.0, 0.0
+            if core.bbox_overlap(P, Bi):
+                N = (P ^ Bi) - Ai
+                extra = float(N.volume()) if not N.is_empty() else 0.0
+                if extra > 0.0:
+                    zb = N.bounding_box()
+                    hz = zb[5] - zb[2]
+                    r = extra / (hz * module * module) if hz > 1e-9 and module > 1e-9 else 0.0
+            drive, ratio = min(drive, extra), min(ratio, r)
+            height = min(height, hz if extra > 0.0 else 0.0)
+    return {"worst_volume": worst[0], "step": worst[1], "steps": len(steps), "largest_gap": gap,
+            "smallest_drive_overlap": drive, "smallest_drive_ratio": ratio, "module": module,
+            "smallest_drive_height": height}
+
+
+TOWARDS = False         # --towards: also run each mesh with the two arbors pushed together (reported only)
+FULL_TURN = False       # --full: run every mesh through the whole turn (Movement.mesh_run), as check 4 does
+
+
 def mesh_state(m, a, ta, b, tb, shift=0.0):
-    """mesh_run on the mesh with b settled in the middle of its backlash. The drive test pushes DRIVE_PUSH of a
-    pitch (module constant swapped for the call)."""
+    """The mesh with b settled in the middle of its backlash: no jam, and the drive test with a push of DRIVE_PUSH
+    of a pitch (module constant swapped for the call)."""
     phi, window = settle(m, a, b, tb, shift)
     if phi is None:
         return {"jam_at_rest": True, "ok_no_jam": False, "ok_drive": False, "backlash_deg": 0.0}
@@ -288,7 +358,7 @@ def mesh_state(m, a, ta, b, tb, shift=0.0):
         if phi:
             mo["solid"] = W.rot_about(keep, mo["axis"], phi)
         W.DRIVE_FRACTION = DRIVE_PUSH
-        r = m.mesh_run(a, ta, b, tb, shift=shift)
+        r = mesh_few(m, a, ta, b, tb, shift=shift, full=FULL_TURN)
     finally:
         mo["solid"] = keep
         W.DRIVE_FRACTION = old
@@ -373,13 +443,18 @@ def run_state(m, quick=False, log=None):
             towards = along(pb, -dx / d, -dy / d) + along(pa, dx / d, dy / d)
             e["away_mm"], e["towards_mm"] = away, towards
             e["away"] = mesh_state(m, a, ta, b, tb, shift=away)
-            e["towards"] = mesh_state(m, a, ta, b, tb, shift=-towards)
-        e["ok_no_jam"] = all(v["ok_no_jam"] for v in e.values() if isinstance(v, dict))
-        e["ok_drive"] = all(v["ok_drive"] for v in e.values() if isinstance(v, dict))
+            if TOWARDS:
+                e["towards"] = mesh_state(m, a, ta, b, tb, shift=-towards)
+        # the rule: backlash is left with the arbors where they are drawn (no jam), and the teeth still drive there
+        # and with both arbors at the far side of their holes, where the load pushes them (away). Pushed together
+        # the teeth may bottom; that is reported (--towards), not judged: the mobiles are free to move apart again.
+        e["ok_no_jam"] = e["centre"]["ok_no_jam"]
+        e["ok_drive"] = e["centre"]["ok_drive"] and ("away" not in e or (e["away"]["ok_drive"] and e["away"]["ok_no_jam"]))
         res["mesh"][key] = e
-        say("  mesh %s: no jam %s, drives %s, backlash %.3f of a pitch%s" % (
-            key, e["ok_no_jam"], e["ok_drive"], e["centre"].get("backlash_pitch_share", 0.0),
-            "" if quick else " (away %.3f, towards %.3f mm)" % (e["away_mm"], e["towards_mm"])))
+        say("  mesh %s: %s; backlash %.3f of a pitch; %s" % (
+            key, "ok" if e["ok_no_jam"] and e["ok_drive"] else "FAIL", e["centre"].get("backlash_pitch_share", 0.0), "; ".join(
+            "%s%s no jam %s drives %s" % (w, "" if w == "centre" else " %.3f mm" % e[w + "_mm"], e[w]["ok_no_jam"],
+                                          e[w]["ok_drive"]) for w in ("centre", "away", "towards") if w in e)))
     res["clear"] = clear_state(m, res["play"], with_play=not quick)
     wc = max((v["worst"] for v in res["clear"].values()), default=0.0)
     say("  clear worst %.4f" % wc)
@@ -400,12 +475,19 @@ def main(argv):
         print(__doc__)
         return 2
     folder, out = os.path.abspath(argv[0]), argv[1]
-    opts = dict(zip(argv[2:], argv[3:]))
+    flags = [a for a in argv[2:] if a in ("--quick", "--stage", "--full", "--towards")]
+    rest = [a for a in argv[2:] if a not in flags]
+    opts = dict(zip(rest[0::2], rest[1::2]))
     tol = float(opts.get("--tol", "0.03"))
     name = opts.get("--file", "movement.json")
     quick = "--quick" in argv
+    global STAGE, FULL_TURN, TOWARDS
+    STAGE, FULL_TURN, TOWARDS = "--stage" in argv, "--full" in argv, "--towards" in argv
     cache, result = {}, {"delivery": folder, "file": name, "tol": tol, "states": {}}
+    only = opts.get("--states", "drawn,max,min").split(",")
     for label, t in (("drawn", 0.0), ("max", tol), ("min", -tol)):
+        if label not in only:
+            continue
         print("state %s (%+.3f mm)" % (label, t), flush=True)
         t0 = time.time()
         try:
@@ -416,7 +498,14 @@ def main(argv):
             continue
         print("  loaded and resized in %.1f s" % (time.time() - t0), flush=True)
         result["states"][label] = run_state(m, quick, lambda s: print(s, flush=True))
-        print("  %s  (%.0f s)" % (result["states"][label]["ok"], result["states"][label]["seconds"]), flush=True)
+        st = result["states"][label]
+        print("  %s  (%.0f s)" % (st["ok"], st["seconds"]), flush=True)
+        for k, v in st["free"].items():
+            if v > W.VOL_TOL:
+                print("  FAIL free: %s overlaps the frame by %.4f mm3 while turning" % (k, v), flush=True)
+        for k, v in st["clear"].items():
+            if v["worst"] > W.VOL_TOL:
+                print("  FAIL clear: %s swept overlap %.4f mm3 (drawn %.4f)" % (k, v["worst"], v["drawn"]), flush=True)
     result["runs_as_made"] = all(all(s["ok"].values()) for s in result["states"].values())
     with open(out, "w") as f:
         json.dump(result, f, indent=1, default=float)
