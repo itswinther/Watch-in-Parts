@@ -23,8 +23,8 @@ never sees a check, a score or a verdict.
 - **What we do not show:** repeated Claude runs, and some grader thresholds the agent is not told. Both are
   spelled out below, with the ten things we would change next.
 
-The project is called Watch in Parts. The repo is still named `board-in-a-box` after our first idea, which we
-dropped.
+The project is called Watch in Parts. Its working name was `board-in-a-box`, after our first idea, which we
+dropped; a few file headers and old notes still carry that name.
 
 **Where to look first**
 
