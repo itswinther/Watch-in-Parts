@@ -1,4 +1,4 @@
-# SPEC.md
+# SPEC.md: Watch in Parts
 
 Version: 0.8 (2026-11-15): the customer-order watch. Same grader checks as 0.7; what changed is the agent's text
 (the customer order, no acceptance test, no target; decided 15 Nov 04:05 and 04:16, `environment/brief_order.py`),

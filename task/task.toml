@@ -4,7 +4,7 @@ artifacts = ["/app/delivery"]   # the whole delivery, scripts/ included; the age
 
 [task]
 name = "junction/watch-one"
-authors = [{ name = "Board in a Box team, Junction 2026 (workstreams A and B)" }]
+authors = [{ name = "Watch in Parts team, Junction 2026" }]
 description = "Design the movement of a thin mechanical dress watch from a customer order, as STEP parts made in CadQuery: frame, going train and hour, minute and seconds hands for a barrel chosen from a supplier catalogue, a 24-hour hand, a 6-hour variant on the same frame, and an assembly plan with a path for every part. Graded only on the delivered files, by geometry, in a separate offline verifier."
 keywords = ["mechanical-design", "cad", "watchmaking", "mechanism", "cadquery", "step", "datasheets"]
 

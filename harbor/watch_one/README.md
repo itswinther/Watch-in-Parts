@@ -1,4 +1,4 @@
-# The one-brief watch task in Harbor (workstream A)
+# Watch in Parts: the Harbor task (workstream A)
 
 This folder packages the decided task as one Harbor task. The decisions behind it are in `SESSION.md`:
 Decisions 13:36, 14:08, 14:20 and 14:45, and B's interface at 15:44.

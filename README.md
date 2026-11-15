@@ -1,6 +1,6 @@
-# Watch movement design job
+# Watch in Parts
 
-An RL environment for the AfterQuery challenge at Junction 2026, in Harbor format. The agent gets a customer
+Watch in Parts is an RL environment for the AfterQuery challenge at Junction 2026, in Harbor format. The agent gets a customer
 order for a thin dress watch and a folder of supplier sheets. It designs the movement as CAD parts (STEP, made
 with CadQuery) and delivers one folder. A separate offline verifier grades that folder by geometry. The agent
 never sees a check, a score or a verdict.
@@ -21,7 +21,8 @@ never sees a check, a score or a verdict.
 - **What we do not show:** repeated Claude runs, and some grader thresholds the agent is not told. Both are
   spelled out below.
 
-The repo is still named `board-in-a-box` after our first idea, which we dropped.
+The project is called Watch in Parts. The repo is still named `board-in-a-box` after our first idea, which we
+dropped.
 
 **Where to look first**
 
