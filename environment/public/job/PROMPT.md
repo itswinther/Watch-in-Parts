@@ -26,6 +26,7 @@ in the order.
 | 6-hour variant (`variant_6h.json`) | the same barrel BR-096-20, in the same place, speed class B (DS-W01) |
 | Materials | each mobile's material is chosen from the design allowables of AD-DS-201 (`DS-201_materials.md`, section 8) |
 | Going-train rating | this calibre is the base of a family that includes an automatic version; the going train is rated for that version's barrel load (QA-W100, gear strength) |
+| Thickness | the calibre is for a slim watch: make the movement as thin as you can. The thickness target and how thickness is scored are in QA-W100, section 9 |
 
 ## Deliverables
 
@@ -38,7 +39,7 @@ Everything goes into the folder `/app/delivery/`. What is in it when you finish 
 | `/app/delivery/assembly.json` | the order in which the parts of `movement.json` are put in, and the path of each |
 | `/app/delivery/parts/<name>.step` | every part of both movements, one STEP file per part; a part used in both movements is one file |
 | `/app/delivery/scripts/` | optional: the scripts that made the parts. Archived with the delivery; never run or read |
-| `/app/delivery/report.json` | optional: your own statement of the result of each part of QA-W100 (`pass`, `fail` or `not_tested`; QA-W100, section 3) |
+| `/app/delivery/report.json` | optional: your own statement of the result of each part of QA-W100 (`pass`, `fail` or `not_tested`), and of the movement's height (QA-W100, sections 3 and 9) |
 
 The file formats, the size limits and the JSON layouts are in `/app/FORMAT.md`.
 
@@ -63,8 +64,10 @@ Installed software: Python 3 with CadQuery 2.8.0 (OpenCASCADE, importable as `ca
 
 ## Acceptance
 
-The delivery is inspected after hand-over per QA-W100 rev A (`/app/datasheets/QA-W100_inspection.md`); each part
-of QA-W100 is judged on its own, and the delivery is accepted only when every part passes everything.
+The delivery is inspected after hand-over per QA-W100 rev B (`/app/datasheets/QA-W100_inspection.md`); each part
+of QA-W100 is judged on its own, and the delivery is accepted only when every part passes everything. When every
+part passes everything, the thickness score of QA-W100, section 9, scales the half of the acceptance figure that
+full acceptance earns.
 
 ## How you work
 

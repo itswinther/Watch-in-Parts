@@ -17,7 +17,7 @@ ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 sys.path.insert(0, ROOT)
 from geometry import watch as W        # noqa: E402
 
-THIN_IN_BRIEF = False      # the probe branch (b/thin-probe) turns this on; False gives main's brief unchanged
+THIN_IN_BRIEF = True       # the probe branch (b/thin-probe) turns this on; False gives main's brief unchanged
 
 QA_REVISION = "B"
 QA_DATE = "2026-11-15"

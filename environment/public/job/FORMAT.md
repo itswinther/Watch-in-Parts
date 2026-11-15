@@ -105,7 +105,7 @@ last row 0 0 0 1.
 At most 100,000 bytes.
 
 ```
-{"parts": {"P1": "pass", "P2": "fail", "P3": "not_tested", "P4": "pass"}}
+{"parts": {"P1": "pass", "P2": "fail", "P3": "not_tested", "P4": "pass"}, "height_mm": 10.4}
 ```
 
 - `parts`: one key per part of QA-W100 (`P1` for Part 1, and so on for each part), each with the statement of that
@@ -114,3 +114,5 @@ At most 100,000 bytes.
 - `report.json` must be a real file in `/app/delivery/` (not a symbolic link). One that is larger than the limit,
   is not valid JSON, has no object `parts`, names a key that is not a part of QA-W100 or gives any other value is
   not valid: every part then counts as `not_tested`. How the statement is scored: QA-W100, section 3.
+- `height_mm` (optional): your statement of the movement's height as QA-W100, section 9 measures it, in mm. It
+  does not change any result; the inspection records it next to the measured height.
