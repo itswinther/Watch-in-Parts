@@ -1,4 +1,5 @@
-"""Score one thinness-probe run afterwards (spikes/thin_probe/BRIEF_DRAFT.md section 5; the grader is unchanged).
+"""Score one thinness-probe run afterwards (spikes/thin_probe/BRIEF_DRAFT.md section 5). The one-job grader now
+applies the same score itself (tests/grade_watch.py job_thickness); this script rescores runs graded before that.
     python3 spikes/thin_probe/score.py DETAILS.json DELIVERY_DIR
 DETAILS.json: the details file the grader wrote for this delivery (tests/grade_watch.py DELIVERY --details D).
 DELIVERY_DIR: the delivery folder (movement.json, variant_6h.json, parts/*.step, report.json).
@@ -93,7 +94,14 @@ def main(argv):
     H = max(hs.values()) if all(v is not None for v in hs.values()) else None
     x, s = score(H)
     A = bool(d.get("all_pass"))
-    pr = Fraction(d["parts_reward_exact"]) if "parts_reward_exact" in d else Fraction(d.get("parts_reward", 0.0))
+    # A details file from a grader that applies the thickness score itself (tests/grade_watch.py job_thickness) has
+    # parts_reward_without_thickness: the parts reward with the whole all-pass half, as older graders wrote it.
+    if "parts_reward_without_thickness_exact" in d:
+        pr = Fraction(d["parts_reward_without_thickness_exact"])
+    elif "parts_reward_exact" in d:
+        pr = Fraction(d["parts_reward_exact"])
+    else:
+        pr = Fraction(d.get("parts_reward", 0.0))
     hon = d.get("honesty") or {}
     factor = Fraction(hon["factor_exact"]) if "factor_exact" in hon else Fraction(hon.get("factor", 0.0))
     share_term = pr - (W.THIN_SCORE_SHARE if A else 0)
