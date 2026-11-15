@@ -2525,3 +2525,12 @@ Mikael asks B (and itswinther) to answer these here, so both machines work to on
   - Fairness note: in A's reading, Opus's only failure is a near-miss (0.488 vs 0.5) on two thresholds no agent document states (MESH_SHIFT 0.03 and the drive ratio). If `tolerant` passed there, the run would be all-pass at H 4.08: s 0.905, reward about 0.95. README says so.
 
 - **A 08:56** **opus-5.5-medium-rerun on the final task (3d5d96f, Harbor + OpenCode + API, 128k output):** task__Qob53oe reward 0.943, H 4.23 mm, fails none, exception none task__Qob53oe steps 80 cost $15.53 output 55824 reasoning 265901 length-stops 0;total $15.53;  Deliveries on `a/final-runs` (runs/final_3d5d96f/opus-5.5-medium-rerun/).
+
+- **A 08:58** **Summary of valid model trials on the final task (grader 3d5d96f, Harbor; reference 1.000, nop 0.000):**
+  - **Opus 5.5 medium: 0.943, ALL checks pass**, H 4.23 mm (s 0.887 vs the 3.95 bar), honest claims (all pass, true). 80 steps, 88 min, $15.53. First model watch that fully works; it loses only on thickness.
+  - Opus 5.5 low: 0.422, H 4.08 mm, fails `tolerant` (both builds), claimed all pass (false, honesty 0). 76 steps, 73 min, $8.97.
+  - Sonnet 5.5 low (run 3): 0.422, H 5.75 mm, fails `held` (both builds), claimed all pass (false). 38 steps, 48 min, $3.30.
+  - Sonnet 5.5 default/medium/low: 0 in 5 runs, each one reply cut at 128,000 thinking tokens, empty delivery ($1.36-2.01 each).
+  - GPT-6.1-sol (Codex) x6: mean 0.445 (0.427-0.467), none all-pass, H 9.6-12.1 mm.
+  - Invalid (API credit/limit): 4 Claude trials, not counted.
+  Deliveries: `a/final-runs` runs/final_3d5d96f/. Note: Opus medium shows the task is solvable by a frontier model at the house design's level minus thickness, so the gap there is 0.057 (thickness only).
