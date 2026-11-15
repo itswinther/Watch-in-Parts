@@ -67,8 +67,8 @@ COLLAR_T = 0.4             # seconds and day arbors: height of the collar under 
 if W.THIN_BARREL:
     # spike (spikes/thin_4mm): the thin barrel, drum z 0..ZB, arbor W.BARREL_ARBOR_Z. Every layer, plate and hand is
     # LAYER_T thick and GAP apart; one-part steel mobiles (--one-part-mobiles), so no collar inside a wheel
-    LAYER_T = float(os.environ.get("THIN_LAYER_T", "0.25"))
-    GAP = float(os.environ.get("THIN_GAP", "0.05"))
+    LAYER_T = float(os.environ.get("THIN_LAYER_T", "0.2"))
+    GAP = float(os.environ.get("THIN_GAP", "0.02"))
     ZB = W.BARREL_WHEEL_Z[1]
     PLATE = (W.BARREL_ARBOR_Z[0], -GAP)
     _z, Z = ZB + GAP, {"A": (GAP, ZB)}
