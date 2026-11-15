@@ -151,3 +151,24 @@ printability: keep, the supplier's own test (13). Honesty report: reword (H1).
 
 Not verified: nothing was run for this table beyond reading the code; the claims "standard gearing passes the
 drive thresholds" and "real hands cover 2 to 8 % of their disc" are estimates, not measured on model deliveries.
+
+## 9. What the customer-order brief does with these verdicts (`environment/brief_order.py`, b/thin-order)
+
+Done in the agent's text (no grader change):
+
+- **F2, F3, F7, F8, C2, 3, 11d, P4, H2**: `FORMAT.md` has a section "How the factory reads the files" (frame and
+  dial side, the barrel mobile, the drawing convention with 0.01 mm3 and 0.01 mm, fixed parts joined into one
+  frame, a mobile's parts each on its seat, the hand part is the pointer alone, external spur meshes, the reading
+  time 7,200 s and 1,800 s), the assembly path rules 1 to 4, and `height_mm` defined on its own.
+- **F4**: `FORMAT.md` lists the accepted ordering codes (AD-C100-HT, AD-CW614N); DS-201 section 8 is gone.
+- **C4, 10, 11a, 11b, P2.2**: the order states the same frame in the same place, hours and minutes on the centre,
+  a closed dial, and the customer's dial (hands at least 5 mm; the 24-hour hand on its own small dial, centre at
+  least 6 mm from the centre, hand at least 3 mm). `DIAL_IN_ORDER = False` takes the dial out.
+- **14a**: the order names the automatic family and cites VM-DS-101 Table 2a, which stays on the agent's DS-101
+  (maker's limits); Tables 2, 3 and 4 (calculated) are gone.
+- **14b**: DS-W04 has no K. **14d**: DS-201 has no safety factors or allowables. Both are now grader numbers
+  that the agent cannot know: the grader changes in section 8 above are still to be made.
+- **H1**: the order names the four statements (P1 to P4) in its own words.
+- **S2**: no target or formula anywhere; "as thin as you can, the thinner the better".
+- QA-W100 is not in the folder. TRACEABILITY_WATCH.md lists every graded number that is no longer stated, with
+  its row here.
