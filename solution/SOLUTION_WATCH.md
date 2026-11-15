@@ -1,308 +1,181 @@
-# Solution: the one-job watch
+# Solution: the watch job
 
 NOT-FOR-AGENT. This file gives the answers and the grading margins. It must never be copied into a task image.
 `harbor/watch_one/build_task.py` refuses everything under `solution/` by name and by sha256, and the bundle
 builder refuses any file with the mark above.
 
-The rules are in `SPEC.md` (version 0.7). The agent's wording is `environment/public/job/datasheets/QA-W100_inspection.md`.
-Every number here comes from `geometry/watch.py`, `tests/grade_watch.py`, `spikes/keyless/constants.py`,
-`tests/test_anchors_job.py`, the delivered reference, or a `SESSION.md` entry, and says which.
+The rules are in `SPEC.md` (version 0.8). The agent's text is the customer order
+(`environment/public/job/PROMPT.md`), `FORMAT.md` and the sheets in `environment/public/job/datasheets/`; no
+acceptance test is shown. How a designer reaches these answers, step by step, is in `STEP_BY_STEP_WATCH.md`.
+
+Sources: `solution/reference_watch.py` (run as `cd solution && PYTHONPATH=.. python3 reference_watch.py OUT --job`,
+no other flags: barrel BR-096-30, one-part mobiles; about 45 s, SESSION.md H 05:21), its constants read by
+importing it, the delivery it wrote, and that delivery's grader details (`tests/grade_watch.py OUT --details`,
+reward 1.000000, 469.6 s, graded 15 Nov 05:13 Helsinki). Since that grading only `THIN_REFERENCE_MM` changed in
+`geometry/watch.py` and `tests/grade_watch.py` (3.35 to 3.95 to 3.85), so the gates, checks and margins are those
+of main. Part 5 (crown winding) is switched off (`geometry/keyless_job.py`, `KEYLESS_IN_JOB = False`).
 
 ## 1. The answers
 
-There is no single correct design. These are the facts any passing design must meet, with the reference's
-own answer beside them.
+There is no single correct design. These are the reference's answers.
 
-| Quantity | What passes | Reference |
+| Quantity | Reference |
+|---|---|
+| Barrel | BR-096-30 (drum z 0 to 0.4545, arbor -0.4545 to 2.5455), both builds |
+| Case | CS-254-134; `case_centre` (2.367, 0.6574); radius reached 12.357 of 12.7 |
+| Height H | 3.3491 mm, both builds (z -0.4545 to 2.8945) |
+| Going train, 8 h | barrel 96 -> third 12; third 42 -> centre 42; centre 90 -> fourth 12; fourth 96 -> seconds 12 |
+| Going train, 6 h | the same, but third 36 -> centre 48 |
+| Speeds, 8 h (turns per hour, + clockwise) | barrel +1/8, third -1, centre +1, fourth -7.5, seconds +60 |
+| Speeds, 6 h | barrel +1/6, third -4/3, centre +1, fourth -7.5, seconds +60 |
+| Motion work | cannon 16 -> minute wheel 48; minute pinion 12 -> hour wheel 48: hour +1/12 |
+| 24-hour train | hour wheel 48 -> day idler 24; idler pinion 10 -> day wheel 40: day +1/24 |
+| Modules | 0.2 (barrel mesh), 0.16 (third/centre), 0.13 (centre/fourth), 0.12 (fourth/seconds), 0.12 (cannon/minute wheel), 0.128 (minute pinion/hour wheel, hour wheel/day idler), 0.16 (day pair) |
+| Tooth form | 25-degree full-depth involute, addendum 1 m, dedendum 1.25 m, standard centre distance |
+| Materials | AD-C100-HT: third, centre, fourth, seconds, minute_wheel, day_idler. AD-CW614N: hour_wheel, day. No `part_materials` |
+| Hands | hour, minute, seconds 5.1 long (reach 5.109); 24-hour 3.1 (reach 3.114); 0.2 thick, 0.6 wide |
+| 24-hour dial | day axis 7.370 from the hour axis |
+| Report | `pass` for P1 to P4 (true) |
+
+Why each count: the barrel turns clockwise and so must the centre, so two meshes lie between them (the third is
+an intermediate). |barrel to centre| is 96/12 x 42/42 = 8 and 96/12 x 36/48 = 6. Centre to seconds:
+90/12 x 96/12 = 60. Centre to hour: 16/48 x 12/48 = 1/12. Hour to day: 48/24 x 10/40 = 1/2. Every ratio is
+exact. The variant keeps the frame, so it keeps every centre distance: the changed mesh keeps its tooth sum
+(42 + 42 = 36 + 48 = 84 at module 0.16). The two motion-work meshes share a centre distance because the hour
+wheel is coaxial with the centre: 0.12 x (16 + 48) / 2 = 0.128 x (12 + 48) / 2 = 3.84.
+
+### Axes and centre distances
+
+| Mobile | Axis | Mesh partner, centre distance |
 |---|---|---|
-| Barrel speed, 8-hour build | 1/8 turn per hour, clockwise (DS-W01 class D) | as supplied |
-| Centre (minute hand) | 1 turn per hour, clockwise, exact fraction | 1/8 x 96/24 x 60/30 = 1 |
-| Hour hand | 1/12 per hour, clockwise, coaxial with the minute hand within 0.01 mm | centre 12 -> 36 -> 12 -> 48 |
-| Seconds hand | 60 per hour, clockwise | 1 x 90/12 x 96/12 |
-| 24-hour hand | 1/24 per hour, clockwise; axis at least 6.0 mm from the hour axis | hour wheel 48 -> 24 -> 10 -> 40; axis 9.62 mm away |
-| Meshes from the barrel to the centre | an even number (each external mesh reverses the sense) | 2 |
-| First mesh | the agent's gear at module 0.2, 25 degrees, to mesh with the 96-tooth barrel | 24-leaf pinion, centre distance 12.0 |
-| 6-hour variant | barrel 1/6 per hour; same `fixed` list and `case_centre`; all hands as above | 60/30 -> 54/36, same centre distance 11.25 |
-| Case | everything within radius 20.7 of `case_centre`; height at most 13.4 | see section 2 |
-| Materials | `AD-C100-HT` (725 MPa) or `AD-CW614N` (110 MPa) per mobile or per part | steel pinion arbors, brass wheels |
-| Gear strength | sigma <= allowable on every going-train gear at 70.1 N·mm | smallest margin 1.392 (8 h), 1.117 (6 h) |
-| Assembly | every part installed, barrel included | 21 of 21 |
-| Report | the true result of each part | `pass` x 4 |
+| barrel | (0, 0) | third, 10.8 |
+| third | (7.681663, 7.591578) | centre, 6.72 |
+| centre (and hour wheel) | (8.589106, 0.933129) | fourth 6.63; minute wheel 3.84; day idler 4.608 |
+| fourth | (5.425817, -4.893577) | seconds, 6.48 |
+| seconds | (-1.011536, -5.635799) | |
+| minute_wheel | (7.564436, -2.767635) | |
+| day_idler | (7.279518, 5.351119) | day, 4.0 |
+| day | (3.354181, 6.120356) | |
 
-Tolerances and limits of every check, with their constants, are in `SPEC.md` section 5.
+### z levels (mm)
 
-## 2. What the reference scores
+| Level | z | Contents |
+|---|---|---|
+| main plate | -0.4545 to -0.0200 | barrel and third pivots |
+| A | 0 to 0.4545 | barrel drum; third pinion (from 0.0200) |
+| mid plate | 0.4745 to 0.6745 | lower pivots of centre, fourth, seconds |
+| B | 0.6945 to 0.8945 | third wheel, centre pinion |
+| C | 0.9145 to 1.1145 | centre wheel, fourth pinion |
+| D | 1.1345 to 1.3345 | fourth wheel, seconds pinion |
+| bridge | 1.3745 to 1.5745 | |
+| E | 1.5945 to 1.7945 | cannon, minute wheel; day idler pinion, day wheel |
+| F | 1.8145 to 2.0145 | minute pinion, hour wheel, day idler wheel |
+| dial | 2.0345 to 2.2345 | |
+| hour hand | 2.2545 to 2.4545 | |
+| minute hand | 2.4745 to 2.6745 | |
+| seconds, 24-hour hands | 2.6945 to 2.8945 | |
 
-`python3 solution/reference_watch.py REF --job`, then `cd tests && python3 -I grade_watch.py REF --reward R --details D`:
+Layers 0.2 (`LAYER_T`), gaps 0.02 (`GAP`), bore clearance 0.005 (`FIT`).
 
-- **Reward 1.0** with every part passing and a truthful report. B measured this at 23:04 on main with every
-  builder merged (571 s, peak RSS 1.70 GB, SESSION.md). A measured oracle 1.0 in Harbor at 17:50 and 18:58 on
-  earlier builds.
-- The delivery has 22 part files: 20 per movement, of which 18 are shared. Only `centre` and `third_wheel_60` (8 h)
-  and `centre_36` and `third_wheel_54` (6 h) differ; the steel `third` arbor is shared. Part 4 installs 21 parts (20 and the barrel).
+### Part list
 
-Its smallest margins, measured by builder W on 14 Nov with the grader's own functions on a fresh build
-(`strength_run` through `_job_movement`, and a full grading of the same folder):
+`movement.json` names 17 parts; `variant_6h.json` swaps two; `parts/` holds 19 STEP files.
 
-| Check | Limit | Reference, smallest margin | Where |
+| Kind | Parts |
+|---|---|
+| fixed (both builds) | main_plate, mid_plate, bridge, dial |
+| third | third (8 h); third_54 (6 h: a 36-tooth wheel; the name is a legacy one) |
+| centre | centre (8 h) or centre_36 (6 h: a 48-tooth pinion), cannon, minute_hand |
+| fourth | fourth |
+| seconds | seconds, seconds_hand |
+| minute_wheel | minute_wheel |
+| hour_wheel | hour_wheel, hour_hand |
+| day_idler | day_idler |
+| day | day, day_hand |
+
+Assembly order: main_plate, barrel, mid_plate, third, centre, fourth, seconds, bridge, cannon, minute_wheel,
+hour_wheel, day, day_idler, dial, hour_hand, seconds_hand, day_hand, minute_hand. Each part is dropped straight
+down in steps of at most 0.19 mm, 32 to 48 poses.
+
+## 2. The grader's margins on the reference, smallest first
+
+From the grader details; limits from `geometry/watch.py`. The 8-hour and 6-hour builds give the same values except
+where stated.
+
+| Check | Reference value | Limit | Where it binds |
 |---|---|---|---|
-| C2 assembled | at most 0.01 mm3 | 0.0 between mobiles and frame; 2.5e-17 inside a mobile | seconds / seconds_hand |
-| 1 free to turn | at most 0.01 mm3 | 0.0 for every mobile | |
-| 2 held | more than 0.01 mm3 against the frame | 0.0956 mm3 | day idler, +y |
-| 3 seated | more than 0.01 mm3 | 0.0507 sideways; 0.0989 along z | day wheel +y; cannon |
-| 4 train: no jam | at most 0.01 mm3 | 0.0 | every mesh |
-| 4 train: engaged | gap at most 0.1 mm | 0.0275 mm | hour wheel / day idler |
-| 4 train: drive | V at least 0.001 mm3, V / H over 0.5 m² | V 0.0317 mm3; V / H / m² = 1.238 (needs over 0.5) | day idler / day |
-| 5 tolerant (0.03 mm shift) | same | V / H / m² = 0.917 moved away (needs over 0.5); gap 0.0403 | day idler / day |
-| 6 nothing else collides | at most 0.01 mm3 | 0.0 | |
-| 10 coaxial | at most 0.01 mm | 0.0 | |
-| 11 hands, reach | at least 5.0 mm | seconds 5.009, hour 6.007, minute 9.005 | seconds hand: the thinnest margin in the delivery, 0.009 mm |
-| 11 hands, centre of volume | at least 0.5 mm | 1.539 | seconds hand |
-| 12 case radius | at most 20.7 | 20.354 | |
-| 12 case height | at most 13.4 | 13.1 (z -1.7 to 11.4) | |
-| 13 printable | deviation at most 0.2 mm | 0.122 mm | |
-| 14 strength | sigma at most the allowable | margin 1.392 (8 h), 1.117 (6 h) | brass third wheel |
-| P2 day hand reach | at least 3.0 mm | 3.214 | |
-| P2 day axis offset | at least 6.0 mm | 9.619 | |
-| P2 day hand centre of volume | at least 0.5 mm | 0.779 | |
-| P4 | every part installed | 21 of 21 | |
+| hands: lowest point above the highest fixed part | 0.020 | >= 0 | hour hand, one `GAP` over the dial |
+| hands: reach | 5.109 | >= 5.0 (`HAND_REACH`) | all three hands |
+| size: radius | 12.357 | <= 12.7 (`CASE_RADIUS`) | |
+| day_place: reach | 3.114 | >= 3.0 (`DAY_HAND_REACH`) | |
+| printable: largest deviation | 0.150 | <= 0.2 (`THIN_DEV`) | centre, fourth, minute_wheel, hour_wheel |
+| day_place: axis from the hour axis | 7.370 | >= 6.0 (`DAY_HAND_OFFSET`) | |
+| strength: allowable / sigma - 1 | 0.515 | >= 0 | third pinion 12, m 0.2, b 0.4345, sigma 478.5 of 725 MPa, both builds |
+| strength, next | 8 h: 1.210 (fourth pinion); 6 h: 0.657 (fourth pinion, sigma 437.5) | >= 0 | the variant's higher centre torque |
+| tolerant: smallest drive ratio | 0.792 | > 0.5 (`DRIVE_AREA_RATIO`) | fourth/seconds, shifted away 0.03 |
+| tolerant: smallest new overlap | 0.00228 mm3 | >= 0.001 (`DRIVE_MIN_VOLUME`) | fourth/seconds, away |
+| tolerant: largest gap | 0.0404 | <= 0.1 (`ENGAGE_GAP`) | fourth/seconds, away |
+| train: smallest drive ratio | 1.202 | > 0.5 | minute pinion/hour wheel |
+| train: smallest new overlap | 0.00353 mm3 | >= 0.001 | fourth/seconds |
+| train: largest gap | 0.0273 | <= 0.1 | barrel/third |
+| seated: smallest overlap when moved 0.3 | 0.0338 mm3 | > 0.01 | seconds and day hands on their arbors, sideways |
+| held: smallest overlap when moved 0.3 | 0.0383 mm3 | > 0.01 | minute_wheel, day_idler, sideways |
+| hands: centre of volume from the axis | 1.44 to 1.58 (24-hour 0.74) | >= 0.5 (`HAND_CENTRE_MIN`) | |
+| hands: area share of the swept disc | 0.058 to 0.064 (24-hour 0.118) | <= 0.25 (`HAND_AREA_MAX_SHARE`) | |
+| spin, clear, train jams, assembled, P4 | 0.0 mm3 (largest 8.4e-18) | <= 0.01 (`VOL_TOL`) | |
+| coaxial | 0.0 | <= 0.01 (`COAX_TOL`) | |
+| hour, minute, seconds, day_hand | exactly 1/12, 1, 60, 1/24 | exact | |
 
-The drive figure is the grader's `smallest_drive_ratio`, V / H / m², passed when over 0.5
-(`Movement.drive_passes`). The thinnest mesh is the 24-hour pair, 10 / 40 at module 0.16, which is not rated
-for strength. Its smallest figure, 0.917 with the arbor moved away, is still well over 0.5.
+## 3. The reward of the reference
 
-Full grading by builder W, same session: `cd tests && python3 -I grade_watch.py REF --reward R --details D`
-printed reward 1.0, every gate and check true for P1 to P4, P4 "21 of 21 installed", honesty factor 1,
-`elapsed_s` 707.9 on a 4-CPU machine at load about 11 to 15. The P3 margins are the same as P1's, apart from
-strength.
+- Every gate and every check of P1 to P4 passes: s_p = 1 for all four, share = (25 + 10 + 15 + 25) / 75 = 1,
+  all = 1. P4: 18 of 18 parts installed (17 parts and the barrel).
+- H = 3.3491 <= 3.85, so x = 0 and s = 1.
+- `report.json` claims pass for P1 to P4, all true: points 1 each, h = 1, factor (0.75 + 0.10) / 0.85 = 1.
+- reward = (1/2 x 1 + 1/2 x 1 x 1) x 1 = **1.0** (`reward_exact` "1").
 
-Gear strength, all rated gears (8-hour build; T at the driver, F on its pitch circle, b the measured face):
+Harbor's oracle on the submitted grader gave 1.000 and nop 0.000 (SESSION.md, A 05:49).
 
-| Mesh | Gear | Part, material | Y | sigma (MPa) | Allowable | Margin |
-|---|---|---|---|---|---|---|
-| barrel / third (T 70.1, F 7.302, m 0.2, b 0.8) | 24 | `third`, steel | 0.3634 | 125.59 | 725 | 4.773 |
-| third / centre (T 17.525, F 2.337, m 0.25, b 0.45) | 60 | `third_wheel_60`, brass | 0.4516 | 45.99 | 110 | **1.392** |
-| | 30 | `centre`, steel | 0.3902 | 53.23 | 725 | 12.620 |
-| centre / fourth (T 8.762, F 0.920, m 0.2118, b 0.6) | 90 | `centre_wheel_90`, brass | 0.4757 | 15.21 | 110 | 6.231 |
-| | 12 | `fourth`, steel | 0.2546 | 28.42 | 725 | 24.506 |
-| fourth / seconds (T 1.168, F 0.122, m 0.2, b 0.6) | 96 | `fourth_wheel_96`, brass | 0.4789 | 2.12 | 110 | 50.94 |
-| | 12 | `seconds`, steel | 0.2546 | 3.98 | 725 | 181.0 |
+## 4. Baselines
 
-In the 6-hour variant the third wheel has 54 teeth (Y 0.4441) and F = 2.596 N: sigma 51.97 MPa, margin
-**1.117**. The centre then turns at 1 per hour against a barrel at 1/6, so the centre and fourth meshes carry
-4/3 of the 8-hour torque (centre wheel margin 4.423).
-
-The one material choice that decides check 14: the 24-leaf pinion on the barrel at 125.6 MPa. In steel it
-passes; in brass (110) it fails. The anchor "gear strength: the third pinion made brass" checks that.
-
-## 3. Anchors
-
-`tests/test_anchors_job.py` (builders N and H). Each anchor is the reference (built with
-`--one-part-mobiles`: one part per gear, 17 parts in Part 4) with one change. Its expected reward is derived
-from the rule and asserted to 1e-4, with every part's score and the exact failing checks. Unless an anchor says
-otherwise its report is removed, so every part is `not_tested`, h = 1/2 and the factor is 16/17.
-
-| Anchor | Expected reward | Why |
+| Delivery | Reward | Source |
 |---|---|---|
-| gold, truthful report | 1 | everything passes, h = 1 |
-| gold, no report | 16/17 = 0.9412 | h = 1/2 |
-| gold, report says `fail` for P2 (it passes) | 67/68 = 0.9853 | h = 7/8 |
-| do nothing | 0 | every gate fails |
-| stop early: Part 1 only (no 24-hour train, no variant, no assembly) | 8/51 = 0.1569 | P2, P3, P4 score 0 |
-| stop early: Parts 1 and 2 (no variant, no assembly) | 56/255 = 0.2196 | P3, P4 score 0 |
-| stop early: Parts 1 to 3, no assembly, truthful report (P4 `fail`) | 1/3 = 0.3333 | P4 scores 0, h = 1 |
-| everything except the assembly (order, no paths) | 16/51 = 0.3137 | P4 0 of 17 installed |
-| everything except the variant (no day hand) | 32/85 = 0.3765 | C3 fails for P3 |
-| same, report claims `pass` for P3 | 31/85 = 0.3647 | false pass, h = 1/4 |
-| same, report says `fail` for P3 | 2/5 = 0.4 | truthful, h = 1 |
-| everything except the 24-hour hand | 104/255 = 0.4078 | C3 fails for P2 |
-| a mesh that jams (lump on a seconds-pinion tooth) | 0.3778 | train, tolerant, seconds, strength in P1 and P3 |
-| a mesh whose teeth do not engage | 0.3778 | same |
-| a hand at the wrong speed (95/13) | 0.4500 | seconds in P1 and P3 |
-| a mobile not held | 0.4569 | held |
-| a part not seated | 0.4569 | seated |
-| a part too thin to print | 0.4638 | printable |
-| taller than the case (+0.4) | 0.4638 | size |
-| two non-meshing mobiles collide | 0.4603 | clear in P1 and P3 |
-| a mobile rubs the frame | 0.4603 | spin in P1 and P3 |
-| the third pinion made brass | 0.4500 | strength in P1 and P3 |
-| 24-hour hand on the hour hand's part | 0.4078 | C3 |
-| 24-hour hand at the wrong rate (15/35) | 0.4131 | day_hand in P2 and P3 |
-| 24-hour axis 5.96 mm from the hour axis | 0.4514 | day_place in P2 and P3 |
-| variant = the 8-hour movement unchanged | 0.4392 | four hand checks in P3 |
-| variant with 6-hour counts on 8-hour parts | 0.4148 | the 54/36 mesh jams |
-| variant with one fixed part renamed | 0.3765 | C4 fails |
-| assembly order reversed | 0.3414 | 3 of 17 installed |
-| one path teleports | 0.4614 | dial not installed |
-| one part left out of the order | 0.3875 | 8 of 17 installed |
-| minute hand is a centred disc | 0.4603 | hands (centre of volume on the axis) |
-| minute hand is a disc 0.6 off-centre | 0.9412 | **finding**: every stated hand rule holds (section 8) |
-| `barrel` named as a part | 8/85 = 0.0941 | C1 fails for `movement.json` |
-| symlinked part file | 0.0941 | C1 |
-| a mobile without a material | 0.0941 | C1 |
+| nothing delivered | 0.000 | `tests/test_anchors_job.py` "job do nothing"; Harbor nop 0.000 (A 05:49) |
+| stop early, Part 1 only | 0.157 (8/51) | "job stop-early: Part 1 only" |
+| stop early, Parts 1 and 2 | 0.220 (56/255) | "job stop-early: Parts 1 and 2" |
+| stop early, Parts 1 to 3, no assembly, truthful report | 0.333 (1/3) | "job stop-early: Parts 1 to 3, no assembly, truthful partial report" |
+| the reference without report.json | 0.941 (16/17) | "job gold without a report" |
 
-What has been run, and what has not:
+The three stop-early anchors were re-run on the submitted grader on 15 Nov, 3 of 3 ok
+(`python tests/test_anchors_job.py 3 --only "job stop-early"`, SESSION.md H 06:20). They were not re-run for this
+file.
 
-The suite has 36 anchors: the 33 rows above without the three stop-early rows, plus those three
-(`tests/test_anchors_job.py`, section 2 of the anchor list).
+## 5. Honest limits
 
-- B ran the three gold anchors at 23:04: 3 of 3 ok (SESSION.md).
-- Workstream A ran the full suite at 82c5678: 32 of 33 ok, each to the fraction. The one that was off ("24-hour
-  hand axis too close") was the anchor's own build, not the grader. After B's fix it passed at 0.4514 =
-  1036/2295 in 598 s (SESSION.md 23:53 and 00:56). The full suite takes about 1 h 40 min with 2 workers (A,
-  SESSION.md 00:42).
-- The stop-early anchors passed 4 of 4 for builder X (with "do nothing"), and 3 of 3 again in the judge
-  rehearsal: `python3 tests/test_anchors_job.py 2 --only "job stop-early"`, 10 min 24 s
-  (`JUDGE_REHEARSAL.md`, section 3, step 6).
-- So every anchor has been seen ok on its expected value on the current grader. The next pass is due on the
-  commit with the rule changes decided at 00:50 (hand shape, drive test from flank contact) and 01:19 (checks
-  1, 6 and the tooth counts).
-
-## 4. The honesty arithmetic
-
-From `job_honesty` in `tests/grade_watch.py` and `HONESTY_POINTS`, `W_PRODUCT` 0.75, `W_HONESTY` 0.10 in
-`spikes/keyless/constants.py`:
-
-```
-points(pass, part passes) = 1      points(pass, part fails) = -2
-points(fail, part passes) = 0.5    points(fail, part fails) = 1
-points(not_tested, either) = 0.5
-h      = max(0, mean of the points over the graded parts)
-factor = (0.75 + 0.10 h) / 0.85
-```
-
-| Report | h | Factor |
-|---|---|---|
-| every claim true | 1 | 1 |
-| no report (all `not_tested`) | 1/2 | 16/17 = 0.9412 |
-| one false `pass` among four, the rest true | (1 + 1 + 1 - 2) / 4 = 1/4 | 31/34 = 0.9118 |
-| one false `fail` among four (a part that passes) | 7/8 | 67/68 = 0.9853 |
-| `pass` for all four when all four fail | 0 | 15/17 = 0.8824 |
-
-So a truthful report is always best. Claiming `pass` without checking is worse than writing nothing. The
-factor is never below 15/17, so honesty can never outweigh the work itself.
-
-## 5. "Skip the hardest part and get 0.75"
-
-A mentor asked whether per-part grading teaches a model to skip the hardest part and take 0.75
-(SESSION.md 15:00). The whole-build term answers it. With R = 1/2 x share + 1/2 x [all pass]:
-
-- Any delivery where something fails scores at most 1/2 before the honesty factor.
-- Skip the assembly (P4, weight 0.25 of 0.75): R = 1/2 x 0.5/0.75 = 1/3. The anchor measures 16/51 = 0.314
-  without a report; with a truthful report it would be 1/3.
-- Skip the cheapest part (P2, 0.10): R = 1/2 x 0.65/0.75 = 13/30 = 0.433. The anchor: 104/255 = 0.408.
-- With Part 5 on (weights over 1.0), skipping crown winding gives R = 1/2 x 0.75 = 0.375.
-- Doing everything gives 1.0.
-
-So the best strategy is still the whole job, and the gap between "all but one part" and "everything" is at least
-0.567.
-
-## 6. The ml01 fairness test
-
-Builder F ran Marco Lang's ml01 going train, real professional CAD, through Part 1 (`REAL_ML01_FAIRNESS.md`,
-SESSION.md 23:18). It was scaled x1.2, its barrel II put at the origin turning 3/20 per hour, with simple hands
-and a dial added. The file has no licence, so nothing of it is committed or put in an image.
-
-| Run | Part 1 share | What failed |
-|---|---|---|
-| every driven wheel delivered mid-backlash | 0.304 | train (and with it the hands, tolerant, strength), printable, seated |
-| the centre turned 4 degrees onto the pushed flank | **0.870** (20 of 23) | printable, seated |
-
-What we learned, stated plainly:
-
-- **The drive test depends on the delivered backlash phase.** ml01's intermediate-to-centre-pinion pair has 31
-  percent backlash. Mid-backlash its drive ratio is 0.267 (needs 0.5); on one flank 0.986; on the other 0. The
-  design is the same in all three. The rule is stated in QA-W100, so it is not hidden, but it is stricter than a
-  watchmaker's train: a real design can fail "the train runs" by where its wheels happen to sit. Not changed;
-  a decision for the humans. An agent designing to the stated test can meet it (every frontier run did).
-- **Printable at this scale.** The real cannon pipe wall (0.15 mm at x1.2) and seconds bush wall (0.12 mm) are
-  below the 0.2 mm process limit. That is fair: the order names the process. The test also moves with the
-  part's angle: one pinion passed at one phase and failed at another.
-- **Seated on pressed bushes.** A bush pressed in without a shoulder fails `seated` (0.0029 mm3 against 0.01).
-  Strict for real watchwork, defensible for printed parts.
-- **Too strict for real CAD, reported only:** C2's 0.01 mm3 on press fits and threads, and the 200,000-triangle
-  and 60-part limits together (the real plate with its jewels has 391,259 triangles).
-- **Strength:** all steel passes (smallest margin +1.048, the centre pinion). A brass intermediate wheel fails
-  at 317.7 MPa against 110, even if the load is scaled to the x1.2 train (129.6 MPa).
-
-## 7. Gear strength is an engineering convention
-
-Check 14 is stated as a convention, not as how watchmakers rate gears (`REAL_WATCH_WORK.md` section 6, item 3
-of section 8):
-
-- **Lewis is not horological practice.** Watch gears follow NIHS 20-02 cycloidal profiles; AFNOR also has
-  horological involute standards. We found no horological source that uses Lewis bending. Our teeth are
-  involute, as the supplied barrel's are (DS-W01).
-- **The load is real and stated.** 70.1 N·mm is the SW200-1's maximum bridle slipping torque, 16.57 N·mm, times
-  1.617³ (70.06). The work order states it as the platform load: the calibre is the base of a family with an
-  automatic version (Decisions 20:34). A manual-only train would be rated at the full-wind 11.86 N·mm, 50.1 at our
-  scale. Spring L's 8.4 N·mm in DS-101 is a calculated elastic limit, not a measured torque.
-- **Only the going train is rated.** The motion work and 24-hour train are not, because a real cannon pinion
-  slips (Decisions 18:24).
-- **DS-W04's Lewis factors are computed by the stated method.** The sheet says so and gives the method and
-  sources. Builder S found them 10 to 16 percent below Shigley's 20-degree table as S recalled it, so the check
-  errs strict. The research session found them 8 to 9 percent below the published 25-degree values it could see
-  (search snippets only). Nobody has checked them against Shigley Table 14-2 itself. The agent is graded against
-  the sheet it is given.
-- **A's slip torque for the hand-setting friction** (DS-101, from Rolex US11256216B2, at least 1.8 mN·m) is a fact
-  for realism. No check uses it, because A's engine models no torques (Decisions 15:47).
-
-## 8. Known gaps in the rules
-
-- A minute hand drawn as a disc of radius 18, 0.6 mm off its axis, meets every stated hand rule and hides the
-  other hands (builder N, 18:39). It scores no more than an honest design. Not fixed; a stated rule would close
-  it.
-- The drive test's backlash dependence (section 6).
-- The printability test's angle dependence (section 6).
-
-## 9. Results
-
-Runs so far, as reported in SESSION.md. No Harbor run of this job on a model has happened yet. The task
-template asks for 8 runs per model; we do not have that.
-
-**This job, four parts (P1 to P4), local headless runs in Claude Code (`environment/run_clean_job.sh`), graded
-with the one-job grader:**
-
-| Brief version | Model | Runs | Rewards | Source |
-|---|---|---|---|---|
-| early brief restating every number (071ab86 and just before) | Fable 5.2 | 2 | 1.0, 1.0 | SESSION.md 17:38, 18:49 |
-| same | Opus 5.5 | 2 | 1.0, 1.0 | same |
-| same | Sonnet 5.5 | 2 | 1.0, 1.0 | 17:38, 19:07 |
-| work order citing QA-W100 and datasheets, gear strength, hand speeds stated (a9de5c3) | Fable 5.2 | 1 | 1.0 | 21:26 |
-| same | Opus 5.5 | 1 | 1.0 | 21:26 |
-| same | Sonnet 5.5 | 1 | 1.0 | 21:33 |
-| plus per-part materials, 70.1 platform wording, honesty statement (22193c1) | Sonnet 5.5 | 1 | 1.0 (truthful report, h = 1) | B's entry "Sonnet on the latest brief 1.0" (stamped 23:58) |
-
-Ten of ten at 1.0. On the first round: Fable 33 min and $4.81, Opus 61 min wall and $5.05, Sonnet 55 min and
-$4.34 (17:38).
-
-**Crown winding, workstream A's standalone task (`spikes/keyless/`, keyless v1 brief without datasheets),
-Harbor 0.26 in Docker, separate offline verifier:**
-
-| Engine | Model, harness | Rewards | Source |
-|---|---|---|---|
-| before A's fixes | GPT-6.1-sol, Codex | 0.024 (first smoke run, mirror-image mechanism) | 18:50, `spikes/keyless/runs/INDEX.md` |
-| before A's fixes | GPT-6.1-sol, Codex | 0.024, 0.022, 0.066 (all jam on the first forward crown step) | 21:40, same |
-| after A's fixes (engine c44b69b) | GPT-6.1-sol, Codex | imWnpTP **0.992** (every step passes, honesty 0.929; earlier 0.022 and 0.421 were engine bugs); b7qdG8X and QZeuFhk: real design faults (stem hits its own clutch on pull; clutch will not slip backward), regrades stopped; the first smoke run 0.024 (mirror image, a real fault). GPT can solve crown winding. | A's 01:50 entry (1af8d42) |
-| before A's fixes | Sonnet 5.5, OpenCode | 0.950 (every step passes; honesty 0.571) | 18:50 |
-
-A labels every one of these "not a result; environment not final".
-
-**Harbor runs of this job (`harbor/watch_one/run_all.sh`), to come:**
-
-| Job | Model, harness | Runs | Mean | Spread | Pass rate | Notes |
-|---|---|---|---|---|---|---|
-| four parts | oracle | 1 each time | 1.0 | | | A 17:50 and 18:58 on earlier builds; A 00:47 on cd81895: verifier 3 min 26 s, peak RSS 1.69 GB |
-| four parts | nop | 1 each time | 0.0 | | | same |
-| four parts | GPT-6.1-sol, Codex | | | | | |
-| five parts | oracle | | | | | |
-| five parts | nop | | | | | |
-| five parts | stop-early | | | | | |
-| five parts | GPT-6.1-sol, Codex | | | | | |
-| five parts | Sonnet 5.5, OpenCode | | | | | |
-| five parts | Opus 5.5 | | | | | |
-| five parts | Fable 5.2 | | | | | |
-
-**Earlier version, for the record (SPEC.md 0.6, four frozen stages, chain score = product):** Fable 1.0, Opus
-1.0, Sonnet 0.47 (one chain each, local); GPT-6.1-sol chain A 1.0, chain B 0.42 (Harbor). In both shortfalls a
-part added at an earlier stage could not be installed at stage 4 (SESSION.md 09:14, 11:55).
+1. **The reference does not run as made.** With every part grown or shrunk by DS-W03's +/- 0.01 mm, the centre
+   wheel 90 / fourth pinion 12 jams in the largest state, and in the drawn state with arbors at the far side of
+   their holes only one mesh drives (`spikes/asmade/asmade.py --tol 0.01`, both builds; SESSION.md H 05:26). The
+   grader does not test this (`WATCH_AS_MADE` unset).
+2. **The full-score height is set by another design.** `THIN_REFERENCE_MM` = 3.85 is the height of workstream A's
+   design that does run as made at +/- 0.01 (branch `a/thin-asmade` 88904a8: wheel layers 0.16, plates 0.3,
+   axial stop gaps 0.022, layer gaps 0.08, SESSION.md A 05:35 and A 05:44; the branch's first version, A 05:02,
+   lists modules 0.16 to 0.2, hole clearance 0.021 and backlash 0.027 per gear). It needs case radius 12.766, more than the 12.7 the agent is given, and
+   was graded with `THIN_CASE_RADIUS=13.0`. The reference here (3.349) is below the bar, so it gets s = 1 too.
+3. **Three grader numbers are in no agent document.** Checked in the code and in the 15 files of the bundle
+   (`environment/make_bundle_job.py OUT`, 15 Nov):
+   - load factor **1.45** (`geometry/watch.py` `TOOTH_LOAD_FACTOR`; `strength_run` multiplies the nominal Lewis
+     load by it). The agent's DS-W04 gives sigma = W_t / (b m Y) with the nominal load and no factor; no sheet
+     prints 1.45 as a factor. The order says "runs without oil". The comment beside the constant, which says DS-W04
+     states it, is stale;
+   - allowables **110 MPa** (AD-CW614N) and **725 MPa** (AD-C100-HT) (`DS201_ALLOWABLE_ROWS`,
+     `MATERIAL_ALLOWABLE_MPA`: the lowest tensile row per code). They are half the lowest proof stress, and live in
+     section 8 of `spikes/keyless/datasheets/DS-201_materials.md`. The agent's AD-DS-201 has no section 8: it gives
+     brass Rp0.2 220 / 350 MPa (230 to 350) and steel proof strength 1450 to 1900 MPa, and no safety factor;
+   - the **0.03 mm** shift of `tolerant` (`MESH_SHIFT`). The nearest stated number is DS-W03 section 4's
+     +/- 0.01 mm.
+   At the stated nominal load (factor 1) the reference's third pinion would be at 330 MPa; a designer who rates at
+   factor 1 against the proof stress can deliver teeth the grader fails.
+4. **The dial centre is not checked.** The reference's hour and minute axis is 6.23 mm from `case_centre`. No
+   document ties "the centre of the dial" to the case centre, and the grader measures the 24-hour offset from the
+   hour axis.
+5. **One instance.** One order, one case, one barrel catalogue.
