@@ -332,6 +332,11 @@ def clear_phase(make, others, n=40):
     return make(mid / n), mid / n
 
 
+def _exact():
+    import exact_v2
+    return exact_v2
+
+
 def _warp_cyl_x(man, r_mean):
     """v1's warp (reference.warp_cyl_x) with the facet length as a parameter: coarser facets give a STEP file with
     fewer flat triangles."""
@@ -345,8 +350,12 @@ def _warp_cyl_x(man, r_mean):
     return out
 
 
+EXACT = {}     # part -> function returning its B-rep in V (exact_v2): the parts whose surfaces are not planar facets
+
+
 def build(bV):
     R1.warp_cyl_x = _warp_cyl_x
+    EXACT.clear()
     """bV: B's parts in V (for phasing): {'hour_wheel': solid}. Returns (parts in V, spec in V, layout)."""
     Lo = layout(AXES)
     k = K_V1
@@ -427,6 +436,21 @@ def build(bV):
     cw, fK = clear_phase(crown, [gI])
     cw = cw - S.cyl_z(K[0], K[1], 0, 3, r_bK, 48)
     parts["crown_wheel"] = cw
+
+    def crown_exact(fK=fK, sp=(G.spur(P["z_crown_spur"], mw, zCs[0], zCs[1], thin=BL)
+                               .rotate([0, 0, 360.0 * fK / P["z_crown_spur"]]).translate([K[0], K[1], 0]))):
+        # B-rep: the face ring lofted (exact_v2), web, hub and bore as true cylinders (web 0.001 inside the ring's
+        # rim so no two faces coincide), the spur's planar faces from the mesh
+        X = _exact()
+        rg = X.face_ring(X.face_gear_gap(zf, zp, mf, R - 0.35, R + 0.35, zr, zt, -BL, 200), zf, R - 0.35, R + 0.35,
+                         zt, zr)[0]
+        rg = X.moved(X.moved(X.moved(rg, X.rot_z(180)), X.rot_z(360.0 * fK / P["z_crown_spur"])),
+                     X.translate(K[0], K[1], 0))
+        sh = X.fuse(mesh_to_shape(sp)[0], rg)
+        sh = X.fuse(sh, X.cyl_z(K[0], K[1], zr - 0.01, zCs[0] + 0.01, R + 0.349))
+        sh = X.fuse(sh, X.cyl_z(K[0], K[1], zr - 0.01, zCs[1], 1.2))
+        return X.one_solid(X.cut(sh, X.cyl_z(K[0], K[1], 0, 3, r_bK)))
+    EXACT["crown_wheel"] = crown_exact
     parts["crown_post"] = S.union([S.cyl_z(K[0], K[1], z_plate[1], zCs[1] + 0.12, r_pK, 48),
                                    S.cyl_z(K[0], K[1], zCs[1] + 0.02, zCs[1] + 0.12, 0.6, 48)])
     fixed.append("crown_post")
@@ -441,7 +465,14 @@ def build(bV):
     wp = min((wpin(sg) for sg in (1, -1)), key=lambda g: (g ^ cw).volume())
     hubw = S.cyl_x(0, 0, xw1 - 0.01, bx0 + 0.01, 0.68 * k, 64)
     wteeth = R1.breguet(o, bx0, bx1, 0.45 * k, 0.85 * k, sliding=False)
-    parts["winding_pinion"] = S.union([wp, hubw, wteeth]) - S.cyl_x(0, 0, xw0 - 1, bx1 + 1, P["stem_in_r"] + 0.026, 48)
+    bore_w = S.cyl_x(0, 0, xw0 - 1, bx1 + 1, P["stem_in_r"] + 0.026, 48)
+    parts["winding_pinion"] = S.union([wp, hubw, wteeth]) - bore_w
+
+    def wpin_exact(rest=S.union([wp, hubw]) - bore_w):
+        X = _exact()
+        t = X.breguet(o, bx0, bx1, 0.45 * k, 0.85 * k, sliding=False)   # inner radius 0.6 clears the bore
+        return X.one_solid(X.fuse(mesh_to_shape(rest)[0], t))
+    EXACT["winding_pinion"] = wpin_exact
 
     # ---- sliding pinion: Breguet teeth, square bore, spur teeth at its outer end
     sx0, st0, st1 = Lo["sx0"], Lo["st0"], Lo["st1"]
@@ -484,6 +515,19 @@ def build(bV):
     phiS = 2 * math.pi * fS1 / P["z_set_spur"]
     sw = sw - S.cyl_z(S1[0], S1[1], -5, 0, r_bS, 48)
     parts["setting_wheel"] = sw
+
+    def setw_exact(fS1=fS1, sp=(G.spur(P["z_set_spur"], P["m_set"], zH[0], zH[1], thin=BL)
+                                .rotate([0, 0, 360.0 * fS1 / P["z_set_spur"]]).translate([S1[0], S1[1], 0]))):
+        X = _exact()     # as crown_exact
+        rg = X.face_ring(X.face_gear_gap(zf, zp, mf, Rs - 0.35, Rs + 0.35, zr, zt, -BL, 200), zf, Rs - 0.35,
+                         Rs + 0.35, zt, zr)[0]
+        for M in (X.MIRROR_Z, X.rot_z(180), X.rot_z(360.0 * fS1 / P["z_set_spur"]), X.translate(S1[0], S1[1], 0)):
+            rg = X.moved(rg, M)
+        sh = X.fuse(mesh_to_shape(sp)[0], rg)
+        sh = X.fuse(sh, X.cyl_z(S1[0], S1[1], -zr - 0.2, -zr + 0.01, Rs + 0.349))
+        sh = X.fuse(sh, X.cyl_z(S1[0], S1[1], zH[0], -zr + 0.01, 0.9))
+        return X.one_solid(X.cut(sh, X.cyl_z(S1[0], S1[1], -5, 0, r_bS)))
+    EXACT["setting_wheel"] = setw_exact
     # no head under the setting wheel: its axis is over the winding pinion, which holds it from below
     parts["setting_post"] = S.union([S.cyl_z(S1[0], S1[1], z_dial, -zr - 0.05, r_pS, 48),
                                      S.cyl_z(S1[0], S1[1], z_dial, zH[0] - 0.02, 0.5, 48)])      # shoulder
@@ -498,9 +542,19 @@ def build(bV):
         cone = m3.Manifold.cylinder(ch, 1.45, 1.02, 96).transform([[0, 0, 1, st1 - ch], [1, 0, 0, 0], [0, 1, 0, 0]])
         spur_t = spur_t ^ S.union([cone, S.cyl_x(0, 0, st0 - 1, st1 - ch + 0.001, 2.0, 96)])
     sp = S.union([steeth, body, spur_t])
-    sp = sp - neck - S.cyl_x(0, 0, bx0 - 1, sx0 + 0.05, 0.62, 48)
-    sp = sp - S.box([sx0, -hsq - 0.013, -hsq - 0.013], [st1 + 1, hsq + 0.013, hsq + 0.013])
+    bore_s = S.cyl_x(0, 0, bx0 - 1, sx0 + 0.05, 0.62, 48)
+    sq_s = S.box([sx0, -hsq - 0.013, -hsq - 0.013], [st1 + 1, hsq + 0.013, hsq + 0.013])
+    sp = sp - neck - bore_s
+    sp = sp - sq_s
     parts["sliding_pinion"] = sp
+
+    def spin_exact(rest=S.union([body, spur_t]) - neck - bore_s - sq_s):
+        X = _exact()
+        t = X.breguet(o, bx0 + P["clear"] / 2, sx0, 0.45 * k, 0.85 * k, sliding=True)
+        t = X.cut(X.cut(t, X.cyl_x(0, 0, bx0 - 1, sx0 + 0.05, 0.62)),
+                  X.box([sx0, -hsq - 0.013, -hsq - 0.013], [st1 + 1, hsq + 0.013, hsq + 0.013]))
+        return X.one_solid(X.fuse(mesh_to_shape(rest)[0], t))
+    EXACT["sliding_pinion"] = spin_exact
 
     # ---- stem: round inner end, collar in the counterbore, square, round shaft, crown outside the case
     xa = sx0 + 0.1                                      # the square starts inside the sliding pinion
@@ -731,7 +785,8 @@ def main(argv):
         import keyless_v1_delivery as KD
         t0 = time.time()
         dl = os.path.abspath(argv[argv.index("--p5-only") + 1])
-        KD.grade(dl, "--force" in argv, work=dl.rstrip("/") + "_p5work")
+        KD.grade(dl, "--force" in argv, jobs=int(argv[argv.index("--jobs") + 1]) if "--jobs" in argv else 1,
+                 work=dl.rstrip("/") + "_p5work")
         print("P5 wall time %.0f s" % (time.time() - t0))
         return 0
     m, bparts, owner, axes, W = load_ref(ref)
@@ -1002,7 +1057,11 @@ def deliver(dst, ref, partsB, section, spec, partsV, TVB):
     for n, mm in partsB.items():
         path = os.path.join(dst, "parts", n + ".step")
         try:   # built in frame V (axis-aligned planes), moved into B's frame as a B-rep
-            sh, nf, ntri = mesh_to_shape(partsV[n])
+            if n in EXACT:      # exact faces (Breguet helicoids, lofted face-ring gaps) plus the planar rest
+                sh = EXACT[n]()
+                nf, ntri = _exact().nfaces(sh), 0
+            else:
+                sh, nf, ntri = mesh_to_shape(partsV[n])
             sh = BRepBuilderAPI_Transform(sh, tr, True).Shape()
             core.write_step(path, sh)
             back = core.load_step_part(path, W.MAX_STEP_BYTES, W.MAX_TRIANGLES, W.STEP_LINEAR_DEFLECTION,

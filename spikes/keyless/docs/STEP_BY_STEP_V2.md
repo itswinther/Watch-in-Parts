@@ -221,17 +221,23 @@ This follows REAL_WATCH_WORK.md section 4 (Unitas/ETA 6497) where B's frame allo
     being fixed.
   - Wall time 3347 s, of which AT-1 took 2399 s.
 - **Installation order.** It passes B's section 8 replay merged into the job plan: section 8a.
-- **STEP.** `--deliver` writes each part as a B-rep: coplanar triangles merge into one polygon face, built in
-  frame V (axis-aligned planes) and moved into B's frame as a B-rep.
-  - 17 of the 21 parts load through B's STEP reader as real solids, with at most 1 flat triangular face and a
-    round trip within 4e-5 mm³.
-  - Four parts do not load yet. Each STEP file is over 16 MB, with tens of thousands of flat triangles:
-    - the crown wheel and the setting wheel, whose face rings are cut by an envelope;
-    - the winding pinion and the sliding pinion, whose Breguet teeth are warped onto a cylinder. At facet
-      length 0.2 the winding pinion still has 836 flat triangles.
-  - These four need curved faces: B-spline flanks lofted through sections of the ring teeth, and Breguet ramps as
-    ruled faces. Until then, `--deliver` writes B's test placeholder for them and puts their solid in
-    `DELIVERY_solids/`, as solution/keyless_v1_delivery.py does.
+- **STEP.** `--deliver` writes all 21 parts as B-reps that load through B's STEP reader as real solids (no part
+  over one flat triangular face; the largest file, the crown wheel, is 15.3 MB of the 16 MB limit).
+  - 17 parts are planar-faced: coplanar triangles merge into one polygon face, built in frame V (axis-aligned
+    planes) and moved into B's frame as a B-rep. Round trip within 4e-5 mm³.
+  - The other four have curved faces, built by `spikes/keyless/exact_v2.py`:
+    - Breguet teeth (winding and sliding pinions): each edge of the unrolled tooth profile is a helix on the
+      inner and outer cylinders, and the flank between them is the ruled helicoid. The winding pinion's cutters
+      are clipped to one turn, as the mesh builder does. Round trip 4e-4 and 8e-4 mm³ against the 0.03-facet
+      mesh.
+    - Face rings (crown and setting wheels): the pinion envelope is recut with 200 poses a pitch (the mesh uses 16),
+      sliced across the gap by planes 0.02 to 0.05 mm apart, each slice fitted with a 60-pole cubic B-spline,
+      and the slices lofted into one gap. The gap is grown 0.0005 mm first, so the spline's fit error (at most
+      0.0012 mm, at the gap bottom of the outer end) never adds material. One pitch of the ring is cut, and 28
+      turned copies of its faces are sewn into the ring: cutting 28 gaps from one ring dropped some gaps, where
+      the pointed outer tooth ends bring neighbouring gaps within a hair. Web, hub and bore are true cylinders.
+      Against the 200-pose mesh the slices are within 0.0015 mm almost everywhere; the round trip differs from
+      the design mesh by 0.020 and 0.024 mm³, mostly the 0.0005 mm growth.
 
 ## 10. What the engine-fix branch (a/keyless-engine-fixes, not merged) would allow
 
