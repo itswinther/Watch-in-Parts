@@ -4,8 +4,10 @@ writes OUT (in the task image it is /app):
     instruction.md          the brief, from environment/public/job/PROMPT.md
     FORMAT.md               the file formats, from environment/public/job/FORMAT.md
     datasheets/             the watch-side sheets (DS-W01 to DS-W03, DS-W04 with the strength check), the inspection
-                            procedure QA-W100, workstream A's supplier sheets (DS-101 to DS-501, from
-                            spikes/keyless/datasheets/INDEX.md) and one INDEX.md for all of them
+                            procedure QA-W100 (not with the customer-order brief, environment/brief_order.py),
+                            workstream A's supplier sheets (DS-101 to DS-501, from spikes/keyless/datasheets/INDEX.md;
+                            with the order brief, the copies make_brief_job.py writes, supplier facts only) and one
+                            INDEX.md for all of them
     supplied/barrel.stl     the supplied barrel (geometry.watch.mesh_path("barrel"), the grader's own, with a neutral
                             header: geometry/data/thin/barrel.stl while W.THIN_BARREL is on, as on b/thin-4mm)
     tools/kernel.py         geometry/core.py
@@ -45,6 +47,15 @@ FORBIDDEN_WORDS = [r"reference_watch", r"reference[ _-]solution", r"reference[ _
                    r"solution", r"\bstages?\b", r"hand_speed", r"1/12", r"1/24", r"60 turns",
                    r"weight", r"anchor", r"board-in-a-box", r"session", r"\bkept\b", r"grade_watch", r"oracle",
                    r"traceab", r"NOT-FOR-AGENT"]
+# The customer-order brief (environment/brief_order.py): no acceptance test, no thickness target or formula, no
+# load factor, no calculated allowables or safety factors, and no check names of the grader.
+ORDER_WORDS = [r"QA-W", r"inspection procedure", r"acceptance figure", r"\btarget", r"load factor", r"\bK = ",
+               r"thickness score", r"safety factor", r"design allowable", r"requirement", r"Free to turn",
+               r"Nothing else collides", r"Runs with its arbors", r"Gear strength", r"Fits the case",
+               r"\bseated\b", r"\btolerant\b", r"\bP[1-4] (?:to|and) P", r"\bPart [1-5]\b", r"mesh test",
+               r"swept solid", r"\b0\.25 of\b", r"area share"]
+if B.O.ORDER_IN_BRIEF:
+    FORBIDDEN_WORDS = FORBIDDEN_WORDS + ORDER_WORDS
 NEUTRAL_STL_HEADER = b"supplied barrel, binary STL, millimetres".ljust(80, b" ")
 
 
@@ -147,8 +158,9 @@ def build(out):
     S = B.strength_module()
     for f, _, _ in B.our_sheets(S) + [("INDEX.md", None, None)]:
         shutil.copyfile(os.path.join(JOB, "datasheets", f), os.path.join(out, "datasheets", f))
-    for f, _, _ in B.external_sheets():
-        shutil.copyfile(os.path.join(B.A_SHEETS, f), os.path.join(out, "datasheets", f))
+    for f, _, _ in B.external_sheets():      # the agent copy that make_brief_job.py wrote (brief_order), else A's sheet
+        src = os.path.join(JOB, "datasheets", f)
+        shutil.copyfile(src if os.path.isfile(src) else os.path.join(B.A_SHEETS, f), os.path.join(out, "datasheets", f))
     with open(os.path.join(out, "supplied", "barrel.stl"), "wb") as f:
         f.write(barrel_bytes())
     with open(os.path.join(out, "tools", "kernel.py"), "w", encoding="utf-8") as f:

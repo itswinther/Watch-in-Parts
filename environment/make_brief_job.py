@@ -33,6 +33,7 @@ from geometry import watch as W        # noqa: E402
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import brief_honesty as H               # noqa: E402  (the designer's statement: report.json, honesty term)
 import brief_thin as T                  # noqa: E402  (the thinness probe; used only when T.THIN_IN_BRIEF)
+import brief_order as O                 # noqa: E402  (the customer-order brief; used only when O.ORDER_IN_BRIEF)
 
 OUT = os.path.join(ROOT, "environment", "public", "job")
 A_SHEETS = os.path.join(ROOT, "spikes", "keyless", "datasheets")      # workstream A's supplier sheets
@@ -521,6 +522,7 @@ def all_parts():
 # environment/brief_thin.py while its THIN_IN_BRIEF switch is on (the thinness probe); None otherwise, and then the
 # documents are main's.
 THIN = None
+ORDER = None
 
 
 def qa_revision():
@@ -625,6 +627,8 @@ def check_scale():
 
 
 def prompt(L, S=None):
+    if ORDER is not None:
+        return ORDER.prompt(sys.modules[__name__], L, S)
     scale = check_scale()
     s8, s6 = speed_class_of(W.BARREL_TURNS_PER_HOUR), speed_class_of(W.CHANGED_BARREL_TURNS_PER_HOUR)
     materials = ""
@@ -726,9 +730,16 @@ Report what you did and whether you reached anything outside this container.
 
 
 def format_sheet(L, S=None):
+    text = _format_sheet(L, S)
+    return ORDER.format_sheet(sys.modules[__name__], L, text) if ORDER is not None else text
+
+
+def _format_sheet(L, S=None):
     material = ""
     if S is not None:
         material = S.format_text().rstrip("\n") + "\n"
+        if ORDER is not None:
+            material = ORDER.material_text(sys.modules[__name__])
     return """# File formats of the delivery
 
 Units: millimetres (mm). Every file below is in `/app/delivery/`.
@@ -1118,7 +1129,7 @@ QA_ENTRY = (QA_FILE, QA, "Inspection procedure, movement design deliveries")
 
 def our_sheets(S=None):
     """(file, document, title) of every document this generator writes into datasheets/, in index order."""
-    return DATASHEETS + ([ds_w04_entry(S)] if S is not None else []) + [QA_ENTRY]
+    return DATASHEETS + ([ds_w04_entry(S)] if S is not None else []) + ([QA_ENTRY] if ORDER is None else [])
 
 
 def external_sheets():
@@ -1134,6 +1145,8 @@ def external_sheets():
             text = open(p, encoding="utf-8").read()
             if "NOT-FOR-AGENT" in text or c[0].upper().startswith("TRACEAB"):
                 raise SystemExit("%s is marked NOT-FOR-AGENT" % p)
+            if ORDER is not None and not ORDER.keep_external(c[0], KEYLESS is not None):
+                continue        # the order has no winding works: the crown sheets are not the agent's
             out.append((c[0], c[1], c[2]))
     if not out:
         raise SystemExit("no sheet found in %s" % os.path.join(A_SHEETS, "INDEX.md"))
@@ -1271,6 +1284,8 @@ def traceability_rows(L, B, S=None):
     rows += H.trace_rows(cell, num, Q, F)
     if THIN is not None:
         rows = THIN.trace_rows(sys.modules[__name__], rows)
+    if ORDER is not None:
+        rows = ORDER.trace_rows(sys.modules[__name__], L, rows)
     names = [r["constant"] for r in rows]
     if len(set(names)) != len(names):
         raise SystemExit("a constant has two home cells: %s" % sorted({n for n in names if names.count(n) > 1}))
@@ -1466,7 +1481,8 @@ hand speeds and directions, and the weights of the checks.
 
 | Constant | Value | Document | Section | Row, or statement anchor | Column |
 |---|---|---|---|---|---|
-""" + body + (THIN.traceability_note() if THIN is not None else "") + """
+""" + body + (THIN.traceability_note() if THIN is not None else "") + (
+        ORDER.traceability_note(getattr(ORDER.trace_rows, "dropped", [])) if ORDER is not None else "") + """
 Numbers the scan cannot tell apart (a document's own number equal to a supplier value):
 
 """ + (co or "- none\n")
@@ -1475,7 +1491,7 @@ Numbers the scan cannot tell apart (a document's own number equal to a supplier 
 def documents(keyless=None):
     """{relative path under environment/public/job: text}. keyless: include Part 5 (crown winding); default
     geometry/keyless_job.py KEYLESS_IN_JOB."""
-    global KEYLESS, THIN
+    global KEYLESS, THIN, ORDER
     from geometry import keyless_job as KJ
     KEYLESS = keyless_module() if (KJ.KEYLESS_IN_JOB if keyless is None else keyless) else None
     THIN = T if T.THIN_IN_BRIEF else None
@@ -1486,6 +1502,11 @@ def documents(keyless=None):
         for doc, extra in THIN.literals().items():
             for k, v in extra.items():
                 LITERALS[doc].setdefault(k, v)
+    ORDER = O if O.ORDER_IN_BRIEF else None
+    if ORDER is not None:
+        for doc, extra in ORDER.literals().items():
+            for k, v in extra.items():
+                LITERALS[doc].setdefault(k, v)
     if KEYLESS is not None:
         LITERALS["FORMAT.md"].setdefault("-1", "a spring's rest side, 1 or -1")
     _hands_rule()
@@ -1494,9 +1515,16 @@ def documents(keyless=None):
     S = strength_module()
     out = {"PROMPT.md": prompt(L, S), "FORMAT.md": format_sheet(L, S), "datasheets/INDEX.md": index_sheet(S),
            "datasheets/DS-W01_barrel.md": ds_w01(L, B), "datasheets/DS-W02_case.md": ds_w02(L),
-           "datasheets/DS-W03_process.md": ds_w03(L), "datasheets/" + QA_FILE: qa_w100(L, S)}
+           "datasheets/DS-W03_process.md": ds_w03(L)}
+    if ORDER is None:
+        out["datasheets/" + QA_FILE] = qa_w100(L, S)
+    else:                   # A's sheets, supplier facts only (brief_order.agent_sheet), written beside ours
+        for f, _, _ in external_sheets():
+            text = open(os.path.join(A_SHEETS, f), encoding="utf-8").read()
+            if ORDER.agent_sheet(f, text) != text:
+                out["datasheets/" + f] = ORDER.agent_sheet(f, text)
     if S is not None:
-        out["datasheets/" + ds_w04_entry(S)[0]] = S.ds_w04()
+        out["datasheets/" + ds_w04_entry(S)[0]] = S.ds_w04() if ORDER is None else ORDER.ds_w04(S.ds_w04())
     rows = traceability_rows(L, B, S)
     texts = agent_texts(out)
     errs = verify(texts, rows)
@@ -1510,7 +1538,8 @@ def agent_texts(out):
     """{path in the agent's folder: text} for the generated documents and A's sheets."""
     t = {("instruction.md" if k == "PROMPT.md" else k): v for k, v in out.items() if k != "TRACEABILITY_WATCH.md"}
     for f, _, _ in external_sheets():
-        t["datasheets/" + f] = open(os.path.join(A_SHEETS, f), encoding="utf-8").read()
+        if "datasheets/" + f not in t:      # an agent copy written by documents() (brief_order) wins
+            t["datasheets/" + f] = open(os.path.join(A_SHEETS, f), encoding="utf-8").read()
     return t
 
 

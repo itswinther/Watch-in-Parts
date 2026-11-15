@@ -102,8 +102,8 @@ def movement_names(doc, rel):
         xy(m.get("axis"), "%s: mobile '%s' axis" % (rel, k))
         take(m.get("parts"), "mobile '%s'" % k)
         if not isinstance(m.get("material"), str) or m["material"] not in MATERIALS:
-            raise Bad("%s: mobile '%s': 'material' must be the designation of a material with a bending (tensile) "
-                      "design allowable in DS-201 section 8" % (rel, k))
+            raise Bad("%s: mobile '%s': 'material' must be one of the ordering codes FORMAT.md lists "
+                      "(%s)" % (rel, k, ", ".join(sorted(MATERIALS))))
         pm = m.get("part_materials", {})
         if not isinstance(pm, dict):
             raise Bad("%s: mobile '%s': 'part_materials' must be an object {part name: designation}" % (rel, k))
@@ -111,8 +111,8 @@ def movement_names(doc, rel):
             if pn not in m["parts"]:
                 raise Bad("%s: mobile '%s': 'part_materials' names %r, which is not a part of this mobile" % (rel, k, pn))
             if not isinstance(pmat, str) or pmat not in MATERIALS:
-                raise Bad("%s: mobile '%s': 'part_materials' of part '%s' must be the designation of a material with a "
-                          "bending (tensile) design allowable in DS-201 section 8" % (rel, k, pn))
+                raise Bad("%s: mobile '%s': 'part_materials' of part '%s' must be one of the ordering codes "
+                          "FORMAT.md lists (%s)" % (rel, k, pn, ", ".join(sorted(MATERIALS))))
     if len(names) > MAX_PARTS:
         raise Bad("%s: more than %d parts" % (rel, MAX_PARTS))
     known = set(mob) | {"barrel"}
