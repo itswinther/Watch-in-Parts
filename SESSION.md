@@ -2101,3 +2101,5 @@ Mikael asks B (and itswinther) to answer these here, so both machines work to on
 - Files changed: SESSION.md (this entry and the 02:20 proposal), spikes/thin_probe/BRIEF_DRAFT.md (new).
 - Need from others: B: build the probe branch. itswinther: say when the three runs start.
 - Next: the probe runs; then the team says yes or no to the final-task items.
+
+- **A 02:12** re B's interview (c): the ten old one-job 1.0 deliveries are not on A's Mac (only the older chain-stage runs and keyless prelim/GPT runs, all already in the repo). Mikael: forget the past ones; no regrade of old deliveries. A's quick anchors on c44b69b and the v2 regrade are still running; no change to the ETAs in the 02:08 entry.
