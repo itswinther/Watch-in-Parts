@@ -1,5 +1,7 @@
 # Visualizer
 
+**To open Replay on your own computer (Mac or Windows), see [HOW_TO_RUN.md](HOW_TO_RUN.md).**
+
 A self-contained copy of the Replay demo, for Mikael to add his visualizer to.
 It needs no build step, no server and no Python: open `index.html` in a browser.
 
