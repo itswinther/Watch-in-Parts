@@ -1,0 +1,3991 @@
+{
+ "mode": "job",
+ "reward": 0.9433140424020567,
+ "reward_exact": "4248308769855259/4503599627370496",
+ "all_pass": true,
+ "parts_reward": 0.9433140424020567,
+ "parts_reward_exact": "4248308769855259/4503599627370496",
+ "honesty": {
+  "report": "valid",
+  "left_out": [],
+  "claims": {
+   "P1": "pass",
+   "P2": "pass",
+   "P3": "pass",
+   "P4": "pass"
+  },
+  "truths": {
+   "P1": true,
+   "P2": true,
+   "P3": true,
+   "P4": true
+  },
+  "points": {
+   "P1": "1",
+   "P2": "1",
+   "P3": "1",
+   "P4": "1"
+  },
+  "honesty": 1.0,
+  "honesty_exact": "1",
+  "factor": 1.0,
+  "factor_exact": "1",
+  "constants": {
+   "W_PRODUCT": 0.75,
+   "W_HONESTY": 0.1,
+   "CLAIMS": [
+    "pass",
+    "fail",
+    "not_tested"
+   ],
+   "HONESTY_POINTS": {
+    "pass/pass": 1.0,
+    "pass/fail": -2.0,
+    "fail/fail": 1.0,
+    "fail/pass": 0.5,
+    "not_tested/pass": 0.5,
+    "not_tested/fail": 0.5
+   },
+   "REPORT_MAX_BYTES": 100000,
+   "source": "spikes/keyless/constants.py"
+  }
+ },
+ "thickness": {
+  "H_mm": {
+   "movement.json": 4.230045527219772,
+   "variant_6h.json": 4.230045527219772
+  },
+  "H_mm_taller": 4.230045527219772,
+  "x": 0.02963444732484362,
+  "s": 0.8866280848041135,
+  "s_exact": "1996508956170011/2251799813685248",
+  "h0_mm": 3.95,
+  "exponent": 4,
+  "error": null
+ },
+ "parts_reward_without_thickness": 1.0,
+ "parts_reward_without_thickness_exact": "1",
+ "parts_graded": [
+  "P1",
+  "P2",
+  "P3",
+  "P4"
+ ],
+ "parts": {
+  "P1": {
+   "name": "going train and hands",
+   "weight": 0.25,
+   "gates": {
+    "files": true,
+    "assembled": true
+   },
+   "checks": {
+    "spin": true,
+    "held": true,
+    "train": true,
+    "clear": true,
+    "minute": true,
+    "hour": true,
+    "seconds": true,
+    "coaxial": true,
+    "hands": true,
+    "size": true,
+    "printable": true,
+    "tolerant": true,
+    "seated": true,
+    "strength": true
+   },
+   "check_weights": {
+    "spin": 1,
+    "held": 2,
+    "train": 3,
+    "clear": 1,
+    "minute": 2,
+    "hour": 2,
+    "seconds": 2,
+    "coaxial": 1,
+    "hands": 1,
+    "size": 1,
+    "printable": 1,
+    "tolerant": 2,
+    "seated": 2,
+    "strength": 2
+   },
+   "share_of_checks": 1.0,
+   "s": 1.0,
+   "s_exact": "1",
+   "passed": true,
+   "details": {
+    "files": {
+     "barrel": "BR-096-30"
+    },
+    "assembled": {
+     "worst_volume": 0.0,
+     "pair": null,
+     "fixed_parts_worst": 1.7143604813243748e-17,
+     "fixed_pair": "mid_plate/motion_bridge",
+     "mobile_parts_worst": 0.000708398235624403,
+     "mobile_pair": "hour:hour/hand_hour",
+     "one_frame": true,
+     "frame_groups": [
+      [
+       "bottom_plate",
+       "mid_plate",
+       "motion_bridge",
+       "top_bridge"
+      ]
+     ]
+    },
+    "spin": {
+     "barrel": {
+      "worst_volume": 0.0,
+      "step": 0.0,
+      "step_exact": "0",
+      "angle_deg": 0.0,
+      "steps": 72,
+      "poses": 216
+     },
+     "m2": {
+      "worst_volume": 0.0,
+      "step": 0.0,
+      "step_exact": "0",
+      "angle_deg": 0.0,
+      "steps": 72,
+      "poses": 216
+     },
+     "m3": {
+      "worst_volume": 0.0,
+      "step": 0.0,
+      "step_exact": "0",
+      "angle_deg": 0.0,
+      "steps": 72,
+      "poses": 216
+     },
+     "m4": {
+      "worst_volume": 0.0,
+      "step": 0.0,
+      "step_exact": "0",
+      "angle_deg": 0.0,
+      "steps": 72,
+      "poses": 216
+     },
+     "seconds": {
+      "worst_volume": 0.0,
+      "step": 0.0,
+      "step_exact": "0",
+      "angle_deg": 0.0,
+      "steps": 72,
+      "poses": 216
+     },
+     "y": {
+      "worst_volume": 0.0,
+      "step": 0.0,
+      "step_exact": "0",
+      "angle_deg": 0.0,
+      "steps": 72,
+      "poses": 216
+     },
+     "x": {
+      "worst_volume": 0.0,
+      "step": 0.0,
+      "step_exact": "0",
+      "angle_deg": 0.0,
+      "steps": 72,
+      "poses": 216
+     },
+     "minute": {
+      "worst_volume": 0.0,
+      "step": 0.0,
+      "step_exact": "0",
+      "angle_deg": 0.0,
+      "steps": 72,
+      "poses": 216
+     },
+     "minute_wheel": {
+      "worst_volume": 0.0,
+      "step": 0.0,
+      "step_exact": "0",
+      "angle_deg": 0.0,
+      "steps": 72,
+      "poses": 216
+     },
+     "hour": {
+      "worst_volume": 0.0,
+      "step": 0.0,
+      "step_exact": "0",
+      "angle_deg": 0.0,
+      "steps": 72,
+      "poses": 216
+     },
+     "idler": {
+      "worst_volume": 0.0,
+      "step": 0.0,
+      "step_exact": "0",
+      "angle_deg": 0.0,
+      "steps": 72,
+      "poses": 216
+     },
+     "day": {
+      "worst_volume": 0.0,
+      "step": 0.0,
+      "step_exact": "0",
+      "angle_deg": 0.0,
+      "steps": 72,
+      "poses": 216
+     }
+    },
+    "held": {
+     "not_held": [],
+     "moves": {
+      "barrel": {
+       "+x": {
+        "held": true,
+        "fixed_volume": 0.18173605814063926,
+        "via": null
+       },
+       "-x": {
+        "held": true,
+        "fixed_volume": 0.18173605814063923,
+        "via": null
+       },
+       "+y": {
+        "held": true,
+        "fixed_volume": 0.18173552286326675,
+        "via": null
+       },
+       "-y": {
+        "held": true,
+        "fixed_volume": 0.18173552286326675,
+        "via": null
+       },
+       "+z": {
+        "held": true,
+        "fixed_volume": 70.89060772444653,
+        "via": null
+       },
+       "-z": {
+        "held": true,
+        "fixed_volume": 76.03253253700515,
+        "via": null
+       }
+      },
+      "m2": {
+       "+x": {
+        "held": true,
+        "fixed_volume": 0.07711183165279241,
+        "via": null
+       },
+       "-x": {
+        "held": true,
+        "fixed_volume": 0.07711182703982403,
+        "via": null
+       },
+       "+y": {
+        "held": true,
+        "fixed_volume": 0.07711179042497461,
+        "via": null
+       },
+       "-y": {
+        "held": true,
+        "fixed_volume": 0.07711178883073039,
+        "via": null
+       },
+       "+z": {
+        "held": true,
+        "fixed_volume": 11.172471522537952,
+        "via": null
+       },
+       "-z": {
+        "held": true,
+        "fixed_volume": 2.563399558612148,
+        "via": null
+       }
+      },
+      "m3": {
+       "+x": {
+        "held": true,
+        "fixed_volume": 0.055805338267886286,
+        "via": null
+       },
+       "-x": {
+        "held": true,
+        "fixed_volume": 0.05580534390935403,
+        "via": null
+       },
+       "+y": {
+        "held": true,
+        "fixed_volume": 0.05580530628983613,
+        "via": null
+       },
+       "-y": {
+        "held": true,
+        "fixed_volume": 0.05580530205542039,
+        "via": null
+       },
+       "+z": {
+        "held": true,
+        "fixed_volume": 0.5808695865619613,
+        "via": null
+       },
+       "-z": {
+        "held": true,
+        "fixed_volume": 0.023944735248932147,
+        "via": null
+       }
+      },
+      "m4": {
+       "+x": {
+        "held": true,
+        "fixed_volume": 0.05580535220937603,
+        "via": null
+       },
+       "-x": {
+        "held": true,
+        "fixed_volume": 0.05580533992230952,
+        "via": null
+       },
+       "+y": {
+        "held": true,
+        "fixed_volume": 0.05580530489276933,
+        "via": null
+       },
+       "-y": {
+        "held": true,
+        "fixed_volume": 0.05580530953485279,
+        "via": null
+       },
+       "+z": {
+        "held": true,
+        "fixed_volume": 0.025860315515874217,
+        "via": null
+       },
+       "-z": {
+        "held": true,
+        "fixed_volume": 9.15114577011487,
+        "via": null
+       }
+      },
+      "seconds": {
+       "+x": {
+        "held": true,
+        "fixed_volume": 0.08452268336945865,
+        "via": null
+       },
+       "-x": {
+        "held": true,
+        "fixed_volume": 0.08452268580036197,
+        "via": null
+       },
+       "+y": {
+        "held": true,
+        "fixed_volume": 0.08452285431213534,
+        "via": null
+       },
+       "-y": {
+        "held": true,
+        "fixed_volume": 0.08452285430711831,
+        "via": null
+       },
+       "+z": {
+        "held": true,
+        "fixed_volume": 0.04088658899439651,
+        "via": null
+       },
+       "-z": {
+        "held": true,
+        "fixed_volume": 0.3875951750133878,
+        "via": null
+       }
+      },
+      "y": {
+       "+x": {
+        "held": true,
+        "fixed_volume": 0.05580534101687752,
+        "via": null
+       },
+       "-x": {
+        "held": true,
+        "fixed_volume": 0.05580535865731834,
+        "via": null
+       },
+       "+y": {
+        "held": true,
+        "fixed_volume": 0.055805308008234404,
+        "via": null
+       },
+       "-y": {
+        "held": true,
+        "fixed_volume": 0.055805305665766844,
+        "via": null
+       },
+       "+z": {
+        "held": true,
+        "fixed_volume": 0.025860298276573115,
+        "via": null
+       },
+       "-z": {
+        "held": true,
+        "fixed_volume": 5.422881526404537,
+        "via": null
+       }
+      },
+      "x": {
+       "+x": {
+        "held": true,
+        "fixed_volume": 0.05580535718660412,
+        "via": null
+       },
+       "-x": {
+        "held": true,
+        "fixed_volume": 0.05580533824829681,
+        "via": null
+       },
+       "+y": {
+        "held": true,
+        "fixed_volume": 0.05580530489760495,
+        "via": null
+       },
+       "-y": {
+        "held": true,
+        "fixed_volume": 0.055805305729414355,
+        "via": null
+       },
+       "+z": {
+        "held": true,
+        "fixed_volume": 0.025860292771484293,
+        "via": null
+       },
+       "-z": {
+        "held": true,
+        "fixed_volume": 2.3486153160860734,
+        "via": null
+       }
+      },
+      "minute": {
+       "+x": {
+        "held": true,
+        "fixed_volume": 0.3828250317430044,
+        "via": null
+       },
+       "-x": {
+        "held": true,
+        "fixed_volume": 0.38282501440105177,
+        "via": null
+       },
+       "+y": {
+        "held": true,
+        "fixed_volume": 0.38282407221802023,
+        "via": null
+       },
+       "-y": {
+        "held": true,
+        "fixed_volume": 0.38282407221802023,
+        "via": null
+       },
+       "+z": {
+        "held": true,
+        "fixed_volume": 0.38886342969439025,
+        "via": null
+       },
+       "-z": {
+        "held": true,
+        "fixed_volume": 2.306109921176366,
+        "via": null
+       }
+      },
+      "minute_wheel": {
+       "+x": {
+        "held": true,
+        "fixed_volume": 0.1393492608158582,
+        "via": null
+       },
+       "-x": {
+        "held": true,
+        "fixed_volume": 0.139348689998789,
+        "via": null
+       },
+       "+y": {
+        "held": true,
+        "fixed_volume": 0.13934850178014832,
+        "via": null
+       },
+       "-y": {
+        "held": true,
+        "fixed_volume": 0.13934848948960588,
+        "via": null
+       },
+       "+z": {
+        "held": true,
+        "fixed_volume": 0.724778724593068,
+        "via": null
+       },
+       "-z": {
+        "held": true,
+        "fixed_volume": 0.023944709586633195,
+        "via": null
+       }
+      },
+      "hour": {
+       "+x": {
+        "held": true,
+        "fixed_volume": 0.14831995873365034,
+        "via": null
+       },
+       "-x": {
+        "held": true,
+        "fixed_volume": 0.14831994104966045,
+        "via": null
+       },
+       "+y": {
+        "held": true,
+        "fixed_volume": 0.14831927565369343,
+        "via": null
+       },
+       "-y": {
+        "held": true,
+        "fixed_volume": 0.14831927565369346,
+        "via": null
+       },
+       "+z": {
+        "held": true,
+        "fixed_volume": 0.6684656614250286,
+        "via": null
+       },
+       "-z": {
+        "held": true,
+        "fixed_volume": 5.831032260698101,
+        "via": null
+       }
+      },
+      "idler": {
+       "+x": {
+        "held": true,
+        "fixed_volume": 0.05580535192491256,
+        "via": null
+       },
+       "-x": {
+        "held": true,
+        "fixed_volume": 0.05580534630674808,
+        "via": null
+       },
+       "+y": {
+        "held": true,
+        "fixed_volume": 0.055805310631254275,
+        "via": null
+       },
+       "-y": {
+        "held": true,
+        "fixed_volume": 0.05580530849141484,
+        "via": null
+       },
+       "+z": {
+        "held": true,
+        "fixed_volume": 1.5015063817676433,
+        "via": null
+       },
+       "-z": {
+        "held": true,
+        "fixed_volume": 0.03711961441477152,
+        "via": null
+       }
+      },
+      "day": {
+       "+x": {
+        "held": true,
+        "fixed_volume": 0.08452269832768747,
+        "via": null
+       },
+       "-x": {
+        "held": true,
+        "fixed_volume": 0.08452270149705478,
+        "via": null
+       },
+       "+y": {
+        "held": true,
+        "fixed_volume": 0.08452287685483421,
+        "via": null
+       },
+       "-y": {
+        "held": true,
+        "fixed_volume": 0.08452287787713858,
+        "via": null
+       },
+       "+z": {
+        "held": true,
+        "fixed_volume": 6.314663768724144,
+        "via": null
+       },
+       "-z": {
+        "held": true,
+        "fixed_volume": 0.02394470305424078,
+        "via": null
+       }
+      }
+     }
+    },
+    "train": {
+     "conflicts": [],
+     "meshes": [
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 768,
+       "largest_gap": 0.03073457076674432,
+       "smallest_drive_overlap": 0.0319128503768177,
+       "smallest_drive_ratio": 1.7552067184157372,
+       "module": 0.2,
+       "smallest_drive_height": 0.4545454680919647,
+       "teeth_match": true,
+       "declared_teeth": {
+        "barrel": 96,
+        "m2": 18
+       },
+       "measured_teeth": {
+        "barrel": 96,
+        "m2": 18
+       },
+       "teeth_height": 0.22727275,
+       "pair": "barrel/m2",
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 256,
+       "largest_gap": 0.035964040473790725,
+       "smallest_drive_overlap": 0.018834800206437918,
+       "smallest_drive_ratio": 0.8901134843610381,
+       "module": 0.22999999999999998,
+       "smallest_drive_height": 0.3999999761581421,
+       "teeth_match": true,
+       "declared_teeth": {
+        "m2": 32,
+        "m3": 8
+       },
+       "measured_teeth": {
+        "m2": 32,
+        "m3": 8
+       },
+       "teeth_height": 2.027,
+       "pair": "m2/m3",
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 320,
+       "largest_gap": 0.03639558189918319,
+       "smallest_drive_overlap": 0.009538084431480149,
+       "smallest_drive_ratio": 1.0568514605518164,
+       "module": 0.19000000000000006,
+       "smallest_drive_height": 0.25,
+       "teeth_match": true,
+       "declared_teeth": {
+        "m3": 40,
+        "m4": 8
+       },
+       "measured_teeth": {
+        "m3": 40,
+        "m4": 8
+       },
+       "teeth_height": 1.2194999,
+       "pair": "m3/m4",
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 288,
+       "largest_gap": 0.03656843525491639,
+       "smallest_drive_overlap": 0.010602823898288804,
+       "smallest_drive_ratio": 1.0602823898288802,
+       "module": 0.2,
+       "smallest_drive_height": 0.25,
+       "teeth_match": true,
+       "declared_teeth": {
+        "m4": 36,
+        "seconds": 8
+       },
+       "measured_teeth": {
+        "m4": 36,
+        "seconds": 8
+       },
+       "teeth_height": 0.8895,
+       "pair": "m4/seconds",
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 112,
+       "largest_gap": 0.03250002861022949,
+       "smallest_drive_overlap": 0.05385486024174353,
+       "smallest_drive_ratio": 1.2363375448058664,
+       "module": 0.33,
+       "smallest_drive_height": 0.3999999761581421,
+       "teeth_match": true,
+       "declared_teeth": {
+        "m2": 14,
+        "y": 14
+       },
+       "measured_teeth": {
+        "m2": 14,
+        "y": 14
+       },
+       "teeth_height": 1.5945,
+       "pair": "m2/y",
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 144,
+       "largest_gap": 0.03542360212591955,
+       "smallest_drive_overlap": 0.04422679677161063,
+       "smallest_drive_ratio": 1.2285222057703695,
+       "module": 0.3,
+       "smallest_drive_height": 0.3999999761581421,
+       "teeth_match": true,
+       "declared_teeth": {
+        "y": 18,
+        "x": 12
+       },
+       "measured_teeth": {
+        "y": 18,
+        "x": 12
+       },
+       "teeth_height": 0.9645,
+       "pair": "y/x",
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 96,
+       "largest_gap": 0.036505005658700296,
+       "smallest_drive_overlap": 0.03929738632342284,
+       "smallest_drive_ratio": 1.091594129603604,
+       "module": 0.3,
+       "smallest_drive_height": 0.3999999761581421,
+       "teeth_match": true,
+       "declared_teeth": {
+        "x": 12,
+        "minute": 12
+       },
+       "measured_teeth": {
+        "x": 12,
+        "minute": 12
+       },
+       "teeth_height": 0.9645000109672547,
+       "pair": "x/minute",
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 240,
+       "largest_gap": 0.029999971389770508,
+       "smallest_drive_overlap": 0.011409799101426255,
+       "smallest_drive_ratio": 1.1409799101426257,
+       "module": 0.19999999999999998,
+       "smallest_drive_height": 0.25,
+       "teeth_match": true,
+       "declared_teeth": {
+        "minute": 10,
+        "minute_wheel": 30
+       },
+       "measured_teeth": {
+        "minute": 10,
+        "minute_wheel": 30
+       },
+       "teeth_height": 1.3195,
+       "pair": "minute/minute_wheel",
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 256,
+       "largest_gap": 0.03564677820674869,
+       "smallest_drive_overlap": 0.008026029685852934,
+       "smallest_drive_ratio": 1.0032534715373498,
+       "module": 0.19999999999999998,
+       "smallest_drive_height": 0.20000004768371582,
+       "teeth_match": true,
+       "declared_teeth": {
+        "minute_wheel": 8,
+        "hour": 32
+       },
+       "measured_teeth": {
+        "minute_wheel": 8,
+        "hour": 32
+       },
+       "teeth_height": 2.6755000295639038,
+       "pair": "minute_wheel/hour",
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 112,
+       "largest_gap": 0.03584956223845618,
+       "smallest_drive_overlap": 0.010629829259096498,
+       "smallest_drive_ratio": 0.8858192457218855,
+       "module": 0.19999999999999998,
+       "smallest_drive_height": 0.2999999523162842,
+       "teeth_match": true,
+       "declared_teeth": {
+        "hour": 14,
+        "idler": 14
+       },
+       "measured_teeth": {
+        "hour": 14,
+        "idler": 14
+       },
+       "teeth_height": 2.0770000228881838,
+       "pair": "hour/idler",
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 224,
+       "largest_gap": 0.03531576366065461,
+       "smallest_drive_overlap": 0.01583844486983456,
+       "smallest_drive_ratio": 1.3198706156073305,
+       "module": 0.20000000000000004,
+       "smallest_drive_height": 0.2999999523162842,
+       "teeth_match": true,
+       "declared_teeth": {
+        "idler": 14,
+        "day": 28
+       },
+       "measured_teeth": {
+        "idler": 14,
+        "day": 28
+       },
+       "teeth_height": 2.077,
+       "pair": "idler/day",
+       "passes": true
+      }
+     ],
+     "not_driven": []
+    },
+    "clear": {
+     "worst_volume": 0.0,
+     "pair": null,
+     "failing": [],
+     "pairs_swept": 31,
+     "pairs_apart": 24
+    },
+    "minute": {
+     "clockwise_turns_per_hour_through_working_meshes": "1"
+    },
+    "hour": {
+     "clockwise_turns_per_hour_through_working_meshes": "1/12"
+    },
+    "seconds": {
+     "clockwise_turns_per_hour_through_working_meshes": "60"
+    },
+    "coaxial": {
+     "distance": 0.0
+    },
+    "hands": {
+     "hour": {
+      "reach": 5.599999904632569,
+      "above_fixed": 0.5799999237060547,
+      "centre_from_axis": 1.6111147770647676,
+      "area_seen_from_dial": 4.352283342902478,
+      "area_share_of_swept_disc": 0.04417649434644393
+     },
+     "minute": {
+      "reach": 8.5,
+      "above_fixed": 0.8299999237060547,
+      "centre_from_axis": 3.0212863177280687,
+      "area_seen_from_dial": 4.611254893769852,
+      "area_share_of_swept_disc": 0.02031568194325715
+     },
+     "seconds": {
+      "reach": 5.249999856414549,
+      "above_fixed": 0.3299999237060547,
+      "centre_from_axis": 1.7353250826380684,
+      "area_seen_from_dial": 2.3998649897720927,
+      "area_share_of_swept_disc": 0.02771522153417126
+     }
+    },
+    "size": {
+     "radius": 12.650000385404612,
+     "z_min": -0.4545454680919647,
+     "z_max": 3.7755000591278076
+    },
+    "printable": {
+     "bottom_plate": {
+      "pieces": 1,
+      "max_deviation": 0.07071067811865477
+     },
+     "mid_plate": {
+      "pieces": 1,
+      "max_deviation": 0.07071067811865477
+     },
+     "motion_bridge": {
+      "pieces": 1,
+      "max_deviation": 0.07071067811865477
+     },
+     "top_bridge": {
+      "pieces": 1,
+      "max_deviation": 0.07071067811865477
+     },
+     "m2a": {
+      "pieces": 1,
+      "max_deviation": 0.1118033988749895
+     },
+     "m2b": {
+      "pieces": 1,
+      "max_deviation": 0.08660254037844387
+     },
+     "m3": {
+      "pieces": 1,
+      "max_deviation": 0.1224744871391589
+     },
+     "m4": {
+      "pieces": 1,
+      "max_deviation": 0.1224744871391589
+     },
+     "s": {
+      "pieces": 1,
+      "max_deviation": 0.1118033988749895
+     },
+     "hand_seconds": {
+      "pieces": 1,
+      "max_deviation": 0.07071067811865477
+     },
+     "y": {
+      "pieces": 1,
+      "max_deviation": 0.07071067811865477
+     },
+     "x": {
+      "pieces": 1,
+      "max_deviation": 0.07071067811865477
+     },
+     "min": {
+      "pieces": 1,
+      "max_deviation": 0.1118033988749895
+     },
+     "hand_minute": {
+      "pieces": 1,
+      "max_deviation": 0.07071067811865477
+     },
+     "mw": {
+      "pieces": 1,
+      "max_deviation": 0.1224744871391589
+     },
+     "hour": {
+      "pieces": 1,
+      "max_deviation": 0.1118033988749895
+     },
+     "hour_collar": {
+      "pieces": 1,
+      "max_deviation": 0.1224744871391589
+     },
+     "hand_hour": {
+      "pieces": 1,
+      "max_deviation": 0.07071067811865477
+     },
+     "i": {
+      "pieces": 1,
+      "max_deviation": 0.1118033988749895
+     },
+     "d": {
+      "pieces": 1,
+      "max_deviation": 0.1224744871391589
+     },
+     "hand_24h": {
+      "pieces": 1,
+      "max_deviation": 0.07071067811865477
+     }
+    },
+    "tolerant": {
+     "meshes": [
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 768,
+       "largest_gap": 0.04450145790781322,
+       "smallest_drive_overlap": 0.025423220876511457,
+       "smallest_drive_ratio": 1.3982771065362252,
+       "module": 0.2,
+       "smallest_drive_height": 0.4545454680919647,
+       "teeth_match": true,
+       "declared_teeth": {
+        "barrel": 96,
+        "m2": 18
+       },
+       "measured_teeth": {
+        "barrel": 96,
+        "m2": 18
+       },
+       "teeth_height": 0.22727275,
+       "pair": "barrel/m2",
+       "position": "away",
+       "shift": 0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 768,
+       "largest_gap": 0.013564539570169964,
+       "smallest_drive_overlap": 0.03958586009610616,
+       "smallest_drive_ratio": 2.17722224039956,
+       "module": 0.2,
+       "smallest_drive_height": 0.4545454680919647,
+       "teeth_match": true,
+       "declared_teeth": {
+        "barrel": 96,
+        "m2": 18
+       },
+       "measured_teeth": {
+        "barrel": 96,
+        "m2": 18
+       },
+       "teeth_height": 0.22727275,
+       "pair": "barrel/m2",
+       "position": "towards",
+       "shift": -0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 256,
+       "largest_gap": 0.049116524923485755,
+       "smallest_drive_overlap": 0.01600009733057451,
+       "smallest_drive_ratio": 0.7561483121103351,
+       "module": 0.22999999999999998,
+       "smallest_drive_height": 0.3999999761581421,
+       "teeth_match": true,
+       "declared_teeth": {
+        "m2": 32,
+        "m3": 8
+       },
+       "measured_teeth": {
+        "m2": 32,
+        "m3": 8
+       },
+       "teeth_height": 2.027,
+       "pair": "m2/m3",
+       "position": "away",
+       "shift": 0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 256,
+       "largest_gap": 0.01828469201483828,
+       "smallest_drive_overlap": 0.022576213797504015,
+       "smallest_drive_ratio": 1.0669288820014795,
+       "module": 0.22999999999999998,
+       "smallest_drive_height": 0.3999999761581421,
+       "teeth_match": true,
+       "declared_teeth": {
+        "m2": 32,
+        "m3": 8
+       },
+       "measured_teeth": {
+        "m2": 32,
+        "m3": 8
+       },
+       "teeth_height": 2.027,
+       "pair": "m2/m3",
+       "position": "towards",
+       "shift": -0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 320,
+       "largest_gap": 0.04945577318188225,
+       "smallest_drive_overlap": 0.007232584707639148,
+       "smallest_drive_ratio": 0.8013944274392403,
+       "module": 0.19000000000000006,
+       "smallest_drive_height": 0.25,
+       "teeth_match": true,
+       "declared_teeth": {
+        "m3": 40,
+        "m4": 8
+       },
+       "measured_teeth": {
+        "m3": 40,
+        "m4": 8
+       },
+       "teeth_height": 1.2194999,
+       "pair": "m3/m4",
+       "position": "away",
+       "shift": 0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 320,
+       "largest_gap": 0.016184960333250484,
+       "smallest_drive_overlap": 0.01204720132135197,
+       "smallest_drive_ratio": 1.3348699525043726,
+       "module": 0.19000000000000006,
+       "smallest_drive_height": 0.25,
+       "teeth_match": true,
+       "declared_teeth": {
+        "m3": 40,
+        "m4": 8
+       },
+       "measured_teeth": {
+        "m3": 40,
+        "m4": 8
+       },
+       "teeth_height": 1.2194999,
+       "pair": "m3/m4",
+       "position": "towards",
+       "shift": -0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 288,
+       "largest_gap": 0.04940111977110553,
+       "smallest_drive_overlap": 0.008174576324026976,
+       "smallest_drive_ratio": 0.8174576324026975,
+       "module": 0.2,
+       "smallest_drive_height": 0.25,
+       "teeth_match": true,
+       "declared_teeth": {
+        "m4": 36,
+        "seconds": 8
+       },
+       "measured_teeth": {
+        "m4": 36,
+        "seconds": 8
+       },
+       "teeth_height": 0.8895,
+       "pair": "m4/seconds",
+       "position": "away",
+       "shift": 0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 288,
+       "largest_gap": 0.018357133025335287,
+       "smallest_drive_overlap": 0.013239615860297234,
+       "smallest_drive_ratio": 1.3239615860297231,
+       "module": 0.2,
+       "smallest_drive_height": 0.25,
+       "teeth_match": true,
+       "declared_teeth": {
+        "m4": 36,
+        "seconds": 8
+       },
+       "measured_teeth": {
+        "m4": 36,
+        "seconds": 8
+       },
+       "teeth_height": 0.8895,
+       "pair": "m4/seconds",
+       "position": "towards",
+       "shift": -0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 112,
+       "largest_gap": 0.03250002861022949,
+       "smallest_drive_overlap": 0.04708575404668343,
+       "smallest_drive_ratio": 1.0809402399727557,
+       "module": 0.33,
+       "smallest_drive_height": 0.3999999761581421,
+       "teeth_match": true,
+       "declared_teeth": {
+        "m2": 14,
+        "y": 14
+       },
+       "measured_teeth": {
+        "m2": 14,
+        "y": 14
+       },
+       "teeth_height": 1.5945,
+       "pair": "m2/y",
+       "position": "away",
+       "shift": 0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 112,
+       "largest_gap": 0.024157494241925054,
+       "smallest_drive_overlap": 0.061002584337934915,
+       "smallest_drive_ratio": 1.4004267211655763,
+       "module": 0.33,
+       "smallest_drive_height": 0.3999999761581421,
+       "teeth_match": true,
+       "declared_teeth": {
+        "m2": 14,
+        "y": 14
+       },
+       "measured_teeth": {
+        "m2": 14,
+        "y": 14
+       },
+       "teeth_height": 1.5945,
+       "pair": "m2/y",
+       "position": "towards",
+       "shift": -0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 144,
+       "largest_gap": 0.04839734301025717,
+       "smallest_drive_overlap": 0.038096352784778055,
+       "smallest_drive_ratio": 1.0582320848749383,
+       "module": 0.3,
+       "smallest_drive_height": 0.3999999761581421,
+       "teeth_match": true,
+       "declared_teeth": {
+        "y": 18,
+        "x": 12
+       },
+       "measured_teeth": {
+        "y": 18,
+        "x": 12
+       },
+       "teeth_height": 0.9645,
+       "pair": "y/x",
+       "position": "away",
+       "shift": 0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 144,
+       "largest_gap": 0.022449861241580153,
+       "smallest_drive_overlap": 0.05073432954020253,
+       "smallest_drive_ratio": 1.4092870156723447,
+       "module": 0.3,
+       "smallest_drive_height": 0.3999999761581421,
+       "teeth_match": true,
+       "declared_teeth": {
+        "y": 18,
+        "x": 12
+       },
+       "measured_teeth": {
+        "y": 18,
+        "x": 12
+       },
+       "teeth_height": 0.9645,
+       "pair": "y/x",
+       "position": "towards",
+       "shift": -0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 96,
+       "largest_gap": 0.048915978142212435,
+       "smallest_drive_overlap": 0.03368377537825424,
+       "smallest_drive_ratio": 0.9356604829434398,
+       "module": 0.3,
+       "smallest_drive_height": 0.3999999761581421,
+       "teeth_match": true,
+       "declared_teeth": {
+        "x": 12,
+        "minute": 12
+       },
+       "measured_teeth": {
+        "x": 12,
+        "minute": 12
+       },
+       "teeth_height": 0.9645000109672547,
+       "pair": "x/minute",
+       "position": "away",
+       "shift": 0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 96,
+       "largest_gap": 0.024107803730160027,
+       "smallest_drive_overlap": 0.04527277740520869,
+       "smallest_drive_ratio": 1.25757722510213,
+       "module": 0.3,
+       "smallest_drive_height": 0.3999999761581421,
+       "teeth_match": true,
+       "declared_teeth": {
+        "x": 12,
+        "minute": 12
+       },
+       "measured_teeth": {
+        "x": 12,
+        "minute": 12
+       },
+       "teeth_height": 0.9645000109672547,
+       "pair": "x/minute",
+       "position": "towards",
+       "shift": -0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 240,
+       "largest_gap": 0.029999971389770508,
+       "smallest_drive_overlap": 0.008950606091934208,
+       "smallest_drive_ratio": 0.895060609193421,
+       "module": 0.19999999999999998,
+       "smallest_drive_height": 0.25,
+       "teeth_match": true,
+       "declared_teeth": {
+        "minute": 10,
+        "minute_wheel": 30
+       },
+       "measured_teeth": {
+        "minute": 10,
+        "minute_wheel": 30
+       },
+       "teeth_height": 1.3195,
+       "pair": "minute/minute_wheel",
+       "position": "away",
+       "shift": 0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 240,
+       "largest_gap": 0.016964847445958907,
+       "smallest_drive_overlap": 0.014049362784238139,
+       "smallest_drive_ratio": 1.4049362784238142,
+       "module": 0.19999999999999998,
+       "smallest_drive_height": 0.25,
+       "teeth_match": true,
+       "declared_teeth": {
+        "minute": 10,
+        "minute_wheel": 30
+       },
+       "measured_teeth": {
+        "minute": 10,
+        "minute_wheel": 30
+       },
+       "teeth_height": 1.3195,
+       "pair": "minute/minute_wheel",
+       "position": "towards",
+       "shift": -0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 256,
+       "largest_gap": 0.04917551508145516,
+       "smallest_drive_overlap": 0.006142979284588949,
+       "smallest_drive_ratio": 0.7678722274986134,
+       "module": 0.19999999999999998,
+       "smallest_drive_height": 0.20000004768371582,
+       "teeth_match": true,
+       "declared_teeth": {
+        "minute_wheel": 8,
+        "hour": 32
+       },
+       "measured_teeth": {
+        "minute_wheel": 8,
+        "hour": 32
+       },
+       "teeth_height": 2.6755000295639038,
+       "pair": "minute_wheel/hour",
+       "position": "away",
+       "shift": 0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 256,
+       "largest_gap": 0.01573573167371052,
+       "smallest_drive_overlap": 0.010088511883422014,
+       "smallest_drive_ratio": 1.26106368476674,
+       "module": 0.19999999999999998,
+       "smallest_drive_height": 0.20000004768371582,
+       "teeth_match": true,
+       "declared_teeth": {
+        "minute_wheel": 8,
+        "hour": 32
+       },
+       "measured_teeth": {
+        "minute_wheel": 8,
+        "hour": 32
+       },
+       "teeth_height": 2.6755000295639038,
+       "pair": "minute_wheel/hour",
+       "position": "towards",
+       "shift": -0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 112,
+       "largest_gap": 0.048985854709913346,
+       "smallest_drive_overlap": 0.008549931902973694,
+       "smallest_drive_ratio": 0.7124944384957491,
+       "module": 0.19999999999999998,
+       "smallest_drive_height": 0.2999999523162842,
+       "teeth_match": true,
+       "declared_teeth": {
+        "hour": 14,
+        "idler": 14
+       },
+       "measured_teeth": {
+        "hour": 14,
+        "idler": 14
+       },
+       "teeth_height": 2.0770000228881838,
+       "pair": "hour/idler",
+       "position": "away",
+       "shift": 0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 112,
+       "largest_gap": 0.015099352575136414,
+       "smallest_drive_overlap": 0.013830065880177204,
+       "smallest_drive_ratio": 1.1525056732006105,
+       "module": 0.19999999999999998,
+       "smallest_drive_height": 0.2999999523162842,
+       "teeth_match": true,
+       "declared_teeth": {
+        "hour": 14,
+        "idler": 14
+       },
+       "measured_teeth": {
+        "hour": 14,
+        "idler": 14
+       },
+       "teeth_height": 2.0770000228881838,
+       "pair": "hour/idler",
+       "position": "towards",
+       "shift": -0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 224,
+       "largest_gap": 0.04960234669094086,
+       "smallest_drive_overlap": 0.012479485967106027,
+       "smallest_drive_ratio": 1.0399573292222677,
+       "module": 0.20000000000000004,
+       "smallest_drive_height": 0.2999999523162842,
+       "teeth_match": true,
+       "declared_teeth": {
+        "idler": 14,
+        "day": 28
+       },
+       "measured_teeth": {
+        "idler": 14,
+        "day": 28
+       },
+       "teeth_height": 2.077,
+       "pair": "idler/day",
+       "position": "away",
+       "shift": 0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 224,
+       "largest_gap": 0.013299658662609817,
+       "smallest_drive_overlap": 0.019396869624245836,
+       "smallest_drive_ratio": 1.6164060589413096,
+       "module": 0.20000000000000004,
+       "smallest_drive_height": 0.2999999523162842,
+       "teeth_match": true,
+       "declared_teeth": {
+        "idler": 14,
+        "day": 28
+       },
+       "measured_teeth": {
+        "idler": 14,
+        "day": 28
+       },
+       "teeth_height": 2.077,
+       "pair": "idler/day",
+       "position": "towards",
+       "shift": -0.03,
+       "passes": true
+      }
+     ]
+    },
+    "seated": {
+     "not_seated": [],
+     "not_in_one_piece": [],
+     "pieces": {
+      "m2": [
+       [
+        "m2a",
+        "m2b"
+       ]
+      ],
+      "seconds": [
+       [
+        "s",
+        "hand_seconds"
+       ]
+      ],
+      "minute": [
+       [
+        "min",
+        "hand_minute"
+       ]
+      ],
+      "hour": [
+       [
+        "hour",
+        "hour_collar",
+        "hand_hour"
+       ]
+      ],
+      "day": [
+       [
+        "d",
+        "hand_24h"
+       ]
+      ]
+     },
+     "moves": {
+      "m2": {
+       "m2a": {
+        "+x": 0.19190093682534373,
+        "-x": 0.19190093000174874,
+        "+y": 0.19189999747567824,
+        "-y": 0.19189999764642499,
+        "+z": 0.1342474296654132,
+        "-z": 0.0
+       },
+       "m2b": {
+        "+x": 0.19190093000174877,
+        "-x": 0.19190093682534373,
+        "+y": 0.191899997646425,
+        "-y": 0.19189999747567824,
+        "+z": 6.938893903907228e-18,
+        "-z": 0.13424742966541323
+       }
+      },
+      "m3": {},
+      "m4": {},
+      "seconds": {
+       "s": {
+        "+x": 0.03453037920312264,
+        "-x": 0.034530379260473795,
+        "+y": 0.034570310223183465,
+        "-y": 0.03453047416514898,
+        "+z": 0.04396406976861758,
+        "-z": 0.0
+       },
+       "hand_seconds": {
+        "+x": 0.03453037926201967,
+        "-x": 0.03453037920466459,
+        "+y": 0.03453047416514899,
+        "-y": 0.03457031022318345,
+        "+z": 0.0,
+        "-z": 0.04396406976861758
+       }
+      },
+      "y": {},
+      "x": {},
+      "minute": {
+       "min": {
+        "+x": 0.05864561661304072,
+        "-x": 0.05864561551646032,
+        "+y": 0.05868258292128278,
+        "-y": 0.05864580741614678,
+        "+z": 0.05143797455404601,
+        "-z": 0.0
+       },
+       "hand_minute": {
+        "+x": 0.05864561551646031,
+        "-x": 0.05864561661304069,
+        "+y": 0.05864580741614675,
+        "-y": 0.058682582921282755,
+        "+z": 0.0,
+        "-z": 0.05143797455404601
+       }
+      },
+      "minute_wheel": {},
+      "hour": {
+       "hour": {
+        "+x": 0.22326437198201596,
+        "-x": 0.22326436745247577,
+        "+y": 0.2233319922500832,
+        "-y": 0.22326436874088404,
+        "+z": 0.1416899504850073,
+        "-z": 0.26142916975242453
+       },
+       "hour_collar": {
+        "+x": 0.12760914632345005,
+        "-x": 0.1276091457799771,
+        "+y": 0.12760850792693423,
+        "-y": 0.12760850792693423,
+        "+z": 0.26142916975242453,
+        "-z": 0.0
+       },
+       "hand_hour": {
+        "+x": 0.09565522112902565,
+        "-x": 0.09565522620203883,
+        "+y": 0.09565586081394982,
+        "-y": 0.09572348432314898,
+        "+z": 0.0,
+        "-z": 0.1416899504850073
+       }
+      },
+      "idler": {},
+      "day": {
+       "d": {
+        "+x": 0.03453033752292221,
+        "-x": 0.03453033685254758,
+        "+y": 0.03457310012854107,
+        "-y": 0.0345304722928918,
+        "+z": 0.04396408633057827,
+        "-z": 0.0
+       },
+       "hand_24h": {
+        "+x": 0.03453033685254611,
+        "-x": 0.03453033767094648,
+        "+y": 0.0345304722928918,
+        "-y": 0.03457310012854108,
+        "+z": 0.0,
+        "-z": 0.04396408633057827
+       }
+      }
+     }
+    },
+    "strength": {
+     "meshes": [
+      {
+       "pair": "barrel/m2",
+       "torque_nmm": 70.1,
+       "nominal_force_n": 7.302083333333331,
+       "load_factor": 1.45,
+       "force_n": 10.58802083333333,
+       "module": 0.2,
+       "face_width": 0.4545454680919647,
+       "gears": {
+        "barrel": {
+         "teeth": 96,
+         "rated": false
+        },
+        "m2": {
+         "teeth": 18,
+         "Y": 0.323,
+         "sigma_mpa": 360.58274209177404,
+         "part": "m2a",
+         "material": "AD-C100-HT",
+         "allowable_mpa": 725.0,
+         "margin": 1.0106342189152135,
+         "drive_overlap_by_part": {
+          "m2a": 3.063638213887435,
+          "m2b": 0.0
+         }
+        }
+       }
+      },
+      {
+       "pair": "m2/m3",
+       "torque_nmm": 13.143749999999999,
+       "nominal_force_n": 3.571671195652174,
+       "load_factor": 1.45,
+       "force_n": 5.178923233695652,
+       "module": 0.22999999999999998,
+       "face_width": 0.3999999761581421,
+       "gears": {
+        "m2": {
+         "teeth": 32,
+         "Y": 0.3972,
+         "sigma_mpa": 141.7236837860554,
+         "part": "m2b",
+         "material": "AD-C100-HT",
+         "allowable_mpa": 725.0,
+         "margin": 4.115588168696295,
+         "drive_overlap_by_part": {
+          "m2a": 0.0,
+          "m2b": 0.6027149364650803
+         }
+        },
+        "m3": {
+         "teeth": 8,
+         "Y": 0.1748,
+         "sigma_mpa": 322.0403157884508,
+         "part": "m3",
+         "material": "AD-C100-HT",
+         "allowable_mpa": 725.0,
+         "margin": 1.2512709262037074
+        }
+       }
+      },
+      {
+       "pair": "m3/m4",
+       "torque_nmm": 3.2859374999999997,
+       "nominal_force_n": 0.8647203947368418,
+       "load_factor": 1.45,
+       "force_n": 1.2538445723684206,
+       "module": 0.19000000000000006,
+       "face_width": 0.25,
+       "gears": {
+        "m3": {
+         "teeth": 40,
+         "Y": 0.4193,
+         "sigma_mpa": 62.95427579140272,
+         "part": "m3",
+         "material": "AD-C100-HT",
+         "allowable_mpa": 725.0,
+         "margin": 10.516294816928205
+        },
+        "m4": {
+         "teeth": 8,
+         "Y": 0.1748,
+         "sigma_mpa": 151.01102882914853,
+         "part": "m4",
+         "material": "AD-C100-HT",
+         "allowable_mpa": 725.0,
+         "margin": 3.8009738468854053
+        }
+       }
+      },
+      {
+       "pair": "m4/seconds",
+       "torque_nmm": 0.6571874999999999,
+       "nominal_force_n": 0.1825520833333333,
+       "load_factor": 1.45,
+       "force_n": 0.2647005208333333,
+       "module": 0.2,
+       "face_width": 0.25,
+       "gears": {
+        "m4": {
+         "teeth": 36,
+         "Y": 0.4093,
+         "sigma_mpa": 12.934303485625863,
+         "part": "m4",
+         "material": "AD-C100-HT",
+         "allowable_mpa": 725.0,
+         "margin": 55.0524964336662
+        },
+        "seconds": {
+         "teeth": 8,
+         "Y": 0.1748,
+         "sigma_mpa": 30.28610078184591,
+         "part": "s",
+         "material": "AD-C100-HT",
+         "allowable_mpa": 725.0,
+         "margin": 22.938373751783175,
+         "drive_overlap_by_part": {
+          "s": 0.3817026765397569,
+          "hand_seconds": 0.0
+         }
+        }
+       }
+      }
+     ],
+     "smallest_margin": 1.0106342189152135,
+     "barrel_torque_nmm": 70.1,
+     "going_train": [
+      "barrel/m2",
+      "m2/m3",
+      "m3/m4",
+      "m4/seconds"
+     ]
+    }
+   }
+  },
+  "P2": {
+   "name": "24-hour hand",
+   "weight": 0.1,
+   "gates": {
+    "files": true,
+    "assembled": true,
+    "day_declared": true
+   },
+   "checks": {
+    "day_hand": true,
+    "day_place": true
+   },
+   "check_weights": {
+    "day_hand": 3,
+    "day_place": 1
+   },
+   "share_of_checks": 1.0,
+   "s": 1.0,
+   "s_exact": "1",
+   "passed": true,
+   "details": {
+    "files": {
+     "barrel": "BR-096-30"
+    },
+    "assembled": {
+     "worst_volume": 0.0,
+     "pair": null,
+     "fixed_parts_worst": 1.7143604813243748e-17,
+     "fixed_pair": "mid_plate/motion_bridge",
+     "mobile_parts_worst": 0.000708398235624403,
+     "mobile_pair": "hour:hour/hand_hour",
+     "one_frame": true,
+     "frame_groups": [
+      [
+       "bottom_plate",
+       "mid_plate",
+       "motion_bridge",
+       "top_bridge"
+      ]
+     ]
+    },
+    "day_declared": {
+     "part": "hand_24h",
+     "also_used_by": []
+    },
+    "day_hand": {
+     "clockwise_turns_per_hour_through_working_meshes": "1/24"
+    },
+    "day_place": {
+     "reach": 3.39999996572376,
+     "above_fixed": 0.3299999237060547,
+     "centre_from_axis": 1.0215541396088659,
+     "area_seen_from_dial": 1.8886406828870292,
+     "area_share_of_swept_disc": 0.05200458589385764,
+     "axis_distance": 6.973673110478739
+    }
+   }
+  },
+  "P3": {
+   "name": "6-hour variant",
+   "weight": 0.15,
+   "gates": {
+    "files": true,
+    "assembled": true,
+    "day_declared": true,
+    "same_frame": true
+   },
+   "checks": {
+    "spin": true,
+    "held": true,
+    "train": true,
+    "clear": true,
+    "minute": true,
+    "hour": true,
+    "seconds": true,
+    "coaxial": true,
+    "hands": true,
+    "size": true,
+    "printable": true,
+    "tolerant": true,
+    "seated": true,
+    "strength": true,
+    "day_hand": true,
+    "day_place": true
+   },
+   "check_weights": {
+    "spin": 1,
+    "held": 2,
+    "train": 3,
+    "clear": 1,
+    "minute": 2,
+    "hour": 2,
+    "seconds": 2,
+    "coaxial": 1,
+    "hands": 1,
+    "size": 1,
+    "printable": 1,
+    "tolerant": 2,
+    "seated": 2,
+    "strength": 2,
+    "day_hand": 3,
+    "day_place": 1
+   },
+   "share_of_checks": 1.0,
+   "s": 1.0,
+   "s_exact": "1",
+   "passed": true,
+   "details": {
+    "files": {
+     "barrel": "BR-096-30"
+    },
+    "assembled": {
+     "worst_volume": 0.0,
+     "pair": null,
+     "fixed_parts_worst": 1.7143604813243748e-17,
+     "fixed_pair": "mid_plate/motion_bridge",
+     "mobile_parts_worst": 0.000708398235624403,
+     "mobile_pair": "hour:hour/hand_hour",
+     "one_frame": true,
+     "frame_groups": [
+      [
+       "bottom_plate",
+       "mid_plate",
+       "motion_bridge",
+       "top_bridge"
+      ]
+     ]
+    },
+    "day_declared": {
+     "part": "hand_24h",
+     "also_used_by": []
+    },
+    "same_frame": {
+     "movement_fixed": [
+      "bottom_plate",
+      "mid_plate",
+      "motion_bridge",
+      "top_bridge"
+     ],
+     "variant_fixed": [
+      "bottom_plate",
+      "mid_plate",
+      "motion_bridge",
+      "top_bridge"
+     ],
+     "movement_case_centre": [
+      2.85,
+      0.0
+     ],
+     "variant_case_centre": [
+      2.85,
+      0.0
+     ],
+     "same_fixed": true,
+     "same_case_centre": true,
+     "only_in_movement": [],
+     "only_in_variant": []
+    },
+    "spin": {
+     "barrel": {
+      "worst_volume": 0.0,
+      "step": 0.0,
+      "step_exact": "0",
+      "angle_deg": 0.0,
+      "steps": 72,
+      "poses": 216
+     },
+     "m2": {
+      "worst_volume": 0.0,
+      "step": 0.0,
+      "step_exact": "0",
+      "angle_deg": 0.0,
+      "steps": 72,
+      "poses": 216
+     },
+     "m3": {
+      "worst_volume": 0.0,
+      "step": 0.0,
+      "step_exact": "0",
+      "angle_deg": 0.0,
+      "steps": 72,
+      "poses": 216
+     },
+     "m4": {
+      "worst_volume": 0.0,
+      "step": 0.0,
+      "step_exact": "0",
+      "angle_deg": 0.0,
+      "steps": 72,
+      "poses": 216
+     },
+     "seconds": {
+      "worst_volume": 0.0,
+      "step": 0.0,
+      "step_exact": "0",
+      "angle_deg": 0.0,
+      "steps": 72,
+      "poses": 216
+     },
+     "y": {
+      "worst_volume": 0.0,
+      "step": 0.0,
+      "step_exact": "0",
+      "angle_deg": 0.0,
+      "steps": 72,
+      "poses": 216
+     },
+     "x": {
+      "worst_volume": 0.0,
+      "step": 0.0,
+      "step_exact": "0",
+      "angle_deg": 0.0,
+      "steps": 72,
+      "poses": 216
+     },
+     "minute": {
+      "worst_volume": 0.0,
+      "step": 0.0,
+      "step_exact": "0",
+      "angle_deg": 0.0,
+      "steps": 72,
+      "poses": 216
+     },
+     "minute_wheel": {
+      "worst_volume": 0.0,
+      "step": 0.0,
+      "step_exact": "0",
+      "angle_deg": 0.0,
+      "steps": 72,
+      "poses": 216
+     },
+     "hour": {
+      "worst_volume": 0.0,
+      "step": 0.0,
+      "step_exact": "0",
+      "angle_deg": 0.0,
+      "steps": 72,
+      "poses": 216
+     },
+     "idler": {
+      "worst_volume": 0.0,
+      "step": 0.0,
+      "step_exact": "0",
+      "angle_deg": 0.0,
+      "steps": 72,
+      "poses": 216
+     },
+     "day": {
+      "worst_volume": 0.0,
+      "step": 0.0,
+      "step_exact": "0",
+      "angle_deg": 0.0,
+      "steps": 72,
+      "poses": 216
+     }
+    },
+    "held": {
+     "not_held": [],
+     "moves": {
+      "barrel": {
+       "+x": {
+        "held": true,
+        "fixed_volume": 0.18173605814063926,
+        "via": null
+       },
+       "-x": {
+        "held": true,
+        "fixed_volume": 0.18173605814063923,
+        "via": null
+       },
+       "+y": {
+        "held": true,
+        "fixed_volume": 0.18173552286326675,
+        "via": null
+       },
+       "-y": {
+        "held": true,
+        "fixed_volume": 0.18173552286326675,
+        "via": null
+       },
+       "+z": {
+        "held": true,
+        "fixed_volume": 70.89060772444653,
+        "via": null
+       },
+       "-z": {
+        "held": true,
+        "fixed_volume": 76.03253253700515,
+        "via": null
+       }
+      },
+      "m2": {
+       "+x": {
+        "held": true,
+        "fixed_volume": 0.07711183165279241,
+        "via": null
+       },
+       "-x": {
+        "held": true,
+        "fixed_volume": 0.07711182703982403,
+        "via": null
+       },
+       "+y": {
+        "held": true,
+        "fixed_volume": 0.07711179042497461,
+        "via": null
+       },
+       "-y": {
+        "held": true,
+        "fixed_volume": 0.07711178883073037,
+        "via": null
+       },
+       "+z": {
+        "held": true,
+        "fixed_volume": 9.801805134247005,
+        "via": null
+       },
+       "-z": {
+        "held": true,
+        "fixed_volume": 2.563399558612148,
+        "via": null
+       }
+      },
+      "m3": {
+       "+x": {
+        "held": true,
+        "fixed_volume": 0.055805338267886286,
+        "via": null
+       },
+       "-x": {
+        "held": true,
+        "fixed_volume": 0.05580534390935403,
+        "via": null
+       },
+       "+y": {
+        "held": true,
+        "fixed_volume": 0.05580530628983613,
+        "via": null
+       },
+       "-y": {
+        "held": true,
+        "fixed_volume": 0.05580530205542039,
+        "via": null
+       },
+       "+z": {
+        "held": true,
+        "fixed_volume": 0.9704092586705569,
+        "via": null
+       },
+       "-z": {
+        "held": true,
+        "fixed_volume": 0.023944735248932147,
+        "via": null
+       }
+      },
+      "m4": {
+       "+x": {
+        "held": true,
+        "fixed_volume": 0.05580535220937603,
+        "via": null
+       },
+       "-x": {
+        "held": true,
+        "fixed_volume": 0.05580533992230952,
+        "via": null
+       },
+       "+y": {
+        "held": true,
+        "fixed_volume": 0.05580530489276933,
+        "via": null
+       },
+       "-y": {
+        "held": true,
+        "fixed_volume": 0.05580530953485279,
+        "via": null
+       },
+       "+z": {
+        "held": true,
+        "fixed_volume": 0.025860315515874217,
+        "via": null
+       },
+       "-z": {
+        "held": true,
+        "fixed_volume": 9.15114577011487,
+        "via": null
+       }
+      },
+      "seconds": {
+       "+x": {
+        "held": true,
+        "fixed_volume": 0.08452268336945865,
+        "via": null
+       },
+       "-x": {
+        "held": true,
+        "fixed_volume": 0.08452268580036197,
+        "via": null
+       },
+       "+y": {
+        "held": true,
+        "fixed_volume": 0.08452285431213534,
+        "via": null
+       },
+       "-y": {
+        "held": true,
+        "fixed_volume": 0.08452285430711831,
+        "via": null
+       },
+       "+z": {
+        "held": true,
+        "fixed_volume": 0.04088658899439651,
+        "via": null
+       },
+       "-z": {
+        "held": true,
+        "fixed_volume": 0.3875951750133878,
+        "via": null
+       }
+      },
+      "y": {
+       "+x": {
+        "held": true,
+        "fixed_volume": 0.05580534101687752,
+        "via": null
+       },
+       "-x": {
+        "held": true,
+        "fixed_volume": 0.05580535865731834,
+        "via": null
+       },
+       "+y": {
+        "held": true,
+        "fixed_volume": 0.055805308008234404,
+        "via": null
+       },
+       "-y": {
+        "held": true,
+        "fixed_volume": 0.055805305665766844,
+        "via": null
+       },
+       "+z": {
+        "held": true,
+        "fixed_volume": 0.025860298276573115,
+        "via": null
+       },
+       "-z": {
+        "held": true,
+        "fixed_volume": 5.422881526404537,
+        "via": null
+       }
+      },
+      "x": {
+       "+x": {
+        "held": true,
+        "fixed_volume": 0.05580535718660412,
+        "via": null
+       },
+       "-x": {
+        "held": true,
+        "fixed_volume": 0.05580533824829681,
+        "via": null
+       },
+       "+y": {
+        "held": true,
+        "fixed_volume": 0.05580530489760495,
+        "via": null
+       },
+       "-y": {
+        "held": true,
+        "fixed_volume": 0.055805305729414355,
+        "via": null
+       },
+       "+z": {
+        "held": true,
+        "fixed_volume": 0.025860292771484293,
+        "via": null
+       },
+       "-z": {
+        "held": true,
+        "fixed_volume": 2.3486153160860734,
+        "via": null
+       }
+      },
+      "minute": {
+       "+x": {
+        "held": true,
+        "fixed_volume": 0.3828250317430044,
+        "via": null
+       },
+       "-x": {
+        "held": true,
+        "fixed_volume": 0.38282501440105177,
+        "via": null
+       },
+       "+y": {
+        "held": true,
+        "fixed_volume": 0.38282407221802023,
+        "via": null
+       },
+       "-y": {
+        "held": true,
+        "fixed_volume": 0.38282407221802023,
+        "via": null
+       },
+       "+z": {
+        "held": true,
+        "fixed_volume": 0.38886342969439025,
+        "via": null
+       },
+       "-z": {
+        "held": true,
+        "fixed_volume": 2.306109921176366,
+        "via": null
+       }
+      },
+      "minute_wheel": {
+       "+x": {
+        "held": true,
+        "fixed_volume": 0.1393492608158582,
+        "via": null
+       },
+       "-x": {
+        "held": true,
+        "fixed_volume": 0.139348689998789,
+        "via": null
+       },
+       "+y": {
+        "held": true,
+        "fixed_volume": 0.13934850178014832,
+        "via": null
+       },
+       "-y": {
+        "held": true,
+        "fixed_volume": 0.13934848948960588,
+        "via": null
+       },
+       "+z": {
+        "held": true,
+        "fixed_volume": 0.724778724593068,
+        "via": null
+       },
+       "-z": {
+        "held": true,
+        "fixed_volume": 0.023944709586633195,
+        "via": null
+       }
+      },
+      "hour": {
+       "+x": {
+        "held": true,
+        "fixed_volume": 0.14831995873365034,
+        "via": null
+       },
+       "-x": {
+        "held": true,
+        "fixed_volume": 0.14831994104966045,
+        "via": null
+       },
+       "+y": {
+        "held": true,
+        "fixed_volume": 0.14831927565369343,
+        "via": null
+       },
+       "-y": {
+        "held": true,
+        "fixed_volume": 0.14831927565369346,
+        "via": null
+       },
+       "+z": {
+        "held": true,
+        "fixed_volume": 0.6684656614250286,
+        "via": null
+       },
+       "-z": {
+        "held": true,
+        "fixed_volume": 5.831032260698101,
+        "via": null
+       }
+      },
+      "idler": {
+       "+x": {
+        "held": true,
+        "fixed_volume": 0.05580535192491256,
+        "via": null
+       },
+       "-x": {
+        "held": true,
+        "fixed_volume": 0.05580534630674808,
+        "via": null
+       },
+       "+y": {
+        "held": true,
+        "fixed_volume": 0.055805310631254275,
+        "via": null
+       },
+       "-y": {
+        "held": true,
+        "fixed_volume": 0.05580530849141484,
+        "via": null
+       },
+       "+z": {
+        "held": true,
+        "fixed_volume": 1.5015063817676433,
+        "via": null
+       },
+       "-z": {
+        "held": true,
+        "fixed_volume": 0.03711961441477152,
+        "via": null
+       }
+      },
+      "day": {
+       "+x": {
+        "held": true,
+        "fixed_volume": 0.08452269832768747,
+        "via": null
+       },
+       "-x": {
+        "held": true,
+        "fixed_volume": 0.08452270149705478,
+        "via": null
+       },
+       "+y": {
+        "held": true,
+        "fixed_volume": 0.08452287685483421,
+        "via": null
+       },
+       "-y": {
+        "held": true,
+        "fixed_volume": 0.08452287787713858,
+        "via": null
+       },
+       "+z": {
+        "held": true,
+        "fixed_volume": 6.314663768724144,
+        "via": null
+       },
+       "-z": {
+        "held": true,
+        "fixed_volume": 0.02394470305424078,
+        "via": null
+       }
+      }
+     }
+    },
+    "train": {
+     "conflicts": [],
+     "meshes": [
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 768,
+       "largest_gap": 0.03073457076674432,
+       "smallest_drive_overlap": 0.0319128503768177,
+       "smallest_drive_ratio": 1.7552067184157372,
+       "module": 0.2,
+       "smallest_drive_height": 0.4545454680919647,
+       "teeth_match": true,
+       "declared_teeth": {
+        "barrel": 96,
+        "m2": 18
+       },
+       "measured_teeth": {
+        "barrel": 96,
+        "m2": 18
+       },
+       "teeth_height": 0.22727275,
+       "pair": "barrel/m2",
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 240,
+       "largest_gap": 0.03647214390501993,
+       "smallest_drive_overlap": 0.02549304782724209,
+       "smallest_drive_ratio": 1.2047754889766658,
+       "module": 0.22999999999999998,
+       "smallest_drive_height": 0.3999999761581421,
+       "teeth_match": true,
+       "declared_teeth": {
+        "m2": 30,
+        "m3": 10
+       },
+       "measured_teeth": {
+        "m2": 30,
+        "m3": 10
+       },
+       "teeth_height": 2.027,
+       "pair": "m2/m3",
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 320,
+       "largest_gap": 0.03639558189918319,
+       "smallest_drive_overlap": 0.009538084431480149,
+       "smallest_drive_ratio": 1.0568514605518164,
+       "module": 0.19000000000000006,
+       "smallest_drive_height": 0.25,
+       "teeth_match": true,
+       "declared_teeth": {
+        "m3": 40,
+        "m4": 8
+       },
+       "measured_teeth": {
+        "m3": 40,
+        "m4": 8
+       },
+       "teeth_height": 1.2194999,
+       "pair": "m3/m4",
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 288,
+       "largest_gap": 0.03656843525491639,
+       "smallest_drive_overlap": 0.010602823898288804,
+       "smallest_drive_ratio": 1.0602823898288802,
+       "module": 0.2,
+       "smallest_drive_height": 0.25,
+       "teeth_match": true,
+       "declared_teeth": {
+        "m4": 36,
+        "seconds": 8
+       },
+       "measured_teeth": {
+        "m4": 36,
+        "seconds": 8
+       },
+       "teeth_height": 0.8895,
+       "pair": "m4/seconds",
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 128,
+       "largest_gap": 0.03250002861022949,
+       "smallest_drive_overlap": 0.058418162692070084,
+       "smallest_drive_ratio": 1.3410965604697918,
+       "module": 0.33,
+       "smallest_drive_height": 0.3999999761581421,
+       "teeth_match": true,
+       "declared_teeth": {
+        "m2": 12,
+        "y": 16
+       },
+       "measured_teeth": {
+        "m2": 12,
+        "y": 16
+       },
+       "teeth_height": 1.5945,
+       "pair": "m2/y",
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 144,
+       "largest_gap": 0.03542360212591955,
+       "smallest_drive_overlap": 0.04422679677161063,
+       "smallest_drive_ratio": 1.2285222057703695,
+       "module": 0.3,
+       "smallest_drive_height": 0.3999999761581421,
+       "teeth_match": true,
+       "declared_teeth": {
+        "y": 18,
+        "x": 12
+       },
+       "measured_teeth": {
+        "y": 18,
+        "x": 12
+       },
+       "teeth_height": 0.9645,
+       "pair": "y/x",
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 96,
+       "largest_gap": 0.036505005658700296,
+       "smallest_drive_overlap": 0.03929738632342284,
+       "smallest_drive_ratio": 1.091594129603604,
+       "module": 0.3,
+       "smallest_drive_height": 0.3999999761581421,
+       "teeth_match": true,
+       "declared_teeth": {
+        "x": 12,
+        "minute": 12
+       },
+       "measured_teeth": {
+        "x": 12,
+        "minute": 12
+       },
+       "teeth_height": 0.9645000109672547,
+       "pair": "x/minute",
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 240,
+       "largest_gap": 0.029999971389770508,
+       "smallest_drive_overlap": 0.011409799101426255,
+       "smallest_drive_ratio": 1.1409799101426257,
+       "module": 0.19999999999999998,
+       "smallest_drive_height": 0.25,
+       "teeth_match": true,
+       "declared_teeth": {
+        "minute": 10,
+        "minute_wheel": 30
+       },
+       "measured_teeth": {
+        "minute": 10,
+        "minute_wheel": 30
+       },
+       "teeth_height": 1.3195,
+       "pair": "minute/minute_wheel",
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 256,
+       "largest_gap": 0.03564677820674869,
+       "smallest_drive_overlap": 0.008026029685852934,
+       "smallest_drive_ratio": 1.0032534715373498,
+       "module": 0.19999999999999998,
+       "smallest_drive_height": 0.20000004768371582,
+       "teeth_match": true,
+       "declared_teeth": {
+        "minute_wheel": 8,
+        "hour": 32
+       },
+       "measured_teeth": {
+        "minute_wheel": 8,
+        "hour": 32
+       },
+       "teeth_height": 2.6755000295639038,
+       "pair": "minute_wheel/hour",
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 112,
+       "largest_gap": 0.03584956223845618,
+       "smallest_drive_overlap": 0.010629829259096498,
+       "smallest_drive_ratio": 0.8858192457218855,
+       "module": 0.19999999999999998,
+       "smallest_drive_height": 0.2999999523162842,
+       "teeth_match": true,
+       "declared_teeth": {
+        "hour": 14,
+        "idler": 14
+       },
+       "measured_teeth": {
+        "hour": 14,
+        "idler": 14
+       },
+       "teeth_height": 2.0770000228881838,
+       "pair": "hour/idler",
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 224,
+       "largest_gap": 0.03531576366065461,
+       "smallest_drive_overlap": 0.01583844486983456,
+       "smallest_drive_ratio": 1.3198706156073305,
+       "module": 0.20000000000000004,
+       "smallest_drive_height": 0.2999999523162842,
+       "teeth_match": true,
+       "declared_teeth": {
+        "idler": 14,
+        "day": 28
+       },
+       "measured_teeth": {
+        "idler": 14,
+        "day": 28
+       },
+       "teeth_height": 2.077,
+       "pair": "idler/day",
+       "passes": true
+      }
+     ],
+     "not_driven": []
+    },
+    "clear": {
+     "worst_volume": 0.0,
+     "pair": null,
+     "failing": [],
+     "pairs_swept": 31,
+     "pairs_apart": 24
+    },
+    "minute": {
+     "clockwise_turns_per_hour_through_working_meshes": "1"
+    },
+    "hour": {
+     "clockwise_turns_per_hour_through_working_meshes": "1/12"
+    },
+    "seconds": {
+     "clockwise_turns_per_hour_through_working_meshes": "60"
+    },
+    "coaxial": {
+     "distance": 0.0
+    },
+    "hands": {
+     "hour": {
+      "reach": 5.599999904632569,
+      "above_fixed": 0.5799999237060547,
+      "centre_from_axis": 1.6111147770647676,
+      "area_seen_from_dial": 4.352283342902478,
+      "area_share_of_swept_disc": 0.04417649434644393
+     },
+     "minute": {
+      "reach": 8.5,
+      "above_fixed": 0.8299999237060547,
+      "centre_from_axis": 3.0212863177280687,
+      "area_seen_from_dial": 4.611254893769852,
+      "area_share_of_swept_disc": 0.02031568194325715
+     },
+     "seconds": {
+      "reach": 5.249999856414549,
+      "above_fixed": 0.3299999237060547,
+      "centre_from_axis": 1.7353250826380684,
+      "area_seen_from_dial": 2.3998649897720927,
+      "area_share_of_swept_disc": 0.02771522153417126
+     }
+    },
+    "size": {
+     "radius": 12.650000385404612,
+     "z_min": -0.4545454680919647,
+     "z_max": 3.7755000591278076
+    },
+    "printable": {
+     "bottom_plate": {
+      "pieces": 1,
+      "max_deviation": 0.07071067811865477
+     },
+     "mid_plate": {
+      "pieces": 1,
+      "max_deviation": 0.07071067811865477
+     },
+     "motion_bridge": {
+      "pieces": 1,
+      "max_deviation": 0.07071067811865477
+     },
+     "top_bridge": {
+      "pieces": 1,
+      "max_deviation": 0.07071067811865477
+     },
+     "m2a": {
+      "pieces": 1,
+      "max_deviation": 0.1118033988749895
+     },
+     "m2b_6h": {
+      "pieces": 1,
+      "max_deviation": 0.1118033988749895
+     },
+     "m3_6h": {
+      "pieces": 1,
+      "max_deviation": 0.1224744871391589
+     },
+     "m4": {
+      "pieces": 1,
+      "max_deviation": 0.1224744871391589
+     },
+     "s": {
+      "pieces": 1,
+      "max_deviation": 0.1118033988749895
+     },
+     "hand_seconds": {
+      "pieces": 1,
+      "max_deviation": 0.07071067811865477
+     },
+     "y_6h": {
+      "pieces": 1,
+      "max_deviation": 0.07071067811865477
+     },
+     "x": {
+      "pieces": 1,
+      "max_deviation": 0.07071067811865477
+     },
+     "min": {
+      "pieces": 1,
+      "max_deviation": 0.1118033988749895
+     },
+     "hand_minute": {
+      "pieces": 1,
+      "max_deviation": 0.07071067811865477
+     },
+     "mw": {
+      "pieces": 1,
+      "max_deviation": 0.1224744871391589
+     },
+     "hour": {
+      "pieces": 1,
+      "max_deviation": 0.1118033988749895
+     },
+     "hour_collar": {
+      "pieces": 1,
+      "max_deviation": 0.1224744871391589
+     },
+     "hand_hour": {
+      "pieces": 1,
+      "max_deviation": 0.07071067811865477
+     },
+     "i": {
+      "pieces": 1,
+      "max_deviation": 0.1118033988749895
+     },
+     "d": {
+      "pieces": 1,
+      "max_deviation": 0.1224744871391589
+     },
+     "hand_24h": {
+      "pieces": 1,
+      "max_deviation": 0.07071067811865477
+     }
+    },
+    "tolerant": {
+     "meshes": [
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 768,
+       "largest_gap": 0.04450145790781322,
+       "smallest_drive_overlap": 0.025423220876511457,
+       "smallest_drive_ratio": 1.3982771065362252,
+       "module": 0.2,
+       "smallest_drive_height": 0.4545454680919647,
+       "teeth_match": true,
+       "declared_teeth": {
+        "barrel": 96,
+        "m2": 18
+       },
+       "measured_teeth": {
+        "barrel": 96,
+        "m2": 18
+       },
+       "teeth_height": 0.22727275,
+       "pair": "barrel/m2",
+       "position": "away",
+       "shift": 0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 768,
+       "largest_gap": 0.013564539570169964,
+       "smallest_drive_overlap": 0.03958586009610616,
+       "smallest_drive_ratio": 2.17722224039956,
+       "module": 0.2,
+       "smallest_drive_height": 0.4545454680919647,
+       "teeth_match": true,
+       "declared_teeth": {
+        "barrel": 96,
+        "m2": 18
+       },
+       "measured_teeth": {
+        "barrel": 96,
+        "m2": 18
+       },
+       "teeth_height": 0.22727275,
+       "pair": "barrel/m2",
+       "position": "towards",
+       "shift": -0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 240,
+       "largest_gap": 0.049058384439892584,
+       "smallest_drive_overlap": 0.020840794225264952,
+       "smallest_drive_ratio": 0.9849147196348378,
+       "module": 0.22999999999999998,
+       "smallest_drive_height": 0.3999999761581421,
+       "teeth_match": true,
+       "declared_teeth": {
+        "m2": 30,
+        "m3": 10
+       },
+       "measured_teeth": {
+        "m2": 30,
+        "m3": 10
+       },
+       "teeth_height": 2.027,
+       "pair": "m2/m3",
+       "position": "away",
+       "shift": 0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 240,
+       "largest_gap": 0.0170748744381186,
+       "smallest_drive_overlap": 0.030455413171495405,
+       "smallest_drive_ratio": 1.439291823571815,
+       "module": 0.22999999999999998,
+       "smallest_drive_height": 0.3999999761581421,
+       "teeth_match": true,
+       "declared_teeth": {
+        "m2": 30,
+        "m3": 10
+       },
+       "measured_teeth": {
+        "m2": 30,
+        "m3": 10
+       },
+       "teeth_height": 2.027,
+       "pair": "m2/m3",
+       "position": "towards",
+       "shift": -0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 320,
+       "largest_gap": 0.04945577318188225,
+       "smallest_drive_overlap": 0.007232584707639148,
+       "smallest_drive_ratio": 0.8013944274392403,
+       "module": 0.19000000000000006,
+       "smallest_drive_height": 0.25,
+       "teeth_match": true,
+       "declared_teeth": {
+        "m3": 40,
+        "m4": 8
+       },
+       "measured_teeth": {
+        "m3": 40,
+        "m4": 8
+       },
+       "teeth_height": 1.2194999,
+       "pair": "m3/m4",
+       "position": "away",
+       "shift": 0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 320,
+       "largest_gap": 0.016184960333250484,
+       "smallest_drive_overlap": 0.01204720132135197,
+       "smallest_drive_ratio": 1.3348699525043726,
+       "module": 0.19000000000000006,
+       "smallest_drive_height": 0.25,
+       "teeth_match": true,
+       "declared_teeth": {
+        "m3": 40,
+        "m4": 8
+       },
+       "measured_teeth": {
+        "m3": 40,
+        "m4": 8
+       },
+       "teeth_height": 1.2194999,
+       "pair": "m3/m4",
+       "position": "towards",
+       "shift": -0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 288,
+       "largest_gap": 0.04940111977110553,
+       "smallest_drive_overlap": 0.008174576324026976,
+       "smallest_drive_ratio": 0.8174576324026975,
+       "module": 0.2,
+       "smallest_drive_height": 0.25,
+       "teeth_match": true,
+       "declared_teeth": {
+        "m4": 36,
+        "seconds": 8
+       },
+       "measured_teeth": {
+        "m4": 36,
+        "seconds": 8
+       },
+       "teeth_height": 0.8895,
+       "pair": "m4/seconds",
+       "position": "away",
+       "shift": 0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 288,
+       "largest_gap": 0.018357133025335287,
+       "smallest_drive_overlap": 0.013239615860297234,
+       "smallest_drive_ratio": 1.3239615860297231,
+       "module": 0.2,
+       "smallest_drive_height": 0.25,
+       "teeth_match": true,
+       "declared_teeth": {
+        "m4": 36,
+        "seconds": 8
+       },
+       "measured_teeth": {
+        "m4": 36,
+        "seconds": 8
+       },
+       "teeth_height": 0.8895,
+       "pair": "m4/seconds",
+       "position": "towards",
+       "shift": -0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 128,
+       "largest_gap": 0.03250002861022949,
+       "smallest_drive_overlap": 0.05107577155581545,
+       "smallest_drive_ratio": 1.172538443530047,
+       "module": 0.33,
+       "smallest_drive_height": 0.3999999761581421,
+       "teeth_match": true,
+       "declared_teeth": {
+        "m2": 12,
+        "y": 16
+       },
+       "measured_teeth": {
+        "m2": 12,
+        "y": 16
+       },
+       "teeth_height": 1.5945,
+       "pair": "m2/y",
+       "position": "away",
+       "shift": 0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 128,
+       "largest_gap": 0.024234714749329048,
+       "smallest_drive_overlap": 0.06598321376932546,
+       "smallest_drive_ratio": 1.514766246607707,
+       "module": 0.33,
+       "smallest_drive_height": 0.3999999761581421,
+       "teeth_match": true,
+       "declared_teeth": {
+        "m2": 12,
+        "y": 16
+       },
+       "measured_teeth": {
+        "m2": 12,
+        "y": 16
+       },
+       "teeth_height": 1.5945,
+       "pair": "m2/y",
+       "position": "towards",
+       "shift": -0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 144,
+       "largest_gap": 0.04839734301025717,
+       "smallest_drive_overlap": 0.038096352784778055,
+       "smallest_drive_ratio": 1.0582320848749383,
+       "module": 0.3,
+       "smallest_drive_height": 0.3999999761581421,
+       "teeth_match": true,
+       "declared_teeth": {
+        "y": 18,
+        "x": 12
+       },
+       "measured_teeth": {
+        "y": 18,
+        "x": 12
+       },
+       "teeth_height": 0.9645,
+       "pair": "y/x",
+       "position": "away",
+       "shift": 0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 144,
+       "largest_gap": 0.022449861241580153,
+       "smallest_drive_overlap": 0.05073432954020253,
+       "smallest_drive_ratio": 1.4092870156723447,
+       "module": 0.3,
+       "smallest_drive_height": 0.3999999761581421,
+       "teeth_match": true,
+       "declared_teeth": {
+        "y": 18,
+        "x": 12
+       },
+       "measured_teeth": {
+        "y": 18,
+        "x": 12
+       },
+       "teeth_height": 0.9645,
+       "pair": "y/x",
+       "position": "towards",
+       "shift": -0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 96,
+       "largest_gap": 0.048915978142212435,
+       "smallest_drive_overlap": 0.03368377537825424,
+       "smallest_drive_ratio": 0.9356604829434398,
+       "module": 0.3,
+       "smallest_drive_height": 0.3999999761581421,
+       "teeth_match": true,
+       "declared_teeth": {
+        "x": 12,
+        "minute": 12
+       },
+       "measured_teeth": {
+        "x": 12,
+        "minute": 12
+       },
+       "teeth_height": 0.9645000109672547,
+       "pair": "x/minute",
+       "position": "away",
+       "shift": 0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 96,
+       "largest_gap": 0.024107803730160027,
+       "smallest_drive_overlap": 0.04527277740520869,
+       "smallest_drive_ratio": 1.25757722510213,
+       "module": 0.3,
+       "smallest_drive_height": 0.3999999761581421,
+       "teeth_match": true,
+       "declared_teeth": {
+        "x": 12,
+        "minute": 12
+       },
+       "measured_teeth": {
+        "x": 12,
+        "minute": 12
+       },
+       "teeth_height": 0.9645000109672547,
+       "pair": "x/minute",
+       "position": "towards",
+       "shift": -0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 240,
+       "largest_gap": 0.029999971389770508,
+       "smallest_drive_overlap": 0.008950606091934208,
+       "smallest_drive_ratio": 0.895060609193421,
+       "module": 0.19999999999999998,
+       "smallest_drive_height": 0.25,
+       "teeth_match": true,
+       "declared_teeth": {
+        "minute": 10,
+        "minute_wheel": 30
+       },
+       "measured_teeth": {
+        "minute": 10,
+        "minute_wheel": 30
+       },
+       "teeth_height": 1.3195,
+       "pair": "minute/minute_wheel",
+       "position": "away",
+       "shift": 0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 240,
+       "largest_gap": 0.016964847445958907,
+       "smallest_drive_overlap": 0.014049362784238139,
+       "smallest_drive_ratio": 1.4049362784238142,
+       "module": 0.19999999999999998,
+       "smallest_drive_height": 0.25,
+       "teeth_match": true,
+       "declared_teeth": {
+        "minute": 10,
+        "minute_wheel": 30
+       },
+       "measured_teeth": {
+        "minute": 10,
+        "minute_wheel": 30
+       },
+       "teeth_height": 1.3195,
+       "pair": "minute/minute_wheel",
+       "position": "towards",
+       "shift": -0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 256,
+       "largest_gap": 0.04917551508145516,
+       "smallest_drive_overlap": 0.006142979284588949,
+       "smallest_drive_ratio": 0.7678722274986134,
+       "module": 0.19999999999999998,
+       "smallest_drive_height": 0.20000004768371582,
+       "teeth_match": true,
+       "declared_teeth": {
+        "minute_wheel": 8,
+        "hour": 32
+       },
+       "measured_teeth": {
+        "minute_wheel": 8,
+        "hour": 32
+       },
+       "teeth_height": 2.6755000295639038,
+       "pair": "minute_wheel/hour",
+       "position": "away",
+       "shift": 0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 256,
+       "largest_gap": 0.01573573167371052,
+       "smallest_drive_overlap": 0.010088511883422014,
+       "smallest_drive_ratio": 1.26106368476674,
+       "module": 0.19999999999999998,
+       "smallest_drive_height": 0.20000004768371582,
+       "teeth_match": true,
+       "declared_teeth": {
+        "minute_wheel": 8,
+        "hour": 32
+       },
+       "measured_teeth": {
+        "minute_wheel": 8,
+        "hour": 32
+       },
+       "teeth_height": 2.6755000295639038,
+       "pair": "minute_wheel/hour",
+       "position": "towards",
+       "shift": -0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 112,
+       "largest_gap": 0.048985854709913346,
+       "smallest_drive_overlap": 0.008549931902973694,
+       "smallest_drive_ratio": 0.7124944384957491,
+       "module": 0.19999999999999998,
+       "smallest_drive_height": 0.2999999523162842,
+       "teeth_match": true,
+       "declared_teeth": {
+        "hour": 14,
+        "idler": 14
+       },
+       "measured_teeth": {
+        "hour": 14,
+        "idler": 14
+       },
+       "teeth_height": 2.0770000228881838,
+       "pair": "hour/idler",
+       "position": "away",
+       "shift": 0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 112,
+       "largest_gap": 0.015099352575136414,
+       "smallest_drive_overlap": 0.013830065880177204,
+       "smallest_drive_ratio": 1.1525056732006105,
+       "module": 0.19999999999999998,
+       "smallest_drive_height": 0.2999999523162842,
+       "teeth_match": true,
+       "declared_teeth": {
+        "hour": 14,
+        "idler": 14
+       },
+       "measured_teeth": {
+        "hour": 14,
+        "idler": 14
+       },
+       "teeth_height": 2.0770000228881838,
+       "pair": "hour/idler",
+       "position": "towards",
+       "shift": -0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 224,
+       "largest_gap": 0.04960234669094086,
+       "smallest_drive_overlap": 0.012479485967106027,
+       "smallest_drive_ratio": 1.0399573292222677,
+       "module": 0.20000000000000004,
+       "smallest_drive_height": 0.2999999523162842,
+       "teeth_match": true,
+       "declared_teeth": {
+        "idler": 14,
+        "day": 28
+       },
+       "measured_teeth": {
+        "idler": 14,
+        "day": 28
+       },
+       "teeth_height": 2.077,
+       "pair": "idler/day",
+       "position": "away",
+       "shift": 0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 224,
+       "largest_gap": 0.013299658662609817,
+       "smallest_drive_overlap": 0.019396869624245836,
+       "smallest_drive_ratio": 1.6164060589413096,
+       "module": 0.20000000000000004,
+       "smallest_drive_height": 0.2999999523162842,
+       "teeth_match": true,
+       "declared_teeth": {
+        "idler": 14,
+        "day": 28
+       },
+       "measured_teeth": {
+        "idler": 14,
+        "day": 28
+       },
+       "teeth_height": 2.077,
+       "pair": "idler/day",
+       "position": "towards",
+       "shift": -0.03,
+       "passes": true
+      }
+     ]
+    },
+    "seated": {
+     "not_seated": [],
+     "not_in_one_piece": [],
+     "pieces": {
+      "m2": [
+       [
+        "m2a",
+        "m2b_6h"
+       ]
+      ],
+      "seconds": [
+       [
+        "s",
+        "hand_seconds"
+       ]
+      ],
+      "minute": [
+       [
+        "min",
+        "hand_minute"
+       ]
+      ],
+      "hour": [
+       [
+        "hour",
+        "hour_collar",
+        "hand_hour"
+       ]
+      ],
+      "day": [
+       [
+        "d",
+        "hand_24h"
+       ]
+      ]
+     },
+     "moves": {
+      "m2": {
+       "m2a": {
+        "+x": 0.1919009368253437,
+        "-x": 0.19190093000174874,
+        "+y": 0.19189999747567818,
+        "-y": 0.19189999764642496,
+        "+z": 0.1342474296654132,
+        "-z": 0.0
+       },
+       "m2b_6h": {
+        "+x": 0.19190093000174877,
+        "-x": 0.19190093682534376,
+        "+y": 0.19189999764642504,
+        "-y": 0.19189999747567824,
+        "+z": -3.469446951953614e-18,
+        "-z": 0.13424742966541325
+       }
+      },
+      "m3": {},
+      "m4": {},
+      "seconds": {
+       "s": {
+        "+x": 0.03453037920312264,
+        "-x": 0.034530379260473795,
+        "+y": 0.034570310223183465,
+        "-y": 0.03453047416514898,
+        "+z": 0.04396406976861758,
+        "-z": 0.0
+       },
+       "hand_seconds": {
+        "+x": 0.03453037926201967,
+        "-x": 0.03453037920466459,
+        "+y": 0.03453047416514899,
+        "-y": 0.03457031022318345,
+        "+z": 0.0,
+        "-z": 0.04396406976861758
+       }
+      },
+      "y": {},
+      "x": {},
+      "minute": {
+       "min": {
+        "+x": 0.05864561661304072,
+        "-x": 0.05864561551646032,
+        "+y": 0.05868258292128278,
+        "-y": 0.05864580741614678,
+        "+z": 0.05143797455404601,
+        "-z": 0.0
+       },
+       "hand_minute": {
+        "+x": 0.05864561551646031,
+        "-x": 0.05864561661304069,
+        "+y": 0.05864580741614675,
+        "-y": 0.058682582921282755,
+        "+z": 0.0,
+        "-z": 0.05143797455404601
+       }
+      },
+      "minute_wheel": {},
+      "hour": {
+       "hour": {
+        "+x": 0.22326437198201596,
+        "-x": 0.22326436745247577,
+        "+y": 0.2233319922500832,
+        "-y": 0.22326436874088404,
+        "+z": 0.1416899504850073,
+        "-z": 0.26142916975242453
+       },
+       "hour_collar": {
+        "+x": 0.12760914632345005,
+        "-x": 0.1276091457799771,
+        "+y": 0.12760850792693423,
+        "-y": 0.12760850792693423,
+        "+z": 0.26142916975242453,
+        "-z": 0.0
+       },
+       "hand_hour": {
+        "+x": 0.09565522112902565,
+        "-x": 0.09565522620203883,
+        "+y": 0.09565586081394982,
+        "-y": 0.09572348432314898,
+        "+z": 0.0,
+        "-z": 0.1416899504850073
+       }
+      },
+      "idler": {},
+      "day": {
+       "d": {
+        "+x": 0.03453033752292221,
+        "-x": 0.03453033685254758,
+        "+y": 0.03457310012854107,
+        "-y": 0.0345304722928918,
+        "+z": 0.04396408633057827,
+        "-z": 0.0
+       },
+       "hand_24h": {
+        "+x": 0.03453033685254611,
+        "-x": 0.03453033767094648,
+        "+y": 0.0345304722928918,
+        "-y": 0.03457310012854108,
+        "+z": 0.0,
+        "-z": 0.04396408633057827
+       }
+      }
+     }
+    },
+    "strength": {
+     "meshes": [
+      {
+       "pair": "barrel/m2",
+       "torque_nmm": 70.1,
+       "nominal_force_n": 7.302083333333331,
+       "load_factor": 1.45,
+       "force_n": 10.58802083333333,
+       "module": 0.2,
+       "face_width": 0.4545454680919647,
+       "gears": {
+        "barrel": {
+         "teeth": 96,
+         "rated": false
+        },
+        "m2": {
+         "teeth": 18,
+         "Y": 0.323,
+         "sigma_mpa": 360.58274209177404,
+         "part": "m2a",
+         "material": "AD-C100-HT",
+         "allowable_mpa": 725.0,
+         "margin": 1.0106342189152135,
+         "drive_overlap_by_part": {
+          "m2a": 3.063638213887435,
+          "m2b_6h": 0.0
+         }
+        }
+       }
+      },
+      {
+       "pair": "m2/m3",
+       "torque_nmm": 13.143749999999999,
+       "nominal_force_n": 3.8097826086956523,
+       "load_factor": 1.45,
+       "force_n": 5.524184782608696,
+       "module": 0.22999999999999998,
+       "face_width": 0.3999999761581421,
+       "gears": {
+        "m2": {
+         "teeth": 30,
+         "Y": 0.3902,
+         "sigma_mpa": 153.88388094945145,
+         "part": "m2b_6h",
+         "material": "AD-C100-HT",
+         "allowable_mpa": 725.0,
+         "margin": 3.7113446549879496,
+         "drive_overlap_by_part": {
+          "m2a": 0.0,
+          "m2b_6h": 0.764793035833878
+         }
+        },
+        "m3": {
+         "teeth": 10,
+         "Y": 0.2198,
+         "sigma_mpa": 273.1823946609461,
+         "part": "m3_6h",
+         "material": "AD-C100-HT",
+         "allowable_mpa": 725.0,
+         "margin": 1.65390454937558
+        }
+       }
+      },
+      {
+       "pair": "m3/m4",
+       "torque_nmm": 4.38125,
+       "nominal_force_n": 1.152960526315789,
+       "load_factor": 1.45,
+       "force_n": 1.671792763157894,
+       "module": 0.19000000000000006,
+       "face_width": 0.25,
+       "gears": {
+        "m3": {
+         "teeth": 40,
+         "Y": 0.4193,
+         "sigma_mpa": 83.93903438853695,
+         "part": "m3_6h",
+         "material": "AD-C100-HT",
+         "allowable_mpa": 725.0,
+         "margin": 7.637221112696155
+        },
+        "m4": {
+         "teeth": 8,
+         "Y": 0.1748,
+         "sigma_mpa": 201.34803843886468,
+         "part": "m4",
+         "material": "AD-C100-HT",
+         "allowable_mpa": 725.0,
+         "margin": 2.6007303851640544
+        }
+       }
+      },
+      {
+       "pair": "m4/seconds",
+       "torque_nmm": 0.87625,
+       "nominal_force_n": 0.24340277777777777,
+       "load_factor": 1.45,
+       "force_n": 0.35293402777777777,
+       "module": 0.2,
+       "face_width": 0.25,
+       "gears": {
+        "m4": {
+         "teeth": 36,
+         "Y": 0.4093,
+         "sigma_mpa": 17.245737980834488,
+         "part": "m4",
+         "material": "AD-C100-HT",
+         "allowable_mpa": 725.0,
+         "margin": 41.039372325249644
+        },
+        "seconds": {
+         "teeth": 8,
+         "Y": 0.1748,
+         "sigma_mpa": 40.38146770912788,
+         "part": "s",
+         "material": "AD-C100-HT",
+         "allowable_mpa": 725.0,
+         "margin": 16.95378031383738,
+         "drive_overlap_by_part": {
+          "s": 0.3817026765397569,
+          "hand_seconds": 0.0
+         }
+        }
+       }
+      }
+     ],
+     "smallest_margin": 1.0106342189152135,
+     "barrel_torque_nmm": 70.1,
+     "going_train": [
+      "barrel/m2",
+      "m2/m3",
+      "m3/m4",
+      "m4/seconds"
+     ]
+    },
+    "day_hand": {
+     "clockwise_turns_per_hour_through_working_meshes": "1/24"
+    },
+    "day_place": {
+     "reach": 3.39999996572376,
+     "above_fixed": 0.3299999237060547,
+     "centre_from_axis": 1.0215541396088659,
+     "area_seen_from_dial": 1.8886406828870292,
+     "area_share_of_swept_disc": 0.05200458589385764,
+     "axis_distance": 6.973673110478739
+    }
+   }
+  },
+  "P4": {
+   "name": "assembly",
+   "weight": 0.25,
+   "gates": {
+    "files": true,
+    "plan": true
+   },
+   "checks": {
+    "barrel": true,
+    "bottom_plate": true,
+    "mid_plate": true,
+    "motion_bridge": true,
+    "top_bridge": true,
+    "m2a": true,
+    "m2b": true,
+    "m3": true,
+    "m4": true,
+    "s": true,
+    "hand_seconds": true,
+    "y": true,
+    "x": true,
+    "min": true,
+    "hand_minute": true,
+    "mw": true,
+    "hour": true,
+    "hour_collar": true,
+    "hand_hour": true,
+    "i": true,
+    "d": true,
+    "hand_24h": true
+   },
+   "check_weights": {
+    "barrel": 1,
+    "bottom_plate": 1,
+    "mid_plate": 1,
+    "motion_bridge": 1,
+    "top_bridge": 1,
+    "m2a": 1,
+    "m2b": 1,
+    "m3": 1,
+    "m4": 1,
+    "s": 1,
+    "hand_seconds": 1,
+    "y": 1,
+    "x": 1,
+    "min": 1,
+    "hand_minute": 1,
+    "mw": 1,
+    "hour": 1,
+    "hour_collar": 1,
+    "hand_hour": 1,
+    "i": 1,
+    "d": 1,
+    "hand_24h": 1
+   },
+   "share_of_checks": 1.0,
+   "s": 1.0,
+   "s_exact": "1",
+   "passed": true,
+   "details": {
+    "files": {},
+    "plan": {
+     "order": [
+      "bottom_plate",
+      "barrel",
+      "mid_plate",
+      "m2a",
+      "min",
+      "x",
+      "mw",
+      "y",
+      "m4",
+      "m3",
+      "m2b",
+      "s",
+      "motion_bridge",
+      "i",
+      "d",
+      "hour_collar",
+      "top_bridge",
+      "hour",
+      "hand_seconds",
+      "hand_24h",
+      "hand_hour",
+      "hand_minute"
+     ]
+    },
+    "parts": {
+     "bottom_plate": {
+      "format_messages": [],
+      "worst_volume": 0.0,
+      "pose_index": -1,
+      "hit": null,
+      "poses": 52
+     },
+     "barrel": {
+      "format_messages": [],
+      "worst_volume": 0.0,
+      "pose_index": -1,
+      "hit": null,
+      "poses": 52
+     },
+     "mid_plate": {
+      "format_messages": [],
+      "worst_volume": 0.0,
+      "pose_index": -1,
+      "hit": null,
+      "poses": 47
+     },
+     "m2a": {
+      "format_messages": [],
+      "worst_volume": 0.0,
+      "pose_index": -1,
+      "hit": null,
+      "poses": 51
+     },
+     "min": {
+      "format_messages": [],
+      "worst_volume": 0.0,
+      "pose_index": -1,
+      "hit": null,
+      "poses": 45
+     },
+     "x": {
+      "format_messages": [],
+      "worst_volume": 0.0,
+      "pose_index": -1,
+      "hit": null,
+      "poses": 46
+     },
+     "mw": {
+      "format_messages": [],
+      "worst_volume": 0.0,
+      "pose_index": -1,
+      "hit": null,
+      "poses": 46
+     },
+     "y": {
+      "format_messages": [],
+      "worst_volume": 0.0,
+      "pose_index": -1,
+      "hit": null,
+      "poses": 46
+     },
+     "m4": {
+      "format_messages": [],
+      "worst_volume": 0.0,
+      "pose_index": -1,
+      "hit": null,
+      "poses": 46
+     },
+     "m3": {
+      "format_messages": [],
+      "worst_volume": 0.0,
+      "pose_index": -1,
+      "hit": null,
+      "poses": 46
+     },
+     "m2b": {
+      "format_messages": [],
+      "worst_volume": 1.577514160966409e-17,
+      "pose_index": 41,
+      "hit": "m2a",
+      "poses": 42
+     },
+     "s": {
+      "format_messages": [],
+      "worst_volume": 0.0,
+      "pose_index": -1,
+      "hit": null,
+      "poses": 46
+     },
+     "motion_bridge": {
+      "format_messages": [],
+      "worst_volume": 0.0,
+      "pose_index": -1,
+      "hit": null,
+      "poses": 42
+     },
+     "i": {
+      "format_messages": [],
+      "worst_volume": 0.0,
+      "pose_index": -1,
+      "hit": null,
+      "poses": 46
+     },
+     "d": {
+      "format_messages": [],
+      "worst_volume": 0.0,
+      "pose_index": -1,
+      "hit": null,
+      "poses": 46
+     },
+     "hour_collar": {
+      "format_messages": [],
+      "worst_volume": 0.0,
+      "pose_index": -1,
+      "hit": null,
+      "poses": 39
+     },
+     "top_bridge": {
+      "format_messages": [],
+      "worst_volume": 0.0,
+      "pose_index": -1,
+      "hit": null,
+      "poses": 37
+     },
+     "hour": {
+      "format_messages": [],
+      "worst_volume": 1.2091395322055137e-18,
+      "pose_index": 38,
+      "hit": "hour_collar",
+      "poses": 39
+     },
+     "hand_seconds": {
+      "format_messages": [],
+      "worst_volume": 0.00021980436402405687,
+      "pose_index": 32,
+      "hit": "s",
+      "poses": 33
+     },
+     "hand_24h": {
+      "format_messages": [],
+      "worst_volume": 0.00021980444682782727,
+      "pose_index": 32,
+      "hit": "d",
+      "poses": 33
+     },
+     "hand_hour": {
+      "format_messages": [],
+      "worst_volume": 0.0007083982356244045,
+      "pose_index": 31,
+      "hit": "hour",
+      "poses": 32
+     },
+     "hand_minute": {
+      "format_messages": [],
+      "worst_volume": 0.0002571711705272612,
+      "pose_index": 29,
+      "hit": "min",
+      "poses": 30
+     }
+    }
+   }
+  }
+ },
+ "elapsed_s": 48.3,
+ "constants": {
+  "part_weights": {
+   "P1": 0.25,
+   "P2": 0.1,
+   "P3": 0.15,
+   "P4": 0.25
+  },
+  "check_weights": {
+   "P1": {
+    "spin": 1,
+    "held": 2,
+    "train": 3,
+    "clear": 1,
+    "minute": 2,
+    "hour": 2,
+    "seconds": 2,
+    "coaxial": 1,
+    "hands": 1,
+    "size": 1,
+    "printable": 1,
+    "tolerant": 2,
+    "seated": 2,
+    "strength": 2
+   },
+   "P2": {
+    "day_hand": 3,
+    "day_place": 1
+   },
+   "P3": {
+    "spin": 1,
+    "held": 2,
+    "train": 3,
+    "clear": 1,
+    "minute": 2,
+    "hour": 2,
+    "seconds": 2,
+    "coaxial": 1,
+    "hands": 1,
+    "size": 1,
+    "printable": 1,
+    "tolerant": 2,
+    "seated": 2,
+    "strength": 2,
+    "day_hand": 3,
+    "day_place": 1
+   },
+   "P4": "one per part of movement.json, 1 each"
+  },
+  "gates": {
+   "P1": [
+    "files",
+    "assembled"
+   ],
+   "P2": [
+    "files",
+    "assembled",
+    "day_declared"
+   ],
+   "P3": [
+    "files",
+    "assembled",
+    "day_declared",
+    "same_frame"
+   ],
+   "P4": [
+    "files",
+    "plan"
+   ]
+  },
+  "barrel_turns_per_hour": {
+   "movement.json": "1/8",
+   "variant_6h.json": "1/6"
+  },
+  "check_timeout_s": 1800,
+  "time_limit_s": 7200
+ }
+}
