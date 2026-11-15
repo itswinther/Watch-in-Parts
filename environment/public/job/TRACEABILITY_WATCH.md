@@ -72,6 +72,7 @@ hand speeds and directions, and the weights of the checks.
 | case outer diameter, context only, not graded: CASE_OUTER_D_MM (make_brief_job.py) | 36 | `datasheets/DS-W02_case.md` | 2. Catalogue | CS-254-134 | Outer diameter |
 | CASE_HEIGHT | 13.4 | `datasheets/DS-W02_case.md` | 2. Catalogue | CS-254-134 | Inner height |
 | MIN_FEATURE | 0.2 | `datasheets/DS-W03_process.md` | 2. Smallest feature | Smallest printable feature | Value |
+| PRINT_TOLERANCE (geometry/asmade_job.py; the as-made test, geometry/asmade.py) | 0.01 | `datasheets/DS-W03_process.md` | 4. Size accuracy | Size accuracy | Value |
 | THIN_VOXEL, THIN_ERODE_VOX, THIN_DILATE_VOX, THIN_DEV, voxel grid offset (the printability test) | (0.05, 1.5, 1.0, 0.2, 0.0113) | `datasheets/DS-W03_process.md` | 3. What the smallest | (whole section) | statement |
 | VOL_TOL | 0.01 | `FORMAT.md` | How the factory reads | **Drawing.** | statement |
 | TIMEOUT_S, JOB_TIME_LIMIT_S in `tests/grade_watch.py` (per condition and check; whole inspection) | (1800, 7200) | `FORMAT.md` | How the factory reads | **Time.** | statement |
@@ -1138,6 +1139,7 @@ Numbers the scan cannot tell apart (a document's own number equal to a supplier 
 - `instruction.md` prints 6 for its own reasons; that number is also a value of: CHANGED_BARREL_TURNS_PER_HOUR (6-hour variant, speed class B in the work order).
 - `instruction.md` prints 8 for its own reasons; that number is also a value of: BARREL_TURNS_PER_HOUR (8-hour build, speed class D in the work order).
 - `FORMAT.md` prints 0 for its own reasons; that number is also a value of: barrel axis (x, y) = (0, 0), every barrel; barrel_z wheel (BR-096-30, to 4 decimals): the toothed drum of the mesh; barrel_z wheel (BR-096-45, to 4 decimals): the toothed drum of the mesh; barrel_z wheel (BR-096-66, to 4 decimals): the toothed drum of the mesh.
+- `FORMAT.md` prints 0.01 for its own reasons; that number is also a value of: PRINT_TOLERANCE (geometry/asmade_job.py; the as-made test, geometry/asmade.py).
 - `FORMAT.md` prints 0.2 for its own reasons; that number is also a value of: BARREL_MODULE (BR-096-30); BARREL_MODULE (BR-096-45); BARREL_MODULE (BR-096-66); MIN_FEATURE; THIN_VOXEL, THIN_ERODE_VOX, THIN_DILATE_VOX, THIN_DEV, voxel grid offset (the printability test).
 - `FORMAT.md` prints 0.5 for its own reasons; that number is also a value of: BARREL_ARBOR_R (section 3), every barrel; BARREL_ARBOR_R (BR-096-30); BARREL_ARBOR_R (BR-096-45); BARREL_ARBOR_R (BR-096-66); LEWIS_Y[167] (geometry/data/lewis_y.json).
 - `FORMAT.md` prints 1 for its own reasons; that number is also a value of: drum height = barrel_z wheel (BR-096-66, to 4 decimals); barrel_z wheel (BR-096-66, to 4 decimals): the toothed drum of the mesh; BARREL_TURNS_PER_HOUR (8-hour build, speed class D in the work order); CHANGED_BARREL_TURNS_PER_HOUR (6-hour variant, speed class B in the work order); THIN_VOXEL, THIN_ERODE_VOX, THIN_DILATE_VOX, THIN_DEV, voxel grid offset (the printability test); LEWIS_ADDENDUM.

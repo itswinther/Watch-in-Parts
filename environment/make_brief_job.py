@@ -30,6 +30,7 @@ from fractions import Fraction
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 sys.path.insert(0, ROOT)
 from geometry import watch as W        # noqa: E402
+from geometry import asmade_job as AMJ  # noqa: E402  (the print process's size accuracy, DS-W03 section 4)
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import brief_honesty as H               # noqa: E402  (the designer's statement: report.json, honesty term)
 import brief_thin as T                  # noqa: E402  (the thinness probe; used only when T.THIN_IN_BRIEF)
@@ -1136,7 +1137,16 @@ millimetres.
 ## 3. What the smallest feature means for a part
 
 {printable}
-""".format(mf=num(W.MIN_FEATURE), printable=wrap(printable_text(L)))
+{accuracy}""".format(mf=num(W.MIN_FEATURE), printable=wrap(printable_text(L)), accuracy=("""
+## 4. Size accuracy
+
+Every surface of a printed part lies within the size accuracy of its drawn position, in any direction: a part may
+come out that much larger or that much smaller than drawn, all over.
+
+| Quantity | Value |
+|---|---|
+| Size accuracy | +/- {tol} mm |
+""".format(tol=num(AMJ.PRINT_TOLERANCE)) if AMJ.ACCURACY_IN_SHEET else ""))
 
 
 DATASHEETS = [("DS-W01_barrel.md", "DS-W01", "Mainspring barrels, catalogue sheet"),
@@ -1227,6 +1237,9 @@ def traceability_rows(L, B, S=None):
              "Inner height", [num(W.CASE_HEIGHT)]),
         cell("MIN_FEATURE", W.MIN_FEATURE, "datasheets/DS-W03_process.md", "2. Smallest feature",
              "Smallest printable feature", "Value", [num(W.MIN_FEATURE)]),
+    ] + ([cell("PRINT_TOLERANCE (geometry/asmade_job.py; the as-made test, geometry/asmade.py)", AMJ.PRINT_TOLERANCE,
+               "datasheets/DS-W03_process.md", "4. Size accuracy", "Size accuracy", "Value",
+               [num(AMJ.PRINT_TOLERANCE)])] if AMJ.ACCURACY_IN_SHEET else []) + [
         cell("THIN_VOXEL, THIN_ERODE_VOX, THIN_DILATE_VOX, THIN_DEV, voxel grid offset (the printability test)",
              (W.THIN_VOXEL, W.THIN_ERODE_VOX, W.THIN_DILATE_VOX, W.THIN_DEV, L["voxel_centre_offset"]),
              "datasheets/DS-W03_process.md", "3. What the smallest", None, None, printable_tokens(L)),

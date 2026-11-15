@@ -7,3 +7,6 @@ AS_MADE_IN_JOB = os.environ.get("WATCH_AS_MADE", "") == "1"
 # mm: the print process's size accuracy: every surface of a printed part lies within this of its drawn position.
 # PROVISIONAL (SESSION.md, G 05:05): to be set to what the house reference passes as made, then stated in DS-W03.
 PRINT_TOLERANCE = float(os.environ.get("WATCH_PRINT_TOLERANCE", "0.01"))
+# DS-W03 states the size accuracy (section 4) as a supplier fact, whether or not the as-made checks are graded
+# (SESSION.md: Mikael via A 04:32, one stated accuracy). False: the sheet is as before.
+ACCURACY_IN_SHEET = os.environ.get("WATCH_ACCURACY_IN_SHEET", "1") != "0"
