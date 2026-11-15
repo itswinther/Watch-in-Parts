@@ -31,6 +31,12 @@ def _c():
     return C, sc
 
 
+def wind_sense_words():
+    """The arbor's winding sense in words, from geometry/keyless_job.py WIND_SENSE (about +z, B's frame; QA-W100's
+    "clockwise" is as seen from +z)."""
+    return "clockwise" if KJ.WIND_SENSE < 0 else "anticlockwise"
+
+
 def check():
     """[error]: the scale table against A's files, A's literals this text states, and the barrel speed."""
     errs = list(KJ.check_table())
@@ -38,6 +44,12 @@ def check():
     if C.BARREL_HOURS_PER_TURN != float(1 / W.BARREL_TURNS_PER_HOUR):
         errs.append("A's BARREL_HOURS_PER_TURN %r is not the 8-hour build's speed class (1 turn every %s h)"
                     % (C.BARREL_HOURS_PER_TURN, 1 / W.BARREL_TURNS_PER_HOUR))
+    import re
+    with open(os.path.join(ROOT, "environment", "public", "job", "datasheets", "DS-W01_barrel.md"), encoding="utf-8") as f:
+        m = re.search(r"\|\s*1 turn every %g h\s*\|\s*([a-z-]+)\s*\|" % (1 / W.BARREL_TURNS_PER_HOUR), f.read())
+    if not m or m.group(1) != wind_sense_words():
+        errs.append("DS-W01's running sense of the 8-hour class (%s) is not the arbor's winding sense from "
+                    "WIND_SENSE (%s)" % (m.group(1) if m else "not found", wind_sense_words()))
     G = KJ._import_a("grade")
     src = inspect.getsource(G._pull) + inspect.getsource(G.worker)
     for text in ("C.WIGGLE_DEG / 1.5", "sgn * 1.5 * k", "_turn(w, -fw * 360)"):
@@ -84,9 +96,7 @@ def format_keyless_block():
     "stem":  {"parts": ["part_name", ...], "point": [x, y, z], "direction": [dx, dy, 0]},
     "arbor": {"parts": ["part_name", ...]},
     "mobiles": {
-      "mobile_name": {"kind": "free", "dof": "rot", "point": [x, y, z], "direction": [dx, dy, dz],
-                      "parts": ["part_name", ...]},
-      "mobile_name": {"kind": "spring", "dof": "slide", "direction": [dx, dy, dz], "rest": 1, "on_stem": true,
+      "mobile_name": {"kind": "free", "dof": "rot", "point": [x, y, z], "direction": [0, 0, 1],
                       "parts": ["part_name", ...]},
       ...
     }
@@ -114,7 +124,7 @@ def format_text(H):
                "`rot` (it turns about the line through `point` along `direction`) or `slide` (it moves along "
                "`direction`; `point` is not needed). `direction`: three numbers, not all zero. `rest` (springs only): "
                "`1` or `-1`, the sign of the mobile's own coordinate (angle about, or travel along, `direction`) that "
-               "its spring urges it towards. `on_stem` (optional, `true` or `false`): `true` for a slide along the "
+               "its spring urges it towards; a mobile's own coordinate is zero in its delivered position. `on_stem` (optional, `true` or `false`): `true` for a slide along the "
                "stem's line that also turns with the stem. A name here is not a name of `mobiles`, and not `barrel`, "
                "`stem` or `arbor`.", "    ") + "\n"
 
@@ -139,46 +149,70 @@ The test rig.
   `keyless.mobiles`, as declared; and, turning freely about their axes, every mobile declared `friction_on` and
   every mobile that the declared meshes drive from the barrel only through such a mobile. Everything else, the
   frame, the barrel's drum and every other mobile of `mobiles`, is one fixed body: the going train stands while
-  the crown is used. The minute hand's mobile is called the minute mobile below.
+  the crown is used. The minute hand's mobile is called the minute mobile below. It must be one of the freely
+  turning mobiles; if it is not, the hands cannot be set while the going train stands, and AT-5 and AT-6 fail.
 - **Positions and directions.** Position 1 (pushed in) is the stem as delivered. Position 2 (pulled out) is the stem
   moved outwards along its line by the winding stem's travel from position 1 to position 2 (VM-DS-401, section 4,
   Table 2, this series). Forward is turning the crown clockwise as seen from outside the case, looking in along the
-  stem; backward is the opposite. The arbor winds when it turns in the barrel's running sense (DS-W01, section 4).
+  stem; backward is the opposite. The arbor winds when it turns in the barrel's running sense (DS-W01, section 4):
+  {wsense}, seen from the dial side (+z) looking towards -z. The mainspring urges it the other way.
 - **Touching.** Two bodies touch, and do not interpenetrate, while they intersect by at most {tol} mm3.
 - **Friction.** Clean, dry contacts, brass on steel: coefficient of friction static {mus}, sliding {mud}
-  (Engineering ToolBox, "Friction and Friction Coefficients"). A body pushed by another moves the least distance along
-  its degree of freedom that the contact, with static friction, allows; if friction prevents it from giving way, it
-  does not.
+  (Engineering ToolBox, "Friction and Friction Coefficients"). Bodies are moved only by contact. A body pushed by
+  another moves the least distance along its degree of freedom that the contact, with static friction, allows; if
+  friction prevents it from giving way, it does not.
+- **Fits.** The rig gives every bore around a turning body's declared axis (the stem, the barrel arbor, a `rot`
+  mobile of `keyless.mobiles` and each freely turning mobile of the going train) {fit} mm of radial play, in that
+  body's own parts and in any part it turns in. Parts may therefore be drawn line to line at a pivot. Nothing else
+  is changed.
 - **Springs.** Spring-loaded mobiles (`spring`) are urged towards their rest side by springs much lighter than the
-  mainspring. They give way first when pushed; if they cannot give way, they are pushed along like any body. They
-  return towards rest until they touch something; their springs never drive other bodies.
+  mainspring. They give way first when pushed, and only in the direction the contact pushes them; if they cannot
+  give way, they are pushed along like any body. Between steps they return towards rest. On the way they push along
+  any freely moving body in their path (a `free` or `spring` mobile, or a freely turning mobile of the going train),
+  but never the fixed body, the stem, the barrel arbor, or another spring away from its own rest side; where they
+  cannot push, they stop.
+- **Riding on the stem.** A mobile declared `on_stem` turns with the stem; its slide along the stem's line is its
+  own. While the stem turns, a `free` `on_stem` mobile is light along its slide: where a contact pushes it that way
+  within the friction rule, it gives way first, like a spring. If it cannot give way, or giving way would push a
+  body behind it into something that cannot move, it drives what it touches.
 - **Mainspring.** The mainspring always urges the barrel arbor against winding. It is much stronger than any spring
   and pushes whatever is in its way.
+- **What the rig does not model.** Parts do not bend: a flexing arm or blade is rigid on the rig. Every axis and
+  slide line is fixed in the frame, except that an `on_stem` mobile turns with the stem. A spring has no body of its
+  own: it is a force on its own mobile, and it acts on other bodies only through that mobile pushing them by
+  contact, as described above. A design that depends on anything else of this kind will not behave on the rig as it
+  would in metal.
 - **The crown** is turned in steps of {step} degrees and pulled or pushed in steps of {pstep} mm. A step that cannot
   proceed is blocked, and nothing moves. While pulling or pushing, a blocked step is retried with the crown rocked
   by up to {wig} degrees either way, in steps of {wst} degrees, to let teeth find their gaps.
-- **At the start** of each step below, bodies may overlap and settle by up to {settle} mm of surface travel.
+- **At the start** of each step below, the rig first lets the movement come to rest: each mobile clears its
+  overlaps within {settle} mm of surface travel, meshing wheels are turned into their gaps, and the springs return
+  their parts.
 - **Starting states.** AT-1 starts from a let-down mainspring. AT-2 starts from a fresh movement whose barrel arbor
-  the rig has turned in the winding sense by {prewind} degrees itself (the arbor, not the crown). AT-3 starts where
-  AT-2 ends; AT-4, AT-5 and AT-6 each start from the state at the end of AT-2 (crown let go, in position 1).
+  the rig has turned in the winding sense by {prewind} degrees itself (the arbor, not the crown); if that winding is
+  blocked, AT-2 fails. AT-3 starts where AT-2 ends; AT-4, AT-5 and AT-6 each start from the state at the end of
+  AT-2 (crown let go, in position 1).
 
 Steps. Each passes or fails on its own.
 
-0. **AT-0 Assemble.** At rest, as delivered, no two bodies intersect by more than {tol} mm3. Every mobile of
+0. **AT-0 Assemble.** Once the rig has let the movement come to rest (see "At the start"), no two bodies intersect
+   by more than {tol} mm3. Every mobile of
    `keyless.mobiles` and every freely turning mobile of the going train, moved {shift} mm across its axis in each of
    two perpendicular directions (and, for one that turns, along its axis each way), intersects some other body by
    more than {tol} mm3. Every part of the `keyless` section except the stem's lies within the inner radius of the
    case named in the work order ({crad}) of the vertical line through `case_centre`; the whole movement with these
-   parts is no taller than the inner height of that case ({chgt}); and stem material reaches at least {prot} mm
-   beyond that radius.
+   parts is no taller than the inner height of that case ({chgt}); and stem material at the crown end (on the side
+   of `case_centre` that the stem's direction points to) reaches at least {prot} mm beyond that radius.
 1. **AT-1 Wind.** The crown, in position 1, is turned forward {wt} turn. It is never blocked; it takes between {wlo}
    and {whi} crown turns per turn of the barrel arbor (measured over this turn); the minute mobile moves at most
    {still} degree.
-2. **AT-2 Hold.** The crown is let go for {hs} steps: it is free to turn, pushed like any free body, and the mainspring
-   pulls back. Every {te} steps the rig taps the movement: each free body moves up to {tap} mm (surface travel) in
+2. **AT-2 Hold.** The crown is let go for {hs} steps, or longer while the arbor is still running back (up to {hmax}
+   steps, or until it has run back more than {rb} degrees): it is free to turn, pushed like any free body, and the
+   mainspring pulls back. Every {te} steps the rig taps the movement: each free body moves up to {tap} mm (surface travel) in
    the direction it can move furthest, and spring-loaded bodies return towards rest. The arbor runs back at most
    {rb} degrees in all, and over the last {hl} steps it moves at most {hd} degree: it is held.
-3. **AT-3 Run.** Fully wound, the mainspring stores the turns of the arbor that VM-DS-101 gives for the spring the
+3. **AT-3 Run.** AT-3 starts from AT-2's end state and also requires AT-2's hold limits (run-back at most {rb}
+   degrees and, over the last {hl} steps, drift at most {hd} degree). Fully wound, the mainspring stores the turns of the arbor that VM-DS-101 gives for the spring the
    supplied barrel holds (Table 3, var. {spring}, column "N at r = D/6"); the run-back measured in AT-2 is lost
    from that, and while the watch runs the barrel turns at the speed class of the 8-hour build (DS-W01, section 4),
    so the power reserve is (capacity - run-back) x the hours per barrel turn. It is at least {res} hours. The barrel
@@ -192,8 +226,9 @@ Steps. Each passes or fails on its own.
 5. **AT-5 Set.** The crown is pulled out to position 2, stopping at {ns} evenly spaced positions (both ends
    included). At each stop, from the same state, the crown is turned {sw} degrees forward and, separately, {sw}
    degrees backward. No test turn is blocked, and none drives both trains (the arbor winding by more than {still}
-   degree and the minute mobile moving by more than {still} degree). At position 1 the forward test turn winds and
-   does not set; at position 2 it sets and does not wind. Then, in position 2, the crown is turned {st} degrees
+   degree and the minute mobile moving by more than {still} degree). At position 1 the forward test turn does not
+   set, and a forward turn of {ct} degrees from there (never blocked) winds the arbor by more than {still} degree;
+   at position 2 the forward test turn does not wind (that it sets is judged by the turns below). Then, in position 2, the crown is turned {st} degrees
    forward and {st} degrees back: it is never blocked, the minute mobile turns at least {smin} degrees each way, and
    the arbor never loses more than {htol} degrees.
 6. **AT-6 Return.** From position 2 the crown is pushed back in, stopping at the same positions in reverse order,
@@ -203,7 +238,8 @@ Steps. Each passes or fails on its own.
 Part 5 is judged by the steps that pass. The rig runs Part 5 as one, within at most {pt} s of the whole inspection's
 time; a step not finished by then fails.
 """.format(tol=n(sc["TOL"]), mus=n(C.MU_STATIC), mud=n(C.MU_SLIDING), step=n(C.STEP_DEG), pstep=n(sc["PULL_STEP"]),
-           wig=n(C.WIGGLE_DEG), wst=n(WIGGLE_STEP), settle=n(sc["World.settle:budget"]), prewind=n(C.PREWIND_DEG),
+           wig=n(C.WIGGLE_DEG), wst=n(WIGGLE_STEP), settle=n(sc["World.phase:budget"]), prewind=n(C.PREWIND_DEG),
+           wsense=wind_sense_words(), fit=n(sc["FIT_CLEARANCE"]), hmax=C.HOLD_MAX_STEPS,
            shift=n(sc["HOLD_SHIFT"]), crad=H.cite_case("Inner radius (mm)"),
            chgt=H.cite_case("Inner height along the axis (mm)"), prot=n(sc["STEM_PROTRUDE"]), wt=n(C.WIND_TURNS),
            wlo=n(C.WIND_BAND[0]), whi=n(C.WIND_BAND[1]), still=n(C.STILL_TOL), hs=C.HOLD_STEPS, te=C.TAP_EVERY,
@@ -255,17 +291,22 @@ def trace_rows(H):
         cell(k + "STEP_DEG, PULL_STEP x S, WIGGLE_DEG, the rocking step (literal 1.5 in A's grade._pull)",
              (C.STEP_DEG, sc["PULL_STEP"], C.WIGGLE_DEG, WIGGLE_STEP), Q, P, "**The crown**", None,
              [n(C.STEP_DEG), n(sc["PULL_STEP"]), n(C.WIGGLE_DEG), n(WIGGLE_STEP)]),
-        cell(k + "engine World.settle budget x S", sc["World.settle:budget"], Q, P, "**At the start**", None,
-             [n(sc["World.settle:budget"])]),
+        cell(k + "engine World.phase budget x S", sc["World.phase:budget"], Q, P, "**At the start**", None,
+             [n(sc["World.phase:budget"])]),
+        cell(k + "FIT_CLEARANCE x S (A's fit rule, grade.relieve_fits)", sc["FIT_CLEARANCE"], Q, P, "**Fits.**", None,
+             [n(sc["FIT_CLEARANCE"])]),
+        cell(k + "winding sense: geometry/keyless_job.py WIND_SENSE %r (the DS-W01 running sense)" % KJ.WIND_SENSE,
+             wind_sense_words(), Q, P, "**Positions and directions.**", None, []),
         cell(k + "PREWIND_DEG", C.PREWIND_DEG, Q, P, "**Starting states.**", None, [n(C.PREWIND_DEG)]),
         cell(k + "HOLD_SHIFT x S, STEM_PROTRUDE x S", (sc["HOLD_SHIFT"], sc["STEM_PROTRUDE"]), Q, P, "0. **AT-0", None,
              [n(sc["HOLD_SHIFT"]), n(sc["STEM_PROTRUDE"])]),
         cell(k + "WIND_TURNS, WIND_BAND, STILL_TOL", (C.WIND_TURNS, C.WIND_BAND, C.STILL_TOL), Q, P, "1. **AT-1", None,
              [n(C.WIND_TURNS), n(C.WIND_BAND[0]), n(C.WIND_BAND[1]), n(C.STILL_TOL)]),
-        cell(k + "HOLD_STEPS, TAP_EVERY, TAP_ARC x S, CLICK_RUNBACK, HELD_LAST_STEPS, HELD_DRIFT",
-             (C.HOLD_STEPS, C.TAP_EVERY, sc["TAP_ARC"], C.CLICK_RUNBACK, C.HELD_LAST_STEPS, C.HELD_DRIFT), Q, P,
-             "2. **AT-2", None, [C.HOLD_STEPS, C.TAP_EVERY, n(sc["TAP_ARC"]), n(C.CLICK_RUNBACK), C.HELD_LAST_STEPS,
-                                 n(C.HELD_DRIFT)]),
+        cell(k + "HOLD_STEPS, HOLD_MAX_STEPS, TAP_EVERY, TAP_ARC x S, CLICK_RUNBACK, HELD_LAST_STEPS, HELD_DRIFT",
+             (C.HOLD_STEPS, C.HOLD_MAX_STEPS, C.TAP_EVERY, sc["TAP_ARC"], C.CLICK_RUNBACK, C.HELD_LAST_STEPS,
+              C.HELD_DRIFT), Q, P, "2. **AT-2", None,
+             [C.HOLD_STEPS, C.HOLD_MAX_STEPS, C.TAP_EVERY, n(sc["TAP_ARC"]), n(C.CLICK_RUNBACK), C.HELD_LAST_STEPS,
+              n(C.HELD_DRIFT)]),
         cell(k + "RESERVE_MIN, FREE_RUN_DEG, FREE_RUN_STEP, COUPLED_TURN (BARREL_HOURS_PER_TURN is "
              "the 8-hour build's speed class, cited; the capacity is cited to VM-DS-101)", (C.RESERVE_MIN, C.FREE_RUN_DEG,
                                                        C.FREE_RUN_STEP, C.COUPLED_TURN), Q, P, "3. **AT-3", None,
