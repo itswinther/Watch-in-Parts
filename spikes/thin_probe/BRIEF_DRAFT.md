@@ -170,7 +170,8 @@ transcripts will show. Fix them before the final task.
   passes; `JUDGE_REHEARSAL.md` section 4).
 - Requirement 6, "at any time of day": the grader turns the slower mobile of a pair only a few degrees (a
   minute hand crossing the seconds hand passes; same section).
-- Requirement 11, the quarter-disc rule: decided at 00:50 and not yet in the grader on `main`.
+- Requirement 11, the quarter-disc rule: in the grader since builder J's merge (9366f17), so the probe branch
+  gets it if it starts from that commit or later.
 - Requirement 4, "from every position": the grader pushes at every eighth step. The 00:50 decision (push from
   flank contact) is not in it yet either.
 
