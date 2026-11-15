@@ -1,1 +1,9 @@
 SESSION.md merge=union
+# Line endings: the task runs in Linux containers. A Windows checkout must not turn LF into CRLF,
+# or test.sh and solve.sh fail to start ("bad interpreter") and the verifier writes no reward.
+* text=auto eol=lf
+*.sh text eol=lf
+*.stl binary
+*.png binary
+*.jpg binary
+*.pdf binary
