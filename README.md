@@ -182,7 +182,7 @@ We also ran Marco Lang's ml01 going train, from his public CAD file, through an 
   and check runs in its own try block with its own time limit (1,800 s each, 7,200 s in all); an exception or a
   timeout fails that check only.
 - Baselines in Harbor, twice. On Modal sandboxes, from the checked-in `task/` with the grader on `main`
-  (Harbor 0.26, 15 Nov 08:55): oracle 1.000 in 4 min 15 s, nop 0.000 in 3 min 11 s, no exceptions. In local
+  (Harbor 0.26, 15 Nov, about 08:25): oracle 1.000 in 4 min 15 s, nop 0.000 in 3 min 11 s, no exceptions. In local
   Docker on grader `3d5d96f`: oracle 1.000, nop 0.000 (SESSION.md, A 05:49). Outside Harbor an empty delivery
   folder grades 0.000000.
 - Leak guard: `make_bundle_job.py` refuses any file name, mark, phrase or number that would point at the
@@ -212,7 +212,7 @@ OPENAI_API_KEY=... harbor/watch_one/run_modal.sh openai/gpt-6.1-sol 3  # then a 
 ```
 
 On Windows, run the three `harbor run` lines above with `-e modal` from PowerShell (the `.sh` runners need
-bash); clone after 15 Nov 08:40, when the line-ending rule went in.
+bash); use a clone that has `.gitattributes` (commit `fca7fe9` or later), which keeps the shell scripts in LF.
 
 `task/` is generated, not hand-written: `harbor/watch_one/build_task.py` writes it from the sources in this repo
 (`environment/`, `geometry/`, `tests/`, `solution/`) and refuses anything that would leak the solution into the
