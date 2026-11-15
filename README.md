@@ -115,9 +115,9 @@ We also ran Marco Lang's ml01 going train, from his public CAD file, through an 
 - `tests/test.sh` writes reward 0 first; the grader writes 0 again and overwrites it once at the end. Each gate
   and check runs in its own try block with its own time limit (1,800 s each, 7,200 s in all); an exception or a
   timeout fails that check only.
-- Baselines in Harbor on `g/final` 4c5d8d3: oracle (our reference, built in the container) 1.000, nop 0.000
-  (SESSION.md, A 04:48). That run was before the thickness term was added. The reference is at H0, so it
-  should stay 1.0; this is to be re-run.
+- Baselines in Harbor on the submitted grader (`3d5d96f`): oracle (our reference, built in the container)
+  1.000, nop 0.000, both marked valid by Harbor (SESSION.md, A 05:49). Outside Harbor an empty delivery folder
+  grades 0.000000.
 - Leak guard: `make_bundle_job.py` refuses any file name, mark, phrase or number that would point at the
   solution, including the house design's height and the thickness formula. `harbor/watch_one/build_task.py`
   admits only an allowlist of paths into the agent image and refuses copies of secret files by sha256.
@@ -137,6 +137,13 @@ AGENT=codex CODEX_FORCE_AUTH_JSON=1 harbor/watch_one/run_all.sh openai/gpt-6.1-s
 It builds the task, checks the network settings, runs `harbor lint`, the oracle, nop and the model (OpenCode by
 default, agent cap 3 h), and summarises the results.
 
+**Claude models under OpenCode need one extra setting.** The task image caps one reply at 64,000 output
+tokens. Sonnet 5.5 spent the whole cap on thinking in a single reply and delivered nothing, three runs out of
+three (SESSION.md, A 05:09). Our Claude runs therefore pass
+`--ae OPENCODE_EXPERIMENTAL_OUTPUT_TOKEN_MAX=128000` to `harbor run`. At 128,000 and default thinking Sonnet
+still did the same in two of two finished runs (A 05:43), so a zero from an empty delivery is a harness
+outcome, not a result; we do not count those runs.
+
 Without Harbor (Python 3.12 or 3.13, `pip install -r requirements.txt`, from the repo root):
 
 ```bash
@@ -148,30 +155,105 @@ python3 environment/make_brief_job.py --check                          # documen
 python3 tests/test_anchors_job.py 2 --only "job stop-early"            # stop-early anchors
 ```
 
-Grading the reference takes a few minutes (153 s in the Harbor oracle run).
+Grading the reference takes a few minutes (188 s in the Harbor oracle run; about 8 min on a busy 4-core machine).
 
 ## Results
 
-Final brief (`g/final` 4c5d8d3 agent image), Harbor, OpenCode or Codex, graded with the thickness term.
+Every number here is from the submitted task: agent image `4c5d8d3`, grader `3d5d96f` (same agent files; the
+grader adds the thickness term). Runs are in Harbor, sandboxed, web tools denied. Deliveries and grader details
+are on branch `a/final-runs`, under `runs/final_4c5d8d3/`.
 
-| Model | Runs | Rewards | Height H (mm) | Notes |
+| Agent | Runs | Reward | Notes |
+| --- | --- | --- | --- |
+| Oracle (our reference) | 1 | 1.000 | H 3.35 mm, built in the container in 37 s |
+| nop (does nothing) | 1 | 0.000 | |
+| GPT-6.1-sol (Codex) | 3 | 0.457, 0.447, 0.427 (mean 0.444) | no run delivers a watch that fully works |
+| Sonnet 5.5 (OpenCode) | 0 valid | | see below |
+| Opus 5.5 (OpenCode) | 0 valid | | see below |
+| Fable 5.2 | not run yet | | |
+
+The three GPT-6.1-sol runs, check by check:
+
+| Run | Reward | Share of checks | Height H | What fails |
 | --- | --- | --- | --- | --- |
-| Oracle (reference) | 1 | pending re-run (1.000 before the thickness term) | 3.35 (full score at 3.95 or below) | |
-| nop | 1 | pending re-run (0.000 before the thickness term) | | |
-| Sonnet 5.5 | 3 | pending | pending | |
-| Opus 5.5 | pending | pending | pending | |
-| Fable 5.2 | pending | pending | pending | |
-| GPT-6.1-sol | pending | pending | pending | |
+| `dQKXa6k` | 0.457 | 0.956 | 9.60 mm | `held` in P1 and P3: one mobile can be pushed sideways out of place |
+| `fhhWYjp` | 0.447 | 0.934 | 11.80 mm | `seated` and `clear` in P1 and P3: a wheel is not seated on its arbor; the minute and seconds mobiles overlap as they turn (0.0106 mm3 against a limit of 0.01) |
+| `oVS4tLK` | 0.427 | 0.894 | 11.15 mm | `held` and `clear` in P1 and P3: the seconds mobile can drop out downwards, minute and seconds overlap (0.034 mm3). `day_place` in P2 and P3: the 24-hour hand lies 0.4 mm below the top of the frame |
+
+How to read these:
+
+- **The reward is below one half because the watch does not work, not because half of it is missing.** Each
+  run passes 89 to 96 % of the weighted checks, and the assembly plan (P4) passes in all three. Half of the
+  reward is paid only when every check of every part passes, and none of the three reaches that.
+- **Thickness did not change these three scores**, because it only applies to a watch that fully works. Had
+  the faults been fixed at the delivered heights, the thickness scores would be 0.026, 0.0008 and 0.003: the
+  watches are 9.6 to 11.8 mm against 3.95 mm. The order says "as thin as you can".
+- **The model said so itself.** All three reports state P1 to P3 `not_tested` and P4 `pass`. That is truthful,
+  and costs 3/68 of the reward.
+- **It stopped early.** The three agents ran for 810 to 2,036 s (14 to 34 minutes) of a 10,800 s limit.
+- One of the faults is marginal: the 0.0106 mm3 overlap in `fhhWYjp`. That run also fails `seated`, so its
+  score does not depend on it.
+
+The three GPT rewards were regraded by workstream A in Docker with grader `3d5d96f` (SESSION.md, A 05:48). A second, independent regrade outside Harbor is running; its result goes here.
+
+**Claude models: no valid result yet.** Sonnet 5.5 at default thinking produced no delivery (see "How to run
+it"). The Sonnet runs at low and medium thinking and the one Opus 5.5 run ended when our API credit ran out;
+Harbor marks them invalid (SESSION.md, A 05:46). More runs are in progress and this table will be updated.
 
 Earlier briefs, for context only:
 
 - On the briefs that stated the acceptance test (four-part job), ten of ten local runs in Claude Code, outside
-  Harbor, scored 1.0 (Fable 5.2 and Opus 5.5 three each, Sonnet 5.5 four). With a stated 9.0 mm thickness target, GPT, Opus and Sonnet all scored 1.000 (SESSION.md 04:05).
+  Harbor, scored 1.0 (Fable 5.2 and Opus 5.5 three each, Sonnet 5.5 four). With a stated 9.0 mm thickness
+  target, GPT, Opus and Sonnet all scored 1.000 (SESSION.md 04:05).
 - Round 2 (4.0 mm target stated, thin barrel, 12.7 mm case; `b/thin-4mm` 92d9622): GPT-6.1-sol scored 0.354 in
   one run. H was 4.71 mm; P1 and P3 failed train, seconds, tolerant and strength; it claimed all four parts pass
   (SESSION.md, A 04:31).
 
 All runs and logs are in [SESSION.md](SESSION.md).
+
+## The judging criteria, and where we stand on each
+
+The four criteria and their points as we noted them from the organisers' brief. We list what is shown and
+what is not.
+
+**1. Gap between frontier agents and the reference (30).**
+
+- Shown: reference 1.000, do-nothing 0.000, GPT-6.1-sol 0.457 / 0.447 / 0.427 in three valid Harbor runs.
+- Context: on the first briefs, which stated the acceptance test and had a roomier case, every frontier model
+  we ran scored 1.0. The submitted brief differs in several ways at once (no stated test, no target, a smaller
+  case, a barrel catalogue), so we cannot say which change produces the gap.
+- Not shown: any valid Claude run on the submitted task. Three runs of one model is the whole evidence today.
+
+**2. Meaningful difficulty (30).**
+
+- Each failed check names a physical fault in the delivered parts (table above), with the measured number in
+  the grader's details file.
+- The agent had what it needed: the order, the sheets, CadQuery, the factory's own STEP loader and a kernel
+  with intersection volume and smallest distance. It used 14 to 34 minutes of 3 hours and reported its own
+  parts as not tested.
+- Every check traces to the order, a sheet, the file format or trade practice
+  ([docs/CHECK_BASIS.md](docs/CHECK_BASIS.md)). The three numbers that do not are listed under known limits;
+  none of the faults above depends on them.
+- Not done: a transcript-level trace of each fault to the decision that caused it.
+
+**3. Reward integrity (25).**
+
+- Separate offline verifier; it reads only the delivered files and never runs submitted code; reward 0 is
+  written first; each check runs in its own try block with a time limit.
+- Oracle 1.000 and nop 0.000 in Harbor on the submitted grader.
+- The leak guard on the agent's folder refuses the solution, the full-score height and the formula.
+- A false `pass` in the report costs more than an admitted fault.
+- Not done on the submitted version: the full anchor suite (`tests/test_anchors_job.py`) has not been re-run
+  on the thin layout; one anchor is known to be out of date there. No exploit hunt was run against this
+  version.
+
+**4. Craft (15).**
+
+- One command builds the task and runs oracle, nop and a model. The same grader runs outside Harbor with four
+  shell lines.
+- `SPEC.md` names the constant behind every number.
+- Known limits are listed below, including the ones that weaken our own claims.
+- Not done: a dry run from a clean clone by someone who did not write this.
 
 ## Known limits
 
