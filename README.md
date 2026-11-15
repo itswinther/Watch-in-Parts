@@ -569,7 +569,7 @@ the fix for each.
 | `task/` | the Harbor task, ready to run |
 | `harbor/watch_one/` | the script that builds `task/`, and the one-command runner |
 | `docs/research/REAL_WATCH_WORK.md`, `docs/research/REAL_ML01_FAIRNESS.md` | the task against real watches and a real CAD design |
-| `visualizer/` | demo pages, open `index.html` or `xray.html` in a browser |
+| `visualizer/` | demo pages, open `index.html` (Replay) or `xray.html` in a browser. Replay shows each run's reward as first graded: Opus medium appears as 0.943 (bar then 3.95 mm; 0.925 on the submitted grader), and it includes one Sonnet run (0.412) that was cut off by our credit limit and is not counted in Results |
 | `SESSION.md` | shared log of the four sessions: decisions, requests, every result |
 
 ## History
