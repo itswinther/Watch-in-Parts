@@ -90,8 +90,10 @@ Conditions. If one fails, Part 1 fails and none of its checks passes.
 
 Checks. Each passes or fails.
 
-1. **Free to turn.** Each mobile, the barrel included, turned through one full turn about its axis in 72 steps of
-   5 degrees, never intersects the frame by more than 0.01 mm3.
+1. **Free to turn.** Each mobile, the barrel included, is turned about its axis through one full turn in 72 steps
+   of 5 degrees: at step i (i = 0, 1, ..., 72 - 1) it is turned i x 5 degrees, and after every step it is
+   also turned (i + 1/3) x 5 and (i + 1/5) x 5 degrees. At none of these 216 positions does it intersect
+   the frame by more than 0.01 mm3.
 2. **Held.** Each mobile, the barrel included, is moved 0.3 mm along +x, -x, +y, -y, +z and -z in turn, and is
    held in every one of the six directions. Only the tested mobile moves; the frame and every other mobile stay
    where they are. Moved in a direction, a mobile is held when it intersects the frame by more than 0.01 mm3, or
@@ -148,11 +150,19 @@ Checks. Each passes or fails.
    D's axis (N then turns about its moved axis; if the two axes coincide, "away" is +x and "towards" is -x). The
    steps, the turning angles and m are those of the assembled positions. This check does not change which meshes
    drive the hands; that is decided in the assembled positions only.
-6. **Nothing else collides.** Every pair of mobiles (the barrel included) that is not declared as a mesh is turned
-   together, each at its speed from the declared tooth counts (a mobile that no declared mesh reaches from the
-   barrel stands still): 144 equal steps covering one full turn of the faster of the two, then, if their speeds
-   differ, 144 equal steps covering one full turn of one relative to the other. At every step they intersect by
-   at most 0.01 mm3.
+6. **Nothing else collides.** No two mobiles (the barrel included) that are not declared as a mesh may meet at any
+   pair of angles, whatever their speeds. They are tested on their swept solids: the swept solid of a mobile is
+   every point that some point of the mobile passes through while it makes one full turn about its axis (the
+   mobile turned to every angle at once). For every such pair, the swept solids of the two mobiles intersect by at
+   most 0.01 mm3. Two mobiles on the same axis are tested in the same way.
+
+   *Swept solid.* It is worked out from horizontal sections of the mobile, all its parts together, in the
+   assembled position. The heights at which the mobile has a vertex cut it into height ranges. Inside a range
+   that no face crosses that is neither vertical nor horizontal, the section is the same at every height; inside
+   any other range, the range is cut into the fewest equal bands no higher than 0.02 mm. Each range of the first
+   kind, and each band, is given by the section at its middle height: through that whole range or band, the swept
+   solid holds every point whose distance from the axis is the distance from the axis of some point of that
+   section. The swept solid is therefore a solid of revolution, with exact circles round the axis.
 7. **Hour hand.** 8. **Minute hand.** 9. **Seconds hand.** The hands show the time, each turning clockwise at a
    constant speed: the hour hand one turn every 12 h, the minute hand one turn every hour, the seconds hand one turn every minute.
    A hand is driven only through declared meshes that pass the mesh test (a declared

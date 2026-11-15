@@ -44,6 +44,7 @@ hand speeds and directions, and the weights of the checks.
 | TIMEOUT_S, JOB_TIME_LIMIT_S in `tests/grade_watch.py` (per condition and check; whole inspection) | (1800, 7200) | `datasheets/QA-W100_inspection.md` | 4. Terms | **Computing time.** | statement |
 | FRAME_JOIN | 0.01 | `datasheets/QA-W100_inspection.md` | 5. Part 1 | **C2 Assembled.** | statement |
 | SPIN_STEPS (and the step, 360 / SPIN_STEPS degrees) | 72 | `datasheets/QA-W100_inspection.md` | 5. Part 1 | **Free to turn.** | statement |
+| SPIN_OFFGRID (and the positions, SPIN_STEPS x (1 + its length)) | ((Fraction(1, 3), Fraction(1, 5)), 72) | `datasheets/QA-W100_inspection.md` | 5. Part 1 | **Free to turn.** | statement |
 | HELD_MOVE | 0.3 | `datasheets/QA-W100_inspection.md` | 5. Part 1 | **Held.** | statement |
 | COAX_TOL (also Part 1 check 10) | 0.01 | `datasheets/QA-W100_inspection.md` | 5. Part 1 | **Held.** | statement |
 | SEAT_TOUCH | 0.02 | `datasheets/QA-W100_inspection.md` | 5. Part 1 | **Seated.** | statement |
@@ -56,7 +57,8 @@ hand speeds and directions, and the weights of the checks.
 | DRIVE_AREA_RATIO | 0.5 | `datasheets/QA-W100_inspection.md` | 5. Part 1 | *Mesh test.* | statement |
 | DRIVE_CONTACT_SCAN, DRIVE_CONTACT_HALVINGS (and the resolution, 1 / (SCAN x 2^HALVINGS) of a pitch) | (32, 7) | `datasheets/QA-W100_inspection.md` | 5. Part 1 | *Mesh test.* | statement |
 | MESH_SHIFT | 0.03 | `datasheets/QA-W100_inspection.md` | 5. Part 1 | **The train runs with | statement |
-| CLEAR_STEPS | 144 | `datasheets/QA-W100_inspection.md` | 5. Part 1 | **Nothing else collides.** | statement |
+| VOL_TOL on the swept solids (`Movement.clear_swept`; CLEAR_STEPS is stage mode only) | 0.01 | `datasheets/QA-W100_inspection.md` | 5. Part 1 | **Nothing else collides.** | statement |
+| SWEEP_DZ (swept solids, `_swept_bands`) | 0.02 | `datasheets/QA-W100_inspection.md` | 5. Part 1 | *Swept solid.* | statement |
 | HAND_REACH | 5.0 | `datasheets/QA-W100_inspection.md` | 5. Part 1 | **Hands.** | statement |
 | HAND_CENTRE_MIN (also Part 2 check 2) | 0.5 | `datasheets/QA-W100_inspection.md` | 5. Part 1 | **Hands.** | statement |
 | hand wholly above the frame (`Movement.hand_shape`, margin 0) | 0.0 | `datasheets/QA-W100_inspection.md` | 5. Part 1 | **Hands.** | statement |

@@ -38,6 +38,8 @@ CHANGED_BARREL_TURNS_PER_HOUR = Fraction(1, 6)
 REF_KEPT_VOLUME_SHARE = 0.626   # stage 3: the reference keeps 0.6267 of the mobile volume and all of the fixed volume it receives (rounded down)
 VOL_TOL = 0.01              # mm3
 SPIN_STEPS = 72             # free-spin test: steps of 5 degrees
+SPIN_OFFGRID = (Fraction(1, 3), Fraction(1, 5))   # one-job mode: extra free-spin poses after every step, as fractions of a step
+SWEEP_DZ = 0.02             # mm, one-job mode, check 6: swept solids, the largest height of a band where the shape changes with z
 HELD_MOVE = 0.3
 SAMPLES_PER_TOOTH = 8
 ENGAGE_GAP = 0.1            # mm: meshing gears are never further apart than this
@@ -359,14 +361,31 @@ class Movement:
         return w, conflicts
 
     # ---- measurements ----
-    def spin(self, name):
-        """Largest overlap with the fixed parts while the mobile makes one full turn."""
-        worst = (0.0, 0)
+    def spin(self, name, offgrid=()):
+        """Largest overlap with the fixed parts while the mobile makes one full turn: SPIN_STEPS poses of
+        360 / SPIN_STEPS degrees. offgrid (one-job mode: SPIN_OFFGRID): also the poses i + f of a step, for every
+        step i and every fraction f, so a mobile whose shape repeats every step (a 72-tooth wheel) cannot hide a
+        stop between the steps. Without offgrid (stage mode) the test is the old one, unchanged."""
+        if not offgrid:
+            worst = (0.0, 0)
+            for i in range(SPIN_STEPS):
+                v = ivol(self.posed(name, 360.0 * i / SPIN_STEPS), self.fixed)
+                if v > worst[0]:
+                    worst = (v, i)
+            return {"worst_volume": worst[0], "step": worst[1], "steps": SPIN_STEPS}
+        # the frame cut to the box round the mobile's swept solid: the mobile stays inside it at every angle, so
+        # every intersection volume is unchanged
+        F = self.fixed ^ self._swept_box(name)
+        worst, n = (0.0, 0), 0
         for i in range(SPIN_STEPS):
-            v = ivol(self.posed(name, 360.0 * i / SPIN_STEPS), self.fixed)
-            if v > worst[0]:
-                worst = (v, i)
-        return {"worst_volume": worst[0], "step": worst[1], "steps": SPIN_STEPS}
+            for f in (Fraction(0),) + tuple(offgrid):
+                s = i + f
+                v = ivol(self.posed(name, float(Fraction(360) * s / SPIN_STEPS)), F)
+                n += 1
+                if v > worst[0]:
+                    worst = (v, s)
+        return {"worst_volume": worst[0], "step": float(worst[1]), "step_exact": str(worst[1]),
+                "angle_deg": float(Fraction(360) * worst[1] / SPIN_STEPS), "steps": SPIN_STEPS, "poses": n}
 
     DIRECTIONS = (("+x", (1, 0, 0)), ("-x", (-1, 0, 0)), ("+y", (0, 1, 0)), ("-y", (0, -1, 0)),
                   ("+z", (0, 0, 1)), ("-z", (0, 0, -1)))
@@ -722,6 +741,44 @@ class Movement:
         r = float(np.hypot(V[:, 0] - m["axis"][0], V[:, 1] - m["axis"][1]).max())
         return core.box((m["axis"][0] - r, m["axis"][1] - r, V[:, 2].min()), (m["axis"][0] + r, m["axis"][1] + r, V[:, 2].max()))
 
+    # ---- swept solids (one-job mode, check 6 "Nothing else collides") ----
+    def swept_cylinder(self, name):
+        """(radius, z_min, z_max) of the upright cylinder round the mobile's axis that holds it at every angle:
+        its largest vertex distance from the axis and its z range."""
+        m = self.mobiles[name]
+        V = core.verts(m["solid"])
+        return (float(np.hypot(V[:, 0] - m["axis"][0], V[:, 1] - m["axis"][1]).max()),
+                float(V[:, 2].min()), float(V[:, 2].max()))
+
+    def swept_profile(self, name):
+        """The mobile's swept solid: every point that some point of the mobile passes through while it makes a
+        full turn about its axis (the union of the mobile turned to every angle). It is a solid of revolution, given
+        as a list of horizontal bands (z0, z1, [(r0, r1), ...]): inside a band it holds exactly the points whose
+        distance from the axis lies in one of the (disjoint, sorted) intervals. See _swept_bands. Cached per solid."""
+        m = self.mobiles[name]
+        cache = self.__dict__.setdefault("_swept_cache", {})
+        hit = cache.get(name)
+        if hit is None or hit[0] is not m["solid"]:
+            hit = (m["solid"], _swept_bands(m["solid"], m["axis"]))
+            cache[name] = hit
+        return hit[1]
+
+    def clear_swept(self, a, b):
+        """Check 6 in one-job mode: the intersection volume of the swept solids of mobiles a and b (worked out
+        exactly from the bands, circles as true circles). A pair whose swept cylinders (swept_cylinder) do not
+        meet is not swept: 0. Returns worst_volume (the swept intersection), z_range of the shared region
+        (None if empty) and pruned."""
+        ra, za0, za1 = self.swept_cylinder(a)
+        rb, zb0, zb1 = self.swept_cylinder(b)
+        (xa, ya), (xb, yb) = self.mobiles[a]["axis"], self.mobiles[b]["axis"]
+        d = math.hypot(xb - xa, yb - ya)
+        if d >= ra + rb or min(za1, zb1) <= max(za0, zb0):
+            return {"worst_volume": 0.0, "z_range": None, "pruned": True}
+        v, zr = _swept_ivol(self.swept_profile(a), self.swept_profile(b), d)
+        if not math.isfinite(v):
+            raise ArithmeticError("non-finite volume")
+        return {"worst_volume": v, "z_range": zr, "pruned": False}
+
     def extent(self):
         """Largest distance from the case centre reached by anything as it turns, and the z range."""
         rmax, zlo, zhi = 0.0, float("inf"), float("-inf")
@@ -858,6 +915,111 @@ def meet_height(A, ax_a, B, ax_b):
         if reach(A, ax_a, z) + reach(B, ax_b, z) > d:
             return z
     return None
+
+
+def _radial_intervals(cs, ax):
+    """The distances from the point ax that the points of the planar region cs take, as sorted disjoint intervals.
+    Each connected piece (an outline with its holes) gives one interval: from 0 if ax lies in it (else its
+    smallest distance from ax, on an edge) to its largest distance from ax (at a vertex)."""
+    out = []
+    for comp in cs.decompose():
+        loops = [np.asarray(p, dtype=np.float64) - np.asarray(ax, dtype=np.float64) for p in comp.to_polygons()]
+        loops = [p for p in loops if len(p) >= 3]
+        if not loops:
+            continue
+        dmax, dmin, crossings = 0.0, float("inf"), 0
+        for p in loops:
+            q = np.roll(p, -1, axis=0)
+            dmax = max(dmax, float(np.hypot(p[:, 0], p[:, 1]).max()))
+            e = q - p
+            L2 = (e * e).sum(axis=1)
+            t = np.clip(-(p * e).sum(axis=1) / np.where(L2 > 0, L2, 1.0), 0.0, 1.0)
+            c = p + t[:, None] * e
+            dmin = min(dmin, float(np.hypot(c[:, 0], c[:, 1]).min()))
+            up = (p[:, 1] > 0) != (q[:, 1] > 0)             # edges that cross the ray from ax along +x
+            with np.errstate(divide="ignore", invalid="ignore"):
+                x = p[:, 0] - p[:, 1] * e[:, 0] / e[:, 1]
+            crossings += int(np.count_nonzero(up & (x > 0)))
+        out.append((0.0 if crossings % 2 else dmin, dmax))
+    out.sort()
+    merged = []
+    for r0, r1 in out:
+        if merged and r0 <= merged[-1][1]:
+            merged[-1] = (merged[-1][0], max(merged[-1][1], r1))
+        else:
+            merged.append((r0, r1))
+    return merged
+
+
+def _swept_bands(S, ax):
+    """The swept solid of S turned about the vertical line through ax (see Movement.swept_profile), as bands.
+    The band edges are every height at which S has a vertex. Between two such heights the horizontal section of S
+    changes only where a face of S that is neither vertical nor horizontal crosses that height range; where none
+    does, the section is the same at every height of the band, and one section at its middle height gives the
+    band exactly. Where one does, the range is cut into equal bands at most SWEEP_DZ high, each given by its
+    section at its middle height."""
+    mesh = S.to_mesh()
+    vp = np.asarray(mesh.vert_properties, dtype=np.float64)[:, :3]
+    tv = np.asarray(mesh.tri_verts, dtype=np.int64)
+    if len(tv) == 0:
+        return []
+    T = vp[tv]
+    n = np.cross(T[:, 1] - T[:, 0], T[:, 2] - T[:, 0])
+    nn = np.linalg.norm(n, axis=1)
+    nz = np.abs(n[:, 2]) / np.where(nn > 0, nn, 1.0)
+    slanted = (nz > 1e-9) & (nz < 1.0 - 1e-9)
+    s_lo, s_hi = np.sort(T[slanted, :, 2].min(axis=1)), np.sort(T[slanted, :, 2].max(axis=1))
+    zs = np.unique(vp[:, 2])
+    zs = zs[np.concatenate(([True], np.diff(zs) > 1e-9))]
+    bands = []
+    for z0, z1 in zip(zs[:-1], zs[1:]):
+        zm = 0.5 * (z0 + z1)
+        # slanted faces that span the middle of this range (lowest point below it, highest above it)
+        k = int(np.searchsorted(s_lo, zm)) - int(np.searchsorted(s_hi, zm))
+        parts = max(1, int(math.ceil((z1 - z0) / SWEEP_DZ - 1e-9))) if k > 0 else 1
+        for j in range(parts):
+            b0, b1 = z0 + (z1 - z0) * j / parts, z0 + (z1 - z0) * (j + 1) / parts
+            iv = _radial_intervals(S.slice(0.5 * (b0 + b1)), ax)
+            if iv:
+                bands.append((float(b0), float(b1), iv))
+    return bands
+
+
+def _lens(a, b, d):
+    """Area shared by two discs of radii a and b whose centres are d apart."""
+    if a <= 0.0 or b <= 0.0 or d >= a + b:
+        return 0.0
+    if d <= abs(a - b):
+        return math.pi * min(a, b) ** 2
+    ca = max(-1.0, min(1.0, (d * d + a * a - b * b) / (2.0 * d * a)))
+    cb = max(-1.0, min(1.0, (d * d + b * b - a * a) / (2.0 * d * b)))
+    k = (-d + a + b) * (d + a - b) * (d - a + b) * (d + a + b)
+    return a * a * math.acos(ca) + b * b * math.acos(cb) - 0.5 * math.sqrt(max(0.0, k))
+
+
+def _swept_ivol(pa, pb, d):
+    """Volume shared by two swept solids given as bands (_swept_bands) about vertical axes d apart, and the z
+    range of the shared region (None if it is empty). An annulus r0..r1 and an annulus s0..s1 share
+    L(r1, s1) - L(r1, s0) - L(r0, s1) + L(r0, s0), with L the disc-disc area _lens."""
+    total, zlo, zhi = 0.0, float("inf"), float("-inf")
+    i = j = 0
+    while i < len(pa) and j < len(pb):
+        a0, a1, ia = pa[i]
+        b0, b1, ib = pb[j]
+        lo, hi = max(a0, b0), min(a1, b1)
+        if hi > lo:
+            area = 0.0
+            for r0, r1 in ia:
+                for s0, s1 in ib:
+                    area += _lens(r1, s1, d) - _lens(r1, s0, d) - _lens(r0, s1, d) + _lens(r0, s0, d)
+            if area > 1e-12:
+                total += area * (hi - lo)
+                zlo, zhi = min(zlo, lo), max(zhi, hi)
+        if a1 <= b1:
+            i += 1
+        else:
+            j += 1
+    return total, ([zlo, zhi] if total > 0.0 else None)
 
 
 def _near_cut(S, ax, O, ax_o):
