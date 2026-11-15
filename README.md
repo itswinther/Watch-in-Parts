@@ -75,6 +75,56 @@ reward = (1/2 x share + 1/2 x all x s) x (0.75 + 0.10 h) / 0.85
   parts). No report, an invalid one, or a part left out counts as `not_tested`. A working watch with no report
   scores 16/17 = 0.941; with a truthful report, 1.0. A false "pass" costs more than an admitted fault.
 
+## Why thinness, and why it is scored this way
+
+**Why thinness at all.** The order is for a dress watch, and a slim case is what defines one: it has to slide
+under a shirt cuff. Watch guides put the whole watch at roughly 6 to 10 mm. The movement sets the floor for
+that, so "how thin" is a real question a movement designer is asked, and watchmakers treat thin movements as
+an achievement in their own right. Three production calibres show the range:
+
+| Calibre | Diameter | Height | Note |
+| --- | --- | --- | --- |
+| ETA 2824-2 | 25.6 mm | 4.6 mm | the common automatic |
+| ETA 2892-A2 | 25.6 mm | 3.6 mm | same diameter, 1 mm thinner; generally regarded as ETA's higher-grade alternative |
+| Peseux / ETA 7001 | 23.3 mm | 2.5 mm | hand-wound |
+| Piaget 9P (1957) | 20.5 mm | 2.0 mm | hand-wound; the watches built on it were just over 4 mm thick |
+
+To get there Piaget thinned wheels from the usual 0.2 mm to 0.12 mm, and thin parts distort. That is the
+trade the agent faces too: a thinner movement leaves less room for wheels on different levels to pass each
+other, for end-shake, for teeth strong enough to carry the barrel, and for a part that can still be printed
+(smallest feature 0.2 mm, DS-W03). The barrel catalogue makes it a choice: the thinnest barrel has the
+shortest arbor (3.0 mm against 6.6) and the narrowest toothed drum (0.45 mm against 1.0, DS-W01).
+
+Our parts are 1.617 times real size (the order says so). Divided by that, our thinnest design that runs as
+made is 3.85 / 1.617 = 2.4 mm, between the 7001 and the Piaget 9P; the GPT deliveries, at 9.6 to 11.8 mm, are
+5.9 to 7.3 mm. The comparison is rough: our movement has no escapement and no winding works.
+
+**Why we score it at all.** With a fixed list of requirements, every frontier model we ran met the list and
+stopped (SESSION.md, 15 Nov 04:05). Sonnet 5.5, on a brief with a 9.0 mm target, delivered 8.10 mm and wrote: "below the 9.0 mm target, so the
+thickness score should be 1. I did not try to go thinner." Meeting a specification and designing well are different things, and thickness is the one quantity
+in this job where better has no stated end.
+
+**Why this formula.**
+
+- *Only for a watch that fully works.* A thin watch that does not run is worth nothing to the customer, so
+  thickness scales only the all-pass half of the reward. Making a broken watch thinner earns nothing.
+- *Measured, not declared.* H is taken from the delivered solids, barrel included. `height_mm` in the report
+  is recorded and ignored.
+- *Against a design we can show.* Full score is at 3.85 mm, the thinnest design of ours that still runs with
+  every part 0.01 mm larger or smaller than drawn (the accuracy DS-W03 states). Nothing is asked of the agent
+  that we have not built. Thinner than that earns no more.
+- *Zero at the case.* The scale ends at 13.4 mm, the inner height of the case in the order: a movement that
+  fills the case has made no attempt.
+- *The fourth power.* s = (1 - x)^4 falls fastest near the bar: 1 mm over costs about a third of the thickness
+  score, 2 mm over about 60 %. In real calibres a millimetre is the whole difference between the 2824-2 and
+  the 2892-A2.
+- *No number in the order.* When we printed a target, models aimed at it and stopped. The order says what a
+  customer would say: as thin as you can.
+
+Sources for the watch figures: Caliber Corner (ETA 2892-A2, ETA 7001), Time+Tide and Monochrome (2824-2
+against 2892-A2), Mr Porter, "Chasing Two Millimetres" (Piaget 9P), Deployant and Swisswatches Magazine (dress
+watch).
+
 ## Why it is hard, and why that is fair
 
 On an earlier brief that printed the acceptance test and a 4.0 mm thickness target, every frontier model we ran
