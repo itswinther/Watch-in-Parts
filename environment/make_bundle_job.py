@@ -15,12 +15,14 @@ Fails (exit 1, OUT removed) if the committed documents are not what geometry/wat
 (environment/make_brief_job.py --check), if a graded number's home cell in OUT is missing or disagrees with the
 constants, or if OUT prints a graded number where it has no home (make_brief_job.verify(), run on the files as
 written to OUT, A's sheets included), or if anything forbidden would be in OUT: a forbidden file or folder name,
-a file carrying the NOT-FOR-AGENT mark, or a forbidden word or phrase anywhere in any file (FORBIDDEN_WORDS and
-the reference's own numbers, case-insensitive)."""
+a file carrying the NOT-FOR-AGENT mark, or a forbidden word or phrase anywhere in any file (FORBIDDEN_WORDS, the
+reference's own numbers and, while the thickness target is not stated, the house design's height and the thickness
+score's formula: thickness_secrets(); all case-insensitive)."""
 import os
 import re
 import shutil
 import sys
+from decimal import Decimal
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 sys.path.insert(0, ROOT)
@@ -93,7 +95,25 @@ def reference_numbers():
         if abs(v - round(v)) > 1e-6:                      # whole numbers (0, 12) say nothing about the layout
             i, f = ("%.6f" % abs(v)).split(".")
             pats.add(re.escape(i + "." + f[:3]))
-    return sorted(pats)
+    return sorted(pats) + thickness_secrets()
+
+
+def thickness_secrets():
+    """Regular expressions that must match nothing in the agent's folder while the thinness probe is on and the
+    thickness target is not stated (W.THIN_TARGET_STATED off): the house design's height, the thickness score's
+    formula and the wording of a stated target. The height is refused as printed (W.THIN_REFERENCE_MM, e.g. 3.35 and
+    3.350) and as any longer decimal that rounds to it (3.345... to 3.354..., which covers the reference's measured
+    3.3491). The number must start at the match: 13.35 and 0.3.35 do not match, and neither does 3.36 or 3.355."""
+    if W.THIN_TARGET_STATED or not B.T.THIN_IN_BRIEF:
+        return []
+    v = Decimal(repr(W.THIN_REFERENCE_MM))
+    if v.as_tuple().exponent >= 0:
+        raise SystemExit("THIN_REFERENCE_MM must be written with decimals (the leak patterns need its precision)")
+    q = Decimal(1).scaleb(v.as_tuple().exponent)          # one unit of its last printed decimal
+    start, hi, lo = r"(?<![0-9.])", re.escape(str(v)), re.escape(str(v - q))
+    return [start + hi + r"(?![0-9])", start + hi + r"[0-4][0-9]*", start + lo + r"[5-9][0-9]*",
+            r"\(1 - x\)", r"\bx = \(H", r"thickness target", r"\btarget is\b", r"\bexponent\b",
+            r"(?:fourth|%dth) power" % W.THIN_SCORE_EXPONENT]
 
 
 def leak_hits(out, words=None):
