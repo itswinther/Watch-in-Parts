@@ -32,7 +32,8 @@ BARREL_SQUARE_SIDE = 1.4            # winding square on the arbor (a square pris
 BARREL_SQUARE_Z = (3.3, 4.9)        # parallel to x and y) that carries the ratchet; half-diagonal 0.99
 STAGE_BARREL_ARBOR_Z = (-1.0, 1.6)  # stage mode only (old runs): the one-body barrel of data/barrel_stage.stl
 BARREL_TURNS_PER_HOUR = Fraction(1, 8)          # clockwise
-CASE_RADIUS = 20.7         # reference reaches 20.354 at its largest stage, plus 0.3, rounded up to 0.05
+CASE_RADIUS = 20.7         # reference reaches 20.354 at its largest stage, plus 0.3, rounded up to 0.05 (main; on
+                           # b/thin-4mm SMALL_CASE_RADIUS 12.7 below replaces it, by the same rule)
 CASE_HEIGHT = 13.4         # reference is 13.1 tall, plus 0.3
 # thinness probe (SESSION.md Proposed spec changes, 2026-11-15 02:20; spikes/thin_probe/): not graded by
 # tests/grade_watch.py. Stated in QA-W100 section 9 only when environment/brief_thin.py THIN_IN_BRIEF is on, and
@@ -52,6 +53,16 @@ CHANGED_BARREL_TURNS_PER_HOUR = Fraction(1, 6)
 # carries geometry/ carries them). The z constants of the barrel follow. The strength load case
 # (BARREL_TORQUE_MAX_NMM, the automatic version's bridle) is kept at full value: conservative (A's choice).
 THIN_BARREL = os.environ.get("WATCH_THIN_BARREL", "1") != "0"
+# The small case (branch b/thin-4mm, from A's spike a/thin-po cde0408): ON by default on this branch. The size check
+# and the documents use THIN_CASE_RADIUS as CASE_RADIUS, and the reference picks its small-case layout when it is
+# set. SMALL_CASE_RADIUS = A's small-case reference reaches 12.357 (both builds), plus 0.3, rounded up to 0.05 (the
+# rule the old 20.7 came from). THIN_CASE_RADIUS=<r> sets another radius; THIN_CASE_RADIUS=0 gives main's 20.7.
+SMALL_CASE_RADIUS = 12.7
+_tcr = os.environ.get("THIN_CASE_RADIUS", "")
+THIN_CASE_RADIUS = SMALL_CASE_RADIUS if _tcr == "" else (float(_tcr) if float(_tcr) > 0 else None)
+del _tcr
+if THIN_CASE_RADIUS is not None:
+    CASE_RADIUS = THIN_CASE_RADIUS
 THIN_BARREL_SCALE = 3.0 / 6.6
 if THIN_BARREL:
     BARREL_WHEEL_Z = tuple(v * THIN_BARREL_SCALE for v in BARREL_WHEEL_Z)

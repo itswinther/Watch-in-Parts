@@ -21,7 +21,7 @@ in the order.
 | Item | Specification |
 |---|---|
 | Barrel | part no. BR-096-20, catalogue sheet DS-W01; supplied as `/app/supplied/barrel.stl` |
-| Case | part no. CS-414-134, catalogue sheet DS-W02 |
+| Case | part no. CS-254-134, catalogue sheet DS-W02 |
 | Parts | printed by the process of process sheet DS-W03 |
 | 8-hour build (`movement.json`) | barrel BR-096-20, speed class D (DS-W01) |
 | 6-hour variant (`variant_6h.json`) | the same barrel BR-096-20, in the same place, speed class B (DS-W01) |

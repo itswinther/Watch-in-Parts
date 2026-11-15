@@ -16,7 +16,7 @@ included. All lengths in millimetres.
 
 | Part no. | Inner radius (mm) | Inner height along the axis (mm) | Outer diameter (mm) |
 |---|---|---|---|
-| CS-376-118 | 18.8 | 11.8 | 45 |
-| CS-414-134 | 20.7 | 13.4 | 48 |
-| CS-414-152 | 20.7 | 15.2 | 48 |
-| CS-452-140 | 22.6 | 14 | 52 |
+| CS-254-134 | 12.7 | 13.4 | 36 |
+| CS-376-118 | 18.8 | 11.8 | 48 |
+| CS-414-152 | 20.7 | 15.2 | 52 |
+| CS-452-140 | 22.6 | 14 | 56 |

@@ -45,9 +45,10 @@ REVISION = "A"
 # the scale of the parts, not of the case.
 REAL_CALIBRE_DIAMETER_MM = 25.6
 DEMO_SCALE = 1.617          # A's sheets' s, the scale of the supplied parts (check_scale() reads it from DS-101)
-# DS-W02's outer diameter (context only, not graded): the inner diameter plus a wall and bezel of CASE_WALL_MM on
-# each side, rounded to the nearest whole mm
-CASE_WALL_MM = 3.5
+# DS-W02's outer diameter (context only, not graded) of the ordered case: the movement in a casing ring inside the
+# watch case; real ETA 2892-class movements (25.6 mm across, 3.6 mm thick) are cased in 36 to 40 mm watches.
+# The catalogue's other cases (CASE_FAMILY) have the same allowance, CASE_OUTER_D_MM - 2 x CASE_RADIUS, rounded.
+CASE_OUTER_D_MM = 36
 APP = "/app"
 QA = "QA-W100"
 QA_FILE = "QA-W100_inspection.md"
@@ -1058,8 +1059,13 @@ def ordered_case_no():
 
 
 def case_outer_d(radius):
-    """DS-W02's outer diameter (mm, context only): 2 x radius + 2 x CASE_WALL_MM, to the nearest whole mm."""
-    return int(math.floor(2 * radius + 2 * CASE_WALL_MM + 0.5))
+    """DS-W02's outer diameter (mm, context only): CASE_OUTER_D_MM for the ordered case; for another case its inner
+    diameter plus the ordered case's allowance (CASE_OUTER_D_MM - 2 x CASE_RADIUS), to the nearest whole mm."""
+    if radius == W.CASE_RADIUS:
+        return CASE_OUTER_D_MM
+    if CASE_OUTER_D_MM <= 2 * W.CASE_RADIUS:
+        raise SystemExit("CASE_OUTER_D_MM is not larger than the ordered case's inner diameter")
+    return int(math.floor(2 * radius + CASE_OUTER_D_MM - 2 * W.CASE_RADIUS + 0.5))
 
 
 def ds_w02(L):
@@ -1183,7 +1189,7 @@ def traceability_rows(L, B, S=None):
     rows = links + ds_w01_trace(L, B) + [
         cell("CASE_RADIUS", W.CASE_RADIUS, "datasheets/DS-W02_case.md", "2. Catalogue", ordered_case_no(),
              "Inner radius", [num(W.CASE_RADIUS)]),
-        cell("case outer diameter, context only, not graded: case_outer_d(CASE_RADIUS) (CASE_WALL_MM each side)",
+        cell("case outer diameter, context only, not graded: CASE_OUTER_D_MM (make_brief_job.py)",
              case_outer_d(W.CASE_RADIUS), "datasheets/DS-W02_case.md", "2. Catalogue", ordered_case_no(),
              "Outer diameter", [num(case_outer_d(W.CASE_RADIUS))]),
         cell("CASE_HEIGHT", W.CASE_HEIGHT, "datasheets/DS-W02_case.md", "2. Catalogue", ordered_case_no(),
