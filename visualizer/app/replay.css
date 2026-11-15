@@ -89,6 +89,8 @@ h2 { font-size: 22px; }
 /* X-ray mode: Mikael's viewer has its own side panels, so the watch takes the full width */
 .stage.xray { grid-template-columns: minmax(0, 1fr); }
 .stage.xray .viewport { margin: 24px 40px; min-height: 760px; }
+/* X-ray mode stacks the log under the watch, so the page grows and scrolls instead of fitting the window */
+html.xray-mode, html.xray-mode body { height: auto; }
 .stage.xray .vp-inner { display: none; }
 .vp-inner {
   position: absolute; inset: 0; display: flex; flex-direction: column;

@@ -14,18 +14,28 @@ It needs no build step, no server and no Python: open `index.html` in a browser.
 | `source/` | the scripts that build it: `build.py`, `check_data.py`, `adapters/`, and Replay's own README and CLAUDE.md |
 | `README.md` | this file |
 
-This is the built output of Abhishek's Replay project, copied here on 15 Nov. It shows all
-six of GPT-6.1-sol's runs on the final task (Harbor + Codex, web search off), from the lowest
-score up: owFDECg 0.427, oVS4tLK 0.427, fhhWYjp 0.447, k843CBe 0.448, dQKXa6k 0.457,
-UVsdmwL 0.467. Every score is from the final grader 3d5d96f; the three runs made on task
-commit 4c5d8d3 use Mikael's regrade on it. Files: branch `a/final-runs`, `runs/final_*/gpt-6.1-sol/`.
+This is the built output of Abhishek's Replay project, copied here on 15 Nov. It shows ten
+runs on the final task, every score from the final grader 3d5d96f (files on branch
+`a/final-runs`, `runs/final_*`):
+
+- GPT-6.1-sol, all six runs (Harbor + Codex): owFDECg 0.427, oVS4tLK 0.427, fhhWYjp 0.447,
+  k843CBe 0.448, dQKXa6k 0.457, UVsdmwL 0.467. The three made on task commit 4c5d8d3 use
+  Mikael's regrade on 3d5d96f.
+- The four Claude runs that delivered a watch (Harbor + OpenCode): Opus 5.5 medium Qob53oe
+  0.943 (every check passes; it loses only on thickness, 4.23 mm), Opus 5.5 low gpCasL8 0.422
+  (score disputed: H's regrade gives 0.082, see the run's note), Sonnet 5.5 low TxhN8Ly 0.422
+  and 8Wrjav3 0.412. Four other Claude runs scored 0 with nothing delivered (API usage limit
+  or output limit) and are not shown.
 
 Each run has Parts 1 to 4 (what the grader checked) and Part 5, a review: where it failed,
 what the AI reported, and how the score is made (reproduced from the grader's output; the
 build stops if it does not match). The agent's own `report.json` is the log, because Harbor
 kept no transcript. The 3D view shows in red the parts behind each failed check (hands that
-break the hand rule, wheels that collide or that nothing holds, wheel pieces not seated).
-Drag to turn. The X-ray button is hidden for these runs: no X-ray pages are built for them.
+break the hand rule, wheels that collide, that nothing holds, or whose teeth bite too little
+when moved 0.03 mm, wheel pieces not seated), and drags like Mikael's X-ray viewer. The
+X-ray button shows the run's watch in Mikael's X-ray viewer (made with his
+`tools/viewer/export_watch_demo.py`, unchanged); in X-ray mode, Reference switches to his
+`xray.html`, the final task's reference watch.
 
 To rebuild: put the files of `source/` next to `index.html` and `app/` in a folder beside the
 team repo, fetch the runs as `source/README.md` says, then `python3 build.py` and

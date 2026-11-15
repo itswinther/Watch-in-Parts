@@ -17,7 +17,8 @@ window.REPLAY.runs["gpt_oVS4tLK"] = {
   "task_version": "one-job watch, SPEC 0.8 (run on task commit 4c5d8d3, regraded)",
   "grader_version": "tests/grade_watch.py",
   "graded_at_commit": "3d5d96f",
-  "honesty": 0.625
+  "honesty": 0.625,
+  "note": null
  },
  "sections": [
   {
@@ -61,7 +62,7 @@ window.REPLAY.runs["gpt_oVS4tLK"] = {
      "name": "held",
      "kind": "check",
      "format_messages": [
-      "nothing holds the seconds wheel: moved 0.3 mm along -z it touches no fixed part"
+      "nothing holds the seconds wheel: moved 0.3 mm along -z it touches no fixed part, so it can slide out"
      ],
      "detail": {
       "not_held": [
@@ -669,6 +670,8 @@ window.REPLAY.runs["gpt_oVS4tLK"] = {
     }
    ],
    "scene": "scenes/gpt_oVS4tLK_8h.html",
+   "xray": "scenes/gpt_oVS4tLK_xray.html",
+   "xray_ref": "scenes/reference_xray.html",
    "scene_mode": "build",
    "new_parts": [],
    "fail_parts": [
@@ -736,6 +739,8 @@ window.REPLAY.runs["gpt_oVS4tLK"] = {
     }
    ],
    "scene": "scenes/gpt_oVS4tLK_8h.html",
+   "xray": "scenes/gpt_oVS4tLK_xray.html",
+   "xray_ref": "scenes/reference_xray.html",
    "scene_mode": "build",
    "new_parts": [],
    "fail_parts": [
@@ -789,7 +794,7 @@ window.REPLAY.runs["gpt_oVS4tLK"] = {
      "name": "held",
      "kind": "check",
      "format_messages": [
-      "nothing holds the seconds wheel: moved 0.3 mm along -z it touches no fixed part"
+      "nothing holds the seconds wheel: moved 0.3 mm along -z it touches no fixed part, so it can slide out"
      ],
      "detail": {
       "not_held": [
@@ -1205,6 +1210,8 @@ window.REPLAY.runs["gpt_oVS4tLK"] = {
     }
    ],
    "scene": "scenes/gpt_oVS4tLK_6h.html",
+   "xray": "scenes/gpt_oVS4tLK_xray.html",
+   "xray_ref": "scenes/reference_xray.html",
    "scene_mode": "build",
    "new_parts": [],
    "fail_parts": [
@@ -1280,6 +1287,8 @@ window.REPLAY.runs["gpt_oVS4tLK"] = {
     }
    ],
    "scene": "scenes/gpt_oVS4tLK_8h.html",
+   "xray": "scenes/gpt_oVS4tLK_xray.html",
+   "xray_ref": "scenes/reference_xray.html",
    "scene_mode": "assembly",
    "new_parts": [],
    "fail_parts": [],
@@ -1323,7 +1332,7 @@ window.REPLAY.runs["gpt_oVS4tLK"] = {
        "Part 1",
        "Part 3"
       ],
-      "message": "nothing holds the seconds wheel: moved 0.3 mm along -z it touches no fixed part"
+      "message": "nothing holds the seconds wheel: moved 0.3 mm along -z it touches no fixed part, so it can slide out"
      },
      {
       "check": "clear",
@@ -1438,7 +1447,9 @@ window.REPLAY.runs["gpt_oVS4tLK"] = {
      },
      "reward": 0.4270685327271005
     }
-   }
+   },
+   "xray": "scenes/gpt_oVS4tLK_xray.html",
+   "xray_ref": "scenes/reference_xray.html"
   }
  ]
 };

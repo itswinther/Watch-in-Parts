@@ -3,13 +3,18 @@
 Pick an AI run and watch it build a mechanical watch, with what the AI was doing shown
 beside it. The demo for our Junction 2026 AfterQuery entry: "It looked done. It wasn't."
 
-Status: milestone 6. All six of GPT-6.1-sol's runs on the final task (Harbor + Codex, web
-search off), each scored with the final grader 3d5d96f: 0.427, 0.427, 0.447, 0.448, 0.457,
-0.467. None passes everything. Each run has Parts 1 to 4 (what the grader checked) and a
-Part 5 review: where it failed, what the AI reported, and how the score is made, every number
-read from the grader's output. The parts behind each failed check are shown in red.
+Status: milestone 7. Ten runs on the final task, every score from the final grader 3d5d96f:
+all six of GPT-6.1-sol's (Harbor + Codex: 0.427, 0.427, 0.447, 0.448, 0.457, 0.467) and the
+four Claude runs that delivered a watch (Harbor + OpenCode: Opus 5.5 medium 0.943, Opus 5.5
+low 0.422 (score disputed, see the run's note), Sonnet 5.5 low 0.422 and 0.412). Four more
+Claude runs scored 0 with nothing delivered, stopped by the API usage limit or the output
+limit; they are not shown. Each run has Parts 1 to 4 (what the grader checked) and a Part 5
+review: where it failed, what the AI reported, and how the score is made, every number read
+from the grader's output. The parts behind each failed check are shown in red. The X-ray
+button shows the run's watch in Mikael's X-ray viewer; Reference switches to his X-ray of
+the final task's reference watch.
 
-## The GPT runs
+## The runs
 
 Harbor kept each delivery and the grader's output, not the agent's transcript, so the log of a
 run is the agent's own `report.json`, line by line, set against the grader's verdict per part.
@@ -22,6 +27,12 @@ for p in $(git -C ../board-in-a-box ls-tree -d --name-only -r origin/a/final-run
            | grep -E "gpt-6.1-sol/task__[^/]+$"); do
   id=$(basename $p | sed 's/task__//'); mkdir -p work/gpt_$id
   git -C ../board-in-a-box archive origin/a/final-runs $p | tar -x -C work/gpt_$id --strip-components=4
+done
+for p in opus-5.5-medium-rerun/task__Qob53oe opus-5.5-low-rerun/task__gpCasL8 \
+         sonnet-5.5-low-run3/task__TxhN8Ly sonnet-5.5-low/task__8Wrjav3; do
+  id=$(basename $p | sed 's/task__//'); mkdir -p work/claude_$id
+  git -C ../board-in-a-box archive origin/a/final-runs runs/final_3d5d96f/$p \
+    | tar -x -C work/claude_$id --strip-components=4
 done
 ```
 

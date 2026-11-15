@@ -83,6 +83,7 @@
     if (r.harness) item("run with", r.harness);
     item("graded with", `${r.grader_version}${r.graded_at_commit ? " @ " + r.graded_at_commit : ""}`);
     if (r.cost_usd != null) item("cost", "$" + r.cost_usd.toFixed(2));
+    if (r.note) box.append(el("span", "warn", r.note));
     if (r.current_spec && !String(r.task_version).includes(r.current_spec)) {
       const w = el("span", "warn", `not regraded on the current SPEC ${r.current_spec}`);
       w.title = r.version_note || "";
@@ -158,7 +159,7 @@
     const box = el("li", "review");
     const section = (title) => { const d = el("div", "rv-block"); d.append(el("h3", null, title)); box.append(d); return d; };
 
-    const fail = section("Where it failed");
+    const fail = section(rv.failures.length ? "Where it failed" : "No check failed");
     rv.failures.forEach((f) => {
       const d = el("div", "rv-fail");
       d.append(el("span", "rv-x", "✕"), el("b", null, f.check),
@@ -166,6 +167,9 @@
       fail.append(d);
     });
     if (rv.passed.length) fail.append(el("div", "rv-pass", `✓ passed everything: ${rv.passed.join(", ")}`));
+    if (!rv.failures.length && sc.reward < 1) fail.append(el("p", null,
+      `Every check passed. What it misses of 1.000 comes from the thickness score: the movement is ` +
+      `${sc.thickness.H_mm.toFixed(2)} mm tall, and the score falls as a watch gets taller than ${sc.thickness.h0_mm} mm (step 2 below).`));
 
     const said = section("What the AI said");
     const claims = Object.entries(h.claims || {}).map(([k, v]) => `${k} ${v.replace("_", " ")}`).join(", ");
@@ -239,7 +243,10 @@
     const fr = $("scene");
     const xray = state.xray && s.xray;
     document.querySelector(".stage").classList.toggle("xray", !!xray);
-    const src = xray ? s.xray : s.scene;
+    document.documentElement.classList.toggle("xray-mode", !!xray);
+    const ref = xray && state.xrayRef && s.xray_ref;
+    $("xray-ref").hidden = !(xray && s.xray_ref);
+    const src = ref ? s.xray_ref : xray ? s.xray : s.scene;
     if (!src) { fr.hidden = true; sceneSrc = null; return; }
     if (sceneSrc !== src) {
       sceneSrc = src; sceneReady = false;
@@ -406,6 +413,11 @@
     $("xray").addEventListener("click", () => {
       state.xray = !state.xray;
       $("xray").setAttribute("aria-pressed", String(state.xray));
+      if (state.run) updateScene();
+    });
+    $("xray-ref").addEventListener("click", () => {
+      state.xrayRef = !state.xrayRef;
+      $("xray-ref").setAttribute("aria-pressed", String(state.xrayRef));
       if (state.run) updateScene();
     });
     document.addEventListener("keydown", (e) => {

@@ -40,5 +40,33 @@ window.REPLAY_INDEX = [
   "chain_score": 0.4674741877427299,
   "task_version": "one-job watch, SPEC 0.8",
   "file": "data/runs/gpt_UVsdmwL.js"
+ },
+ {
+  "id": "claude_Qob53oe",
+  "label": "Claude Opus 5.5 \u00b7 medium \u00b7 Qob53oe",
+  "chain_score": 0.9433140424020567,
+  "task_version": "one-job watch, SPEC 0.8",
+  "file": "data/runs/claude_Qob53oe.js"
+ },
+ {
+  "id": "claude_gpCasL8",
+  "label": "Claude Opus 5.5 \u00b7 low \u00b7 gpCasL8",
+  "chain_score": 0.42185279909065077,
+  "task_version": "one-job watch, SPEC 0.8",
+  "file": "data/runs/claude_gpCasL8.js"
+ },
+ {
+  "id": "claude_TxhN8Ly",
+  "label": "Claude Sonnet 5.5 \u00b7 low \u00b7 TxhN8Ly",
+  "chain_score": 0.42185279909065077,
+  "task_version": "one-job watch, SPEC 0.8",
+  "file": "data/runs/claude_TxhN8Ly.js"
+ },
+ {
+  "id": "claude_8Wrjav3",
+  "label": "Claude Sonnet 5.5 \u00b7 low \u00b7 8Wrjav3",
+  "chain_score": 0.4121909633418585,
+  "task_version": "one-job watch, SPEC 0.8",
+  "file": "data/runs/claude_8Wrjav3.js"
  }
 ];

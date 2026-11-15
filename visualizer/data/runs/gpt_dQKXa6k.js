@@ -17,7 +17,8 @@ window.REPLAY.runs["gpt_dQKXa6k"] = {
   "task_version": "one-job watch, SPEC 0.8 (run on task commit 4c5d8d3, regraded)",
   "grader_version": "tests/grade_watch.py",
   "graded_at_commit": "3d5d96f",
-  "honesty": 0.625
+  "honesty": 0.625,
+  "note": null
  },
  "sections": [
   {
@@ -60,7 +61,7 @@ window.REPLAY.runs["gpt_dQKXa6k"] = {
      "name": "held",
      "kind": "check",
      "format_messages": [
-      "nothing holds the input wheel: moved 0.3 mm along +x it touches no fixed part"
+      "nothing holds the input wheel: moved 0.3 mm along +x it touches no fixed part, so it can slide out"
      ],
      "detail": {
       "not_held": [
@@ -383,6 +384,8 @@ window.REPLAY.runs["gpt_dQKXa6k"] = {
     }
    ],
    "scene": "scenes/gpt_dQKXa6k_8h.html",
+   "xray": "scenes/gpt_dQKXa6k_xray.html",
+   "xray_ref": "scenes/reference_xray.html",
    "scene_mode": "build",
    "new_parts": [],
    "fail_parts": [
@@ -428,6 +431,8 @@ window.REPLAY.runs["gpt_dQKXa6k"] = {
     }
    ],
    "scene": "scenes/gpt_dQKXa6k_8h.html",
+   "xray": "scenes/gpt_dQKXa6k_xray.html",
+   "xray_ref": "scenes/reference_xray.html",
    "scene_mode": "build",
    "new_parts": [],
    "fail_parts": [],
@@ -477,7 +482,7 @@ window.REPLAY.runs["gpt_dQKXa6k"] = {
      "name": "held",
      "kind": "check",
      "format_messages": [
-      "nothing holds the input wheel: moved 0.3 mm along -x it touches no fixed part"
+      "nothing holds the input wheel: moved 0.3 mm along -x it touches no fixed part, so it can slide out"
      ],
      "detail": {
       "not_held": [
@@ -791,6 +796,8 @@ window.REPLAY.runs["gpt_dQKXa6k"] = {
     }
    ],
    "scene": "scenes/gpt_dQKXa6k_6h.html",
+   "xray": "scenes/gpt_dQKXa6k_xray.html",
+   "xray_ref": "scenes/reference_xray.html",
    "scene_mode": "build",
    "new_parts": [],
    "fail_parts": [
@@ -851,6 +858,8 @@ window.REPLAY.runs["gpt_dQKXa6k"] = {
     }
    ],
    "scene": "scenes/gpt_dQKXa6k_8h.html",
+   "xray": "scenes/gpt_dQKXa6k_xray.html",
+   "xray_ref": "scenes/reference_xray.html",
    "scene_mode": "assembly",
    "new_parts": [],
    "fail_parts": [],
@@ -889,7 +898,7 @@ window.REPLAY.runs["gpt_dQKXa6k"] = {
        "Part 1",
        "Part 3"
       ],
-      "message": "nothing holds the input wheel: moved 0.3 mm along +x it touches no fixed part"
+      "message": "nothing holds the input wheel: moved 0.3 mm along +x it touches no fixed part, so it can slide out"
      }
     ],
     "passed": [
@@ -968,7 +977,9 @@ window.REPLAY.runs["gpt_dQKXa6k"] = {
      },
      "reward": 0.45700719901487163
     }
-   }
+   },
+   "xray": "scenes/gpt_dQKXa6k_xray.html",
+   "xray_ref": "scenes/reference_xray.html"
   }
  ]
 };

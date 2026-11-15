@@ -17,7 +17,8 @@ window.REPLAY.runs["gpt_fhhWYjp"] = {
   "task_version": "one-job watch, SPEC 0.8 (run on task commit 4c5d8d3, regraded)",
   "grader_version": "tests/grade_watch.py",
   "graded_at_commit": "3d5d96f",
-  "honesty": 0.625
+  "honesty": 0.625,
+  "note": null
  },
  "sections": [
   {
@@ -515,6 +516,8 @@ window.REPLAY.runs["gpt_fhhWYjp"] = {
     }
    ],
    "scene": "scenes/gpt_fhhWYjp_8h.html",
+   "xray": "scenes/gpt_fhhWYjp_xray.html",
+   "xray_ref": "scenes/reference_xray.html",
    "scene_mode": "build",
    "new_parts": [],
    "fail_parts": [
@@ -565,6 +568,8 @@ window.REPLAY.runs["gpt_fhhWYjp"] = {
     }
    ],
    "scene": "scenes/gpt_fhhWYjp_8h.html",
+   "xray": "scenes/gpt_fhhWYjp_xray.html",
+   "xray_ref": "scenes/reference_xray.html",
    "scene_mode": "build",
    "new_parts": [],
    "fail_parts": [],
@@ -934,6 +939,8 @@ window.REPLAY.runs["gpt_fhhWYjp"] = {
     }
    ],
    "scene": "scenes/gpt_fhhWYjp_6h.html",
+   "xray": "scenes/gpt_fhhWYjp_xray.html",
+   "xray_ref": "scenes/reference_xray.html",
    "scene_mode": "build",
    "new_parts": [],
    "fail_parts": [
@@ -1018,6 +1025,8 @@ window.REPLAY.runs["gpt_fhhWYjp"] = {
     }
    ],
    "scene": "scenes/gpt_fhhWYjp_8h.html",
+   "xray": "scenes/gpt_fhhWYjp_xray.html",
+   "xray_ref": "scenes/reference_xray.html",
    "scene_mode": "assembly",
    "new_parts": [],
    "fail_parts": [],
@@ -1160,7 +1169,9 @@ window.REPLAY.runs["gpt_fhhWYjp"] = {
      },
      "reward": 0.44654021028701335
     }
-   }
+   },
+   "xray": "scenes/gpt_fhhWYjp_xray.html",
+   "xray_ref": "scenes/reference_xray.html"
   }
  ]
 };

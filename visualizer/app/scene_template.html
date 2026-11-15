@@ -182,7 +182,7 @@ renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.localClippingEnabled = true;
 view.appendChild(renderer.domElement);
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 2000);
+const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 3000);   // as the X-ray viewer
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 scene.add(new THREE.HemisphereLight(0xffffff, 0x445566, 1.1));
@@ -451,10 +451,11 @@ if (!asmData) $("asmBox").style.display = "none";
 
 // ---------- camera ----------
 function setCam(kind) {
-  const d = span * (EMBED ? 1.6 : 2.0); const c = centre;
+  const d = span * (EMBED ? 1.9 : 2.0); const c = centre;          // embed: the X-ray viewer's distance
   controls.target.copy(c);
   if (kind === "top") camera.position.set(c.x, c.y - 0.001, c.z + d);
   else if (kind === "side") camera.position.set(c.x, c.y - d, c.z);
+  else if (EMBED) camera.position.set(c.x + d * 0.35, c.y - d * 0.75, c.z + d * 0.75);   // X-ray iso
   else camera.position.set(c.x + d * 0.6, c.y - d * 0.75, c.z + d * 0.6);
   controls.update();
 }
@@ -494,19 +495,8 @@ function frame(now) {
     let u = +$("asm").value + dt / (n * 0.6); if (u >= 1) { u = 1; asmPlaying = false; $("asmPlay").classList.remove("on"); }
     $("asm").value = u; applyAssembly();
   }
-  // Replay: draw only while something moves (the drag, its glide, autorotate, a running train, an
-  // assembly replay) or just after an input or message, so a drag never competes with idle redraws.
-  const moved = controls.update();
-  if (!EMBED || moved || running || asmPlaying || controls.autoRotate || now - lastPoke < 400) {
-    renderer.render(scene, camera);
-  }
-  requestAnimationFrame(frame);
+  controls.update(); renderer.render(scene, camera); requestAnimationFrame(frame);
 }
-let lastPoke = 0;
-const poke = () => { lastPoke = performance.now(); };
-["pointerdown", "pointermove", "wheel", "input", "change", "click", "keydown"].forEach(t =>
-  addEventListener(t, poke, { passive: true, capture: true }));
-addEventListener("message", poke);
 
 function resize() {
   const w = view.clientWidth, h = view.clientHeight || 500;
@@ -545,15 +535,8 @@ if (EMBED) {
                         fixed: "#7d7d78", supplied: "#b3ab96", other: "#bdb9ad" });
   $("colorMode").value = "role"; $("fixedOpacity").value = 0.3; $("caseRing").checked = false;
   caseGroup.visible = false;
-  controls.autoRotate = true; controls.autoRotateSpeed = 0.5;
-  controls.addEventListener("start", () => { controls.autoRotate = false; });
-  // Smoother drag: short glide, slower turn and zoom, no flipping under the watch, no zooming
-  // through it; outlines off and at most 1.5x pixels so each frame is cheap.
-  controls.dampingFactor = 0.18;
-  controls.rotateSpeed = 0.7; controls.zoomSpeed = 0.8; controls.panSpeed = 0.7;
-  controls.minDistance = span * 0.6; controls.maxDistance = span * 5;
-  controls.minPolarAngle = 0.05; controls.maxPolarAngle = Math.PI - 0.05;
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5)); resize();
+  // Drag as in Mikael's X-ray viewer: three.js OrbitControls with its default glide and speeds,
+  // no autorotate, a redraw every frame (see frame()); outlines off.
   $("edges").checked = false;
   let lastFail = null;
   let buildOrder = [];

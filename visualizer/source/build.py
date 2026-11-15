@@ -32,7 +32,11 @@ from adapters.common import (STAGE_NAMES, failures_from_details, load_json,  # n
 # GPT-6.1-sol's six runs on the final task (Harbor + Codex, web search off), from the team repo's
 # branch a/final-runs, extracted to work/gpt_<id> (see README). Every run is scored with the final
 # grader 3d5d96f: the three runs made on task commit 4c5d8d3 use Mikael's regrade on 3d5d96f
-# (details_grader_3d5d96f.json). Listed from the lowest score up.
+# (details_grader_3d5d96f.json). Listed from the lowest score up. After them, the four Claude runs on
+# the final task that delivered a watch (Harbor + OpenCode, branch a/final-runs, extracted to
+# work/claude_<id>). Four more Claude runs scored 0 with nothing delivered, stopped by the API usage
+# limit (opus-5.5-low 72MeZWP, opus-5.5-medium duDH2jb) or the output limit (sonnet-5.5-low-rerun
+# r7DpYvK, sonnet-5.5-medium Cn3TrvK); they are harness stops, not designs, and are not shown.
 GPT_GAP_NOTE = {
     # written after reading this run's report.json and delivered scripts/build.py
     "owFDECg": "None of the checks in its report looks at how high the hands sit or whether a wheel's "
@@ -111,6 +115,54 @@ RUNS = {
         "graded_at_commit": "3d5d96f",
         "gap_note": GPT_GAP_NOTE.get("UVsdmwL"),
     },
+    "claude_Qob53oe": {
+        "label": "Claude Opus 5.5 · medium · Qob53oe",
+        "adapter": "harbor_delivery",
+        "path": "work/claude_Qob53oe",
+        "details": "details.json",
+        "origin": "a/final-runs: runs/final_3d5d96f/opus-5.5-medium-rerun/task__Qob53oe",
+        "model": "claude-opus-5-5, effort medium",
+        "harness": "Harbor 0.26 + OpenCode, Anthropic API, 128k output",
+        "task_version": "one-job watch, SPEC 0.8",
+        "graded_at_commit": "3d5d96f",
+        "note": 'A second run at medium effort; the first (duDH2jb) stopped on the API usage limit with nothing delivered.',
+    },
+    "claude_gpCasL8": {
+        "label": "Claude Opus 5.5 · low · gpCasL8",
+        "adapter": "harbor_delivery",
+        "path": "work/claude_gpCasL8",
+        "details": "details.json",
+        "origin": "a/final-runs: runs/final_3d5d96f/opus-5.5-low-rerun/task__gpCasL8",
+        "model": "claude-opus-5-5, effort low",
+        "harness": "Harbor 0.26 + OpenCode, Anthropic API, 128k output",
+        "task_version": "one-job watch, SPEC 0.8",
+        "graded_at_commit": "3d5d96f",
+        "note": "Score disputed: A's verifier gives 0.4219 (shown); H's regrade outside Harbor gives 0.0817, because parts/a_wheel_8h.step reads there as a compound with 0 solids (SESSION.md, 15 Nov 08:4x). Open until the verifier's cadquery-ocp is confirmed.",
+    },
+    "claude_TxhN8Ly": {
+        "label": "Claude Sonnet 5.5 · low · TxhN8Ly",
+        "adapter": "harbor_delivery",
+        "path": "work/claude_TxhN8Ly",
+        "details": "details.json",
+        "origin": "a/final-runs: runs/final_3d5d96f/sonnet-5.5-low-run3/task__TxhN8Ly",
+        "model": "claude-sonnet-5-5, effort low",
+        "harness": "Harbor 0.26 + OpenCode, Anthropic API, 128k output",
+        "task_version": "one-job watch, SPEC 0.8",
+        "graded_at_commit": "3d5d96f",
+        "note": 'Third run at low effort; the second (r7DpYvK) stopped at the output limit with nothing delivered. H regraded this run outside Harbor: identical.',
+    },
+    "claude_8Wrjav3": {
+        "label": "Claude Sonnet 5.5 · low · 8Wrjav3",
+        "adapter": "harbor_delivery",
+        "path": "work/claude_8Wrjav3",
+        "details": "details.json",
+        "origin": "a/final-runs: runs/final_3d5d96f/sonnet-5.5-low/task__8Wrjav3",
+        "model": "claude-sonnet-5-5, effort low",
+        "harness": "Harbor 0.26 + OpenCode, Anthropic API, 128k output",
+        "task_version": "one-job watch, SPEC 0.8",
+        "graded_at_commit": "3d5d96f",
+        "note": 'This run ended on an API usage limit error after 97 steps; what it had delivered by then was graded. H regraded it outside Harbor: identical.',
+    },
 }
 
 
@@ -182,6 +234,46 @@ def build_xray(repo, stage_dir, stage, out_rel):
         return None
     print(f"  wrote {out_rel}")
     return out_rel
+
+
+def build_xray_job(repo, deliv, run_id, title):
+    """X-ray page of a one-job delivery (8-hour build and 6-hour variant in one page, switchable),
+    made by Mikael's tools/viewer/export_watch_demo.py, unchanged. Returns the page path, or None."""
+    out_rel = f"scenes/{run_id}_xray.html"
+    out = os.path.join(HERE, out_rel)
+    if os.path.exists(out) and not OPTS["rebuild_scenes"]:
+        return out_rel
+    if OPTS["no_scenes"] or not os.path.exists(VENV_PY):
+        return None
+    import shutil
+    import tempfile
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmp = os.path.join(tmpdir, run_id)                  # the X-ray page shows this folder's name
+        os.makedirs(tmp)
+        os.symlink(os.path.join(deliv, "parts"), os.path.join(tmp, "parts"))
+        for name in ("movement.json", "variant_6h.json"):
+            if os.path.exists(os.path.join(deliv, name)):
+                shutil.copy(os.path.join(deliv, name), os.path.join(tmp, name))
+        r = subprocess.run([VENV_PY, os.path.join(repo, "tools", "viewer", "export_watch_demo.py"), tmp, out,
+                            "--title", title], capture_output=True, text=True)
+    if r.returncode != 0:
+        print(f"  (X-ray failed for {out_rel}):\n{r.stderr[-800:]}")
+        return None
+    print(f"  wrote {out_rel}")
+    return out_rel
+
+
+REFERENCE_XRAY = "visualizer/xray.html"   # Mikael's X-ray of the final task's reference delivery (team repo)
+
+
+def reference_xray(repo):
+    """Copy the team's reference X-ray page into scenes/ as it is; None if the repo has none."""
+    src = os.path.join(repo, REFERENCE_XRAY)
+    if not os.path.exists(src):
+        return None
+    import shutil
+    shutil.copy(src, os.path.join(HERE, "scenes", "reference_xray.html"))
+    return "scenes/reference_xray.html"
 
 
 def unpack(repo, rel, out_dir):
@@ -268,6 +360,7 @@ PART_NAMES = {"P1": "Part 1 · Going train and hands", "P2": "Part 2 · 24-hour 
 # grader's own numbers and to pick which parts to colour; pass/fail always comes from details.json.
 HAND_REACH, DAY_HAND_REACH, HAND_CENTRE_MIN, HAND_AREA_MAX_SHARE = 5.0, 3.0, 0.5, 0.25
 DAY_HAND_OFFSET, VOL_TOL, HELD_MOVE = 6.0, 0.01, 0.3
+ENGAGE_GAP, DRIVE_MIN_VOLUME, DRIVE_AREA_RATIO = 0.1, 0.001, 0.5   # mesh test (Movement.mesh_passes)
 
 
 def hand_problems(name, v, reach):
@@ -326,11 +419,44 @@ def explain(name, d, movement):
         return "; ".join(msgs) or "parts collide", red
     if name == "held":
         msgs, red = [], []
+        loose = {}
         for item in d.get("not_held", []):
             mob, direction = item.rsplit(" ", 1)
-            msgs.append(f"nothing holds the {mob} wheel: moved {HELD_MOVE} mm along {direction} it touches no fixed part")
+            loose.setdefault(mob, []).append(direction)
+        for mob, dirs in loose.items():
             red += mobile_parts(movement, mob)
-        return "; ".join(msgs) or "a wheel is not held", red
+        if not loose:
+            return "a wheel is not held", red
+        if len(loose) == 1:
+            mob, ds = next(iter(loose.items()))
+            return (f"nothing holds the {mob} wheel: moved {HELD_MOVE} mm along {' or '.join(ds)} it touches "
+                    f"no fixed part, so it can slide out"), red
+        each = ", ".join(f"{m} ({' '.join(ds)})" for m, ds in loose.items())
+        return (f"nothing holds {len(loose)} wheels: each, moved {HELD_MOVE} mm the way shown, touches no fixed "
+                f"part, so it can slide out. {each}"), red
+    if name == "tolerant":
+        msgs, red = [], []
+        for x in d.get("meshes", []):
+            if x.get("passes"):
+                continue
+            a, b = x["pair"].split("/")
+            why = []
+            if not x.get("teeth_match", True):
+                why.append("the teeth no longer match what was declared")
+            if x.get("worst_volume", 0) > VOL_TOL:
+                why.append(f"they jam ({x['worst_volume']:.3f} mm³ overlap)")
+            if x.get("largest_gap", 0) > ENGAGE_GAP:
+                why.append(f"they come apart ({x['largest_gap']:.3f} mm gap, at most {ENGAGE_GAP})")
+            if x.get("smallest_drive_overlap", 1) < DRIVE_MIN_VOLUME:
+                why.append(f"the teeth barely touch ({x['smallest_drive_overlap']:.4f} mm³)")
+            if x.get("smallest_drive_ratio", 1) <= DRIVE_AREA_RATIO:
+                why.append(f"the teeth bite too little: drive ratio {x['smallest_drive_ratio']:.3f}, "
+                           f"needs more than {DRIVE_AREA_RATIO}")
+            msgs.append(f"with the {b} moved {abs(x['shift'])} mm {x['position']} from the {a}, "
+                        + ("; ".join(why) or "the mesh test fails")
+                        + " (a real wheel sits up to this far off)")
+            red += mobile_parts(movement, a) + mobile_parts(movement, b)
+        return "; ".join(dict.fromkeys(msgs)) or "gears fail with a small shift", red
     return "failed", []
 
 
@@ -366,16 +492,19 @@ def score_breakdown(details):
 
 
 def report_entries(report_rel):
-    """Every line of the agent's report.json that says something: (line number, kind, text).
-    "P1": ... lines are its claims; "key": value lines its checks; bare strings in a list its notes."""
+    """Every key and value of the agent's report.json, in file order: (line number, kind, text).
+    "P1": ... are its claims; other "key": value pairs its checks; bare strings in a list its notes.
+    Works for a report spread over many lines and for one written on a single line."""
+    pair = re.compile(r'"([^"]+)"\s*:\s*("(?:[^"\\]|\\.)*"|-?[0-9][0-9.eE+-]*|true|false|null)')
     out = []
     for i, line in enumerate(open(os.path.join(HERE, report_rel)).read().splitlines(), 1):
         t = line.strip().rstrip(",")
-        if re.match(r'^"P\d+"\s*:', t):
-            out.append((i, "claim", t))
-        elif re.match(r'^"[^"]+"\s*:\s*[^\s{\[]', t):
-            out.append((i, "check", t))
-        elif re.match(r'^"[^"]*"$', t):
+        found = False
+        for m in pair.finditer(line):
+            found = True
+            text = m.group(0)
+            out.append((i, "claim" if re.fullmatch(r"P\d+", m.group(1)) else "check", text))
+        if not found and re.match(r'^"[^"]*"$', t):
             out.append((i, "note", t))
     return out
 
@@ -442,6 +571,9 @@ def build_harbor_delivery(run_id, spec, repo):
             scenes[build] = build_scene(repo, tmp, stage, f"scenes/{run_id}_{build}.html",
                                         f"{spec['label']} · {build} build")
 
+    xray = build_xray_job(repo, deliv, run_id, f"{spec['label']}: X-ray")
+    xray_ref = reference_xray(repo)
+
     sections = []
     claims = details.get("honesty", {}).get("claims", {})
     for i, (pid, part) in enumerate(details["parts"].items(), 1):
@@ -482,6 +614,8 @@ def build_harbor_delivery(run_id, spec, repo):
             "cost_usd": None,
             "log": log,
             "scene": scenes["6h"] if pid == "P3" else scenes["8h"],
+            "xray": xray,
+            "xray_ref": xray_ref,
             "scene_mode": "assembly" if pid == "P4" else "build",
             "new_parts": [],
             "fail_parts": sorted(red),
@@ -490,6 +624,7 @@ def build_harbor_delivery(run_id, spec, repo):
 
     sections.append(review_section(details, sections, rel, details_name, scenes["8h"], entries,
                                    spec.get("gap_note")))
+    sections[-1].update(xray=xray, xray_ref=xray_ref)
 
     return {
         "schema": "replay-run/1",
@@ -510,6 +645,7 @@ def build_harbor_delivery(run_id, spec, repo):
             "grader_version": "tests/grade_watch.py",
             "graded_at_commit": spec.get("graded_at_commit"),
             "honesty": details.get("honesty", {}).get("honesty"),
+            "note": spec.get("note"),
         },
         "sections": sections,
     }

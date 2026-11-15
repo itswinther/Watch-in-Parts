@@ -1,0 +1,365 @@
+{
+ "schema": "replay-run/1",
+ "run": {
+  "id": "claude_Qob53oe",
+  "label": "Claude Opus 5.5 · medium · Qob53oe",
+  "model": "claude-opus-5-5, effort medium",
+  "harness": "Harbor 0.26 + OpenCode, Anthropic API, 128k output",
+  "source": "a/final-runs: runs/final_3d5d96f/opus-5.5-medium-rerun/task__Qob53oe",
+  "source_root": "replay",
+  "source_format": "Harbor trial: delivery folder and the grader's details.json; no agent transcript",
+  "chain_score": 0.9433140424020567,
+  "chain_score_source": "work/claude_Qob53oe/details.json",
+  "score_label": "score",
+  "cost_usd": null,
+  "section_kind": "part",
+  "task_version": "one-job watch, SPEC 0.8",
+  "grader_version": "tests/grade_watch.py",
+  "graded_at_commit": "3d5d96f",
+  "honesty": 1.0,
+  "note": "A second run at medium effort; the first (duDH2jb) stopped on the API usage limit with nothing delivered."
+ },
+ "sections": [
+  {
+   "id": "p1",
+   "index": 1,
+   "label": "Part 1 · Going train and hands",
+   "ran": true,
+   "reward": 1.0,
+   "p": 1.0,
+   "score_source": "work/claude_Qob53oe/details.json",
+   "score_key": "parts.P1",
+   "claim": "pass",
+   "gates": {
+    "files": true,
+    "assembled": true
+   },
+   "checks": {
+    "spin": true,
+    "held": true,
+    "train": true,
+    "clear": true,
+    "minute": true,
+    "hour": true,
+    "seconds": true,
+    "coaxial": true,
+    "hands": true,
+    "size": true,
+    "printable": true,
+    "tolerant": true,
+    "seated": true,
+    "strength": true
+   },
+   "failed_gates": [],
+   "failed_checks": [],
+   "new_failures": [],
+   "failures": [],
+   "duration_s": null,
+   "tool_calls": null,
+   "cost_usd": null,
+   "log": [
+    {
+     "t": 0.0,
+     "kind": "claim",
+     "text": "\"P1\": \"pass\"",
+     "src": {
+      "file": "work/claude_Qob53oe/delivery/report.json",
+      "line": 1
+     }
+    },
+    {
+     "t": 1.0,
+     "kind": "check",
+     "text": "\"height_mm\": 4.23",
+     "src": {
+      "file": "work/claude_Qob53oe/delivery/report.json",
+      "line": 1
+     }
+    }
+   ],
+   "scene": "scenes/claude_Qob53oe_8h.html",
+   "xray": "scenes/claude_Qob53oe_xray.html",
+   "xray_ref": "scenes/reference_xray.html",
+   "scene_mode": "build",
+   "new_parts": [],
+   "fail_parts": [],
+   "submission_dir": "work/claude_Qob53oe/delivery"
+  },
+  {
+   "id": "p2",
+   "index": 2,
+   "label": "Part 2 · 24-hour hand",
+   "ran": true,
+   "reward": 1.0,
+   "p": 1.0,
+   "score_source": "work/claude_Qob53oe/details.json",
+   "score_key": "parts.P2",
+   "claim": "pass",
+   "gates": {
+    "files": true,
+    "assembled": true,
+    "day_declared": true
+   },
+   "checks": {
+    "day_hand": true,
+    "day_place": true
+   },
+   "failed_gates": [],
+   "failed_checks": [],
+   "new_failures": [],
+   "failures": [],
+   "duration_s": null,
+   "tool_calls": null,
+   "cost_usd": null,
+   "log": [
+    {
+     "t": 0.0,
+     "kind": "claim",
+     "text": "\"P2\": \"pass\"",
+     "src": {
+      "file": "work/claude_Qob53oe/delivery/report.json",
+      "line": 1
+     }
+    }
+   ],
+   "scene": "scenes/claude_Qob53oe_8h.html",
+   "xray": "scenes/claude_Qob53oe_xray.html",
+   "xray_ref": "scenes/reference_xray.html",
+   "scene_mode": "build",
+   "new_parts": [],
+   "fail_parts": [],
+   "submission_dir": "work/claude_Qob53oe/delivery"
+  },
+  {
+   "id": "p3",
+   "index": 3,
+   "label": "Part 3 · 6-hour variant",
+   "ran": true,
+   "reward": 1.0,
+   "p": 1.0,
+   "score_source": "work/claude_Qob53oe/details.json",
+   "score_key": "parts.P3",
+   "claim": "pass",
+   "gates": {
+    "files": true,
+    "assembled": true,
+    "day_declared": true,
+    "same_frame": true
+   },
+   "checks": {
+    "spin": true,
+    "held": true,
+    "train": true,
+    "clear": true,
+    "minute": true,
+    "hour": true,
+    "seconds": true,
+    "coaxial": true,
+    "hands": true,
+    "size": true,
+    "printable": true,
+    "tolerant": true,
+    "seated": true,
+    "strength": true,
+    "day_hand": true,
+    "day_place": true
+   },
+   "failed_gates": [],
+   "failed_checks": [],
+   "new_failures": [],
+   "failures": [],
+   "duration_s": null,
+   "tool_calls": null,
+   "cost_usd": null,
+   "log": [
+    {
+     "t": 0.0,
+     "kind": "claim",
+     "text": "\"P3\": \"pass\"",
+     "src": {
+      "file": "work/claude_Qob53oe/delivery/report.json",
+      "line": 1
+     }
+    }
+   ],
+   "scene": "scenes/claude_Qob53oe_6h.html",
+   "xray": "scenes/claude_Qob53oe_xray.html",
+   "xray_ref": "scenes/reference_xray.html",
+   "scene_mode": "build",
+   "new_parts": [],
+   "fail_parts": [],
+   "submission_dir": "work/claude_Qob53oe/delivery"
+  },
+  {
+   "id": "p4",
+   "index": 4,
+   "label": "Part 4 · Assembly",
+   "ran": true,
+   "reward": 1.0,
+   "p": 1.0,
+   "score_source": "work/claude_Qob53oe/details.json",
+   "score_key": "parts.P4",
+   "claim": "pass",
+   "gates": {
+    "files": true,
+    "plan": true
+   },
+   "checks": {
+    "barrel": true,
+    "bottom_plate": true,
+    "mid_plate": true,
+    "motion_bridge": true,
+    "top_bridge": true,
+    "m2a": true,
+    "m2b": true,
+    "m3": true,
+    "m4": true,
+    "s": true,
+    "hand_seconds": true,
+    "y": true,
+    "x": true,
+    "min": true,
+    "hand_minute": true,
+    "mw": true,
+    "hour": true,
+    "hour_collar": true,
+    "hand_hour": true,
+    "i": true,
+    "d": true,
+    "hand_24h": true
+   },
+   "failed_gates": [],
+   "failed_checks": [],
+   "new_failures": [],
+   "failures": [],
+   "duration_s": null,
+   "tool_calls": null,
+   "cost_usd": null,
+   "log": [
+    {
+     "t": 0.0,
+     "kind": "claim",
+     "text": "\"P4\": \"pass\"",
+     "src": {
+      "file": "work/claude_Qob53oe/delivery/report.json",
+      "line": 1
+     }
+    }
+   ],
+   "scene": "scenes/claude_Qob53oe_8h.html",
+   "xray": "scenes/claude_Qob53oe_xray.html",
+   "xray_ref": "scenes/reference_xray.html",
+   "scene_mode": "assembly",
+   "new_parts": [],
+   "fail_parts": [],
+   "submission_dir": "work/claude_Qob53oe/delivery"
+  },
+  {
+   "id": "review",
+   "index": 5,
+   "label": "Part 5 · Review",
+   "kind": "review",
+   "ran": true,
+   "reward": 0.9433140424020567,
+   "p": null,
+   "score_source": "work/claude_Qob53oe/details.json",
+   "gates": null,
+   "checks": null,
+   "failed_gates": [],
+   "failed_checks": [],
+   "new_failures": [],
+   "failures": [],
+   "duration_s": null,
+   "tool_calls": null,
+   "cost_usd": null,
+   "log": [],
+   "scene": "scenes/claude_Qob53oe_8h.html",
+   "scene_mode": "build",
+   "new_parts": [],
+   "fail_parts": [],
+   "review": {
+    "failures": [],
+    "passed": [
+     "Part 1 · Going train and hands",
+     "Part 2 · 24-hour hand",
+     "Part 3 · 6-hour variant",
+     "Part 4 · Assembly"
+    ],
+    "report_checked": [
+     "height_mm"
+    ],
+    "gap_note": "",
+    "score": {
+     "rows": [
+      {
+       "id": "P1",
+       "label": "Part 1 · Going train and hands",
+       "weight": 0.25,
+       "s": 1.0,
+       "weighted": 0.25
+      },
+      {
+       "id": "P2",
+       "label": "Part 2 · 24-hour hand",
+       "weight": 0.1,
+       "s": 1.0,
+       "weighted": 0.1
+      },
+      {
+       "id": "P3",
+       "label": "Part 3 · 6-hour variant",
+       "weight": 0.15,
+       "s": 1.0,
+       "weighted": 0.15
+      },
+      {
+       "id": "P4",
+       "label": "Part 4 · Assembly",
+       "weight": 0.25,
+       "s": 1.0,
+       "weighted": 0.25
+      }
+     ],
+     "weighted_sum": 0.75,
+     "weight_total": 0.75,
+     "parts_average": 1.0,
+     "parts_half": 0.5,
+     "all_pass": true,
+     "all_pass_half": 0.44331404240205674,
+     "thickness": {
+      "H_mm": 4.230045527219772,
+      "h0_mm": 3.95,
+      "s": 0.8866280848041135
+     },
+     "honesty": {
+      "claims": {
+       "P1": "pass",
+       "P2": "pass",
+       "P3": "pass",
+       "P4": "pass"
+      },
+      "truths": {
+       "P1": true,
+       "P2": true,
+       "P3": true,
+       "P4": true
+      },
+      "points": {
+       "P1": "1",
+       "P2": "1",
+       "P3": "1",
+       "P4": "1"
+      },
+      "honesty": 1.0,
+      "factor": 1.0,
+      "W_PRODUCT": 0.75,
+      "W_HONESTY": 0.1
+     },
+     "reward": 0.9433140424020567
+    }
+   },
+   "xray": "scenes/claude_Qob53oe_xray.html",
+   "xray_ref": "scenes/reference_xray.html"
+  }
+ ]
+}
