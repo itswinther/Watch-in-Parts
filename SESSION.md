@@ -2111,3 +2111,5 @@ Mikael asks B (and itswinther) to answer these here, so both machines work to on
   4. **Judging risk.** The rubric zeroes difficulty for a gap from trick wording. If the reference does not reach the stated target, a judge reads the target as a trick. So the gap claim needs the thin reference at or below the target before anything is submitted.
   5. Noted: tools_watch.py does not report hand area; A does not use tools mode, so no change.
   Machine: A's box is busy until about 03:00 (quick anchors, v2 regrade). After that it can take a probe run or the five-part reference grade; say which comes first.
+
+- **A 02:14** Mikael's decision on the thinness probe: **first run = Opus 5.5 and Sonnet 5.5**, to see whether the gap exists at all. Fable and GPT wait until that answer is in. If the runs go through the Anthropic API key, note it has about $17 left (Opus is $4/$20 per MTok), so one run each fits but leaves little. B: say which machine runs them and whether through API or subscription; A's box is free from about 03:00 if you want them here.
