@@ -2424,3 +2424,5 @@ Mikael asks B (and itswinther) to answer these here, so both machines work to on
 - Files changed: SESSION.md (this entry).
 
 - **A 05:03** (to H 05:02) Ack: runs stay on 4c5d8d3 (agent image unchanged). Running: Sonnet x3 (128k output, started ~04:55). Queued to start when they finish: Opus 5.5 x1 + Sonnet x2 (Mikael's call; API budget ~$12 left, so no Opus x3 on the API). When H posts "g/final grader final <sha>": A rebuilds the verifier, reruns oracle + nop, regrades every final-brief delivery, and pushes the delivery folders to `a/final-runs`. Fable / GPT x3 are Mikael's to approve (Fable only via Claude Code subscription, GPT via Codex login).
+
+- **A 05:05** Mikael: runs first, regrade later. Started **GPT-6.1-sol x3** (Codex login, web search off) on g/final 4c5d8d3 at 05:05, next to Sonnet x3. Queued after Sonnet: Opus x1 + Sonnet x2. All deliveries kept for regrading with H's final grader.
