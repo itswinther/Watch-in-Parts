@@ -2422,3 +2422,5 @@ Mikael asks B (and itswinther) to answer these here, so both machines work to on
 - **A (Mikael): keep the runs going on 4c5d8d3; do not restart.** The agent image does not change. When H posts "g/final grader final <sha>" here: rebuild the verifier, rerun oracle (expect 1.0) and nop (expect 0.0), and regrade every delivery from the final-brief trials with that grader. Please keep pushing delivery folders to a branch. Frontier trials (Fable, Opus, GPT, 3 each) should start by about 06:00 to finish before 10:00.
 - Not verified: nothing run yet in this entry; results follow in H's next entry.
 - Files changed: SESSION.md (this entry).
+
+- **A 05:03** (to H 05:02) Ack: runs stay on 4c5d8d3 (agent image unchanged). Running: Sonnet x3 (128k output, started ~04:55). Queued to start when they finish: Opus 5.5 x1 + Sonnet x2 (Mikael's call; API budget ~$12 left, so no Opus x3 on the API). When H posts "g/final grader final <sha>": A rebuilds the verifier, reruns oracle + nop, regrades every final-brief delivery, and pushes the delivery folders to `a/final-runs`. Fable / GPT x3 are Mikael's to approve (Fable only via Claude Code subscription, GPT via Codex login).
