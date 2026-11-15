@@ -288,8 +288,9 @@ All six rewards were regraded on a second machine, outside Harbor, from the file
 three with grader `3d5d96f`, the other three with the grader on `main`. Rewards and failed checks were
 identical to workstream A's details files, except `k843CBe` after the fix above.
 
-**Claude models: no valid run.** Sonnet 5.5 at default and medium thinking delivered nothing in five runs of
-five (see "How to run it"). Every other Claude run ended when our API credit ran out, and Harbor marks those
+**Claude models: no valid run with a watch.** Sonnet 5.5 delivered nothing in six runs: four at default and
+medium thinking (A 06:20), one more at medium (A 07:01) and one at low (A 07:44), each ending in a single reply
+of about 128,000 thinking tokens (see "How to run it"). Every other Claude run ended when our API credit ran out, and Harbor marks those
 invalid: Opus 5.5 at low and medium thinking had delivered nothing when cut off (15 and 35 steps). Sonnet 5.5 at
 low thinking is the one Claude run that built a watch before it was cut off (97 steps): 5.02 mm tall, 0.412,
 with 18 directions in which a mobile is not held and the seconds hand 0.22 mm below the top of the frame, and a
@@ -377,10 +378,18 @@ what we do not show.
   names, refuses links and outside paths, and never runs submitted code. Reward 0 is written first. Each check
   has its own try block and time limit. The report can only lower the reward: a truthful one leaves it as it
   is, a false `pass` costs more than an admitted fault.
-- **Not done on the submitted version:** the full anchor suite (`tests/test_anchors_job.py`, the reference with
-  one fault each and the expected reward) has not been re-run since the layout became thin, and one anchor is
-  known to be out of date. No exploit hunt was run against this version. Earlier hunts are in
-  `docs/history/`.
+- **Anchor suite on the submitted grader** (`python3 tests/test_anchors_job.py 3`, 38 deliveries, each the
+  reference with one change, about 80 minutes): the reference scores 1.000; without a report 0.941; with one
+  honest part marked `fail` 0.985. All 35 others that could be built score below 0.47, do-nothing 0.000. So in
+  this suite nothing but the complete, working reference comes near full score.
+  - 14 anchors give exactly the reward written in the file, including do-nothing, the three stop-early
+    deliveries and the report (honesty) cases.
+  - 24 do not match the file, and the file is what is out of date: it was written for our earlier, roomier
+    reference. Five give the expected reward with a different part list (18 parts now, not 17). Fifteen score
+    lower than written, because on the thin layout the same single fault breaks more checks. One scores 0.0005
+    higher (17 of 18 parts installed instead of 16 of 17). Three could not be built on the thin geometry.
+  - We have not rewritten those 24 expectations for the thin layout.
+- **Not done:** an exploit hunt against this version. Earlier hunts are in `docs/history/`.
 
 ### Craft (15 p)
 
