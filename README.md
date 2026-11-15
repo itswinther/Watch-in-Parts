@@ -250,7 +250,8 @@ what we do not show.
 - **Information and tools available:** the order, seven supplier sheets, the file format, CadQuery, and
   `tools/kernel.py` with the factory's own STEP loader, intersection volume and smallest distance. These are
   enough to test "held", "overlap while turning" and "hand above the frame" before delivering. The reference
-  is built with the same libraries.
+  is built with the same CadQuery; its involute gear maker (`geometry/watch_gears_cad.py`) is our own code and is
+  not given to the agent, which has to write its own.
 - **Withheld information:** the agent is not shown the acceptance test. Every check traces to the order, a
   sheet, the format or trade practice ([docs/CHECK_BASIS.md](docs/CHECK_BASIS.md)). Three grader numbers do
   not (known limits); none of the faults above depends on them.
