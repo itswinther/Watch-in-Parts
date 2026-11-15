@@ -33,6 +33,14 @@ STAGE_BARREL_ARBOR_Z = (-1.0, 1.6)  # stage mode only (old runs): the one-body b
 BARREL_TURNS_PER_HOUR = Fraction(1, 8)          # clockwise
 CASE_RADIUS = 20.7         # reference reaches 20.354 at its largest stage, plus 0.3, rounded up to 0.05
 CASE_HEIGHT = 13.4         # reference is 13.1 tall, plus 0.3
+# thinness probe (SESSION.md Proposed spec changes, 2026-11-15 02:20; spikes/thin_probe/): not graded by
+# tests/grade_watch.py. Stated in QA-W100 section 9 only when environment/brief_thin.py THIN_IN_BRIEF is on, and
+# scored afterwards by spikes/thin_probe/score.py: x = (H - THIN_TARGET_MM) / (CASE_HEIGHT - THIN_TARGET_MM), clamped
+# to 0..1, s = (1 - x) ** THIN_SCORE_EXPONENT, reward = THIN_SCORE_SHARE x share + THIN_SCORE_SHARE x [all pass] x s.
+# (Not the THIN_VOXEL ... constants below, which belong to the printability test.)
+THIN_TARGET_MM = 9.0       # mm: the thickness target, total height along z of the taller build, barrel included
+THIN_SCORE_EXPONENT = 4
+THIN_SCORE_SHARE = Fraction(1, 2)   # the half of the reward that full acceptance earns (as tests/grade_watch.py)
 # stage 3, change request: the supplied barrel (same mesh) turns clockwise once every 6 hours instead of 8
 CHANGED_BARREL_TURNS_PER_HOUR = Fraction(1, 6)
 REF_KEPT_VOLUME_SHARE = 0.626   # stage 3: the reference keeps 0.6267 of the mobile volume and all of the fixed volume it receives (rounded down)
