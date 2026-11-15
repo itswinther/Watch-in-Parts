@@ -1,216 +1,218 @@
 # Watch movement design job
 
-An RL environment for the AfterQuery challenge at Junction 2026, in Harbor format. The agent gets a work
-order and a folder of supplier documents, and designs the gear train of a mechanical watch in real CAD.
+An RL environment for the AfterQuery challenge at Junction 2026, in Harbor format. The agent gets a customer
+order for a thin dress watch and a folder of supplier sheets. It designs the movement as CAD parts (STEP, made
+with CadQuery) and delivers one folder. A separate offline verifier grades that folder by geometry. The agent
+never sees a check, a score or a verdict.
 
 The repo is still named `board-in-a-box` after our first idea, which we dropped.
 
-## What the agent does
+## What the agent gets and what it must deliver
 
-It plays a movement designer at a watch maker. The order names a barrel from a catalogue, a case and a print
-process. The agent must deliver, in one folder:
+The instruction is [environment/public/job/PROMPT.md](environment/public/job/PROMPT.md), written as a customer
+order. It asks for:
 
-- the going train, frame and hands for that barrel: hours and minutes on one centre, and seconds;
-- a 24-hour hand on its own axis;
-- a 6-hour variant: the same barrel run faster, on the same frame;
-- an assembly plan: an order and a collision-free path for every part;
-- optionally, its own statement of which parts pass.
+- a movement with four hands: hours and minutes on the centre, seconds, and a 24-hour hand on its own small dial;
+- a barrel chosen by the agent from the catalogue DS-W01 (three barrels with arbors 3.0, 4.5 and 6.6 mm long);
+- case CS-254-134 (inner radius 12.7 mm, inner height 13.4 mm, DS-W02);
+- parts printed by the process of DS-W03 (smallest feature 0.2 mm), each mobile in brass or steel;
+- two builds on the same frame: `movement.json` with the barrel at one turn per 8 hours, and `variant_6h.json`
+  with the same barrel at one turn per 6 hours;
+- an assembly plan, `assembly.json`: an order and a path of rigid poses for every part of the 8-hour build;
+- optionally `report.json`: the designer's statement, for each of four items, `pass`, `fail` or `not_tested`;
+- "as thin as you can": no number is given.
 
-Parts are STEP files written with CadQuery. The agent has a geometry kernel and a format checker. It has no
-grader and gets no score while it works. The acceptance test is a written inspection procedure in its folder
-(`QA-W100`), and every number it needs sits in one cell of one supplier sheet: barrel and case catalogues,
-a print process sheet, a gear rating sheet, mainspring, materials, jewels and crown sheets.
+There is no acceptance test, no target height and no stated formula in anything the agent reads.
 
-The full rules are in [SPEC.md](SPEC.md) (version 0.7). The brief is
-[environment/public/job/PROMPT.md](environment/public/job/PROMPT.md).
+The agent's `/app`, built by `environment/make_bundle_job.py`:
 
-## Why it is realistic
+| Path | What it is |
+| --- | --- |
+| `instruction.md` | the order (from `PROMPT.md`) |
+| `FORMAT.md` | file formats, size limits, JSON layouts, how the factory reads the files |
+| `datasheets/` | DS-W01 barrels, DS-W02 cases, DS-W03 printing, DS-W04 gear rating, DS-101 mainsprings, DS-201 materials, DS-301 jewels, `INDEX.md` |
+| `supplied/BR-096-30.stl`, `BR-096-45.stl`, `BR-096-66.stl` | each catalogue barrel as a mesh |
+| `tools/kernel.py` | geometry helpers, including the STEP loader the grader uses |
+| `tools/check_format.py` | checks file format only, prints `format ok` or the format errors |
+| `delivery/` | empty; the agent writes here |
 
-We checked the task against real watches (`REAL_WATCH_WORK.md`):
+Installed: Python 3.12, CadQuery 2.8.0, manifold3d, trimesh, numpy, scipy.
 
-- The ratios are real. Barrel to centre is 8, as in Grossmann's textbook train. Real barrels run 6.3 to 8 hours
-  per turn (`REAL_WATCH_WORK.md`, section 1), so our 8-hour and 6-hour builds are both in range.
+## How it is graded
+
+`tests/grade_watch.py`, one-job mode. The full rules are in [SPEC.md](SPEC.md) (version 0.8).
+
+| Part | What | Weight | Gates |
+| --- | --- | --- | --- |
+| P1 | 8-hour build: frame, going train, hour, minute and seconds hands | 25 | files load; parts do not overlap |
+| P2 | the 24-hour hand of the 8-hour build | 10 | as P1, plus a 24-hour hand declared |
+| P3 | the 6-hour variant: every P1 and P2 check again | 15 | as P2, plus the same frame as the 8-hour build |
+| P4 | assembly: each part of the 8-hour build goes in along its path | 25 | movement.json loads; assembly.json is valid |
+
+P1 has 14 weighted checks: every mobile turns freely and is held; multi-part mobiles are one piece; every mesh
+drives, also with the driven axis moved 0.03 mm; no undeclared pair of mobiles ever touches; the hands turn at
+1/12, 1 and 60 turns per hour, clockwise; hour and minute are coaxial; hands are at least 5 mm long and lie
+above the frame; everything fits the case; every part passes the print test; the going train passes a Lewis
+bending check under 70.1 N·mm at the barrel. P4 scores the share of parts installed. A part whose gates fail
+scores 0; no part gates another.
+
+The reward:
+
+```
+share  = sum(w_p x s_p) / sum(w_p)          s_p = weighted share of part p's checks that pass (0 if a gate fails)
+all    = 1 if every gate and check of every part passes, else 0
+x      = (H - 3.35) / (13.4 - 3.35), clamped to 0..1      H = total height of the taller build, mm
+s      = (1 - x)^4
+reward = (1/2 x share + 1/2 x all x s) x (0.75 + 0.10 h) / 0.85
+```
+
+- **Thickness.** 3.35 mm (`THIN_REFERENCE_MM`) is the height our own house design reaches; 13.4 mm is the case
+  height. A build at or below 3.35 mm gets s = 1. At 4.71 mm s = 0.56; at 6 mm s = 0.29. Thickness pays only
+  for a watch that fully works. The agent is told only that thinner is better.
+- **Statement factor.** h scores `report.json` against the truth, part by part: `pass` on a part that passes
+  in full 1, `pass` on one that does not -2, `fail` 0.5 or 1, `not_tested` 0.5; h = max(0, mean over the four
+  parts). No report, an invalid one, or a part left out counts as `not_tested`. A working watch with no report
+  scores 16/17 = 0.941; with a truthful report, 1.0. A false "pass" costs more than an admitted fault.
+
+## Why it is hard, and why that is fair
+
+On an earlier brief that printed the acceptance test and a 4.0 mm thickness target, every frontier model we ran
+scored 1.0: they rebuilt the stated checks as a self-test and stopped when it passed (SESSION.md, 15 Nov
+04:05). So the submitted brief states no test and no target. The agent has to know what a working movement is,
+check its own design, and decide how thin it can go.
+
+Every check must trace to one of four sources: the order, a supplier sheet, the file format, or ordinary trade
+practice (a wheel turns freely, two parts do not occupy one space, a hand is a pointer). The table, check by
+check, is [docs/CHECK_BASIS.md](docs/CHECK_BASIS.md). Where a check had no basis, we added the fact to the order
+or to `FORMAT.md` (for example the dial layout and hand lengths, the dial side, the drawing convention), or we
+list it under known limits below.
+
+The task is grounded in real watches (`REAL_WATCH_WORK.md`):
+
+- Barrel to centre is 8, as in Grossmann's textbook train. Real barrels run 6.3 to 8 hours per turn, so the
+  8-hour and 6-hour builds are both in range.
 - The 24-hour hand is driven off the hour wheel through an intermediate wheel, as in the ETA 2893-2 and the
   Miyota 9075.
-- The 6-hour variant changes one gear pair on an unchanged frame. ETA's 6497-1 and 6498-1 do the same: one
-  frame family, the centre and escape wheels kept.
+- The 6-hour variant changes one gear pair on an unchanged frame, as ETA's 6497-1 and 6498-1 share one frame.
 - Wheels are brass on steel pinions, as Saunier describes.
 - The gear load, 70.1 N·mm, is the Sellita SW200-1's bridle slipping torque (16.57 N·mm) scaled to our size
-  (`REAL_WATCH_WORK.md`, section 6).
+  (DS-101 Table 2a). The order says the train is shared with an automatic version and must carry its barrel.
+- The catalogue barrels turn clockwise seen from the dial. Most real calibres mesh the barrel straight onto the
+  centre pinion, so the minute hand would run backwards here; the train needs one extra wheel. Marco Lang's
+  ml01 has that wheel, and so does US patent 7,452,123.
 
-We also ran a real professional design through our checks: Marco Lang's ml01 going train, from his public
-CAD file (`REAL_ML01_FAIRNESS.md`). It passes most checks. Where it fails, the file says whether the fault is
-the design, the scale or our rule.
+We also ran Marco Lang's ml01 going train, from his public CAD file, through an earlier version of our checks
+(`REAL_ML01_FAIRNESS.md`).
 
-**Why our barrel turns clockwise.** Most real calibres mesh the barrel straight onto the centre pinion. Their
-barrel then turns against the minute hand, counter-clockwise seen from the dial. Our catalogue barrel turns
-clockwise. So the train needs one extra wheel before the centre, or the minute hand runs backwards. Lang's ml01
-has exactly that extra wheel (26 teeth), and so does US patent 7,452,123. It is real but uncommon. A
-counter-clockwise barrel would let a textbook train drop straight in; this one makes the designer work out the
-turning sense.
+## Reward integrity
 
-## What we found so far
+- The verifier runs in Harbor's separate environment with no network. It holds the grader and `geometry/`;
+  the agent image holds neither.
+- It reads only the delivered files that `movement.json`, `variant_6h.json` and `assembly.json` name, plus
+  `report.json`. Symbolic links and paths outside the delivery are refused. It never runs submitted code;
+  `scripts/` is archived, never opened.
+- `tests/test.sh` writes reward 0 first; the grader writes 0 again and overwrites it once at the end. Each gate
+  and check runs in its own try block with its own time limit (1,800 s each, 7,200 s in all); an exception or a
+  timeout fails that check only.
+- Baselines in Harbor on `g/final` 4c5d8d3: oracle (our reference, built in the container) 1.000, nop 0.000
+  (SESSION.md, A 04:48). That run was before the thickness term was added. The reference is at H0, so it
+  should stay 1.0; this is to be re-run.
+- Leak guard: `make_bundle_job.py` refuses any file name, mark, phrase or number that would point at the
+  solution, including the house design's height and the thickness formula. `harbor/watch_one/build_task.py`
+  admits only an allowlist of paths into the agent image and refuses copies of secret files by sha256.
+- The agent's network is an allowlist of model endpoints only; web tools are denied.
 
-**The going-train job is solved by frontier models.** Ten local runs, ten scores of 1.0: Fable 5.2 and Opus 5.5
-three each, Sonnet 5.5 four. Six ran on the early brief, which restated every number. Three ran on the brief
-that cites the documents instead and adds the gear strength check. The last (Sonnet) ran on the current brief,
-with a material per part and the report statement, and wrote a truthful report. In the first round each model
-rebuilt the acceptance test from the brief and checked its own design against it. These ran in Claude Code,
-headless, outside Harbor. Nobody has run GPT on this job yet.
+## How to run it
 
-**A judge rehearsal found three ways to score 1.0 with a watch that does not work** (`JUDGE_REHEARSAL.md`,
-section 4): false tooth counts that get a weak pinion past the strength check, a minute hand that hits the
-seconds hand once an hour, and a wheel locked by a pawl that still passes "free to turn". With the known
-off-centre disc hand, that makes four. None scores above 1.0. The rules that close them are decided and being
-built (see "Open work").
-
-**Crown winding is not in the judged job.** Workstream A built a winding and hand-setting mechanism (crown,
-stem, clutch, ratchet, click) as its own task, with its own acceptance steps (`spikes/keyless/`). Its grader is
-in this job's code but switched off (`KEYLESS_IN_JOB = False`, `geometry/keyless_job.py`), so the judges' job is
-Parts 1 to 4. Runs of A's task, in Harbor:
-
-| Model, harness | Engine | Rewards |
-| --- | --- | --- |
-| GPT-6.1-sol, Codex | first | 0.024, 0.022, 0.066 (plus a first smoke run at 0.024) |
-| GPT-6.1-sol, Codex | fixed engine (c44b69b, the same designs regraded) | **0.992** for imWnpTP (every step passes; it was failed twice by engine bugs); b7qdG8X and QZeuFhk have real design faults (a stem that hits its own clutch on pull; a clutch that will not slip backward), regrades stopped. GPT can solve crown winding. |
-| Sonnet 5.5, OpenCode | first | 0.95, every step passing |
-
-The rows used different engines, and Sonnet was graded on the first one only. On the fixed engine GPT's
-designs wind, then jam when the rig pre-winds the barrel for the hold test. One of those jams is a design fault
-(a clutch that cannot slip). A traced the other two to the simulator (the engine skips contact patches below
-a size floor, and these contacts were split into many tiny ones), so they are not the model's mistake. A's
-engine fix is on a branch, not merged. Until it is in and the designs are regraded, these numbers are not a
-gap.
-
-Two published results point the same way: the static shape is easy and the moving contact is hard. CAD-bench
-reports that agents build a right-angle gearbox's shape in 96.9 percent of attempts but average 4.0 percent on
-its functional score (link and notes: `HARBOR_RESEARCH.md`, section 3.4, and `spikes/RESEARCH_GAPS.md`; we could
-not confirm where it was published). BenchCAD (Zhang et al., arXiv 2605.10865) reports that models replace
-sweeps and lofts with simpler extrudes. On our job, so far, frontier models get the moving contact right too.
-
-All numbers and run logs are in [SESSION.md](SESSION.md) and in the results table of
-[solution/SOLUTION_WATCH.md](solution/SOLUTION_WATCH.md) (section 9).
-
-## How it is scored
-
-The inspection has four parts: going train and hands (weight 0.25), 24-hour hand (0.10), 6-hour variant (0.15)
-and assembly (0.25). Each part is a weighted share of pass/fail checks. Nothing gates anything else.
-
-```
-R      = 0.5 x (weighted share of the parts) + 0.5 x [everything passes]
-reward = R x (0.75 + 0.10 h) / 0.85      h = how well the agent's own report matches the result
-```
-
-So a delivery that skips any part scores at most 0.5, and a finished one scores 1.0. A truthful report helps;
-a false "pass" costs more than no report. The grader never runs submitted code.
-
-## Running it
-
-Tested on Python 3.13 (the task image uses 3.12).
+The Harbor task, with one command. Needs Docker, `uv` and a Harbor 0.26 checkout (`HARBOR_SRC`); details in
+[harbor/watch_one/README.md](harbor/watch_one/README.md).
 
 ```bash
-pip install -r requirements.txt
-```
-
-All commands run from the repo root. The reference, as one delivery folder (about 40 s):
-
-```bash
-python3 solution/reference_watch.py /tmp/ref --job
-```
-
-Grade a delivery folder (absolute path; 4 min 35 s on an idle 4-CPU machine, allow 10):
-
-```bash
-(cd tests && python3 -I grade_watch.py /tmp/ref --reward /tmp/ref_reward.txt --details /tmp/ref_details.json)
-```
-
-The do-nothing baseline: the same command on an empty folder gives reward 0 (under a second):
-
-```bash
-mkdir -p /tmp/empty && (cd tests && python3 -I grade_watch.py /tmp/empty --reward /tmp/empty_reward.txt)
-```
-
-Build the folder the agent gets (brief, datasheets, supplied barrel, kernel, format checker, empty
-`delivery/`; a few seconds). It refuses any file that leaks the solution:
-
-```bash
-python3 environment/make_bundle_job.py /tmp/bundle
-```
-
-The anchor suite: each anchor is the reference with one change, and its expected reward. The full suite (36
-anchors) takes about 1 h 40 min with 2 workers. The stop-early baseline alone (a delivery stopped after Part 1,
-after Parts 1 and 2, and after Parts 1 to 3; expected 0.157, 0.220, 0.333) took 10 min 24 s in our judge
-rehearsal:
-
-```bash
-python3 tests/test_anchors_job.py 2
-python3 tests/test_anchors_job.py 2 --only "job stop-early"
-```
-
-The Harbor task, with one command (needs Docker and a Harbor 0.26 checkout; see
-[harbor/watch_one/README.md](harbor/watch_one/README.md)):
-
-```bash
-SKIP_MODEL=1 harbor/watch_one/run_all.sh none 0                         # oracle and do-nothing only (oracle verifier 3 min 26 s)
-KEY_FILE=~/anthropic.key harbor/watch_one/run_all.sh anthropic/claude-sonnet-5-5 3
+SKIP_MODEL=1 harbor/watch_one/run_all.sh none 0                        # oracle and nop only, no key
+KEY_FILE=~/anthropic.key harbor/watch_one/run_all.sh anthropic/claude-opus-5-5 3
 AGENT=codex CODEX_FORCE_AUTH_JSON=1 harbor/watch_one/run_all.sh openai/gpt-6.1-sol 3
 ```
 
-A local headless run in Claude Code, from a folder outside the repo:
+It builds the task, checks the network settings, runs `harbor lint`, the oracle, nop and the model (OpenCode by
+default, agent cap 3 h), and summarises the results.
+
+Without Harbor (Python 3.12 or 3.13, `pip install -r requirements.txt`, from the repo root):
 
 ```bash
-environment/run_clean_job.sh /path/outside/repo/run1 claude-sonnet-5-5
+python3 solution/reference_watch.py /tmp/ref --job                     # the reference delivery, about 40 s
+(cd tests && python3 -I grade_watch.py /tmp/ref --reward /tmp/r.txt --details /tmp/d.json)
+mkdir -p /tmp/empty && (cd tests && python3 -I grade_watch.py /tmp/empty --reward /tmp/e.txt)   # reward 0
+python3 environment/make_bundle_job.py /tmp/bundle                     # the agent's /app
+python3 environment/make_brief_job.py --check                          # documents agree with the constants
+python3 tests/test_anchors_job.py 2 --only "job stop-early"            # stop-early anchors
 ```
+
+Grading the reference takes a few minutes (153 s in the Harbor oracle run).
+
+## Results
+
+Final brief (`g/final` 4c5d8d3 agent image), Harbor, OpenCode or Codex, graded with the thickness term.
+
+| Model | Runs | Rewards | Height H (mm) | Notes |
+| --- | --- | --- | --- | --- |
+| Oracle (reference) | 1 | pending re-run (1.000 before the thickness term) | 3.35 | |
+| nop | 1 | pending re-run (0.000 before the thickness term) | | |
+| Sonnet 5.5 | 3 | pending | pending | |
+| Opus 5.5 | pending | pending | pending | |
+| Fable 5.2 | pending | pending | pending | |
+| GPT-6.1-sol | pending | pending | pending | |
+
+Earlier briefs, for context only:
+
+- On the briefs that stated the acceptance test (four-part job), ten of ten local runs in Claude Code, outside
+  Harbor, scored 1.0 (Fable 5.2 and Opus 5.5 three each, Sonnet 5.5 four). With a stated 9.0 mm thickness target, GPT, Opus and Sonnet all scored 1.000 (SESSION.md 04:05).
+- Round 2 (4.0 mm target stated, thin barrel, 12.7 mm case; `b/thin-4mm` 92d9622): GPT-6.1-sol scored 0.354 in
+  one run. H was 4.71 mm; P1 and P3 failed train, seconds, tolerant and strength; it claimed all four parts pass
+  (SESSION.md, A 04:31).
+
+All runs and logs are in [SESSION.md](SESSION.md).
+
+## Known limits
+
+- **One task instance.** One order, one case, one catalogue.
+- **Three grader numbers the agent cannot derive.** The tooth load factor 1.45 (dry meshing), the material
+  allowables (brass 110 MPa, steel 725 MPa, proof stress / 2) and the 0.03 mm shift of the `tolerant` check
+  are in the grader but in no agent document. `docs/CHECK_BASIS.md` marks them OT: to be replaced by a test of
+  the movement as made. That replacement is not built.
+- **The as-made test is not in the score.** A test of the watch as printed, within DS-W03's +/- 0.01 mm, exists
+  (`geometry/asmade.py`, `spikes/asmade/asmade.py`; in the grader only with `WATCH_AS_MADE=1`, which the
+  Harbor task does not set). Its results are reported beside the score, not in it.
+- **Crown winding is not in the task.** Workstream A built a winding and hand-setting part (`spikes/keyless/`)
+  and the grader can include it as Part 5, but it is switched off (`geometry/keyless_job.py`,
+  `KEYLESS_IN_JOB = False`); it does not fit the thin layout.
+- **Thickness is scored against our own design.** If a better design than ours is possible, the scale tops out
+  at 3.35 mm and does not reward going further.
 
 ## Where things are
 
 | Path | What it is |
 | --- | --- |
-| `SPEC.md` | the rules, with every number and the file it comes from |
-| `environment/public/job/` | what the agent reads: brief, format sheet, datasheets, inspection procedure |
+| `SPEC.md` | the rules, with every number and the constant it comes from |
+| `docs/CHECK_BASIS.md` | the basis of every check |
+| `environment/public/job/` | what the agent reads: order, format sheet, datasheets |
 | `environment/make_bundle_job.py` | builds the agent's folder and refuses anything that leaks the solution |
 | `tests/grade_watch.py` | the grader |
 | `geometry/watch.py` | the constants and the mechanical tests |
-| `solution/reference_watch.py` | the reference |
-| `solution/SOLUTION_WATCH.md` | answers, margins, anchors, results (never in the agent's image) |
-| `solution/STEP_BY_STEP_WATCH.md` | the reference as an expert would build it (never in the agent's image) |
-| `tests/test_anchors_job.py` | anchor suite |
-| `harbor/watch_one/` | the Harbor task (workstream A) |
-| `spikes/keyless/` | crown winding: engine, acceptance steps, datasheets, runs (workstream A) |
+| `solution/reference_watch.py` | the reference (house design) |
+| `tests/test_anchors_job.py` | anchor suite: the reference with one change each, and its expected reward |
+| `harbor/watch_one/` | the Harbor task |
 | `REAL_WATCH_WORK.md`, `REAL_ML01_FAIRNESS.md` | the task against real watches and a real CAD design |
-| `visualizer/` | demo pages: open `index.html` (Replay of Sonnet's staged run) or `xray.html` (X-ray of the watch) in a browser; no server needed. See `visualizer/README.md` |
-| `tools/viewer/` | scripts that make the 3D pages |
-| `transcripts/` | earlier agent runs with grader output |
-| `SESSION.md` | shared log: decisions, requests, every result |
-| `JUDGE_REHEARSAL.md`, `BRIEF_REVIEW.md` | a mock judging of the repo, and a review of everything the agent reads |
-| `docs/history/` | handoffs between sessions and the first watch idea write-up, kept for the record |
+| `visualizer/` | demo pages, open `index.html` or `xray.html` in a browser |
+| `SESSION.md` | shared log of the four sessions: decisions, requests, every result |
 
-## What we tried before this
+## History
 
-Nine task ideas were built and tested over one night: an enclosure design, a packing problem, furniture path
-planning, a single-stage watch, an abstract gear train, a five-step watch, a regulation task with hidden
-physics, a wrist tracker and a decision game. Every fully specified task with exact feedback was solved at or
-near 1.0 by the strongest models, usually in under ten minutes. Details are in `SESSION.md` and
-`spikes/README.md`.
-
-Then we built the watch as four frozen stages: design, extend, change, assemble, each a fresh conversation
-that inherited the last one's files (SPEC.md 0.6). Fable and Opus scored 1.0 on every stage. Sonnet and one
-GPT-6.1-sol chain fell short at assembly, because a part added earlier could not be put in. We moved to one
-job with nothing frozen, because a real designer sees the whole order at once. The staged grader is kept to
-regrade old runs (`grade_watch.py FOLDER --stage N`).
-
-## Open work
-
-- Grader rules decided and being built, each with an anchor that must score low: a hand may cover at most a
-  quarter of the disc its tip sweeps (closes the disc hand); the drive test starts from flank contact (the ml01
-  backlash finding, `REAL_ML01_FAIRNESS.md`); "nothing else collides" tested over every pair of angles;
-  "free to turn" tested off the 5-degree grid too; declared tooth counts must match the teeth on the part. Then
-  a full anchor rerun.
-- Regrade our ten saved 1.0 deliveries with those rules.
-- Part 5 (crown winding) in this job: A's engine fix merged, A's reference at 1.0 in our frame, then the switch
-  on.
-- Harbor runs on the submitted job: several per model, including GPT, with reward, part scores, time and cost.
-- Known strict or loose spots are logged in `solution/SOLUTION_WATCH.md`, section 8.
+Before this task we built and dropped nine others, including Board in a Box (an enclosure design), because
+clean agents scored at or near 1.0 (`spikes/README.md`, `SESSION.md`). The first watch version was four frozen
+stages (SPEC 0.6), where Fable and Opus scored 1.0 on every stage; its grader mode is kept to regrade old runs
+(`grade_watch.py FOLDER --stage N`). SPEC 0.7 made it one job with a stated acceptance test (QA-W100); every
+frontier model scored 1.0. SPEC 0.8 is the customer order described above. Earlier write-ups are in
+`docs/history/`.
 
 ## Team
 
