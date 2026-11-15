@@ -750,10 +750,57 @@ def grade_keyless_part(m, deadline=None, run=None, force=False, jobs=1, work=Non
             shutil.rmtree(tmp, ignore_errors=True)
 
 
+def job_reward(num, den, all_pass, s, factor):
+    """The one-job reward as an exact Fraction: (1/2 x num / den + 1/2 x [all pass] x s) x factor.
+    num / den: the weighted share of the parts; s: the thickness score (float or Fraction, 0..1); factor: the
+    honesty factor. Without everything passing, thickness adds nothing whatever s is."""
+    from geometry import watch as W
+    half = W.THIN_SCORE_SHARE
+    share = Fraction(num) / Fraction(den) if den else Fraction(0)
+    return ((1 - half) * share + (half * Fraction(s) if all_pass else Fraction(0))) * Fraction(factor)
+
+
+def job_thickness(folder, cache=None, run=None):
+    """The thickness record of a delivery (as spikes/thin_probe/score.py measures it): H = z_max - z_min of
+    Movement.extent() (barrel included, assembled positions) of movement.json and of variant_6h.json; the taller
+    counts. A build that does not load, any exception or a non-finite height gives H None and s = 0 (fail closed,
+    the error recorded). s_exact: s as an exact Fraction (the caller turns it into text)."""
+    import math
+    from geometry import watch as W
+    rec = {"H_mm": {}, "H_mm_taller": None, "x": 1.0, "s": 0.0, "s_exact": Fraction(0), "h0_mm": None,
+           "exponent": None, "error": None}
+    errors = []
+    try:
+        rec["h0_mm"], rec["exponent"] = W.thin_full_score_height(), W.THIN_SCORE_EXPONENT
+        for name in (JOB_MOVEMENT, JOB_VARIANT):
+            def measure(name=name):
+                e = W.load_movement(folder, name, cache=cache, materials=True).extent()
+                h = float(e["z_max"] - e["z_min"])
+                if not math.isfinite(h):
+                    raise ValueError("non-finite height")
+                return True, {"h": h}
+            ok, info = (run or _run)(measure)
+            rec["H_mm"][name] = info["h"] if ok else None
+            if not ok:
+                errors.append("%s: %s" % (name, info.get("error")))
+        hs = list(rec["H_mm"].values())
+        H = max(hs) if hs and all(h is not None for h in hs) else None
+        x, s = W.thin_score(H)
+        if not (math.isfinite(x) and math.isfinite(s)):
+            raise ValueError("non-finite thickness score")
+        rec.update(H_mm_taller=H, x=float(x), s=float(s), s_exact=Fraction(s))
+    except Exception as e:      # noqa  (fail closed: no thickness score, say why)
+        rec.update(x=1.0, s=0.0, s_exact=Fraction(0))
+        errors.append("thickness not computed, s = 0: %s: %s" % (type(e).__name__, e))
+    rec["error"] = "; ".join(errors) if errors else None
+    return rec
+
+
 def grade_job(folder):
     """One-job mode: grade the delivery folder part by part (JOB_PARTS). A part whose gates fail scores 0; every
-    other part is still graded. reward = 0.5 x sum(w_p s_p) / sum(w_p) + 0.5 x [every gate and check of every
-    graded part passes], s_p = the weighted share of part p's checks passed."""
+    other part is still graded. reward = (0.5 x sum(w_p s_p) / sum(w_p) + 0.5 x [every gate and check of every
+    graded part passes] x s) x honesty factor, s_p = the weighted share of part p's checks passed, s = the
+    thickness score of the taller build (job_thickness, geometry/watch.py thin_score)."""
     from geometry import watch as W
     t0 = time.monotonic()
     deadline = t0 + JOB_TIME_LIMIT_S
@@ -831,9 +878,12 @@ def grade_job(folder):
         parts[pid] = {"name": what, "weight": float(w), "gates": gates, "checks": checks, "check_weights": weights,
                       "share_of_checks": float(share), "s": float(s), "s_exact": str(s), "passed": passed,
                       "details": {k: v for k, v in d.items() if k in keep}}
-    reward = Fraction(1, 2) * num / den + (Fraction(1, 2) if all_pass else Fraction(0))
+    # thickness score (geometry/watch.py thin_score): the all-pass half is scaled by s
+    thickness = job_thickness(folder, cache, run)
+    parts_reward_without_thickness = job_reward(num, den, all_pass, 1, 1)
+    parts_reward = job_reward(num, den, all_pass, thickness["s_exact"], 1)
+    thickness["s_exact"] = str(thickness["s_exact"])
     # the designer's statement (report.json) against each part's result: the honesty term (Decisions 17:56)
-    parts_reward = reward
     try:
         honesty, factor = job_honesty(folder, {pid: p["passed"] for pid, p in parts.items()})
     except Exception as e:      # noqa  (A's constants missing: a broken verifier; fail closed, say so)
@@ -842,6 +892,9 @@ def grade_job(folder):
     reward = parts_reward * factor
     return {"mode": "job", "reward": float(reward), "reward_exact": str(reward), "all_pass": all_pass,
             "parts_reward": float(parts_reward), "parts_reward_exact": str(parts_reward), "honesty": honesty,
+            "thickness": thickness,
+            "parts_reward_without_thickness": float(parts_reward_without_thickness),
+            "parts_reward_without_thickness_exact": str(parts_reward_without_thickness),
             "parts_graded": [p[0] for p in JOB_PARTS], "parts": parts, "elapsed_s": round(time.monotonic() - t0, 1),
             "constants": {"part_weights": {p[0]: float(p[2]) for p in JOB_PARTS},
                           "check_weights": {p[0]: (dict(p[4]) if p[4] is not None else "one per part of movement.json, 1 each")
