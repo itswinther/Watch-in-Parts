@@ -11,17 +11,25 @@ It needs no build step, no server and no Python: open `index.html` in a browser.
 | `app/` | its script (`replay.js`), style (`replay.css`) and the 3D frame template |
 | `data/` | the runs the page shows (`index.js`, `runs/<run>.js`) |
 | `scenes/` | the 3D watch for each section of a run, shown in the page's frame |
+| `source/` | the scripts that build it: `build.py`, `check_data.py`, `adapters/`, and Replay's own README and CLAUDE.md |
 | `README.md` | this file |
 
-This is the built output of Abhishek's Replay project, copied here on 15 Nov. It shows one
-run: GPT-6.1-sol's lowest score of its six runs on the final task (0.427, Harbor + Codex,
-graded at 3d5d96f; files on branch `a/final-runs`, `runs/final_3d5d96f/gpt-6.1-sol/task__owFDECg`).
-Per graded part (P1 to P4) it sets the agent's own `report.json` against the grader, and the
-3D view shows in red the parts behind each failed check: the hour, seconds and 24-hour hands
-below the top of the frame, and the pieces of two wheels that are not seated. Harbor kept no
-agent transcript for this run, so the log is the report. The earlier Sonnet run is removed.
-The build scripts stay in Abhishek's Replay project; a rebuild there does not update
-this folder, so a new build has to be copied in again.
+This is the built output of Abhishek's Replay project, copied here on 15 Nov. It shows all
+six of GPT-6.1-sol's runs on the final task (Harbor + Codex, web search off), from the lowest
+score up: owFDECg 0.427, oVS4tLK 0.427, fhhWYjp 0.447, k843CBe 0.448, dQKXa6k 0.457,
+UVsdmwL 0.467. Every score is from the final grader 3d5d96f; the three runs made on task
+commit 4c5d8d3 use Mikael's regrade on it. Files: branch `a/final-runs`, `runs/final_*/gpt-6.1-sol/`.
+
+Each run has Parts 1 to 4 (what the grader checked) and Part 5, a review: where it failed,
+what the AI reported, and how the score is made (reproduced from the grader's output; the
+build stops if it does not match). The agent's own `report.json` is the log, because Harbor
+kept no transcript. The 3D view shows in red the parts behind each failed check (hands that
+break the hand rule, wheels that collide or that nothing holds, wheel pieces not seated).
+Drag to turn. The X-ray button is hidden for these runs: no X-ray pages are built for them.
+
+To rebuild: put the files of `source/` next to `index.html` and `app/` in a folder beside the
+team repo, fetch the runs as `source/README.md` says, then `python3 build.py` and
+`python3 check_data.py` (the 3D needs the `.venv` it describes).
 
 ## Where the visualizer goes
 

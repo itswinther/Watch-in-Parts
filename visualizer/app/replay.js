@@ -15,7 +15,7 @@
   const KIND_LABEL = {
     read: "reads", write: "writes", run: "runs", check: "checks", result: "→",
     error: "error", harness: "tool", wait: "waits", submit: "submit", say: "says",
-    think: "thinks", done: "done", claim: "reports",
+    think: "thinks", done: "done", claim: "reports", note: "notes",
   };
   const PLAY_SECONDS_PER_SECTION = 18;   // a played section lasts about this long
 
@@ -133,6 +133,15 @@
 
     const ol = $("log");
     ol.replaceChildren();
+    if (s.review) {
+      $("log-meta").textContent = `every number from ${s.score_source}`;
+      if (state.scored.has(state.sec)) ol.append(renderReview(s.review));
+      else ol.append(el("li", "empty", "The review appears when grading ends."));
+      ol.scrollTop = 0;
+      renderViewport(s);
+      renderFailures(s);
+      return;
+    }
     if (!s.log.length) ol.append(el("li", "empty", "No transcript for this section."));
     s.log.slice(0, state.revealed).forEach((l) => ol.append(logLine(l, showHarness)));
     if (state.playing) ol.scrollTop = ol.scrollHeight;
@@ -140,6 +149,49 @@
 
     renderViewport(s);
     renderFailures(s);
+  }
+
+  /* Part 5: where the delivery failed, and how the grader's formula gives the score */
+  function renderReview(rv) {
+    const f3 = (x) => Number(x).toFixed(3), f4 = (x) => Number(x).toFixed(4);
+    const sc = rv.score, h = sc.honesty;
+    const box = el("li", "review");
+    const section = (title) => { const d = el("div", "rv-block"); d.append(el("h3", null, title)); box.append(d); return d; };
+
+    const fail = section("Where it failed");
+    rv.failures.forEach((f) => {
+      const d = el("div", "rv-fail");
+      d.append(el("span", "rv-x", "✕"), el("b", null, f.check),
+               el("span", "rv-where", ` · ${f.parts.join(", ")}`), el("div", "rv-msg", f.message));
+      fail.append(d);
+    });
+    if (rv.passed.length) fail.append(el("div", "rv-pass", `✓ passed everything: ${rv.passed.join(", ")}`));
+
+    const said = section("What the AI said");
+    const claims = Object.entries(h.claims || {}).map(([k, v]) => `${k} ${v.replace("_", " ")}`).join(", ");
+    said.append(el("p", null, `It reported ${claims}. The checks it lists in its report: ` +
+      `${rv.report_checked.join(", ")}.` + (rv.gap_note ? ` ${rv.gap_note}` : "")));
+
+    const how = section(`How it got ${f3(sc.reward)}`);
+    const t = el("table", "rv-table");
+    t.append(Object.assign(el("tr"), { innerHTML: "<th>part</th><th>weight</th><th>part score</th><th>weight × score</th>" }));
+    sc.rows.forEach((r) => {
+      const tr = el("tr", r.s < 1 ? "bad" : "");
+      [r.label, f3(r.weight), f3(r.s), f4(r.weighted)].forEach((v) => tr.append(el("td", null, v)));
+      t.append(tr);
+    });
+    how.append(t);
+    const steps = el("ol", "rv-steps");
+    [
+      `Parts: ${f4(sc.weighted_sum)} ÷ ${f3(sc.weight_total)} total weight = ${f4(sc.parts_average)}. Half the score is this: ½ × ${f4(sc.parts_average)} = ${f4(sc.parts_half)}.`,
+      sc.all_pass
+        ? `Everything passed, so the other half is ½ × thickness score ${f4(sc.thickness.s)} = ${f4(sc.all_pass_half)}.`
+        : `The other half is paid only if every check passes. Some failed, so it adds 0. (Even then it would be ½ × the thickness score ${f4(sc.thickness.s)}: the movement is ${sc.thickness.H_mm.toFixed(2)} mm tall against the ${sc.thickness.h0_mm} mm it is measured against.)`,
+      `Honesty: its claims scored ${Object.entries(h.points).map(([k, v]) => `${k} ${v}`).join(", ")}, an average of ${f3(h.honesty)}. Factor = (${h.W_PRODUCT} + ${h.W_HONESTY} × ${f3(h.honesty)}) ÷ (${h.W_PRODUCT} + ${h.W_HONESTY}) = ${f4(h.factor)}.`,
+      `Score = (${f4(sc.parts_half)} + ${f4(sc.all_pass_half)}) × ${f4(h.factor)} = ${f4(sc.reward)}.`,
+    ].forEach((x) => steps.append(el("li", null, x)));
+    how.append(steps);
+    return box;
   }
 
   function logLine(l, showHarness) {
@@ -230,11 +282,13 @@
     big.title = shown ? `from ${s.score_source}` : "";
     const said = s.claim ? `the AI reported: ${s.claim.replace("_", " ")}` : null;
     const sub = el("div", "vp-sub",
-      shown ? [said, `grader: p = ${fmtScore(s.p)} (share of checks passed)`].filter(Boolean).join(" · ")
+      s.review ? (shown ? "final score · how it is made is on the right" : "grading")
+      : shown ? [said, `grader: p = ${fmtScore(s.p)} (share of checks passed)`].filter(Boolean).join(" · ")
             : (said || "the AI is working"));
     top.append(big, sub);
     const failNote = shown && s.fail_parts && s.fail_parts.length
-      ? ` Red: ${s.fail_parts.join(", ")}.` : "";
+      ? (s.review ? ` Red: every part behind a failed check (${s.fail_parts.length}).`
+                  : ` Red: ${s.fail_parts.join(", ")}.`) : "";
     const note = s.scene
       ? (s.scene_mode === "assembly" ? "The AI's own assembly paths, replayed. Drag to turn." + failNote
          : s.fail_parts ? `The delivered movement. Drag to turn.${failNote}`

@@ -494,8 +494,19 @@ function frame(now) {
     let u = +$("asm").value + dt / (n * 0.6); if (u >= 1) { u = 1; asmPlaying = false; $("asmPlay").classList.remove("on"); }
     $("asm").value = u; applyAssembly();
   }
-  controls.update(); renderer.render(scene, camera); requestAnimationFrame(frame);
+  // Replay: draw only while something moves (the drag, its glide, autorotate, a running train, an
+  // assembly replay) or just after an input or message, so a drag never competes with idle redraws.
+  const moved = controls.update();
+  if (!EMBED || moved || running || asmPlaying || controls.autoRotate || now - lastPoke < 400) {
+    renderer.render(scene, camera);
+  }
+  requestAnimationFrame(frame);
 }
+let lastPoke = 0;
+const poke = () => { lastPoke = performance.now(); };
+["pointerdown", "pointermove", "wheel", "input", "change", "click", "keydown"].forEach(t =>
+  addEventListener(t, poke, { passive: true, capture: true }));
+addEventListener("message", poke);
 
 function resize() {
   const w = view.clientWidth, h = view.clientHeight || 500;
@@ -536,10 +547,21 @@ if (EMBED) {
   caseGroup.visible = false;
   controls.autoRotate = true; controls.autoRotateSpeed = 0.5;
   controls.addEventListener("start", () => { controls.autoRotate = false; });
+  // Smoother drag: short glide, slower turn and zoom, no flipping under the watch, no zooming
+  // through it; outlines off and at most 1.5x pixels so each frame is cheap.
+  controls.dampingFactor = 0.18;
+  controls.rotateSpeed = 0.7; controls.zoomSpeed = 0.8; controls.panSpeed = 0.7;
+  controls.minDistance = span * 0.6; controls.maxDistance = span * 5;
+  controls.minPolarAngle = 0.05; controls.maxPolarAngle = Math.PI - 0.05;
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5)); resize();
+  $("edges").checked = false;
+  let lastFail = null;
   let buildOrder = [];
   const applyReplay = (m) => {
     const u = Math.max(0, Math.min(1, m.progress == null ? 1 : m.progress));
-    if (m.failParts) { FAIL = new Set(m.failParts); applyColors(); }
+    if (m.failParts && m.failParts.join() !== lastFail) {   // recolour only when the list changes
+      lastFail = m.failParts.join(); FAIL = new Set(m.failParts); applyColors();
+    }
     if (m.newParts) {
       const nw = new Set(m.newParts);
       buildOrder = parts.filter(P => nw.has(P.data.name)).sort((a, b) => a.data.zmin - b.data.zmin);
