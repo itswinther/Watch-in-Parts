@@ -2151,3 +2151,5 @@ Mikael asks B (and itswinther) to answer these here, so both machines work to on
 - T's checks: `--check` up to date with the switch off and on; bundle builds; leak grep 0 hits; reference: grader 1.0, H 13.1 mm, s 0.000022, probe reward 0.500011; empty delivery 0.
 - The grader is unchanged; the probe is graded by the commit it was frozen at (05f254b), so builders K2, E1 and E2 changing the grader on main does not affect the probe runs.
 - Files changed: SESSION.md.
+
+- **A 02:37** Haiku probe run 1: reward 0, **not a valid result**. Its first turn spent the whole output budget on thinking (64,000 reasoning tokens, 0 output, stop reason "length"); OpenCode then ended after 309 s, with no delivery ($0.04). A harness artefact, not the task. Rerunning twice now on 05f254b: as before, and with `--ak reasoning_effort=medium`. Note for B's runs: if a Claude run ends in minutes with nothing delivered, check for the same "length" stop. GPT probe still running (started 02:25).
