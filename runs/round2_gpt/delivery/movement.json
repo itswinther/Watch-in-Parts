@@ -1,0 +1,168 @@
+{
+  "case_centre": [
+    2.3,
+    0
+  ],
+  "fixed": [
+    "mainplate",
+    "bridge"
+  ],
+  "mobiles": {
+    "input": {
+      "axis": [
+        11.2,
+        0
+      ],
+      "parts": [
+        "input_8h",
+        "input_cap"
+      ],
+      "material": "AD-C100-HT"
+    },
+    "minute": {
+      "axis": [
+        5,
+        0
+      ],
+      "parts": [
+        "minute_8h",
+        "minute_hand"
+      ],
+      "material": "AD-C100-HT"
+    },
+    "third": {
+      "axis": [
+        2,
+        4
+      ],
+      "parts": [
+        "third",
+        "third_cap"
+      ],
+      "material": "AD-C100-HT"
+    },
+    "seconds": {
+      "axis": [
+        -1.63,
+        4
+      ],
+      "parts": [
+        "seconds",
+        "seconds_hand"
+      ],
+      "material": "AD-C100-HT"
+    },
+    "counter": {
+      "axis": [
+        5,
+        -3.6
+      ],
+      "parts": [
+        "counter",
+        "counter_cap"
+      ],
+      "material": "AD-C100-HT"
+    },
+    "hour": {
+      "axis": [
+        5,
+        0
+      ],
+      "parts": [
+        "hour",
+        "hour_hand"
+      ],
+      "material": "AD-C100-HT"
+    },
+    "dayidler": {
+      "axis": [
+        6.8,
+        3.1176914536
+      ],
+      "parts": [
+        "dayidler",
+        "dayidler_cap"
+      ],
+      "material": "AD-C100-HT"
+    },
+    "day": {
+      "axis": [
+        8.6,
+        6.2353829072
+      ],
+      "parts": [
+        "day",
+        "day_hand"
+      ],
+      "material": "AD-C100-HT"
+    }
+  },
+  "meshes": [
+    {
+      "driver": "barrel",
+      "driver_teeth": 96,
+      "driven": "input",
+      "driven_teeth": 16
+    },
+    {
+      "driver": "input",
+      "driver_teeth": 40,
+      "driven": "minute",
+      "driven_teeth": 30
+    },
+    {
+      "driver": "minute",
+      "driver_teeth": 60,
+      "driven": "third",
+      "driven_teeth": 10
+    },
+    {
+      "driver": "third",
+      "driver_teeth": 60,
+      "driven": "seconds",
+      "driven_teeth": 6
+    },
+    {
+      "driver": "minute",
+      "driver_teeth": 12,
+      "driven": "counter",
+      "driven_teeth": 36
+    },
+    {
+      "driver": "counter",
+      "driver_teeth": 12,
+      "driven": "hour",
+      "driven_teeth": 48
+    },
+    {
+      "driver": "hour",
+      "driver_teeth": 12,
+      "driven": "dayidler",
+      "driven_teeth": 12
+    },
+    {
+      "driver": "dayidler",
+      "driver_teeth": 12,
+      "driven": "day",
+      "driven_teeth": 24
+    }
+  ],
+  "hands": {
+    "hour": {
+      "mobile": "hour",
+      "part": "hour_hand"
+    },
+    "minute": {
+      "mobile": "minute",
+      "part": "minute_hand"
+    },
+    "seconds": {
+      "mobile": "seconds",
+      "part": "seconds_hand"
+    },
+    "day": {
+      "mobile": "day",
+      "part": "day_hand"
+    }
+  }
+}
