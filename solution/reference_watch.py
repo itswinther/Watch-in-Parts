@@ -62,6 +62,28 @@ HAND0 = DIAL[1] + 0.05     # hour, seconds and day hands sit here (0.3 thick)
 MIN0 = HAND0 + 0.35        # the minute hand sits here (0.3 thick); the centre arbor ends at its top
 HAND_T = 0.3
 PIV = 0.3                  # motion-work arbors: pivot length below (into the bridge) and above (into the dial)
+LO_PIV = 0.7               # going-train arbors: pivot length below the shoulder (into the plate)
+COLLAR_T = 0.4             # seconds and day arbors: height of the collar under the plate above
+if W.THIN_BARREL:
+    # spike (spikes/thin_4mm): the thin barrel, drum z 0..ZB, arbor W.BARREL_ARBOR_Z. Every layer, plate and hand is
+    # LAYER_T thick and GAP apart; one-part steel mobiles (--one-part-mobiles), so no collar inside a wheel
+    LAYER_T = float(os.environ.get("THIN_LAYER_T", "0.25"))
+    ZB = W.BARREL_WHEEL_Z[1]
+    PLATE = (W.BARREL_ARBOR_Z[0], -GAP)
+    _z, Z = ZB + GAP, {"A": (GAP, ZB)}
+    for _k in ("B", "C", "D", "bridge", "E", "F", "dial"):
+        Z[_k] = (_z, _z + LAYER_T)
+        _z += LAYER_T + GAP
+        if _k == "D":
+            _z += GAP          # the arbors' top shoulder sits GAP under the bridge
+    BRIDGE, DIAL = Z.pop("bridge"), Z.pop("dial")
+    Z_DAY = Z["E"]
+    HAND_T = LAYER_T
+    HAND0 = DIAL[1] + GAP
+    MIN0 = HAND0 + HAND_T + GAP
+    PIV = LAYER_T
+    LO_PIV = PLATE[1] + GAP - PLATE[0] - 0.05
+    COLLAR_T = LAYER_T
 PLATE_MARGIN = 0.1        # plate rim beyond the farthest swept wheel or hand
 PILLAR_R, PILLAR_GAP = 0.75, 0.15
 dist = lambda p, q: math.hypot(p[0] - q[0], p[1] - q[1])
@@ -127,8 +149,9 @@ def gear_at(axis, teeth, module, z, toward, partner=None):
     return GC.gear(teeth, module, z[0], z[1], phase_deg=phase, x=axis[0], y=axis[1]), phase
 
 
-def arbor(axis, z0, z1, r=0.5, pivot=0.3, plen=0.7, top=None):
+def arbor(axis, z0, z1, r=0.5, pivot=0.3, plen=None, top=None):
     x, y = axis
+    plen = LO_PIV if plen is None else plen
     top = plen if top is None else top
     return union([cyl(x, y, z0, z1, r), cyl(x, y, z0 - plen, z0 + 0.01, pivot), cyl(x, y, z1 - 0.01, z1 + top, pivot)])
 
@@ -188,7 +211,7 @@ def frame(P, with_day, job=False):
     is left free for a ratchet)."""
     C, I, T, S, Mw, Id, D = (P[k] for k in ("centre", "third", "fourth", "seconds", "minute_wheel", "day_idler", "day"))
     (cx, cy), R_PLATE, spots = P["case"]
-    lo, hi = PLATE[1] + 0.1, BRIDGE[0] - GAP
+    lo, hi = PLATE[1] + (GAP if W.THIN_BARREL else 0.1), BRIDGE[0] - GAP
     BAR = 1.0
     pb = [(0.0, 0.0, 1.3)] + [(a[0], a[1], 1.0) for a in (I, T, C, S)] + [(x, y, 0.85) for x, y in spots]
     plate = union([GC.skeleton(PLATE[0], PLATE[1], pb, BAR)[0]] + [cyl(x, y, PLATE[1] - 0.1, BRIDGE[0], 0.75) for x, y in spots])
@@ -222,7 +245,7 @@ def frame(P, with_day, job=False):
         px, py = -1.7 * C[0] / u, -1.7 * C[1] / u
         bridge = union([bridge, cyl(px, py, W.BARREL_WHEEL_Z[1] + GAP, BRIDGE[0] + 0.01, 0.6)])
     out = {"main_plate": minus(plate, ph), "bridge": minus(bridge, bh), "dial": minus(dial, dh)}
-    if not job:
+    if not job and BRIDGE[0] > 2.5:      # stage mode only (the old stage barrel); not built for a lower bridge
         out["barrel_cock"] = minus(union([cyl(0, 0, 1.15, 2.45, 1.6), cyl(0, 0, 2.4, BRIDGE[0], 0.6)]), cyl(0, 0, 1.0, 1.7, 0.6))
     return out
 
@@ -231,15 +254,15 @@ def centre_arbor(C, lo, hi, pinion, wheel):
     """Centre arbor, stepped so the cannon (on the 0.6 -> 0.5 step at Z["E"][0]) and the minute hand (on the
     0.5 -> 0.35 step at MIN0) slide down onto it; it ends flush with the minute hand's top."""
     cx, cy = C
-    return union([cyl(cx, cy, lo, Z["E"][0], 0.6), cyl(cx, cy, lo - 0.7, lo + 0.01, 0.3),
+    return union([cyl(cx, cy, lo, Z["E"][0], 0.6), cyl(cx, cy, lo - LO_PIV, lo + 0.01, 0.3),
                   cyl(cx, cy, Z["E"][0] - 0.01, MIN0, 0.5), cyl(cx, cy, MIN0 - 0.01, MIN0 + HAND_T, 0.35), pinion, wheel])
 
 
-def hand_arbor(A, z0, z1, gear_solid, plen=0.7):
+def hand_arbor(A, z0, z1, gear_solid, plen=None):
     """Seconds or day arbor: shaft 0.6 with a 0.8 collar under the plate above (it holds the arbor down),
     top 0.5, and a 0.3 tip for the hand from HAND0 to the hand's top."""
     x, y = A
-    return union([cyl(x, y, z0, z1, 0.6), cyl(x, y, z1 - 0.4, z1, 0.8), cyl(x, y, z0 - plen, z0 + 0.01, 0.3), cyl(x, y, z1 - 0.01, HAND0, 0.5),
+    return union([cyl(x, y, z0, z1, 0.6), cyl(x, y, z1 - COLLAR_T, z1, 0.8), cyl(x, y, z0 - (LO_PIV if plen is None else plen), z0 + 0.01, 0.3), cyl(x, y, z1 - 0.01, HAND0, 0.5),
                   cyl(x, y, HAND0 - 0.01, HAND0 + HAND_T, 0.3), gear_solid])
 
 
@@ -247,7 +270,7 @@ def build_stage1():
     P = place()
     P["case"] = case_geometry(P)
     B, I, C, T, S, Mw = (P[k] for k in ("barrel", "third", "centre", "fourth", "seconds", "minute_wheel"))
-    lo, hi = PLATE[1] + 0.1, BRIDGE[0] - GAP
+    lo, hi = PLATE[1] + (GAP if W.THIN_BARREL else 0.1), BRIDGE[0] - GAP
     cx, cy = C
     sx, sy = S
     parts, phase = {}, {}
@@ -331,7 +354,7 @@ def build_stage3(doc, parts, P):
     doc = json.loads(json.dumps(doc))
     parts = dict(parts)
     B, I, C, T = P["barrel"], P["third"], P["centre"], P["fourth"]
-    lo, hi = PLATE[1] + 0.1, BRIDGE[0] - GAP
+    lo, hi = PLATE[1] + (GAP if W.THIN_BARREL else 0.1), BRIDGE[0] - GAP
     cx, cy = C
     p1, _ = gear_at(I, 24, M_A, Z["A"], ang(I, B), (96, 0.0))
     w1, ph_w1 = wheel_at(I, 54, M_B, Z["B"], ang(I, C))
@@ -455,7 +478,7 @@ def split_wheels(P):
     the gear solids the stage builds recorded in _GEARS (run build_stage1 and build_stage3 first). Returns
     {part name: solid}; a part shared by both movements is one solid (third, centre_wheel_90, fourth and its wheel,
     the minute wheel's two parts)."""
-    lo, hi = PLATE[1] + 0.1, BRIDGE[0] - GAP
+    lo, hi = PLATE[1] + (GAP if W.THIN_BARREL else 0.1), BRIDGE[0] - GAP
     I, C, T, Mw = P["third"], P["centre"], P["fourth"], P["minute_wheel"]
     out = {}
     p1, w1 = _GEARS["third"]

@@ -43,6 +43,16 @@ THIN_SCORE_EXPONENT = 4
 THIN_SCORE_SHARE = Fraction(1, 2)   # the half of the reward that full acceptance earns (as tests/grade_watch.py)
 # stage 3, change request: the supplied barrel (same mesh) turns clockwise once every 6 hours instead of 8
 CHANGED_BARREL_TURNS_PER_HOUR = Fraction(1, 6)
+# spike only (spikes/thin_4mm/, branch a/thin-4mm), OFF by default: WATCH_THIN_BARREL=1 swaps in a thin barrel, the
+# supplied meshes scaled in z by THIN_BARREL_SCALE about z = 0 (arbor 3.0 mm instead of 6.6; teeth and module in x/y
+# unchanged), read from spikes/thin_4mm/data/. The z constants of the barrel follow. The strength load case
+# (BARREL_TORQUE_MAX_NMM, the automatic version's bridle) is kept at full value: conservative.
+THIN_BARREL = os.environ.get("WATCH_THIN_BARREL", "") == "1"
+THIN_BARREL_SCALE = 3.0 / 6.6
+if THIN_BARREL:
+    BARREL_WHEEL_Z = tuple(v * THIN_BARREL_SCALE for v in BARREL_WHEEL_Z)
+    BARREL_ARBOR_Z = tuple(v * THIN_BARREL_SCALE for v in BARREL_ARBOR_Z)
+    BARREL_SQUARE_Z = tuple(v * THIN_BARREL_SCALE for v in BARREL_SQUARE_Z)
 REF_KEPT_VOLUME_SHARE = 0.626   # stage 3: the reference keeps 0.6267 of the mobile volume and all of the fixed volume it receives (rounded down)
 VOL_TOL = 0.01              # mm3
 SPIN_STEPS = 72             # free-spin test: steps of 5 degrees
@@ -145,7 +155,10 @@ _MESHES = {}
 
 def _mesh(name):
     if name not in _MESHES:
-        path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", name + ".stl")
+        data = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
+        if THIN_BARREL and name != "barrel_stage":
+            data = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "spikes", "thin_4mm", "data")
+        path = os.path.join(data, name + ".stl")
         _MESHES[name] = core.tris_to_manifold(core.read_stl(path, MAX_TRIANGLES, MAX_STL_BYTES))
     return _MESHES[name]
 
