@@ -2,7 +2,7 @@
 
 | Document | Revision | Date | Status |
 |---|---|---|---|
-| QA-W100 | B | 2026-11-15 | Released |
+| QA-W100 | C | 2026-11-15 | Released |
 
 **Issued by:** the manufacturer's quality department. **Document type:** inspection procedure.
 
@@ -260,16 +260,7 @@ when every part is installed.
 
 ## 9. Thickness
 
-The order asks for a slim calibre. The movement's height H is the highest point minus the lowest point of every
-part of the movement and of the barrel, in the assembled positions, along the axis. The taller of `movement.json`
-and `variant_6h.json` counts. The target is **4.0 mm**.
-
-With C the inner height of the case named in the work order (DS-W02, section 2, column "Inner height along the
-axis (mm)"):
-
-    x = (H - 4.0) / (C - 4.0), taken as 0 below 0 and as 1 above 1
-    thickness score s = (1 - x) ^ 4
-
-The acceptance figure is 1/2 x (the result of Parts 1 to 4 together) + 1/2 x [every condition and every
-requirement of Parts 1 to 4 is met] x s, times the statement factor of section 3. A movement file that does not
-load counts as no thickness score (s = 0).
+The movement's height is the highest point minus the lowest point of every part of the movement and of the barrel,
+in the assembled positions, along the axis. It is measured for `movement.json` and for `variant_6h.json`, and the
+taller of the two counts. The height is recorded and compared with the manufacturer's own design of this calibre.
+Thinner is better.

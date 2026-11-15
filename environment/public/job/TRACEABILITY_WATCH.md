@@ -1092,12 +1092,10 @@ hand speeds and directions, and the weights of the checks.
 | HONESTY_POINTS[('not_tested', False)] (spikes/keyless/constants.py) | 0.5 | `datasheets/QA-W100_inspection.md` | 3. Acceptance | not_tested | The part does not pass |
 | W_PRODUCT, W_HONESTY, and their sum (spikes/keyless/constants.py) | (0.75, 0.1) | `datasheets/QA-W100_inspection.md` | 3. Acceptance | The delivery's acceptance figure | statement |
 | REPORT_MAX_BYTES (spikes/keyless/constants.py) | 100000 | `FORMAT.md` | `report.json` | (whole section) | statement |
-| THIN_TARGET_MM (thinness probe) | 4.0 | `datasheets/QA-W100_inspection.md` | 9. Thickness | The target is | statement |
-| THIN_SCORE_EXPONENT (thinness probe) | 4 | `datasheets/QA-W100_inspection.md` | 9. Thickness | (whole section) | statement |
-| THIN_SCORE_SHARE (thinness probe; also the grader's parts reward split, Fraction(1, 2)) | 1/2 | `datasheets/QA-W100_inspection.md` | 9. Thickness | The acceptance figure is | statement |
-| CASE_HEIGHT cited in the thickness formula (no value printed) |  | `datasheets/QA-W100_inspection.md` | 9. Thickness | With C the inner height | statement |
 
-Thinness probe (environment/brief_thin.py THIN_IN_BRIEF on): QA-W100 rev B states requirements only. These test-method numbers of the grader are not stated anywhere the agent can read: SPIN_STEPS (and the step, 360 / SPIN_STEPS degrees); SPIN_OFFGRID (and the positions, SPIN_STEPS x (1 + its length)); SAMPLES_PER_TOOTH, MESH_OFFGRID, every 4th and 8th step; TEETH_RAYS (mesh test, teeth as declared: directions of a section's outline).
+Thinness probe (environment/brief_thin.py THIN_IN_BRIEF on): QA-W100 rev C states requirements only. These test-method numbers of the grader are not stated anywhere the agent can read: SPIN_STEPS (and the step, 360 / SPIN_STEPS degrees); SPIN_OFFGRID (and the positions, SPIN_STEPS x (1 + its length)); SAMPLES_PER_TOOTH, MESH_OFFGRID, every 4th and 8th step; TEETH_RAYS (mesh test, teeth as declared: directions of a section's outline).
+
+Thickness (geometry/watch.py THIN_TARGET_STATED off): the thickness score is measured against the house design, inside the grader; QA-W100 section 9 says only how the height is measured and that it is compared with the manufacturer's own design. Not stated anywhere the agent can read, by decision: THIN_REFERENCE_MM (3.35 mm, the height the house design reaches, at and below which the thickness score is 1), THIN_SCORE_EXPONENT (4), the score formula, and THIN_SCORE_SHARE as the share of the reward that the thickness score scales. THIN_TARGET_MM (4.0) is not used. `environment/make_bundle_job.py` refuses a bundle in which any of its `thickness_secrets()` matches.
 
 Numbers the scan cannot tell apart (a document's own number equal to a supplier value):
 
@@ -1111,7 +1109,7 @@ Numbers the scan cannot tell apart (a document's own number equal to a supplier 
 - `FORMAT.md` prints 8 for its own reasons; that number is also a value of: BARREL_TURNS_PER_HOUR (8-hour build, speed class D in the work order).
 - `datasheets/QA-W100_inspection.md` prints 0 for its own reasons; that number is also a value of: barrel axis (x, y) = (0, 0); BARREL_WHEEL_Z (to 4 decimals); BARREL_WHEEL_Z (to 4 decimals), BARREL_CORE_R (the core).
 - `datasheets/QA-W100_inspection.md` prints 0.2 for its own reasons; that number is also a value of: BARREL_MODULE; MIN_FEATURE; THIN_VOXEL, THIN_ERODE_VOX, THIN_DILATE_VOX, THIN_DEV, voxel grid offset (the printability test).
-- `datasheets/QA-W100_inspection.md` prints 1/2 for its own reasons; that number is also a value of: BARREL_ARBOR_R; BARREL_ARBOR_R (section 3); LEWIS_Y[167] (geometry/data/lewis_y.json).
+- `datasheets/QA-W100_inspection.md` prints 0.5 for its own reasons; that number is also a value of: BARREL_ARBOR_R; BARREL_ARBOR_R (section 3); LEWIS_Y[167] (geometry/data/lewis_y.json).
 - `datasheets/QA-W100_inspection.md` prints 1 for its own reasons; that number is also a value of: BARREL_TURNS_PER_HOUR (8-hour build, speed class D in the work order); CHANGED_BARREL_TURNS_PER_HOUR (6-hour variant, speed class B in the work order); THIN_VOXEL, THIN_ERODE_VOX, THIN_DILATE_VOX, THIN_DEV, voxel grid offset (the printability test); LEWIS_ADDENDUM.
 - `datasheets/QA-W100_inspection.md` prints 6 for its own reasons; that number is also a value of: CHANGED_BARREL_TURNS_PER_HOUR (6-hour variant, speed class B in the work order).
 - `datasheets/QA-W100_inspection.md` prints 8 for its own reasons; that number is also a value of: BARREL_TURNS_PER_HOUR (8-hour build, speed class D in the work order).
