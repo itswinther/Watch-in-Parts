@@ -141,8 +141,10 @@ Checks. Each passes or fails.
 10. **Hours and minutes on a common centre.** The axes of the hour hand's mobile and the minute hand's mobile are
     at most 0.01 mm apart.
 11. **Hands.** Each of the hour, minute and seconds hand parts reaches at least 5 mm from its mobile's axis;
-    lies wholly above the frame (its lowest point is no lower than the highest point of any fixed part); and
-    points: its centre of volume is at least 0.5 mm from its mobile's axis.
+    lies wholly above the frame (its lowest point is no lower than the highest point of any fixed part);
+    points: its centre of volume is at least 0.5 mm from its mobile's axis; and is slender: seen from the dial
+    side (the part projected along z onto the xy plane), the area it covers is at most 0.25 of the area of the
+    disc its tip sweeps, the circle about its mobile's axis through the point of the part furthest from that axis.
 12. **Fits the case.** Everything stays within the inner radius of the case named in the work order (DS-W02,
     section 2, column "Inner radius (mm)") of the vertical line through `case_centre` as it turns: every point of
     every fixed part, and, for each mobile, its largest distance from its own axis plus the distance from its axis
@@ -207,8 +209,9 @@ Checks:
    meshes that pass the mesh test of Part 1, and no mobile may be given two different speeds by the declared
    meshes.
 2. **24-hour hand placement.** Its mobile's axis is at least 6 mm from the axis of the hour hand's mobile;
-   the hand part reaches at least 3 mm from its mobile's axis; it lies wholly above the frame; and its
-   centre of volume is at least 0.5 mm from its mobile's axis.
+   the hand part reaches at least 3 mm from its mobile's axis; it lies wholly above the frame; its
+   centre of volume is at least 0.5 mm from its mobile's axis; and seen from the dial side it covers at most
+   0.25 of the area of the disc its tip sweeps, measured as in Part 1 check 11.
 
 ## 7. Part 3: the 6-hour variant (`variant_6h.json`)
 

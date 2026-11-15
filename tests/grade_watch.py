@@ -140,11 +140,13 @@ def _mesh_runs(m, run=None):
     return st["runs"]
 
 
-def _check_table(m, runs, speeds, conflicts, driven, thin_cache=None):
+def _check_table(m, runs, speeds, conflicts, driven, thin_cache=None, job=False):
     """name -> function () -> (passed, details), for every scored design check of movement m.
     runs: _mesh_runs(m); speeds, conflicts: m.speeds(); driven: m.speeds(meshes that pass the train test)[0].
     thin_cache: optional dict shared between movements; the thickness test of a solid object already
-    measured is reused (the same solid gives the same result)."""
+    measured is reused (the same solid gives the same result).
+    job: one-job mode; the hands checks (hands, day_place) also limit the hand's area seen from the dial
+    side (HAND_AREA_MAX_SHARE). Stage mode (job=False) is unchanged."""
     import math
     from geometry import watch as W
     names = list(m.mobiles)
@@ -205,8 +207,13 @@ def _check_table(m, runs, speeds, conflicts, driven, thin_cache=None):
     def hand_ok(h, reach):
         above, centre = m.hand_shape(h)
         r = m.hand_reach(h)
-        return r >= reach and above >= 0.0 and centre >= W.HAND_CENTRE_MIN, \
-            {"reach": r, "above_fixed": above, "centre_from_axis": centre}
+        ok = r >= reach and above >= 0.0 and centre >= W.HAND_CENTRE_MIN
+        info = {"reach": r, "above_fixed": above, "centre_from_axis": centre}
+        if job:
+            area, share = m.hand_area(h)
+            ok = ok and share <= W.HAND_AREA_MAX_SHARE
+            info.update(area_seen_from_dial=area, area_share_of_swept_disc=share)
+        return ok, info
 
     def hands():
         r = {h: hand_ok(h, W.HAND_REACH) for h in HAND_SPEED}
@@ -554,7 +561,7 @@ def _job_movement(folder, name, barrel_speed, keys, extra_gates, run, cache, thi
         for k in keys:
             details[k] = dict(info, note="not run: the driven speeds could not be worked out")
         return m, gates, checks, details
-    table = _check_table(m, runs, st["speeds"], st["conflicts"], st["driven"], thin_cache)
+    table = _check_table(m, runs, st["speeds"], st["conflicts"], st["driven"], thin_cache, job=True)
     for k in keys:
         checks[k], details[k] = run(table[k])
     return m, gates, checks, details
