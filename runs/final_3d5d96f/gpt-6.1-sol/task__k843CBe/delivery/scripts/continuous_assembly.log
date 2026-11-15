@@ -1,0 +1,21 @@
+mainplate {}
+barrel {}
+train_plate {}
+barrel_bridge {}
+first {}
+minute {}
+seconds_intermediate {}
+seconds_arbor {}
+motion_bridge {}
+motion_intermediate {}
+hour_sleeve {}
+day_idler_bridge {}
+day_intermediate {}
+day_bridge {}
+day_arbor {}
+closed_dial {}
+hour_hand {}
+seconds_hand {}
+day_hand {}
+minute_hand {}
+continuous assembly PASS

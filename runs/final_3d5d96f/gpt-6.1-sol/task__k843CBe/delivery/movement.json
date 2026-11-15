@@ -1,0 +1,170 @@
+{
+  "barrel": "BR-096-30",
+  "case_centre": [
+    2.8,
+    0
+  ],
+  "fixed": [
+    "mainplate",
+    "train_plate",
+    "barrel_bridge",
+    "motion_bridge",
+    "day_idler_bridge",
+    "day_bridge",
+    "closed_dial"
+  ],
+  "mobiles": {
+    "first": {
+      "axis": [
+        10.8,
+        0
+      ],
+      "parts": [
+        "first"
+      ],
+      "material": "AD-C100-HT"
+    },
+    "minute": {
+      "axis": [
+        2.8,
+        0
+      ],
+      "parts": [
+        "minute",
+        "minute_hand"
+      ],
+      "material": "AD-C100-HT"
+    },
+    "seconds_intermediate": {
+      "axis": [
+        2.8,
+        6.6
+      ],
+      "parts": [
+        "seconds_intermediate"
+      ],
+      "material": "AD-C100-HT"
+    },
+    "seconds": {
+      "axis": [
+        8.25,
+        5.312560681041628
+      ],
+      "parts": [
+        "seconds_arbor",
+        "seconds_hand"
+      ],
+      "material": "AD-C100-HT"
+    },
+    "motion_intermediate": {
+      "axis": [
+        -3.2,
+        0
+      ],
+      "parts": [
+        "motion_intermediate"
+      ],
+      "material": "AD-C100-HT"
+    },
+    "hour": {
+      "axis": [
+        2.8,
+        0
+      ],
+      "parts": [
+        "hour_sleeve",
+        "hour_hand"
+      ],
+      "material": "AD-C100-HT"
+    },
+    "day_intermediate": {
+      "axis": [
+        2.8,
+        -3.6
+      ],
+      "parts": [
+        "day_intermediate"
+      ],
+      "material": "AD-C100-HT"
+    },
+    "day": {
+      "axis": [
+        2.8,
+        -7.2
+      ],
+      "parts": [
+        "day_arbor",
+        "day_hand"
+      ],
+      "material": "AD-C100-HT"
+    }
+  },
+  "meshes": [
+    {
+      "driver": "barrel",
+      "driver_teeth": 96,
+      "driven": "first",
+      "driven_teeth": 12
+    },
+    {
+      "driver": "first",
+      "driver_teeth": 40,
+      "driven": "minute",
+      "driven_teeth": 40
+    },
+    {
+      "driver": "minute",
+      "driver_teeth": 80,
+      "driven": "seconds_intermediate",
+      "driven_teeth": 8
+    },
+    {
+      "driver": "seconds_intermediate",
+      "driver_teeth": 48,
+      "driven": "seconds",
+      "driven_teeth": 8
+    },
+    {
+      "driver": "minute",
+      "driver_teeth": 12,
+      "driven": "motion_intermediate",
+      "driven_teeth": 36
+    },
+    {
+      "driver": "motion_intermediate",
+      "driver_teeth": 12,
+      "driven": "hour",
+      "driven_teeth": 48
+    },
+    {
+      "driver": "hour",
+      "driver_teeth": 12,
+      "driven": "day_intermediate",
+      "driven_teeth": 12
+    },
+    {
+      "driver": "day_intermediate",
+      "driver_teeth": 12,
+      "driven": "day",
+      "driven_teeth": 24
+    }
+  ],
+  "hands": {
+    "hour": {
+      "mobile": "hour",
+      "part": "hour_hand"
+    },
+    "minute": {
+      "mobile": "minute",
+      "part": "minute_hand"
+    },
+    "seconds": {
+      "mobile": "seconds",
+      "part": "seconds_hand"
+    },
+    "day": {
+      "mobile": "day",
+      "part": "day_hand"
+    }
+  }
+}

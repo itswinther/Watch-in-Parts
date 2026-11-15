@@ -1,0 +1,45 @@
+loaded barrel_bridge
+loaded closed_dial
+loaded day_arbor
+loaded day_bridge
+loaded day_hand
+loaded day_idler_bridge
+loaded day_intermediate
+loaded first
+loaded first_6h
+loaded hour_hand
+loaded hour_sleeve
+loaded mainplate
+loaded minute
+loaded minute_6h
+loaded minute_hand
+loaded motion_bridge
+loaded motion_intermediate
+loaded seconds_arbor
+loaded seconds_hand
+loaded seconds_intermediate
+loaded train_plate
+STATIC 8h
+case max radius 12.650000496936244
+STATIC 6h
+case max radius 12.650000496936244
+ASSEMBLY mainplate {}
+ASSEMBLY barrel {}
+ASSEMBLY train_plate {}
+ASSEMBLY barrel_bridge {}
+ASSEMBLY first {}
+ASSEMBLY minute {}
+ASSEMBLY seconds_intermediate {}
+ASSEMBLY seconds_arbor {}
+ASSEMBLY motion_bridge {}
+ASSEMBLY motion_intermediate {}
+ASSEMBLY hour_sleeve {}
+ASSEMBLY day_idler_bridge {}
+ASSEMBLY day_intermediate {}
+ASSEMBLY day_bridge {}
+ASSEMBLY day_arbor {}
+ASSEMBLY closed_dial {}
+ASSEMBLY hour_hand {}
+ASSEMBLY seconds_hand {}
+ASSEMBLY day_hand {}
+ASSEMBLY minute_hand {}

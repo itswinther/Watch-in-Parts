@@ -1,0 +1,23 @@
+{
+  "parts": {
+    "P1": "not_tested",
+    "P2": "not_tested",
+    "P3": "not_tested",
+    "P4": "pass"
+  },
+  "height_mm": 10.05,
+  "validation": {
+    "format": "pass",
+    "print_feature_voxels": "pass for all 35 referenced STEP parts",
+    "nominal_assembled_interference": "pass",
+    "hand_rates_both_builds": "hour 1/12 rph, minute 1 rph, seconds 60 rph, day 1/24 rph; all clockwise",
+    "running_clearance_samples": "61 coherent poses per build across 24 hours; no pair intersection above 0.01 mm3",
+    "assembly_clearance": "All vertical-prism height breakpoints checked against already installed parts; no intersection above 0.01 mm3"
+  },
+  "unverified": [
+    "Complete dry-running friction and torque budget",
+    "Worst-case printing tolerance and loaded bearing displacement",
+    "Proof of minimum possible height"
+  ],
+  "external_access": "None; all work remained inside this container."
+}

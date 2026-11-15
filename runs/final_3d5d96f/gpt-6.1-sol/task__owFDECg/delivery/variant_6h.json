@@ -1,0 +1,214 @@
+{
+  "barrel": "BR-096-30",
+  "case_centre": [
+    2.8,
+    0
+  ],
+  "fixed": [
+    "lower_frame",
+    "centre_bridge",
+    "upper_frame",
+    "hour_idle_post",
+    "hour_idle_bridge",
+    "transfer_bridge",
+    "B_bracket",
+    "C_bracket",
+    "seconds_bracket",
+    "day_idle_bracket",
+    "A_keeper",
+    "B_keeper",
+    "C_keeper",
+    "day_idle_keeper",
+    "dial"
+  ],
+  "mobiles": {
+    "transfer": {
+      "axis": [
+        10.8,
+        0
+      ],
+      "parts": [
+        "transfer_lower",
+        "transfer_6"
+      ],
+      "material": "AD-C100-HT"
+    },
+    "minute": {
+      "axis": [
+        2.8,
+        0
+      ],
+      "parts": [
+        "minute_lower_6",
+        "minute_upper",
+        "minute_hand"
+      ],
+      "material": "AD-C100-HT"
+    },
+    "hour": {
+      "axis": [
+        2.8,
+        0
+      ],
+      "parts": [
+        "hour_wheel",
+        "hour_hand"
+      ],
+      "material": "AD-C100-HT"
+    },
+    "hour_idle": {
+      "axis": [
+        2.8,
+        5.1
+      ],
+      "parts": [
+        "hour_idle_lower",
+        "hour_idle_upper"
+      ],
+      "material": "AD-C100-HT"
+    },
+    "A": {
+      "axis": [
+        -2.6000000000000005,
+        0
+      ],
+      "parts": [
+        "A_lower",
+        "A_upper"
+      ],
+      "material": "AD-C100-HT"
+    },
+    "B": {
+      "axis": [
+        -3.0,
+        4.4821869662029945
+      ],
+      "parts": [
+        "B_wheel"
+      ],
+      "material": "AD-C100-HT"
+    },
+    "C": {
+      "axis": [
+        0.7968822235205526,
+        8.321937658723751
+      ],
+      "parts": [
+        "C_wheel"
+      ],
+      "material": "AD-C100-HT"
+    },
+    "day_idle": {
+      "axis": [
+        7.378008657189949,
+        -1.4428571428571428
+      ],
+      "parts": [
+        "day_idle_wheel"
+      ],
+      "material": "AD-C100-HT"
+    },
+    "seconds": {
+      "axis": [
+        2.8,
+        7
+      ],
+      "parts": [
+        "seconds_wheel",
+        "seconds_hand"
+      ],
+      "material": "AD-C100-HT"
+    },
+    "day": {
+      "axis": [
+        2.8,
+        -7
+      ],
+      "parts": [
+        "day_wheel",
+        "day_hand"
+      ],
+      "material": "AD-C100-HT"
+    }
+  },
+  "meshes": [
+    {
+      "driver": "barrel",
+      "driver_teeth": 96,
+      "driven": "transfer",
+      "driven_teeth": 12
+    },
+    {
+      "driver": "transfer",
+      "driver_teeth": 18,
+      "driven": "minute",
+      "driven_teeth": 24
+    },
+    {
+      "driver": "minute",
+      "driver_teeth": 12,
+      "driven": "hour_idle",
+      "driven_teeth": 36
+    },
+    {
+      "driver": "hour_idle",
+      "driver_teeth": 12,
+      "driven": "hour",
+      "driven_teeth": 48
+    },
+    {
+      "driver": "minute",
+      "driver_teeth": 36,
+      "driven": "A",
+      "driven_teeth": 12
+    },
+    {
+      "driver": "A",
+      "driver_teeth": 48,
+      "driven": "B",
+      "driven_teeth": 12
+    },
+    {
+      "driver": "B",
+      "driver_teeth": 60,
+      "driven": "C",
+      "driven_teeth": 12
+    },
+    {
+      "driver": "C",
+      "driver_teeth": 12,
+      "driven": "seconds",
+      "driven_teeth": 12
+    },
+    {
+      "driver": "hour",
+      "driver_teeth": 24,
+      "driven": "day_idle",
+      "driven_teeth": 24
+    },
+    {
+      "driver": "day_idle",
+      "driver_teeth": 24,
+      "driven": "day",
+      "driven_teeth": 48
+    }
+  ],
+  "hands": {
+    "hour": {
+      "mobile": "hour",
+      "part": "hour_hand"
+    },
+    "minute": {
+      "mobile": "minute",
+      "part": "minute_hand"
+    },
+    "seconds": {
+      "mobile": "seconds",
+      "part": "seconds_hand"
+    },
+    "day": {
+      "mobile": "day",
+      "part": "day_hand"
+    }
+  }
+}

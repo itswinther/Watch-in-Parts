@@ -1,0 +1,20 @@
+{
+  "parts": {
+    "P1": "not_tested",
+    "P2": "not_tested",
+    "P3": "not_tested",
+    "P4": "pass"
+  },
+  "height_mm": 11.954545468091965,
+  "checks": {
+    "format": "pass",
+    "nominal_static_interference_both_builds": "pass",
+    "print_process_voxel_test_all_parts": "pass",
+    "sampled_tooth_cycles_8h": "pass",
+    "assembly_paths_and_continuous_z_interference": "pass"
+  },
+  "notes": [
+    "Complete dry-running performance, bearing loads, deflections and manufacturing-tolerance effects have not been validated. P1, P2 and P3 are therefore not claimed as passing.",
+    "All work used local files and software. No resources outside this container were accessed."
+  ]
+}

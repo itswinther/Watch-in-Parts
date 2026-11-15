@@ -1,0 +1,26 @@
+{
+  "parts": {
+    "P1": "not_tested",
+    "P2": "not_tested",
+    "P3": "not_tested",
+    "P4": "pass"
+  },
+  "height_mm": 12.1,
+  "verified_checks": {
+    "format": "pass",
+    "process_sheet_voxel_printability_all_35_parts": "pass",
+    "nominal_part_intersections_and_case_fit_both_builds": "pass",
+    "declared_hand_periods_and_senses_both_builds": "pass",
+    "sampled_meshing_motion_both_builds": "pass",
+    "sampled_full_rotation_against_frame_both_builds": "pass",
+    "continuous_vertical_assembly_sweeps": "pass"
+  },
+  "qualification_limit": "P1, P2 and P3 are not fully qualified for dry-running torque/friction and manufacturing tolerances. The recorded geometric and kinematic checks do not establish those complete statements.",
+  "assembly_verification": {
+    "parts_including_barrel": 34,
+    "poses_per_part": 251,
+    "translation_step_mm": 0.1,
+    "maximum_swept_intersection_mm3": 2.01e-08
+  },
+  "access": "Only files and installed software inside this container were accessed; no external network resources were reached."
+}
