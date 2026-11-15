@@ -1,12 +1,15 @@
 """Reference for the watch task.
     python solution/reference_watch.py OUT_DIR
 writes OUT_DIR/stage1 .. OUT_DIR/stage4, each with movement.json and parts/*.step (stage4 also assembly.json).
-    python solution/reference_watch.py OUT_DIR --job [--one-part-mobiles]
+    python solution/reference_watch.py OUT_DIR --job [--one-part-mobiles | --split-wheels] [--barrel PART_NO]
 writes OUT_DIR as one delivery folder (Decisions 2026-11-14 15:44): movement.json (the stage-2 design: 8-hour
 barrel, with the 24-hour hand), variant_6h.json (the stage-3 design: same frame, 1/6 barrel turn per hour),
 assembly.json (order and paths for movement.json) and parts/*.step, one file per part name for both movements.
 In the delivery the going train and the minute wheel are brass wheels on steel pinion arbors, two parts each
-(split_wheels, part_materials); --one-part-mobiles keeps them one part each, as in the stage folders.
+(split_wheels, part_materials); --one-part-mobiles keeps them one part each, as in the stage folders. With the thin
+build (W.THIN_BARREL, the default of geometry/watch.py) one-part mobiles are the default (SPLIT_DEFAULT), so that
+`reference_watch.py OUT --job` with no flags and no environment variables, as Harbor's solve.sh runs it, writes the
+delivery that passes; --split-wheels asks for the split wheels anyway.
 Parts are built on the CAD kernel (geometry/watch_gears_cad.py, CadQuery/OpenCASCADE) and written as STEP.
 Like an agent, each stage copies the part files it keeps from the stage before and writes only new ones.
 
@@ -29,6 +32,14 @@ from geometry import watch as W
 from geometry import watch_gears_cad as GC
 
 union, box = GC.union, GC.box
+# barrel catalogue: `--barrel <id>` (or REF_BARREL=<id>) builds the reference for that catalogue barrel (its z
+# constants, set in this process only) and names it in every movement file ("barrel", required in one-job mode).
+# Default: geometry/watch.py DEFAULT_BARREL, BR-096-30, the slimmest barrel of the catalogue, which the house design
+# passes with (b/thin-cat: reward 1.0). The layout is the thin build's (W.THIN_BARREL), stacked on the chosen drum.
+_ba = sys.argv[sys.argv.index("--barrel") + 1] if __name__ == "__main__" and "--barrel" in sys.argv[1:-1] else None
+REF_BARREL = W.barrel_id_of({"barrel": _ba or os.environ.get("REF_BARREL") or W.DEFAULT_BARREL}, "--barrel", True)
+_bz = W.barrel_z(REF_BARREL)
+W.BARREL_WHEEL_Z, W.BARREL_ARBOR_Z, W.BARREL_SQUARE_Z = _bz["wheel"], _bz["arbor"], _bz["square"]
 _FILES = {}                # id(solid) -> the STEP file it was first written to
 _GEARS = {}                # part name -> (pinion, wheel) solids of a stage build, read by the one-job mode's split_wheels
 
@@ -47,12 +58,68 @@ M_E, M_F = 0.25, 0.2                                     # motion work
 M_DAY = 0.16                                             # day pair: idler pinion 10 -> day wheel 40
 DAY_TEETH = (10, 40)
 DAY_CD = M_DAY * sum(DAY_TEETH) / 2.0                    # 4.0
-Z_DAY = (6.2, 7.2)        # the day pair is 1.0 thick (layer E lowered by 0.2) for a larger drive overlap
+# tooth counts: third pinion, third wheel / centre pinion (8 h), (6 h), centre wheel, fourth pinion, fourth wheel,
+# seconds pinion, cannon, minute wheel, minute pinion, hour wheel, day idler wheel
+TT = dict(p1=24, w1=60, p2=30, w1v=54, p2v=36, w2=90, p3=12, w3=96, p4=12, can=12, w5=36, p5=12, w6=48, ga=24)
+HANDS = dict(hour=6.0, minute=9.0, seconds=5.0, day=3.2)
+SEC_R, SEC_COLLAR = 0.6, True       # seconds arbor radius below the bridge; a collar under the bridge holds it up
+GAP = 0.05                # z clearance between neighbouring layers, and between an arbor's shoulder and its plate
 FIT = 0.005               # radial clearance of every bore on its shaft
 SPOKE = dict(rim=0.4, spokes=5, width=0.45, fillet=0.15)  # crossed-out wheels
 # gear layers; B, C and D are only as thick as their drive margin needs (drawn drive overlap >= 0.03)
-Z = {"A": (0.1, 0.9), "B": (1.4, 1.85), "C": (2.6, 3.2), "D": (3.8, 4.4), "E": (6.4, 7.2), "F": (7.6, 8.4)}
-PLATE, BRIDGE, DIAL = (-1.7, -0.3), (5.0, 6.0), (8.8, 9.6)
+# thin build: layers 0.1 apart, the motion work just above a thin bridge, a thin dial, the hands just above the
+# dial; everything but the barrel arbor's tip below the barrel arbor's top (W.BARREL_ARBOR_Z[1] = 5.6) where it can be
+# A is fixed by the barrel's drum (z 0 to 1); B, C, D and E are 0.45 thick, the least that leaves 0.2 of a split wheel
+# over its 0.25 collar (DS-W04 margins stay above 1); F (one-part gears) 0.4
+Z = {"A": (0.1, 0.9), "B": (1.05, 1.5), "C": (1.55, 2.0), "D": (2.05, 2.5), "E": (3.05, 3.5), "F": (3.55, 3.95)}
+PLATE, BRIDGE, DIAL = (-1.0, -0.2), (2.6, 3.0), (4.0, 4.3)
+Z_DAY = Z["E"]            # thin build: the day pair shares layer E (the day wheel is clear of the minute wheel and cannon)
+HAND0 = DIAL[1] + 0.05     # hour, seconds and day hands sit here (0.3 thick)
+MIN0 = HAND0 + 0.35        # the minute hand sits here (0.3 thick); the centre arbor ends at its top
+HAND_T = 0.3
+PIV = 0.3                  # motion-work arbors: pivot length below (into the bridge) and above (into the dial)
+LO_PIV = 0.7               # going-train arbors: pivot length below the shoulder (into the plate)
+COLLAR_T = 0.4             # seconds and day arbors: height of the collar under the plate above
+# spike a/thin-po: a small case (W.THIN_CASE_RADIUS): smaller modules and tooth counts, a mid plate over the
+# barrel's drum that carries the lower pivots of the centre, fourth and seconds arbors (so they may stand over the
+# drum), and a placement searched for the smallest case (spikes/thin_po/layout.py)
+PO = W.THIN_CASE_RADIUS is not None
+MID = None
+if PO:
+    M_B, M_C, M_D, M_E, M_F = 0.16, 0.13, 0.12, 0.12, 0.128
+    TT = dict(p1=12, w1=42, p2=42, w1v=36, p2v=48, w2=90, p3=12, w3=96, p4=12, can=16, w5=48, p5=12, w6=48, ga=24)
+    HANDS = dict(hour=5.1, minute=5.1, seconds=5.1, day=3.1)
+    SEC_R, SEC_COLLAR = 0.5, False
+if W.THIN_BARREL:
+    # spike (spikes/thin_4mm): the thin barrel, drum z 0..ZB, arbor W.BARREL_ARBOR_Z. Every layer, plate and hand is
+    # LAYER_T thick and GAP apart; one-part steel mobiles (--one-part-mobiles), so no collar inside a wheel
+    LAYER_T = float(os.environ.get("THIN_LAYER_T", "0.2"))
+    GAP = float(os.environ.get("THIN_GAP", "0.02"))
+    ZB = W.BARREL_WHEEL_Z[1]
+    PLATE = (W.BARREL_ARBOR_Z[0], -GAP)
+    _z, Z = ZB + GAP, {"A": (GAP, ZB)}
+    for _k in (("mid",) if PO else ()) + ("B", "C", "D", "bridge", "E", "F", "dial"):
+        Z[_k] = (_z, _z + LAYER_T)
+        _z += LAYER_T + GAP
+        if _k == "D":
+            _z += GAP          # the arbors' top shoulder sits GAP under the bridge
+    BRIDGE, DIAL = Z.pop("bridge"), Z.pop("dial")
+    MID = Z.pop("mid", None)
+    Z_DAY = Z["E"]
+    HAND_T = LAYER_T
+    HAND0 = DIAL[1] + GAP
+    if HAND0 < W.BARREL_SQUARE_Z[1]:
+        # a taller (catalogue) barrel: the hands sweep over its axis, so they go above its winding square
+        HAND0 = W.BARREL_SQUARE_Z[1] + GAP
+    MIN0 = HAND0 + HAND_T + GAP
+    PIV = LAYER_T
+    LO_PIV = PLATE[1] + GAP - PLATE[0] - 0.05
+SEC0 = HAND0               # seconds and day hands' level
+MID_PIV = None
+if PO:
+    SEC0 = MIN0 + HAND_T + GAP    # seconds and day hands above the minute hand (their shafts clear the hour/minute sweep)
+    MID_PIV = MID[1] - MID[0] + GAP - 0.03     # centre, fourth, seconds: lower pivots in the mid plate
+    COLLAR_T = LAYER_T
 PLATE_MARGIN = 0.1        # plate rim beyond the farthest swept wheel or hand
 PILLAR_R, PILLAR_GAP = 0.75, 0.15
 dist = lambda p, q: math.hypot(p[0] - q[0], p[1] - q[1])
@@ -89,6 +156,28 @@ def place(seed=1):
     raise RuntimeError("no placement found")
 
 
+# a/thin-po: axis directions found by spikes/thin_po/layout.py (smallest enclosing case for the PO gears): third from
+# the barrel, centre from the third, fourth from the centre, seconds from the fourth, minute wheel and day idler from
+# the centre, day wheel from the idler (radians)
+PO_ANGLES = [0.779500, 4.847839, 4.215017, 3.256385, 4.442275, 1.858967, 2.948078]   # case radius 12.357
+
+
+def place_po():
+    th = [float(v) for v in os.environ.get("PO_ANGLES", "").split(",")] if os.environ.get("PO_ANGLES") else PO_ANGLES
+    cd = dict(third=W.BARREL_MODULE * (96 + TT["p1"]) / 2, centre=M_B * (TT["w1"] + TT["p2"]) / 2,
+              fourth=M_C * (TT["w2"] + TT["p3"]) / 2, seconds=M_D * (TT["w3"] + TT["p4"]) / 2,
+              minute_wheel=M_E * (TT["can"] + TT["w5"]) / 2, day_idler=M_F * (TT["w6"] + TT["ga"]) / 2, day=DAY_CD)
+    P = {"barrel": (0.0, 0.0)}
+    P["third"] = on(P["barrel"], cd["third"], th[0])
+    P["centre"] = on(P["third"], cd["centre"], th[1])
+    P["fourth"] = on(P["centre"], cd["fourth"], th[2])
+    P["seconds"] = on(P["fourth"], cd["seconds"], th[3])
+    P["minute_wheel"] = on(P["centre"], cd["minute_wheel"], th[4])
+    P["day_idler"] = on(P["centre"], cd["day_idler"], th[5])
+    P["day"] = on(P["day_idler"], cd["day"], th[6])
+    return {k: (round(v[0], 6), round(v[1], 6)) for k, v in P.items()}
+
+
 def place_day(P):
     """The day wheel on a circle of DAY_CD round the day idler, clear of the centre, minute wheel and seconds
     (wheel radius 3.36), as close to the centre axis as those clearances allow."""
@@ -118,8 +207,9 @@ def gear_at(axis, teeth, module, z, toward, partner=None):
     return GC.gear(teeth, module, z[0], z[1], phase_deg=phase, x=axis[0], y=axis[1]), phase
 
 
-def arbor(axis, z0, z1, r=0.5, pivot=0.3, plen=0.7, top=None):
+def arbor(axis, z0, z1, r=0.5, pivot=0.3, plen=None, top=None):
     x, y = axis
+    plen = LO_PIV if plen is None else plen
     top = plen if top is None else top
     return union([cyl(x, y, z0, z1, r), cyl(x, y, z0 - plen, z0 + 0.01, pivot), cyl(x, y, z1 - 0.01, z1 + top, pivot)])
 
@@ -142,6 +232,16 @@ def wheel_at(axis, teeth, module, z, toward, partner=None, hub_r=1.1):
 # swept radius of each mobile of the largest stage, below the dial (wheels) and with the hands
 SWEEP = {"barrel": (9.8, 9.8), "third": (7.75, 7.75), "centre": (9.75, 9.75), "fourth": (9.8, 9.8), "seconds": (1.4, 5.01),
          "minute_wheel": (4.75, 4.75), "hour_wheel": (5.0, 6.01), "day_idler": (2.6, 2.6), "day": (3.36, 3.36)}
+
+
+if PO:
+    _hr = lambda L: math.hypot(L, 0.3) + 0.005
+    SWEEP = {"barrel": (9.8, 9.8), "third": (M_B * (TT["w1"] / 2 + 1), M_B * (TT["w1"] / 2 + 1)),
+             "centre": (M_C * (TT["w2"] / 2 + 1), max(M_C * (TT["w2"] / 2 + 1), _hr(HANDS["minute"]))),
+             "fourth": (M_D * (TT["w3"] / 2 + 1),) * 2, "seconds": (M_D * (TT["p4"] / 2 + 1), _hr(HANDS["seconds"])),
+             "minute_wheel": (M_E * (TT["w5"] / 2 + 1),) * 2,
+             "hour_wheel": (M_F * (TT["w6"] / 2 + 1), _hr(HANDS["hour"])), "day_idler": (M_F * (TT["ga"] / 2 + 1),) * 2,
+             "day": (3.36, 3.36)}
 
 
 def case_geometry(P):
@@ -179,87 +279,116 @@ def frame(P, with_day, job=False):
     is left free for a ratchet)."""
     C, I, T, S, Mw, Id, D = (P[k] for k in ("centre", "third", "fourth", "seconds", "minute_wheel", "day_idler", "day"))
     (cx, cy), R_PLATE, spots = P["case"]
-    lo, hi = PLATE[1] + 0.1, BRIDGE[0] - 0.1
+    lo, hi = PLATE[1] + (GAP if W.THIN_BARREL else 0.1), BRIDGE[0] - GAP
+    lo2 = MID[1] + GAP if PO else lo    # centre, fourth, seconds: shoulder over the mid plate
     BAR = 1.0
     pb = [(0.0, 0.0, 1.3)] + [(a[0], a[1], 1.0) for a in (I, T, C, S)] + [(x, y, 0.85) for x, y in spots]
-    plate = union([GC.skeleton(PLATE[0], PLATE[1], pb, BAR)[0]] + [cyl(x, y, PLATE[1] - 0.1, BRIDGE[0], 0.75) for x, y in spots])
+    if PO:
+        # the plate carries the barrel and the third arbor; the mid plate (over the drum) the centre, fourth and seconds
+        pb = [(0.0, 0.0, 1.3), (I[0], I[1], 1.0)] + [(x, y, 0.85) for x, y in spots]
+        plate = union([GC.skeleton(PLATE[0], PLATE[1], pb, BAR)[0]] + [cyl(x, y, PLATE[1] - 0.1, MID[0], 0.75) for x, y in spots])
+        # over the barrel: a ring over the drum's core (top face at the drum's top) holds the barrel up; its hole
+        # clears the winding square (half-diagonal 0.99) so the mid plate goes in from above after the barrel.
+        # Round the third arbor: a ring whose hole lets the third pinion (below) pass
+        mb = [(0.0, 0.0, 1.8), (I[0], I[1], 2.1)] + [(a[0], a[1], 1.0) for a in (C, T, S)] + [(x, y, 0.85) for x, y in spots]
+        mid = union([GC.skeleton(MID[0], MID[1], mb, BAR)[0]] + [cyl(x, y, MID[1] - 0.1, BRIDGE[0], 0.75) for x, y in spots])
+        mh = [cyl(0, 0, MID[0] - 1, MID[1] + 1, 1.1), cyl(I[0], I[1], MID[0] - 1, MID[1] + 1, 1.5)] \
+            + [cyl(a[0], a[1], MID[0] - 1, MID[1] + 1, 0.4) for a in (C, T, S)]
+    else:
+        plate = union([GC.skeleton(PLATE[0], PLATE[1], pb, BAR)[0]] + [cyl(x, y, PLATE[1] - 0.1, BRIDGE[0], 0.75) for x, y in spots])
     bb = [(a[0], a[1], 1.0) for a in (I, T, Mw)] + [(C[0], C[1], 1.4), (S[0], S[1], 1.2)] + [(x, y, 0.85) for x, y in spots] \
-        + [(0.0, 0.0, 1.1 if job else 0.8)]   # over the barrel: the barrel cock's post stands on it (stages), or the arbor's pivot runs in it (job)
+        + [(0.0, 0.0, 1.7 if job else 0.8)]   # over the barrel: the barrel cock's post stands on it (stages), or the arbor's pivot runs in it (job)
     db = [(Mw[0], Mw[1], 1.0), (C[0], C[1], 1.8), (S[0], S[1], 1.2)] + [(x, y, 0.85) for x, y in spots]
     if with_day:
         bb += [(Id[0], Id[1], 1.0), (D[0], D[1], 1.0)]
         db += [(Id[0], Id[1], 1.0), (D[0], D[1], 1.2)]
+    if job:
+        db += [(0.0, 0.0, 1.7)]   # round the barrel's square (a clear hole)
     bridge = union([GC.skeleton(BRIDGE[0], BRIDGE[1], bb, BAR)[0]] + [cyl(x, y, BRIDGE[1] - 0.1, DIAL[0], 0.75) for x, y in spots])
     dial = GC.skeleton(DIAL[0], DIAL[1], db, BAR)[0]
-    ph = [cyl(0, 0, -1.1, PLATE[1] + 1, 0.6)] + [cyl(a[0], a[1], lo - 0.8, PLATE[1] + 1, 0.4) for a in (I, T, C, S)]
+    ph = [cyl(0, 0, PLATE[0] - 1, PLATE[1] + 1, 0.6)] + [cyl(a[0], a[1], PLATE[0] - 1, PLATE[1] + 1, 0.4) for a in ((I,) if PO else (I, T, C, S))]
     bh = [cyl(a[0], a[1], BRIDGE[0] - 1, hi + 0.8, 0.4) for a in (I, T)] + [cyl(C[0], C[1], BRIDGE[0] - 1, BRIDGE[1] + 1, 0.7),
                                                                           cyl(S[0], S[1], BRIDGE[0] - 1, BRIDGE[1] + 1, 0.6)]
-    bh += [cyl(Mw[0], Mw[1], BRIDGE[1] - 0.7, BRIDGE[1] + 1, 0.4)]
+    bh += [cyl(Mw[0], Mw[1], BRIDGE[0] - 1, BRIDGE[1] + 1, 0.4)]
     if job:
-        bh += [cyl(0, 0, BRIDGE[0] - 1, W.BARREL_ARBOR_Z[1] + 0.1, W.BARREL_ARBOR_R + 0.1)]
-    dh = [cyl(Mw[0], Mw[1], DIAL[0] - 1, DIAL[0] + 0.45, 0.4), cyl(C[0], C[1], DIAL[0] - 1, DIAL[1] + 1, 1.15), cyl(S[0], S[1], DIAL[0] - 1, DIAL[1] + 1, 0.6)]
+        # the barrel's arbor and square turn through the bridge and the dial: clear holes
+        bh += [cyl(0, 0, BRIDGE[0] - 1, BRIDGE[1] + 1, 1.1)]
+    dh = [cyl(Mw[0], Mw[1], DIAL[0] - 1, DIAL[1] + 1, 0.4), cyl(C[0], C[1], DIAL[0] - 1, DIAL[1] + 1, 1.15), cyl(S[0], S[1], DIAL[0] - 1, DIAL[1] + 1, 0.6)]
+    if job:
+        dh += [cyl(0, 0, DIAL[0] - 1, DIAL[1] + 1, 1.1)]
     if with_day:
-        bh += [cyl(a[0], a[1], BRIDGE[1] - 0.7, BRIDGE[1] + 1, 0.4) for a in (Id, D)]
-        dh += [cyl(Id[0], Id[1], DIAL[0] - 1, DIAL[0] + 0.45, 0.4), cyl(D[0], D[1], DIAL[0] - 1, DIAL[1] + 1, 0.6)]
+        bh += [cyl(a[0], a[1], BRIDGE[0] - 1, BRIDGE[1] + 1, 0.4) for a in (Id, D)]
+        dh += [cyl(Id[0], Id[1], DIAL[0] - 1, DIAL[1] + 1, 0.4), cyl(D[0], D[1], DIAL[0] - 1, DIAL[1] + 1, 0.6)]
+    if job and not PO:
+        # the barrel is held up (+z) by a post hanging from the bridge over its drum and core (top face z 1.0),
+        # on the side away from the centre wheel, clear of the square (half-diagonal 0.99) as the barrel turns
+        u = math.hypot(C[0], C[1])
+        px, py = -1.7 * C[0] / u, -1.7 * C[1] / u
+        bridge = union([bridge, cyl(px, py, W.BARREL_WHEEL_Z[1] + GAP, BRIDGE[0] + 0.01, 0.6)])
     out = {"main_plate": minus(plate, ph), "bridge": minus(bridge, bh), "dial": minus(dial, dh)}
-    if not job:
+    if PO:
+        out["mid_plate"] = minus(mid, mh)
+    if not job and BRIDGE[0] > 2.5:      # stage mode only (the old stage barrel); not built for a lower bridge
         out["barrel_cock"] = minus(union([cyl(0, 0, 1.15, 2.45, 1.6), cyl(0, 0, 2.4, BRIDGE[0], 0.6)]), cyl(0, 0, 1.0, 1.7, 0.6))
     return out
 
 
 def centre_arbor(C, lo, hi, pinion, wheel):
-    """Centre arbor, stepped so the cannon (on the 0.6 -> 0.5 step at 6.4) and the minute hand (on the
-    0.5 -> 0.35 step at 10.7) slide down onto it."""
+    """Centre arbor, stepped so the cannon (on the 0.6 -> 0.5 step at Z["E"][0]) and the minute hand (on the
+    0.5 -> 0.35 step at MIN0) slide down onto it; it ends flush with the minute hand's top."""
     cx, cy = C
-    return union([cyl(cx, cy, lo, 6.4, 0.6), cyl(cx, cy, lo - 0.7, lo + 0.01, 0.3),
-                  cyl(cx, cy, 6.39, 10.7, 0.5), cyl(cx, cy, 10.69, 11.4, 0.35), pinion, wheel])
+    return union([cyl(cx, cy, lo, Z["E"][0], 0.6), cyl(cx, cy, lo - (MID_PIV or LO_PIV), lo + 0.01, 0.3),
+                  cyl(cx, cy, Z["E"][0] - 0.01, MIN0, 0.5), cyl(cx, cy, MIN0 - 0.01, MIN0 + HAND_T, 0.35), pinion, wheel])
 
 
-def hand_arbor(A, z0, z1, gear_solid):
+def hand_arbor(A, z0, z1, gear_solid, plen=None, r=0.6, collar=True):
     """Seconds or day arbor: shaft 0.6 with a 0.8 collar under the plate above (it holds the arbor down),
-    top 0.5, and a 0.3 tip for the hand from 9.9 to 10.3."""
+    top 0.5, and a 0.3 tip for the hand from HAND0 to the hand's top."""
     x, y = A
-    return union([cyl(x, y, z0, z1, 0.6), cyl(x, y, z1 - 0.4, z1, 0.8), cyl(x, y, z0 - 0.7, z0 + 0.01, 0.3), cyl(x, y, z1 - 0.01, 9.9, 0.5),
-                  cyl(x, y, 9.89, 10.3, 0.3), gear_solid])
+    return union([cyl(x, y, z0, z1, r)] + ([cyl(x, y, z1 - COLLAR_T, z1, 0.8)] if collar else []) + [cyl(x, y, z0 - (LO_PIV if plen is None else plen), z0 + 0.01, 0.3), cyl(x, y, z1 - 0.01, SEC0, 0.5),
+                  cyl(x, y, SEC0 - 0.01, SEC0 + HAND_T, 0.3), gear_solid])
 
 
 def build_stage1():
-    P = place()
+    P = place_po() if PO else place()
     P["case"] = case_geometry(P)
     B, I, C, T, S, Mw = (P[k] for k in ("barrel", "third", "centre", "fourth", "seconds", "minute_wheel"))
-    lo, hi = PLATE[1] + 0.1, BRIDGE[0] - 0.1
+    lo, hi = PLATE[1] + (GAP if W.THIN_BARREL else 0.1), BRIDGE[0] - GAP
+    lo2 = MID[1] + GAP if PO else lo    # centre, fourth, seconds: shoulder over the mid plate
     cx, cy = C
     sx, sy = S
     parts, phase = {}, {}
-    p1, _ = gear_at(I, 24, M_A, Z["A"], ang(I, B), (96, 0.0))
-    w1, ph_w1 = wheel_at(I, 60, M_B, Z["B"], ang(I, C))
-    parts["third"] = union([arbor(I, lo, hi), p1, w1])
-    p2, _ = wheel_at(C, 30, M_B, Z["B"], ang(C, I), (60, ph_w1), hub_r=1.2)
-    w2, ph_w2 = wheel_at(C, 90, M_C, Z["C"], ang(C, T), hub_r=1.2)
-    parts["centre"] = centre_arbor(C, lo, hi, p2, w2)
-    can, ph_can = gear_at(C, 12, M_E, Z["E"], ang(C, Mw))
+    p1, _ = gear_at(I, TT["p1"], M_A, Z["A"], ang(I, B), (96, 0.0))
+    w1, ph_w1 = wheel_at(I, TT["w1"], M_B, Z["B"], ang(I, C))
+    parts["third"] = union([arbor(I, lo, hi, top=BRIDGE[1] - hi), p1, w1])
+    p2, _ = wheel_at(C, TT["p2"], M_B, Z["B"], ang(C, I), (TT["w1"], ph_w1), hub_r=1.2)
+    w2, ph_w2 = wheel_at(C, TT["w2"], M_C, Z["C"], ang(C, T), hub_r=1.2)
+    parts["centre"] = centre_arbor(C, lo2, hi, p2, w2)
+    can, ph_can = gear_at(C, TT["can"], M_E, Z["E"], ang(C, Mw))
     parts["cannon"] = minus(can, cyl(cx, cy, Z["E"][0] - 1, Z["E"][1] + 1, 0.5 + FIT))
-    p3, _ = gear_at(T, 12, M_C, Z["C"], ang(T, C), (90, ph_w2))
-    w3, ph_w3 = wheel_at(T, 96, M_D, Z["D"], ang(T, S))
-    parts["fourth"] = union([arbor(T, lo, hi), p3, w3])
-    p4, _ = gear_at(S, 12, M_D, Z["D"], ang(S, T), (96, ph_w3))
-    parts["seconds"] = hand_arbor(S, lo, hi, p4)
+    p3, _ = gear_at(T, TT["p3"], M_C, Z["C"], ang(T, C), (TT["w2"], ph_w2))
+    w3, ph_w3 = wheel_at(T, TT["w3"], M_D, Z["D"], ang(T, S))
+    parts["fourth"] = union([arbor(T, lo2, hi, plen=MID_PIV, top=BRIDGE[1] - hi), p3, w3])
+    p4, _ = gear_at(S, TT["p4"], M_D, Z["D"], ang(S, T), (TT["w3"], ph_w3))
+    parts["seconds"] = hand_arbor(S, lo2, hi, p4, plen=MID_PIV, r=SEC_R, collar=SEC_COLLAR)
     _GEARS.update(third=(p1, w1), centre=(p2, w2), fourth=(p3, w3))
-    w5, _ = wheel_at(Mw, 36, M_E, Z["E"], ang(Mw, C), (12, ph_can))
-    p5, ph_p5 = gear_at(Mw, 12, M_F, Z["F"], ang(Mw, C))
-    parts["minute_wheel"] = union([arbor(Mw, BRIDGE[1] + 0.1, DIAL[0] - 0.1, top=0.4), w5, p5])
+    w5, _ = wheel_at(Mw, TT["w5"], M_E, Z["E"], ang(Mw, C), (TT["can"], ph_can))
+    p5, ph_p5 = gear_at(Mw, TT["p5"], M_F, Z["F"], ang(Mw, C))
+    parts["minute_wheel"] = union([arbor(Mw, BRIDGE[1] + GAP, DIAL[0] - GAP, plen=PIV, top=PIV), w5, p5])
     _GEARS["minute_wheel"] = (p5, w5)
-    w6, phase["hour"] = wheel_at(C, 48, M_F, Z["F"], ang(C, Mw), (12, ph_p5), hub_r=1.6)
+    w6, phase["hour"] = wheel_at(C, TT["w6"], M_F, Z["F"], ang(C, Mw), (TT["p5"], ph_p5), hub_r=1.6)
     # the tube starts 0.2 above the cannon: moved 0.3 down, the hour wheel rests on the cannon (held)
-    parts["hour_wheel"] = minus(union([cyl(cx, cy, 7.4, 9.9, 1.0), cyl(cx, cy, 9.89, 10.3, 0.9), cyl(cx, cy, 8.4, 8.65, 1.6), w6]),
-                                cyl(cx, cy, 7.0, 10.6, 0.6))
-    parts["hour_hand"] = hand(C, 9.9, 10.2, 6.0, 1.3, 0.9 + FIT)
-    parts["minute_hand"] = hand(C, 10.7, 11.0, 9.0, 1.0, 0.35 + FIT)
-    parts["seconds_hand"] = hand(S, 9.9, 10.2, 5.0, 0.9, 0.3 + FIT)
+    # the tube starts 0.05 above the cannon (held down by it); moved 0.3 up, the wheel's hub meets the dial's centre boss
+    parts["hour_wheel"] = minus(union([cyl(cx, cy, Z["E"][1] + 0.05, HAND0, 1.0), cyl(cx, cy, HAND0 - 0.01, HAND0 + HAND_T, 0.9), w6]),
+                                cyl(cx, cy, Z["E"][1], HAND0 + 1.0, 0.6))
+    parts["hour_hand"] = hand(C, HAND0, HAND0 + HAND_T, HANDS["hour"], 1.3, 0.9 + FIT)
+    parts["minute_hand"] = hand(C, MIN0, MIN0 + HAND_T, HANDS["minute"], 1.0, 0.35 + FIT)
+    parts["seconds_hand"] = hand(S, SEC0, SEC0 + HAND_T, HANDS["seconds"], 0.9, 0.3 + FIT)
     parts.update(frame(P, with_day=False))
-    doc = {
+    doc = {"barrel": REF_BARREL}
+    doc.update({
         "case_centre": list(P["case"][0]),
-        "fixed": ["main_plate", "bridge", "dial", "barrel_cock"],
+        "fixed": ["main_plate"] + (["mid_plate"] if PO else []) + ["bridge", "dial", "barrel_cock"],
         "mobiles": {
             "third": {"axis": list(I), "parts": ["third"]},
             "centre": {"axis": list(C), "parts": ["centre", "cannon", "minute_hand"]},
@@ -269,17 +398,17 @@ def build_stage1():
             "hour_wheel": {"axis": list(C), "parts": ["hour_wheel", "hour_hand"]},
         },
         "meshes": [
-            {"driver": "barrel", "driver_teeth": 96, "driven": "third", "driven_teeth": 24},
-            {"driver": "third", "driver_teeth": 60, "driven": "centre", "driven_teeth": 30},
-            {"driver": "centre", "driver_teeth": 90, "driven": "fourth", "driven_teeth": 12},
-            {"driver": "fourth", "driver_teeth": 96, "driven": "seconds", "driven_teeth": 12},
-            {"driver": "centre", "driver_teeth": 12, "driven": "minute_wheel", "driven_teeth": 36},
-            {"driver": "minute_wheel", "driver_teeth": 12, "driven": "hour_wheel", "driven_teeth": 48},
+            {"driver": "barrel", "driver_teeth": 96, "driven": "third", "driven_teeth": TT["p1"]},
+            {"driver": "third", "driver_teeth": TT["w1"], "driven": "centre", "driven_teeth": TT["p2"]},
+            {"driver": "centre", "driver_teeth": TT["w2"], "driven": "fourth", "driven_teeth": TT["p3"]},
+            {"driver": "fourth", "driver_teeth": TT["w3"], "driven": "seconds", "driven_teeth": TT["p4"]},
+            {"driver": "centre", "driver_teeth": TT["can"], "driven": "minute_wheel", "driven_teeth": TT["w5"]},
+            {"driver": "minute_wheel", "driver_teeth": TT["p5"], "driven": "hour_wheel", "driven_teeth": TT["w6"]},
         ],
         "hands": {"hour": {"mobile": "hour_wheel", "part": "hour_hand"},
                   "minute": {"mobile": "centre", "part": "minute_hand"},
                   "seconds": {"mobile": "seconds", "part": "seconds_hand"}},
-    }
+    })
     return doc, parts, P, phase
 
 
@@ -288,17 +417,17 @@ def build_stage2(doc, parts, P, phase):
     doc = json.loads(json.dumps(doc))
     parts = dict(parts)
     C, Id, D = P["centre"], P["day_idler"], P["day"]
-    ga, _ = gear_at(Id, 24, M_F, Z["F"], ang(Id, C), (48, phase["hour"]))
+    ga, _ = gear_at(Id, TT["ga"], M_F, Z["F"], ang(Id, C), (TT["w6"], phase["hour"]))
     gb, ph_gb = gear_at(Id, DAY_TEETH[0], M_DAY, Z_DAY, ang(Id, D))
-    parts["day_idler"] = union([arbor(Id, BRIDGE[1] + 0.1, DIAL[0] - 0.1, top=0.4), ga, gb])
+    parts["day_idler"] = union([arbor(Id, BRIDGE[1] + GAP, DIAL[0] - GAP, plen=PIV, top=PIV), ga, gb])
     dw, _ = wheel_at(D, DAY_TEETH[1], M_DAY, Z_DAY, ang(D, Id), (DAY_TEETH[0], ph_gb), hub_r=1.2)
-    z0, z1 = BRIDGE[1] + 0.1, DIAL[0] - 0.1
-    parts["day"] = hand_arbor(D, z0, z1, dw)
-    parts["day_hand"] = hand(D, 9.9, 10.2, 3.2, 0.9, 0.3 + FIT)
+    z0, z1 = BRIDGE[1] + GAP, DIAL[0] - GAP
+    parts["day"] = hand_arbor(D, z0, z1, dw, plen=PIV)
+    parts["day_hand"] = hand(D, SEC0, SEC0 + HAND_T, HANDS["day"], 0.9, 0.3 + FIT)
     parts.update(frame(P, with_day=True))
     doc["mobiles"]["day_idler"] = {"axis": list(Id), "parts": ["day_idler"]}
     doc["mobiles"]["day"] = {"axis": list(D), "parts": ["day", "day_hand"]}
-    doc["meshes"] += [{"driver": "hour_wheel", "driver_teeth": 48, "driven": "day_idler", "driven_teeth": 24},
+    doc["meshes"] += [{"driver": "hour_wheel", "driver_teeth": TT["w6"], "driven": "day_idler", "driven_teeth": TT["ga"]},
                       {"driver": "day_idler", "driver_teeth": DAY_TEETH[0], "driven": "day", "driven_teeth": DAY_TEETH[1]}]
     doc["hands"]["day"] = {"mobile": "day", "part": "day_hand"}
     return doc, parts
@@ -310,20 +439,21 @@ def build_stage3(doc, parts, P):
     doc = json.loads(json.dumps(doc))
     parts = dict(parts)
     B, I, C, T = P["barrel"], P["third"], P["centre"], P["fourth"]
-    lo, hi = PLATE[1] + 0.1, BRIDGE[0] - 0.1
+    lo, hi = PLATE[1] + (GAP if W.THIN_BARREL else 0.1), BRIDGE[0] - GAP
+    lo2 = MID[1] + GAP if PO else lo    # centre, fourth, seconds: shoulder over the mid plate
     cx, cy = C
-    p1, _ = gear_at(I, 24, M_A, Z["A"], ang(I, B), (96, 0.0))
-    w1, ph_w1 = wheel_at(I, 54, M_B, Z["B"], ang(I, C))
-    parts["third_54"] = union([arbor(I, lo, hi), p1, w1])
-    p2, _ = wheel_at(C, 36, M_B, Z["B"], ang(C, I), (54, ph_w1), hub_r=1.2)
-    w2, _ = wheel_at(C, 90, M_C, Z["C"], ang(C, T), hub_r=1.2)
-    parts["centre_36"] = centre_arbor(C, lo, hi, p2, w2)
+    p1, _ = gear_at(I, TT["p1"], M_A, Z["A"], ang(I, B), (96, 0.0))
+    w1, ph_w1 = wheel_at(I, TT["w1v"], M_B, Z["B"], ang(I, C))
+    parts["third_54"] = union([arbor(I, lo, hi, top=BRIDGE[1] - hi), p1, w1])
+    p2, _ = wheel_at(C, TT["p2v"], M_B, Z["B"], ang(C, I), (TT["w1v"], ph_w1), hub_r=1.2)
+    w2, _ = wheel_at(C, TT["w2"], M_C, Z["C"], ang(C, T), hub_r=1.2)
+    parts["centre_36"] = centre_arbor(C, lo2, hi, p2, w2)
     _GEARS.update(third_54=(p1, w1), centre_36=(p2, w2))
     doc["mobiles"]["third"]["parts"] = ["third_54"]
     doc["mobiles"]["centre"]["parts"] = ["centre_36" if n == "centre" else n for n in doc["mobiles"]["centre"]["parts"]]
     for e in doc["meshes"]:
         if e["driver"] == "third" and e["driven"] == "centre":
-            e["driver_teeth"], e["driven_teeth"] = 54, 36
+            e["driver_teeth"], e["driven_teeth"] = TT["w1v"], TT["p2v"]
     return doc, parts
 
 
@@ -333,6 +463,9 @@ ORDER = ["main_plate", "barrel", "barrel_cock", "third_54", "centre_36", "fourth
 
 # the same order for the 8-hour movement, which has the 60/30 third wheel and centre pinion, and no barrel cock
 # (the one-job delivery's two-body barrel pivots in the bridge)
+if PO:
+    ORDER = [n for n in ORDER if n != "barrel"]
+    ORDER[1:1] = ["barrel", "mid_plate"]
 ORDER_8H = [{"third_54": "third", "centre_36": "centre"}.get(n, n) for n in ORDER if n != "barrel_cock"]
 
 
@@ -434,12 +567,13 @@ def split_wheels(P):
     the gear solids the stage builds recorded in _GEARS (run build_stage1 and build_stage3 first). Returns
     {part name: solid}; a part shared by both movements is one solid (third, centre_wheel_90, fourth and its wheel,
     the minute wheel's two parts)."""
-    lo, hi = PLATE[1] + 0.1, BRIDGE[0] - 0.1
+    lo, hi = PLATE[1] + (GAP if W.THIN_BARREL else 0.1), BRIDGE[0] - GAP
+    lo2 = MID[1] + GAP if PO else lo    # centre, fourth, seconds: shoulder over the mid plate
     I, C, T, Mw = P["third"], P["centre"], P["fourth"], P["minute_wheel"]
     out = {}
     p1, w1 = _GEARS["third"]
     collar, out["third_wheel_60"] = _wheel_on(I, w1, Z["B"], 0.5, top=False)
-    out["third"] = union([arbor(I, lo, hi), p1, collar])
+    out["third"] = union([arbor(I, lo, hi, top=BRIDGE[1] - hi), p1, collar])
     _, w1_54 = _GEARS["third_54"]
     _, out["third_wheel_54"] = _wheel_on(I, w1_54, Z["B"], 0.5, top=False)
     p2, w2 = _GEARS["centre"]
@@ -449,12 +583,12 @@ def split_wheels(P):
     out["centre_36"] = centre_arbor(C, lo, hi, p2_36, collar)
     p3, w3 = _GEARS["fourth"]
     collar, out["fourth_wheel_96"] = _wheel_on(T, w3, Z["D"], 0.5, top=False)
-    out["fourth"] = union([arbor(T, lo, hi), p3, collar])
+    out["fourth"] = union([arbor(T, lo, hi, top=BRIDGE[1] - hi), p3, collar])
     # the minute wheel's pinion is above its wheel: the wheel goes in first and the arbor comes down through it,
     # its collar seating in the wheel's counterbore from above
     p5, w5 = _GEARS["minute_wheel"]
     collar, out["minute_wheel_36"] = _wheel_on(Mw, w5, Z["E"], 0.5, top=True)
-    out["minute_wheel"] = union([arbor(Mw, BRIDGE[1] + 0.1, DIAL[0] - 0.1, top=0.4), p5, collar])
+    out["minute_wheel"] = union([arbor(Mw, BRIDGE[1] + GAP, DIAL[0] - GAP, plen=PIV, top=PIV), p5, collar])
     return out
 
 
@@ -499,7 +633,12 @@ def job_order(order):
     return out
 
 
-def main_job(out, split=True):
+# one-job mode's default: split wheels for main's 6.6 mm layout, one-part steel mobiles for the thin layout (whose
+# layers are too thin for a collar inside a wheel; A's thin reference was graded with --one-part-mobiles)
+SPLIT_DEFAULT = not W.THIN_BARREL
+
+
+def main_job(out, split=SPLIT_DEFAULT):
     """One delivery folder: the 8-hour movement with its 24-hour hand, the 6-hour variant on the same frame,
     the assembly plan for the 8-hour movement, and one parts/ folder. A part name used by both movements is
     one solid and one file; a part that differs between them has its own name. Every mobile declares its material.
@@ -554,8 +693,14 @@ def main_job(out, split=True):
 
 
 if __name__ == "__main__":
-    args = [a for a in sys.argv[1:] if a not in ("--job", "--one-part-mobiles")]
+    args = [a for i, a in enumerate(sys.argv[1:]) if a not in ("--job", "--one-part-mobiles", "--split-wheels", "--barrel")
+            and not (i > 0 and sys.argv[i] == "--barrel")]
     if "--job" in sys.argv[1:]:
-        main_job(args[0] if args else "out_job", split="--one-part-mobiles" not in sys.argv[1:])
+        split = SPLIT_DEFAULT
+        if "--one-part-mobiles" in sys.argv[1:]:
+            split = False
+        if "--split-wheels" in sys.argv[1:]:
+            split = True
+        main_job(args[0] if args else "out_job", split=split)
     else:
         main(args[0] if args else "out")

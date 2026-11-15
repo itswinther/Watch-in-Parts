@@ -28,6 +28,9 @@ from fractions import Fraction
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 sys.path.insert(0, ROOT)
 sys.path.insert(0, os.path.join(ROOT, "tests"))
+# the cases below place their pinions on main's 1.0 mm drum (z 0.1 to 0.9): run them on main's 6.6 mm barrel
+# unless told otherwise (geometry/watch.py defaults to the thin barrel on b/thin-4mm)
+os.environ.setdefault("WATCH_THIN_BARREL", "0")
 from geometry import core            # noqa: E402
 from geometry import watch as W      # noqa: E402
 from geometry.core import FormatError  # noqa: E402
@@ -83,7 +86,8 @@ def case_arithmetic():
     #         pinion 24: sigma = F / (0.8 x 0.2 x Y24); the barrel's own teeth are not rated
     # mesh 2: T = 70.1 x (1/8)/(1/2) = 17.525 N·mm at a; F = 17.525 / (0.25 x 60 / 2) = 17.525 / 7.5 = 2.336667 N;
     #         wheel 60 (steel): F / (0.45 x 0.25 x Y60); pinion 30 (brass): F / (0.45 x 0.25 x Y30)
-    F1, F2 = 70.1 / 9.6, 17.525 / 7.5
+    # both loads times the load factor for dry meshing, W.TOOTH_LOAD_FACTOR (DS-W04 section 2)
+    F1, F2 = W.TOOTH_LOAD_FACTOR * 70.1 / 9.6, W.TOOTH_LOAD_FACTOR * 17.525 / 7.5
     want = {("barrel/a", "a"): F1 / (0.8 * 0.2 * Y24), ("a/b", "a"): F2 / (0.45 * 0.25 * Y60),
             ("a/b", "b"): F2 / (0.45 * 0.25 * Y30)}
     got = {(e["pair"], g): v["sigma_mpa"] for e in d["meshes"] for g, v in e["gears"].items() if "sigma_mpa" in v}
@@ -115,7 +119,7 @@ def _doc(material):
     mob = {"axis": [5.0, 0.0], "parts": ["p"]}
     if material is not None:
         mob["material"] = material
-    return {"case_centre": [0, 0], "fixed": ["plate"], "mobiles": {"p": mob},
+    return {"barrel": W.DEFAULT_BARREL, "case_centre": [0, 0], "fixed": ["plate"], "mobiles": {"p": mob},
             "meshes": [{"driver": "barrel", "driver_teeth": 96, "driven": "p", "driven_teeth": 12}],
             "hands": {h: {"mobile": "p", "part": "p"} for h in ("hour", "minute", "seconds")}}
 
@@ -166,7 +170,7 @@ def case_barrel():
         res = {}
         x = None
         for mat in ("AD-C100-HT", "AD-CW614N"):
-            doc = {"case_centre": [0, 0], "fixed": ["plate"],
+            doc = {"barrel": W.DEFAULT_BARREL, "case_centre": [0, 0], "fixed": ["plate"],
                    "mobiles": {"p": {"axis": [cd, 0.0], "parts": ["pinion"], "material": mat}},
                    "meshes": [{"driver": "barrel", "driver_teeth": W.BARREL_TEETH, "driven": "p", "driven_teeth": 12}],
                    "hands": {h: {"mobile": "p", "part": "pinion"} for h in ("hour", "minute", "seconds")}}
@@ -178,8 +182,9 @@ def case_barrel():
             res[mat] = W.strength_run(m, [x], driven)
         g = res["AD-C100-HT"][1]["meshes"][0]
         assert res["AD-C100-HT"][0] and not res["AD-CW614N"][0], res
-        # F = 70.1 / (0.2 x 96 / 2) = 7.302083 N; b = the drive test's height (the pinion is 0.8 thick)
-        assert abs(g["force_n"] - 70.1 / 9.6) < 1e-9 and abs(g["module"] - 0.2) < 1e-9
+        # F = K x 70.1 / (0.2 x 96 / 2) = K x 7.302083 N; b = the drive test's height (the pinion is 0.8 thick)
+        assert abs(g["force_n"] - W.TOOTH_LOAD_FACTOR * 70.1 / 9.6) < 1e-9 and abs(g["module"] - 0.2) < 1e-9
+        assert abs(g["nominal_force_n"] - 70.1 / 9.6) < 1e-9 and g["load_factor"] == W.TOOTH_LOAD_FACTOR
         assert 0.75 <= g["face_width"] <= 0.8 + 1e-6, g
         s = g["gears"]["p"]
         return "b %.4f mm, Y(12) %.4f, sigma %.2f MPa: steel allowable 725 margin %.3f passes, brass allowable 110 margin %.3f fails" % (
@@ -193,7 +198,7 @@ def _doc2(part_materials, material="AD-CW614N"):
     mob = {"axis": [5.0, 0.0], "parts": ["pin", "wheel"], "material": material}
     if part_materials is not None:
         mob["part_materials"] = part_materials
-    return {"case_centre": [0, 0], "fixed": ["plate"], "mobiles": {"p": mob},
+    return {"barrel": W.DEFAULT_BARREL, "case_centre": [0, 0], "fixed": ["plate"], "mobiles": {"p": mob},
             "meshes": [{"driver": "barrel", "driver_teeth": 96, "driven": "p", "driven_teeth": 12}],
             "hands": {h: {"mobile": "p", "part": "wheel"} for h in ("hour", "minute", "seconds")}}
 
@@ -273,7 +278,7 @@ def case_per_part():
             mob = {"axis": [px, 0.0], "parts": ["pin", "wheel"], "material": material}
             if pm is not None:
                 mob["part_materials"] = pm
-            doc = {"case_centre": [0, 0], "fixed": ["plate"],
+            doc = {"barrel": W.DEFAULT_BARREL, "case_centre": [0, 0], "fixed": ["plate"],
                    "mobiles": {"p": mob, "q": {"axis": [qx, 0.0], "parts": ["q"], "material": "AD-C100-HT"}},
                    "meshes": [{"driver": "barrel", "driver_teeth": W.BARREL_TEETH, "driven": "p", "driven_teeth": 12},
                               {"driver": "p", "driver_teeth": 36, "driven": "q", "driven_teeth": 12}],
@@ -296,7 +301,7 @@ def case_per_part():
         assert gq["part"] == "q" and gq["material"] == "AD-C100-HT" and "drive_overlap_by_part" not in gq, gq
         # sigma by hand: mesh 1, T = 70.1 at the barrel, F = 70.1 / (0.2 x 96 / 2); mesh 2, p turns 96/12 x 1/8 = 1
         # per hour, T = 70.1 x (1/8) / 1 = 8.7625 N·mm at p, F = 8.7625 / (0.2 x 36 / 2) = 2.434028 N
-        F1, F2 = 70.1 / 9.6, 8.7625 / 3.6
+        F1, F2 = W.TOOTH_LOAD_FACTOR * 70.1 / 9.6, W.TOOTH_LOAD_FACTOR * 8.7625 / 3.6   # x the dry load factor
         b1, b2 = d["meshes"][0]["face_width"], d["meshes"][1]["face_width"]
         assert 0.75 <= b1 <= 0.8 + 1e-6 and 0.45 <= b2 <= 0.5 + 1e-6, (b1, b2)
         want = {"pin": F1 / (b1 * mod * W.LEWIS_Y[12]), "wheel": F2 / (b2 * mod * W.LEWIS_Y[36]),

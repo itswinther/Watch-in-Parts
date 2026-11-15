@@ -36,6 +36,16 @@ import tempfile
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
 
+
+def supplied_meshes(G):
+    """The barrel meshes the agent's /app/supplied/ must hold: the stage placeholder's one barrel.stl, or (one-job,
+    b/thin-cat) one <part no.>.stl per barrel of the catalogue, geometry/watch.py BARREL_IDS."""
+    if G["bundle_map"]:
+        return ["supplied/barrel.stl"]
+    sys.path.insert(0, REPO)
+    from geometry import watch as W
+    return ["supplied/%s.stl" % b for b in W.BARREL_IDS]
+
 # ---------------------------------------------------------------------------------------------
 # The switch (or --grader, or GRADER= for run_all.sh).
 GRADER = "one-job"           # B's one-delivery grader is on main (071ab86, SPEC 0.7); "spec06-stage1" is the old placeholder
@@ -160,13 +170,13 @@ artifacts = ["/app/delivery"]   # the whole delivery, scripts/ included; the age
 [task]
 name = "junction/watch-one"
 authors = [{{ name = "Board in a Box team, Junction 2026 (workstreams A and B)" }}]
-description = "Design a complete mechanical watch movement from one professional brief, as 3D CAD parts: going train and hands, a 24-hour hand, a 6-hour-barrel variant, crown winding and an assembly sequence. Graded only on the delivered files, by geometry and contact simulation in a separate offline verifier."
+description = "Design the movement of a thin mechanical dress watch from a customer order, as STEP parts made in CadQuery: frame, going train and hour, minute and seconds hands for a barrel chosen from a supplier catalogue, a 24-hour hand, a 6-hour variant on the same frame, and an assembly plan with a path for every part. Graded only on the delivered files, by geometry, in a separate offline verifier."
 keywords = ["mechanical-design", "cad", "watchmaking", "mechanism", "cadquery", "step", "datasheets"]
 
 [metadata]
 category = "engineering-design"
 difficulty = "hard"
-difficulty_explanation = "One unfrozen job with five parts that must work together in one movement: tooth counts and centre distances that give exact hand speeds, clearances and printable minimum features at demonstration scale, a barrel-speed variant that shares parts, contact-driven crown winding that must drive one way and slip the other, and an assembly order with collision-free paths. Limits come from supplier datasheets the agent must read. Nothing returns a verdict to the agent, and the whole-build term pays only if every part works."
+difficulty_explanation = "One unfrozen job with four graded parts that must work together in one movement: tooth counts and centre distances that give exact hand speeds, gears that mesh and drive and pass a bending check, clearances and printable minimum features at demonstration scale, a barrel-speed variant on the same frame, and an assembly order with collision-free paths, all as thin as possible. The order states no acceptance test and no target height; limits come from the order, supplier datasheets the agent must read, the file format and trade practice. Nothing returns a verdict to the agent. The whole-build term, scaled by thinness against the house design, pays only if every part works."
 expert_time_estimate_hours = 60    # author estimate, unverified: one to two weeks for an experienced movement designer in CAD
 junior_time_estimate_hours = 160   # author estimate, unverified
 grader = "{grader}"
@@ -255,11 +265,20 @@ def bundle(app, G):
         for f in sorted(os.listdir(pd)):
             if f.endswith((".txt", ".pdf")) or f == "README.md":
                 shutil.copyfile(os.path.join(pd, f), os.path.join(ds, "public_domain", f))
-    need = ["supplied/barrel.stl", "tools/kernel.py"] + ([] if G["bundle_map"] else ["tools/check_format.py"])
+    need = supplied_meshes(G) + ["tools/kernel.py"] + ([] if G["bundle_map"] else ["tools/check_format.py"])
     for n in need:
         if not os.path.isfile(os.path.join(app, n)):
             raise SystemExit("B's bundle builder did not produce %s (interface of Decisions 15:44)" % n)
+    if not supplied_files(app):
+        raise SystemExit("B's bundle builder did not produce any supplied/*.stl (one barrel, or the catalogue)")
     return brief_text
+
+
+def supplied_files(app):
+    """The supplied barrel meshes in the agent's /app/supplied: one barrel.stl (single-barrel briefs) or every
+    barrel of the catalogue (supplied/<part no.>.stl, make_bundle_job.py)."""
+    d = os.path.join(app, "supplied")
+    return sorted(f for f in os.listdir(d) if f.endswith(".stl")) if os.path.isdir(d) else []
 
 
 def forbidden_hashes():
@@ -289,6 +308,9 @@ def assert_clean(env_dir, G):
     anything carrying the NOT-FOR-AGENT mark."""
     app = os.path.join(env_dir, "app")
     pats, bad = allow_patterns(G), forbidden_hashes()
+    # the supplied barrel meshes are shipped on purpose (catalogue barrels may equal geometry/data meshes)
+    for f in supplied_files(app):
+        bad.discard(hashlib.sha256(open(os.path.join(app, "supplied", f), "rb").read()).hexdigest())
     n = 0
     for root, dirs, files in os.walk(env_dir):
         for d in dirs:
@@ -309,7 +331,9 @@ def assert_clean(env_dir, G):
             if hashlib.sha256(data).hexdigest() in bad or MARK in data:
                 raise SystemExit("REFUSED: %s matches a file that must never reach the agent" % rel)
             n += 1
-    for need in ("supplied/barrel.stl", "tools/kernel.py", "delivery", "datasheets"):
+    if not supplied_files(app):
+        raise SystemExit("REFUSED: no supplied/*.stl in the agent image")
+    for need in supplied_meshes(G) + ["tools/kernel.py", "delivery", "datasheets"]:
         if not os.path.exists(os.path.join(app, need)):
             raise SystemExit("REFUSED: %s missing from the agent image" % need)
     if os.listdir(os.path.join(app, "delivery")):

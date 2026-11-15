@@ -9,7 +9,8 @@
 ## 1. Scope
 
 Bending strength of spur gear teeth by the Lewis formula. For a gear of z teeth and module m (mm), with face
-width b (mm), carrying a tangential load W_t (N) on its pitch circle, the bending stress at the root of a tooth is
+width b (mm), carrying a nominal tangential load W_t (N) on its pitch circle, the bending stress at the root of a
+tooth is
 
     sigma = W_t / (b x m x Y(z))      (MPa = N/mm2)
 

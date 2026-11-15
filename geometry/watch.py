@@ -23,7 +23,8 @@ BARREL_WHEEL_Z = (0.0, 1.0)         # the toothed drum
 BARREL_ARBOR_Z = (-1.0, 5.6)        # the whole arbor
 BARREL_ARBOR_R = 0.5                # the arbor's pivots and plain sections, below and above the drum
 BARREL_INNER_D = 12.12              # inside diameter of the drum's spring chamber (not modelled in the mesh):
-                                    # DS-101 Rev F: thin spring L's listed barrel at demonstration scale (A, 19:50)
+                                    # DS-101 Rev F: thin spring L's listed barrel at demonstration scale (A, 19:50);
+                                    # the thin barrel's spring LT (L with a 0.25 strip) has the same D
 BARREL_CORE_R = BARREL_INNER_D / 6  # arbor core (hub) radius, one third of the inner radius (DS-101 section 1,
                                     # Grossmann art. 108 to 111, Saunier art. 517); the core spans the drum's z
 BARREL_BORE_R = 2.0367              # the drum's bore round the core: radial clearance 0.0167
@@ -31,10 +32,148 @@ BARREL_SQUARE_SIDE = 1.4            # winding square on the arbor (a square pris
 BARREL_SQUARE_Z = (3.3, 4.9)        # parallel to x and y) that carries the ratchet; half-diagonal 0.99
 STAGE_BARREL_ARBOR_Z = (-1.0, 1.6)  # stage mode only (old runs): the one-body barrel of data/barrel_stage.stl
 BARREL_TURNS_PER_HOUR = Fraction(1, 8)          # clockwise
-CASE_RADIUS = 20.7         # reference reaches 20.354 at its largest stage, plus 0.3, rounded up to 0.05
+CASE_RADIUS = 20.7         # reference reaches 20.354 at its largest stage, plus 0.3, rounded up to 0.05 (main; on
+                           # b/thin-4mm SMALL_CASE_RADIUS 12.7 below replaces it, by the same rule)
 CASE_HEIGHT = 13.4         # reference is 13.1 tall, plus 0.3
+# Thickness score (SESSION.md Proposed spec changes, 2026-11-15 02:20; spikes/thin_probe/): applied by the one-job
+# grader, tests/grade_watch.py job_thickness() and job_reward() (stage mode unchanged), with thin_score() below.
+# Described in QA-W100 section 9 only when environment/brief_thin.py THIN_IN_BRIEF is on. spikes/thin_probe/score.py
+# measures the same H and rescores old runs, graded before the grader applied it:
+#     x = (H - H0) / (CASE_HEIGHT - H0), clamped to 0..1;  s = (1 - x) ** THIN_SCORE_EXPONENT
+#     reward = (THIN_SCORE_SHARE x share + THIN_SCORE_SHARE x [all pass] x s) x statement factor
+# H0 = thin_full_score_height(): the height that earns s = 1, and anything thinner earns s = 1 too.
+#   THIN_TARGET_STATED off (default): H0 = THIN_REFERENCE_MM, the height the house design (solution/reference_watch.py)
+#     reaches. The agent's documents print neither H0, the exponent nor the formula: they say that thickness is
+#     compared with the manufacturer's own design, so no stated figure scores full marks when touched.
+#   THIN_TARGET_STATED on (WATCH_THIN_TARGET_STATED=1): H0 = THIN_TARGET_MM, and QA-W100 section 9 prints the target,
+#     the exponent and the formula (the documents of b/thin-4mm 92d9622, byte for byte; to regrade its runs).
+# (Not the THIN_VOXEL ... constants below, which belong to the printability test.)
+THIN_TARGET_STATED = os.environ.get("WATCH_THIN_TARGET_STATED", "0") == "1"
+THIN_TARGET_MM = 4.0       # mm: the stated thickness target (THIN_TARGET_STATED on only)
+# mm: the house design's height, total height along z of the taller build, barrel included. Where the value comes
+# from: the reference delivery (python3 solution/reference_watch.py OUT --job, thin barrel, small case) measures
+# H = 3.3491 with spikes/thin_probe/score.py; rounded up to 0.01. THE ONE PLACE this number lives: when the reference
+# changes, re-measure it and change this constant, nothing else (the score, the bundle's leak check and the
+# traceability note all read it). It must not be below the reference's measured H, or the reference loses score.
+THIN_REFERENCE_MM = 3.35
+THIN_SCORE_EXPONENT = 4
+THIN_SCORE_SHARE = Fraction(1, 2)   # the half of the reward that full acceptance earns (as tests/grade_watch.py)
+
+
+def thin_full_score_height(stated=None):
+    """The height H0 (mm) at and below which the thickness score is 1 (stated: default THIN_TARGET_STATED)."""
+    return THIN_TARGET_MM if (THIN_TARGET_STATED if stated is None else stated) else THIN_REFERENCE_MM
+
+
+def thin_score(H, exponent=None, stated=None):
+    """(x, s) for a movement of height H mm; H None (a movement file that does not load) or non-finite: (1.0, 0.0).
+    exponent: default THIN_SCORE_EXPONENT (the argument is for tables of alternatives only)."""
+    if H is None or not math.isfinite(H):
+        return 1.0, 0.0
+    h0 = thin_full_score_height(stated)
+    x = min(1.0, max(0.0, (H - h0) / (CASE_HEIGHT - h0)))
+    return x, (1.0 - x) ** (THIN_SCORE_EXPONENT if exponent is None else exponent)
+
+
 # stage 3, change request: the supplied barrel (same mesh) turns clockwise once every 6 hours instead of 8
 CHANGED_BARREL_TURNS_PER_HOUR = Fraction(1, 6)
+# The thin barrel (branch b/thin-4mm, from A's spike a/thin-4mm): ON by default on this branch, so the generator, the
+# bundle, the grader, the reference and spikes/thin_probe/score.py all read the same barrel without any setting.
+# WATCH_THIN_BARREL=0 gives the 6.6 mm barrel of main (to regrade old runs). The thin barrel is the main meshes
+# scaled in z by THIN_BARREL_SCALE about z = 0 (arbor 3.0 mm instead of 6.6; teeth, module and every x/y size
+# unchanged), written by spikes/thin_4mm/make_barrel.py to data/thin/ (inside geometry/, so every image that
+# carries geometry/ carries them). The z constants of the barrel follow. The strength load case
+# (BARREL_TORQUE_MAX_NMM, the automatic version's bridle) is kept at full value: conservative (A's choice).
+THIN_BARREL = os.environ.get("WATCH_THIN_BARREL", "1") != "0"
+# The small case (branch b/thin-4mm, from A's spike a/thin-po cde0408): ON by default on this branch. The size check
+# and the documents use THIN_CASE_RADIUS as CASE_RADIUS, and the reference picks its small-case layout when it is
+# set. SMALL_CASE_RADIUS = A's small-case reference reaches 12.357 (both builds), plus 0.3, rounded up to 0.05 (the
+# rule the old 20.7 came from). THIN_CASE_RADIUS=<r> sets another radius; THIN_CASE_RADIUS=0 gives main's 20.7.
+SMALL_CASE_RADIUS = 12.7
+_tcr = os.environ.get("THIN_CASE_RADIUS", "")
+THIN_CASE_RADIUS = SMALL_CASE_RADIUS if _tcr == "" else (float(_tcr) if float(_tcr) > 0 else None)
+del _tcr
+if THIN_CASE_RADIUS is not None:
+    CASE_RADIUS = THIN_CASE_RADIUS
+THIN_BARREL_SCALE = 3.0 / 6.6
+# Barrel catalogue (branch a/barrel-catalogue): the agent may choose its barrel. Each entry is BR-096-20 (96 teeth,
+# module 0.2, every x/y size unchanged) scaled in z only, about z = 0, by the factor below; meshes in data/<id>/
+# (barrel.stl, barrel_drum.stl, barrel_arbor.stl; written by spikes/barrel_catalogue/make_barrels.py: BR-096-66 is
+# byte for byte data/, BR-096-30 byte for byte data/thin/). movement.json may name one under the top-level key
+# "barrel". Unscaled z of BR-096-20: drum (0, 1), arbor (-1, 5.6), square (3.3, 4.9).
+# b/thin-cat: this table (with BARREL_SPRING_GEOMETRY and BARREL_SPRING_TORQUE below, keyed by the same part
+# numbers) is the one source of every barrel-dependent number; barrel_row() gathers one barrel's. In one-job mode
+# (Movement(..., materials=True)) the "barrel" key is required, and the grader requires variant_6h.json to name the
+# same barrel as movement.json; elsewhere (stage mode, tools) a file without it gets DEFAULT_BARREL. The grader
+# reads each movement's own barrel (Movement.barrel_id): its solid (every going-train check, the height and the
+# case fit, the strength check's face width, which is the measured overlap height and so the drum height at most),
+# and in Part 5 its two bodies and its spring (geometry/keyless_job.py). The module constants BARREL_WHEEL_Z,
+# BARREL_ARBOR_Z and BARREL_SQUARE_Z further down are DEFAULT_BARREL's, for code that has no movement (the
+# reference's default, solution/fit_keyless.py, geometry/watch_gears.py, tests).
+BARREL_CATALOGUE = {"BR-096-66": 1.0, "BR-096-45": 4.5 / 6.6, "BR-096-30": 3.0 / 6.6}
+_BR096_Z = {"wheel": BARREL_WHEEL_Z, "arbor": BARREL_ARBOR_Z, "square": BARREL_SQUARE_Z}   # BR-096-20, unscaled
+BARREL_IDS = tuple(sorted(BARREL_CATALOGUE))
+# WATCH_THIN_BARREL=0 makes BR-096-66 (main's 6.6 mm barrel) the default instead of BR-096-30 (the thin one)
+DEFAULT_BARREL = "BR-096-30" if THIN_BARREL else "BR-096-66"
+
+
+# Geometry the catalogue sheet may print (drawing data only): spring strip h x t x L (mm, demonstration scale s =
+# 1.617, DS-101 [^s]) and the 1:1 row it is cut from. Spring height = the drum height less 0.05 clearance, at 1:1
+# rounded down to 0.01 mm; t, L and the chamber are spring L's (DS-101 Table 1). BR-096-66 holds L itself.
+BARREL_SPRING_GEOMETRY = {
+    "BR-096-66": {"row": "L", "h_1to1": 0.48, "h": 0.78, "t": 0.162, "L": 437},
+    "BR-096-45": {"row": "L39", "h_1to1": 0.39, "h": 0.63, "t": 0.162, "L": 437},
+    "BR-096-30": {"row": "LT", "h_1to1": 0.25, "h": 0.40, "t": 0.162, "L": 437},
+}
+# GRADER-INTERNAL, not for the agent's documents: the spring's own torques (DS-101 formulas d1 to d3, M proportional
+# to h, so row L's values x h/0.48; turns and run time are L's). The strength check's load stays the bridle torque
+# BARREL_TORQUE_MAX_NMM for every barrel.
+BARREL_SPRING_TORQUE = {
+    "BR-096-66": {"torque_factor": 1.0, "M_el_nmm": 8.4, "n_el": 9.7, "turns_D6": 4.9, "run_h_D6": 40, "M_at_N_nmm": 4.5},
+    "BR-096-45": {"torque_factor": 0.39 / 0.48, "M_el_nmm": 6.8, "n_el": 9.7, "turns_D6": 4.9, "run_h_D6": 40, "M_at_N_nmm": 3.7},
+    "BR-096-30": {"torque_factor": 0.25 / 0.48, "M_el_nmm": 4.4, "n_el": 9.7, "turns_D6": 4.9, "run_h_D6": 40, "M_at_N_nmm": 2.4},
+}
+
+
+def barrel_z(barrel_id):
+    """{"wheel": drum z range, "arbor": arbor z range, "square": winding square z range} of a catalogue barrel."""
+    k = BARREL_CATALOGUE[barrel_id]
+    return {key: tuple(v * k for v in zr) for key, zr in _BR096_Z.items()}
+
+
+def barrel_row(barrel_id=None):
+    """Every number of one catalogue barrel (default DEFAULT_BARREL), from the tables above: part no., z scale, drum,
+    arbor and square z ranges, the x/y sizes (BR-096-20's, the same for every barrel), its spring (geometry: what
+    the sheet prints; torque: grader-internal) and its mesh folder (data/<id>/)."""
+    bid = DEFAULT_BARREL if barrel_id is None else barrel_id
+    z = barrel_z(bid)
+    return {"id": bid, "z_scale": BARREL_CATALOGUE[bid], "wheel_z": z["wheel"], "arbor_z": z["arbor"],
+            "square_z": z["square"], "drum_height": z["wheel"][1] - z["wheel"][0],
+            "arbor_length": z["arbor"][1] - z["arbor"][0], "teeth": BARREL_TEETH, "module": BARREL_MODULE,
+            "arbor_r": BARREL_ARBOR_R, "inner_d": BARREL_INNER_D, "core_r": BARREL_CORE_R, "bore_r": BARREL_BORE_R,
+            "square_side": BARREL_SQUARE_SIDE, "spring": BARREL_SPRING_GEOMETRY[bid],
+            "spring_torque": BARREL_SPRING_TORQUE[bid],
+            "data": os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", bid)}
+
+
+def barrel_id_of(doc, where="movement.json", required=False):
+    """The catalogue barrel a movement file names under "barrel" (FormatError if it names none of BARREL_IDS);
+    DEFAULT_BARREL when the key is absent and not required (stage mode, tools)."""
+    bid = doc.get("barrel") if isinstance(doc, dict) else None
+    if bid is None and not required:
+        return DEFAULT_BARREL
+    if not isinstance(bid, str) or bid not in BARREL_CATALOGUE:
+        raise FormatError("%s: 'barrel' must be the part no. of one of the barrels of DS-W01, section 2: %s"
+                          % (where, ", ".join(BARREL_IDS)))
+    return bid
+
+
+# the default barrel's z ranges under the old single-barrel names (see the table's note)
+_bz = barrel_z(DEFAULT_BARREL)
+BARREL_WHEEL_Z, BARREL_ARBOR_Z, BARREL_SQUARE_Z = _bz["wheel"], _bz["arbor"], _bz["square"]
+del _bz
+
+
 REF_KEPT_VOLUME_SHARE = 0.626   # stage 3: the reference keeps 0.6267 of the mobile volume and all of the fixed volume it receives (rounded down)
 VOL_TOL = 0.01              # mm3
 SPIN_STEPS = 72             # free-spin test: steps of 5 degrees
@@ -104,6 +243,11 @@ MAX_NAME_LEN = 40                    # the {1,40} of NAME_RE
 # the cells from the sheet text and fails if any differs, so the sheet stays the one source.
 BARREL_TORQUE_MAX_NMM = 70.1         # N·mm: DS-101 Table 2a, "Slipping torque of the bridle", column "This series
                                      # (N·mm)", the upper end of "51.6 to 70.1" (also DS-101 Note 2)
+TOOTH_LOAD_FACTOR = 1.45             # the rated tooth load is this x the nominal W_t = T / (m z / 2): the load factor
+                                     # for unlubricated (dry) meshing that DS-W04 states (section 1 and its table of
+                                     # section 2). Basis: A's train simulation (a/train-sim 42b3eaf,
+                                     # spikes/train_sim/README.md): with dry friction the peak tooth force is 1.39 to
+                                     # 1.45 x the Lewis F. Approved by Mikael (B logs it in SESSION.md).
 # DS-201 section 8, table "Design allowables at the upper end of the matching tier": every row, as
 # (the row's Material cell, its ordering code from DS-201 section 2, Allowable (MPa), kind of strength).
 DS201_ALLOWABLE_ROWS = (
@@ -141,25 +285,33 @@ def cyl(x, y, z0, z1, r, seg=48):
 _MESHES = {}
 
 
-def _mesh(name):
-    if name not in _MESHES:
-        path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", name + ".stl")
-        _MESHES[name] = core.tris_to_manifold(core.read_stl(path, MAX_TRIANGLES, MAX_STL_BYTES))
-    return _MESHES[name]
+def mesh_path(name, barrel_id=None):
+    """The file of supplied mesh `name` (barrel, barrel_drum, barrel_arbor, barrel_stage): data/<barrel_id>/ for a
+    catalogue barrel (BARREL_CATALOGUE; None: DEFAULT_BARREL). The stage task's one-body barrel_stage is data/'s."""
+    if name == "barrel_stage":
+        return os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", name + ".stl")
+    return os.path.join(barrel_row(barrel_id_of({"barrel": barrel_id}))["data"], name + ".stl")
 
 
-def barrel():
+def _mesh(name, barrel_id=None):
+    key = (name, DEFAULT_BARREL if barrel_id is None and name != "barrel_stage" else barrel_id)
+    if key not in _MESHES:
+        _MESHES[key] = core.tris_to_manifold(core.read_stl(mesh_path(name, barrel_id), MAX_TRIANGLES, MAX_STL_BYTES))
+    return _MESHES[key]
+
+
+def barrel(barrel_id=None):
     """The supplied mainspring barrel as one solid (data/barrel.stl, the agent's supplied/barrel.stl): the union
     of the toothed drum and the arbor in their assembled position, axis on x = y = 0. The going-train checks
-    turn it as one mobile."""
-    return _mesh("barrel")
+    turn it as one mobile. barrel_id: a catalogue barrel instead (BARREL_CATALOGUE)."""
+    return _mesh("barrel", barrel_id)
 
 
-def barrel_bodies():
+def barrel_bodies(barrel_id=None):
     """The two bodies of the supplied barrel, {"barrel_drum": solid, "barrel_arbor": solid} (data/barrel_drum.stl,
     data/barrel_arbor.stl), for the crown-winding part: there the drum stands with the going train and the
     arbor is wound."""
-    return {n: _mesh(n) for n in ("barrel_drum", "barrel_arbor")}
+    return {n: _mesh(n, barrel_id) for n in ("barrel_drum", "barrel_arbor")}
 
 
 def barrel_stage():
@@ -176,12 +328,14 @@ def rot_about(man, axis_xy, deg):
 class Movement:
     """A parsed movement: fixed solid, mobiles (name -> solid, axis), meshes, hands."""
 
-    def __init__(self, doc, load_stl, barrel_solid=None, materials=False):
+    def __init__(self, doc, load_stl, barrel_solid=None, materials=False, name="movement.json"):
         """materials: one-job mode; every mobile must declare "material", a key of MATERIAL_ALLOWABLE_MPA (a format
         error otherwise, C1), and may declare "part_materials", {part of that mobile: such a key}, overriding
         "material" for those parts (a format error if a key is not a part of the mobile or a value does not
         qualify). mobiles[name]["part_materials"] then gives every part its material. Without it (stage mode)
-        neither field is read."""
+        neither field is read. The barrel: "barrel", the part no. of a catalogue barrel (barrel_id_of), required in
+        one-job mode (materials) and DEFAULT_BARREL when absent otherwise; barrel_solid (stage mode) overrides its
+        solid. name: the movement file's name, for messages."""
         if not isinstance(doc, dict):
             raise FormatError("movement.json: top level must be an object")
         cc = doc.get("case_centre")
@@ -218,7 +372,11 @@ class Movement:
         mob = doc.get("mobiles")
         if not isinstance(mob, dict) or not mob:
             raise FormatError("movement.json: 'mobiles' must be a non-empty object")
-        self.mobiles = {"barrel": {"axis": (0.0, 0.0), "solid": barrel() if barrel_solid is None else barrel_solid,
+        bid = barrel_id_of(doc, name, required=materials)      # the catalogue barrel this movement is built on
+        self.barrel_id = bid
+        if barrel_solid is None:
+            barrel_solid = barrel(bid)
+        self.mobiles = {"barrel": {"axis": (0.0, 0.0), "solid": barrel_solid,
                                    "parts": {}}}
         for name, m in mob.items():
             if not NAME_RE.match(str(name)) or name == "barrel":
@@ -1029,7 +1187,7 @@ def load_movement(folder, name="movement.json", cache=None, barrel_solid=None, m
         if key is not None:
             cache[key] = solid
         return solid
-    return Movement(doc, load, barrel_solid, materials=materials)
+    return Movement(doc, load, barrel_solid, materials=materials, name=name)
 
 
 def inside(folder, path):
@@ -1315,7 +1473,8 @@ def strength_run(m, runs, driven):
     Rated: the going train (going_train: barrel to the seconds hand's mobile through passing meshes; the motion
     work and other branches are not rated, as a watchmaker rates a train: the cannon pinion slips; Decisions,
     orchestrator's answer (B) to builder S). For each rated mesh: T at the driver = BARREL_TORQUE_MAX_NMM x
-    |barrel speed / driver speed| (N·mm), F = T / (m z_D / 2) (N) with m = 2 x axis distance / (z_D + z_N) (mm),
+    |barrel speed / driver speed| (N·mm), F = TOOTH_LOAD_FACTOR x T / (m z_D / 2) (N) with
+    m = 2 x axis distance / (z_D + z_N) (mm),
     b = the smallest height in z of the drive test's new overlap over its steps (mm), sigma = F / (b m Y(z)) (MPa)
     for each gear with its own z, in the material of the part of its mobile that holds its teeth (teeth_part:
     that part's entry of "part_materials", which defaults to the mobile's "material"), the supplied barrel's gear
@@ -1333,8 +1492,10 @@ def strength_run(m, runs, driven):
         (a, ta, b, tb), x = m.meshes[i], runs[i]
         T = BARREL_TORQUE_MAX_NMM * float(wb / abs(driven[a]))
         mod = x["module"]
-        F = T / (mod * ta / 2.0)
-        e = {"pair": "%s/%s" % (a, b), "torque_nmm": T, "force_n": F, "module": mod}
+        F0 = T / (mod * ta / 2.0)                   # nominal tooth load on the driver's pitch circle
+        F = TOOTH_LOAD_FACTOR * F0                  # the rated load: with the load factor for dry meshing
+        e = {"pair": "%s/%s" % (a, b), "torque_nmm": T, "nominal_force_n": F0, "load_factor": TOOTH_LOAD_FACTOR,
+             "force_n": F, "module": mod}
         out.append(e)
         if not Movement.drive_passes(x):
             e["error"] = "the drive test fails, so the face width is not measured"

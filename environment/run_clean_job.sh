@@ -5,6 +5,8 @@
 # built by environment/make_bundle_job.py; the brief's absolute /app paths are rewritten to RUN_DIR/app
 # (in Harbor the folder is /app itself). Leaves RUN_DIR/agent.jsonl, agent.err, start, end, exit,
 # reward.txt, details.json, grade.log.
+# PREBUILT_APP=DIR (optional env var): copy DIR to RUN_DIR/app instead of building it (DIR itself is not
+# changed; the copy's /app paths are rewritten as usual), e.g. PREBUILT_APP=/tmp/claude-0/thin_app.
 # TIMEOUT_S (default 10800) is a safety stop, sized to never bind: check in the transcript that it did not.
 set -u
 RUN=$1; MODEL=$2; LIMIT=${3:-10800}
@@ -12,7 +14,13 @@ REPO=$(cd "$(dirname "$0")/.." && pwd)
 case "$RUN" in "$REPO"*) echo "RUN_DIR must be outside the repo"; exit 2;; esac
 APP=$RUN/app
 mkdir -p "$RUN"
-python3 "$REPO/environment/make_bundle_job.py" "$APP" > "$RUN/bundle.log" || { echo "bundle failed"; exit 2; }
+if [ -n "${PREBUILT_APP:-}" ]; then      # optional: copy an agent folder built before (the thinness probe's)
+  { [ -f "$PREBUILT_APP/instruction.md" ] && [ ! -e "$APP" ]; } || { echo "PREBUILT_APP has no instruction.md, or $APP exists"; exit 2; }
+  cp -a "$PREBUILT_APP" "$APP" && rm -rf "$APP/delivery" && mkdir "$APP/delivery" || { echo "copy failed"; exit 2; }
+  echo "copied prebuilt agent folder $PREBUILT_APP" > "$RUN/bundle.log"
+else
+  python3 "$REPO/environment/make_bundle_job.py" "$APP" > "$RUN/bundle.log" || { echo "bundle failed"; exit 2; }
+fi
 find "$APP" -name __pycache__ | xargs -r rm -rf
 grep -rlI "/app" "$APP" | xargs -r sed -i "s#/app#$APP#g"
 PROMPT="Your whole working world is the folder $APP. Read $APP/instruction.md and do the job it describes.

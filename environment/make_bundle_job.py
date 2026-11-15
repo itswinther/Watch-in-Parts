@@ -4,9 +4,12 @@ writes OUT (in the task image it is /app):
     instruction.md          the brief, from environment/public/job/PROMPT.md
     FORMAT.md               the file formats, from environment/public/job/FORMAT.md
     datasheets/             the watch-side sheets (DS-W01 to DS-W03, DS-W04 with the strength check), the inspection
-                            procedure QA-W100, workstream A's supplier sheets (DS-101 to DS-501, from
-                            spikes/keyless/datasheets/INDEX.md) and one INDEX.md for all of them
-    supplied/barrel.stl     the supplied barrel (geometry/data/barrel.stl with a neutral header)
+                            procedure QA-W100 (not with the customer-order brief, environment/brief_order.py),
+                            workstream A's supplier sheets (DS-101 to DS-501, from spikes/keyless/datasheets/INDEX.md;
+                            with the order brief, the copies make_brief_job.py writes, supplier facts only) and one
+                            INDEX.md for all of them
+    supplied/<part no.>.stl every barrel of the catalogue (geometry.watch.BARREL_IDS; mesh_path("barrel", id), the
+                            grader's own meshes, with a neutral header), named by its DS-W01 part no.
     tools/kernel.py         geometry/core.py
     tools/check_format.py   environment/check_format_job.py with the format numbers filled in
     delivery/               empty
@@ -14,12 +17,14 @@ Fails (exit 1, OUT removed) if the committed documents are not what geometry/wat
 (environment/make_brief_job.py --check), if a graded number's home cell in OUT is missing or disagrees with the
 constants, or if OUT prints a graded number where it has no home (make_brief_job.verify(), run on the files as
 written to OUT, A's sheets included), or if anything forbidden would be in OUT: a forbidden file or folder name,
-a file carrying the NOT-FOR-AGENT mark, or a forbidden word or phrase anywhere in any file (FORBIDDEN_WORDS and
-the reference's own numbers, case-insensitive)."""
+a file carrying the NOT-FOR-AGENT mark, or a forbidden word or phrase anywhere in any file (FORBIDDEN_WORDS, the
+reference's own numbers and, while the thickness target is not stated, the house design's height and the thickness
+score's formula: thickness_secrets(); all case-insensitive)."""
 import os
 import re
 import shutil
 import sys
+from decimal import Decimal
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 sys.path.insert(0, ROOT)
@@ -44,6 +49,15 @@ FORBIDDEN_WORDS = [r"reference_watch", r"reference[ _-]solution", r"reference[ _
                    r"solution", r"\bstages?\b", r"hand_speed", r"1/12", r"1/24", r"60 turns",
                    r"weight", r"anchor", r"board-in-a-box", r"session", r"\bkept\b", r"grade_watch", r"oracle",
                    r"traceab", r"NOT-FOR-AGENT"]
+# The customer-order brief (environment/brief_order.py): no acceptance test, no thickness target or formula, no
+# load factor, no calculated allowables or safety factors, and no check names of the grader.
+ORDER_WORDS = [r"QA-W", r"inspection procedure", r"acceptance figure", r"\btarget", r"load factor", r"\bK = ",
+               r"thickness score", r"safety factor", r"design allowable", r"requirement", r"Free to turn",
+               r"Nothing else collides", r"Runs with its arbors", r"Gear strength", r"Fits the case",
+               r"\bseated\b", r"\btolerant\b", r"\bP[1-4] (?:to|and) P", r"\bPart [1-5]\b", r"mesh test",
+               r"swept solid", r"\b0\.25 of\b", r"area share"]
+if B.O.ORDER_IN_BRIEF:
+    FORBIDDEN_WORDS = FORBIDDEN_WORDS + ORDER_WORDS
 NEUTRAL_STL_HEADER = b"supplied barrel, binary STL, millimetres".ljust(80, b" ")
 
 
@@ -54,7 +68,7 @@ def fill_check_format():
     for k in ("MAX_PARTS", "MAX_TRIANGLES", "MAX_STEP_BYTES", "STEP_LINEAR_DEFLECTION", "STEP_ANGULAR_DEFLECTION",
               "STEP_MAX_TRIANGLE_FACES", "STEP_TIMEOUT_S", "STEP_MEMORY_MB", "SELF_UNION_TOL", "MAX_SCRIPTS_BYTES",
               "MAX_SCRIPT_FILES", "MAX_JSON_BYTES", "MAX_ASSEMBLY_BYTES", "MIN_TEETH", "MAX_TEETH", "MAX_NAME_LEN",
-              "MATERIAL_DESIGNATIONS"):
+              "MATERIAL_DESIGNATIONS", "BARREL_IDS"):
         s = s.replace("__%s__" % k, repr(getattr(W, k)))
     HC = B.H.constants()             # the designer's statement (report.json): A's limit and claims, the part ids
     s = s.replace("__REPORT_MAX_BYTES__", repr(HC.REPORT_MAX_BYTES))
@@ -73,10 +87,15 @@ def kernel_text():
     return s.replace('b"board-in-a-box"', 'b"kernel"')
 
 
-def barrel_bytes():
-    with open(os.path.join(ROOT, "geometry", "data", "barrel.stl"), "rb") as f:
+def barrel_bytes(barrel_id):
+    with open(W.mesh_path("barrel", barrel_id), "rb") as f:      # the mesh the grader uses for that barrel
         data = f.read()
     return NEUTRAL_STL_HEADER + data[80:]
+
+
+def supplied_name(barrel_id):
+    """The file name of a catalogue barrel's mesh in supplied/ (the work order and DS-W01 cite it)."""
+    return barrel_id + ".stl"
 
 
 def reference_numbers():
@@ -92,7 +111,25 @@ def reference_numbers():
         if abs(v - round(v)) > 1e-6:                      # whole numbers (0, 12) say nothing about the layout
             i, f = ("%.6f" % abs(v)).split(".")
             pats.add(re.escape(i + "." + f[:3]))
-    return sorted(pats)
+    return sorted(pats) + thickness_secrets()
+
+
+def thickness_secrets():
+    """Regular expressions that must match nothing in the agent's folder while the thinness probe is on and the
+    thickness target is not stated (W.THIN_TARGET_STATED off): the house design's height, the thickness score's
+    formula and the wording of a stated target. The height is refused as printed (W.THIN_REFERENCE_MM, e.g. 3.35 and
+    3.350) and as any longer decimal that rounds to it (3.345... to 3.354..., which covers the reference's measured
+    3.3491). The number must start at the match: 13.35 and 0.3.35 do not match, and neither does 3.36 or 3.355."""
+    if W.THIN_TARGET_STATED or not B.T.THIN_IN_BRIEF:
+        return []
+    v = Decimal(repr(W.THIN_REFERENCE_MM))
+    if v.as_tuple().exponent >= 0:
+        raise SystemExit("THIN_REFERENCE_MM must be written with decimals (the leak patterns need its precision)")
+    q = Decimal(1).scaleb(v.as_tuple().exponent)          # one unit of its last printed decimal
+    start, hi, lo = r"(?<![0-9.])", re.escape(str(v)), re.escape(str(v - q))
+    return [start + hi + r"(?![0-9])", start + hi + r"[0-4][0-9]*", start + lo + r"[5-9][0-9]*",
+            r"\(1 - x\)", r"\bx = \(H", r"thickness target", r"\btarget is\b", r"\bexponent\b",
+            r"(?:fourth|%dth) power" % W.THIN_SCORE_EXPONENT]
 
 
 def leak_hits(out, words=None):
@@ -121,7 +158,7 @@ def cell_errors_in(out, S):
     """make_brief_job.verify() on the files as they are in OUT: every home cell (A's DS-101 and DS-201 cells
     included, through builder S's trace rows) exists and matches the constants, and no graded number is printed
     where it has no home."""
-    L, Bf = B._literals(), B.barrel_facts()
+    L, Bf = B._literals(), B.catalogue_facts()
     rows = B.traceability_rows(L, Bf, S)
     texts = {}
     for root, _, files in os.walk(out):
@@ -146,10 +183,12 @@ def build(out):
     S = B.strength_module()
     for f, _, _ in B.our_sheets(S) + [("INDEX.md", None, None)]:
         shutil.copyfile(os.path.join(JOB, "datasheets", f), os.path.join(out, "datasheets", f))
-    for f, _, _ in B.external_sheets():
-        shutil.copyfile(os.path.join(B.A_SHEETS, f), os.path.join(out, "datasheets", f))
-    with open(os.path.join(out, "supplied", "barrel.stl"), "wb") as f:
-        f.write(barrel_bytes())
+    for f, _, _ in B.external_sheets():      # the agent copy that make_brief_job.py wrote (brief_order), else A's sheet
+        src = os.path.join(JOB, "datasheets", f)
+        shutil.copyfile(src if os.path.isfile(src) else os.path.join(B.A_SHEETS, f), os.path.join(out, "datasheets", f))
+    for bid in W.BARREL_IDS:
+        with open(os.path.join(out, "supplied", supplied_name(bid)), "wb") as f:
+            f.write(barrel_bytes(bid))
     with open(os.path.join(out, "tools", "kernel.py"), "w", encoding="utf-8") as f:
         f.write(kernel_text())
     with open(os.path.join(out, "tools", "check_format.py"), "w", encoding="utf-8") as f:

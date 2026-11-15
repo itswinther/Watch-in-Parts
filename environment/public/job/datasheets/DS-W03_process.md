@@ -25,3 +25,12 @@ least 0.075 mm (1.5 voxels) from the centre of the nearest voxel that is not sol
 solid voxel whose centre is within 0.05 mm (1 voxel) of the centre of a surviving voxel. The part is printable
 when at least one voxel survives and no solid voxel's centre is further than 0.2 mm from the centre of the nearest
 voxel of the printable body.
+
+## 4. Size accuracy
+
+Every surface of a printed part lies within the size accuracy of its drawn position, in any direction: a part may
+come out that much larger or that much smaller than drawn, all over.
+
+| Quantity | Value |
+|---|---|
+| Size accuracy | +/- 0.01 mm |

@@ -245,6 +245,18 @@ listed D, and the supplied chamber (Ø 17.0 at s) is larger than L, M and N's li
 s. Either the supplied chamber matches a listed D (L: inner radius 6.06 at s, core 2.02), or Note 1 is
 relaxed with a source. Only L leaves a clear height margin in a 1.0 drum.
 
+## 4e. DS-101 Rev F, row LT: the thin barrel's spring (branch b/thin-4mm, B, 15 Nov)
+
+On b/thin-4mm the supplied barrel is the 6.6 mm one scaled in z by 3.0/6.6 (A's a/thin-4mm): drum 0.4545
+tall at s (0.281 mm at 1:1). Row LT is spring L with the strip height cut to 0.25 mm at 1:1 (0.404 at s,
+printed 0.40; clearance 0.05 at s); t, L and D are L's. **Not a catalogue size** (the catalogue search of
+4d found no real spring under 0.48 mm high); the sheet says so in footnote rLT. Derived with footnotes d1
+to d3 from the scaled sizes (the same computation reproduces row L: M_el 8.37, n_el 9.67, N 4.95 / 5.25 /
+3.02, 0.866 N·mm per turn): M_el 4.36 -> 4.4, n_el 9.67 -> 9.7, Table 3 equal to L's, Table 4 0.451 N·mm
+per turn -> 0.5, 0.9, 1.4, 1.8, 2.3, at N (5.25 turns) 2.37 -> 2.4. geometry/keyless_job.py JOB_SPRING = LT.
+The strength load case stays the Table 2a bridle torque (70.1 at s), far above LT's own torque: a platform
+design load, not this spring's.
+
 ## 5. Sources and licensing
 
 - **Every URL** used is in the footnotes of the DS sheets. The full list of the previous revision is

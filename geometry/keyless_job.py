@@ -163,28 +163,43 @@ def step_weights():
 
 
 
-JOB_SPRING = "L"        # the spring the supplied barrel holds (DS-101 Rev F; A's 19:50 request, B's chamber 12.12)
+# The spring of the job's barrel is the movement's own catalogue barrel's (geometry/watch.py BARREL_SPRING_GEOMETRY:
+# BR-096-66 row L, BR-096-45 row L39, BR-096-30 row LT; b/thin-cat). job_spring() names it.
 DS101 = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "spikes", "keyless", "datasheets",
                      "DS-101_mainspring_barrel.md")
 
 
-def capacity_turns(path=DS101):
-    """AT-3's capacity in the joined job: DS-101 Table 3, row JOB_SPRING, column "N at r = D/6" (A's 21:50 answer).
-    Also checks that the row's core radius "r = D/6 (mm)" equals the supplied arbor's core (geometry/watch.py)."""
+def job_spring(barrel_id=None):
+    """The DS-101 row of the spring in catalogue barrel barrel_id (None: geometry/watch.py DEFAULT_BARREL)."""
+    from geometry import watch as W
+    return W.barrel_row(barrel_id)["spring"]["row"]
+
+
+def capacity_turns(barrel_id=None, path=DS101):
+    """AT-3's capacity in the joined job: the turns N at r = D/6 of the barrel's spring. DS-101 Table 3, column
+    "N at r = D/6", for a spring the sheet lists (A's 21:50 answer); also checks that the row's core radius
+    "r = D/6 (mm)" equals the supplied arbor's core and that geometry/watch.py's grader-internal turns_D6 agrees.
+    A spring the sheet does not list (L39: Mikael 04:16, no torque or turns figures for the agent) has the table's
+    turns_D6 (A's figure, from DS-101's formulas; spikes/thin_cat/spring_rows.py recomputes it)."""
     import re
     from geometry import watch as W
+    row = W.barrel_row(barrel_id)
+    spring, want = row["spring"]["row"], row["spring_torque"]["turns_D6"]
     with open(path, encoding="utf-8") as f:
         txt = f.read()
     sec = txt[txt.index("(Table 3, calculated)"):]
-    m = re.search(r"^\|\s*%s\s*\|\s*([0-9.]+)\s*\|\s*([0-9.]+)\s*\|\s*([0-9.]+)\s*\|" % JOB_SPRING, sec, re.M)
+    m = re.search(r"^\|\s*%s\s*\|\s*([0-9.]+)\s*\|\s*([0-9.]+)\s*\|\s*([0-9.]+)\s*\|" % re.escape(spring), sec, re.M)
     if not m:
-        raise RuntimeError("DS-101 Table 3: no row %s" % JOB_SPRING)
+        return want
     core, n = float(m.group(1)), float(m.group(3))
-    if abs(core - W.BARREL_CORE_R) > 0.005:
-        raise RuntimeError("DS-101 Table 3 row %s: core %s mm, supplied arbor core %s mm" % (JOB_SPRING, core, W.BARREL_CORE_R))
+    if abs(core - row["core_r"]) > 0.005:
+        raise RuntimeError("DS-101 Table 3 row %s: core %s mm, supplied arbor core %s mm" % (spring, core, row["core_r"]))
+    if n != want:
+        raise RuntimeError("DS-101 Table 3 row %s: N %s, geometry/watch.py BARREL_SPRING_TORQUE turns_D6 %s" % (spring, n, want))
     return n
 
-def job_constants(C):
+
+def job_constants(C, barrel_id=None):
     """A namespace with every upper-case constant of A's constants module C, the scaled lengths of SCALE_TABLE and
     B's frame values in place of A's (WIND_SENSE; the case, the stem line and the minute body come from the delivery)."""
     import types
@@ -193,20 +208,20 @@ def job_constants(C):
         if row[0] == "constants":
             setattr(ns, row[1], job_value(row))
     ns.WIND_SENSE = WIND_SENSE
-    ns.CAPACITY_TURNS = capacity_turns()        # the supplied spring's turns, from DS-101 (A's 21:50 answer)
+    ns.CAPACITY_TURNS = capacity_turns(barrel_id)   # the chosen barrel's spring's turns (A's 21:50 answer)
     for k in ("STEM_POINT", "STEM_DIR", "BARREL_AXIS", "MINUTE_AXIS", "CASE_CENTRE", "CASE_RADIUS", "CASE_Z"):
         if hasattr(ns, k):
             delattr(ns, k)          # B's frame: these come from the delivery and geometry/watch.py, never A's
     return ns
 
 
-def apply_to_engine(E, G):
+def apply_to_engine(E, G, barrel_id=None):
     """Put the scaled constants into A's engine module E and grade module G, in this interpreter only (the P5 run is
     a fresh interpreter, tests/grade_keyless.py). Returns the namespace now used as G.C."""
     errs = check_table({"constants": _import_a("constants"), "engine": E})
     if errs:
         raise RuntimeError("SCALE_TABLE disagrees with A's files: " + "; ".join(errs))
-    ns = job_constants(G.C)
+    ns = job_constants(G.C, barrel_id)
     for row in SCALE_TABLE:
         if row[0] != "engine":
             continue
@@ -402,7 +417,7 @@ def build_world(m, k, solids):
     from .core import union
     fixed_gt, free_gt = train_split(m)
     minute = m.hands["minute"][0]
-    drum, arbor = W.barrel_bodies()["barrel_drum"], W.barrel_bodies()["barrel_arbor"]
+    drum, arbor = W.barrel_bodies(m.barrel_id)["barrel_drum"], W.barrel_bodies(m.barrel_id)["barrel_arbor"]
     bodies = []
 
     def add(name, kind, solid, role, dof=None, point=None, direction=None, rest=None, carrier=None):
@@ -429,7 +444,7 @@ def build_world(m, k, solids):
             union([solids[p] for p in e["parts"]]), "keyless mobile %s" % n, dof=e["dof"], point=e["point"],
             direction=e["direction"], rest=(e["rest"] * math.inf) if e["rest"] is not None else None,
             carrier="stem" if e["on_stem"] else None)
-    meta = {"fixed_going_train": [n for n in fixed_gt if n != minute], "free_going_train": free_gt,
+    meta = {"barrel": m.barrel_id, "fixed_going_train": [n for n in fixed_gt if n != minute], "free_going_train": free_gt,
             "minute_mobile": minute, "minute_free": minute in free_gt, "bounds": bounds(m, k, solids)}
     if minute not in free_gt:
         meta["setting_not_run"] = minute_not_free_reason(minute)

@@ -11,12 +11,35 @@ Units: millimetres (mm). Every file below is in `/app/delivery/`.
   assembly.json        the assembly plan of movement.json
   parts/<name>.step    one STEP file per part, for both movements
   scripts/             optional, at most 200 files and 4,194,304 bytes in all; never run or read
-  report.json          optional: the designer's statement of each inspection part's result
+  report.json          optional: the designer's statement of what works
 ```
 
 Of `parts/`, only the files that `movement.json` and `variant_6h.json` name are opened. Every file that is
 opened, and the `parts/` folder, must be a real file or folder inside `/app/delivery/`: a symbolic link, or a
 file outside the folder, is a format error.
+
+## How the factory reads the files
+
+- **Frame.** Millimetres (mm), cubic millimetres (mm3) and degrees. A right-handed frame. Every arbor (rotation
+  axis) is parallel to z. The dial side is +z: the hands are read looking from +z towards -z, and "clockwise"
+  always means clockwise in that view. Positions are those of the parts as assembled.
+- **The barrel** is the mobile `barrel`: the supplied mesh of the barrel the movement is built on, its drum and
+  its arbor turning together, on the axis of the barrel as supplied (DS-W01, section 3). It is listed under no
+  mobile; meshes and the assembly plan name it `barrel`.
+- **Drawing.** Each part is drawn at its nominal size, in its assembled position. Parts that are joined (pressed,
+  riveted, screwed or bonded) are drawn touching, never overlapping: the factory makes the joint where the drawn
+  parts touch. Two solids whose intersection is at most 0.01 mm3 are taken as touching, not overlapping, and two
+  parts at most 0.01 mm apart as touching.
+- **Fixed parts** (`fixed`) are joined into one frame where they touch.
+- **A mobile of several parts** is joined where its parts touch. The factory puts each part on its seat: every
+  part sits on the rest of its mobile so that their shapes locate it sideways and stop it along the axis in at
+  least one direction.
+- **A hand** is the pointer alone: a part of its own, not one piece with a wheel or another hand.
+- **Speeds.** The factory works out each mobile's speed from the tooth counts declared under `meshes`, starting
+  from the barrel at its speed class (DS-W01, section 4). Every declared mesh is an external spur mesh: its two
+  mobiles turn in opposite senses.
+- **Time.** The factory reads and measures a delivery in at most 7,200 s, and spends at most 1,800 s on any one
+  measurement; what cannot be read or measured in that time is not accepted.
 
 ## Names
 
@@ -26,7 +49,7 @@ named in both movement files is that one file. STL part files are not accepted.
 
 ## Part files (STEP)
 
-Each part file holds one part in its assembled position. It becomes the solid that every test uses like this:
+Each part file holds one part in its assembled position. It becomes the solid that the factory measures, like this:
 
 - The file is at most 16,777,216 bytes. Its length unit is millimetre; a file in any other unit (inch, metre, ...) is
   rejected, not converted. It holds exactly one solid, valid by OpenCASCADE's shape check, and nothing outside
@@ -46,6 +69,7 @@ Each is at most 1,048,576 bytes and names at most 60 parts.
 
 ```
 {
+  "barrel": "part no.",
   "case_centre": [x, y],
   "fixed": ["part_name", ...],
   "mobiles": {
@@ -66,20 +90,22 @@ Each is at most 1,048,576 bytes and names at most 60 parts.
 }
 ```
 
+- `barrel`: the part no. of the barrel the movement is built on, one of the barrels of the catalogue DS-W01, as
+  that sheet prints it. Required. `movement.json` and `variant_6h.json` name the same barrel.
 - `case_centre`: x and y of the case's axis, in mm.
 - `fixed`: the parts that do not move. A non-empty list.
 - `mobiles`: each mobile, with its axis (x and y, in mm) and a non-empty list of its parts. `barrel` is not listed;
   it exists already.
-- `material`: in each mobile, its material, as an ordering code of DS-201 (its table of ordering codes). Every
-  part of a mobile is of its material, except a part named in `part_materials`. The code must be one that has a
-  design allowable for bending (a tensile, yield-based allowable) in DS-201's table of design allowables; any
-  other value, or a mobile without `material`, makes the file not valid.
+- `material`: in each mobile, its material, as an ordering code of AD-DS-201 (its table of ordering codes). The
+  factory makes mobiles in these materials only: `AD-C100-HT`, `AD-CW614N`. Every part of a mobile is of its
+  material, except a part named in `part_materials`. Any other value, or a mobile without `material`, makes the
+  file not valid.
 - `part_materials` (optional): in a mobile, an object `{"part name": "ordering code"}` that gives some of its
   parts another material than the mobile's `material`, for example a brass wheel on a steel pinion. Each key must
-  be a part listed in that mobile's `parts`, and each code must qualify as for `material`; anything else makes the
+  be a part listed in that mobile's `parts`, and each code must be one of the codes above; anything else makes the
   file not valid. A part not named here is of the mobile's `material`.
 - `meshes`: every pair of gears that drive one another: the two mobiles (`barrel` or a mobile name), and the tooth
-  count of the gear on each (each `n` above stands for one). Tooth counts are integers from 3 to 1000.
+  count of the gear on each (each `n` above stands for one), as drawn. Tooth counts are integers from 3 to 1000.
 - `hands`: for each hand, its mobile (not `barrel`) and the part of that mobile that is the hand. `day` is the
   24-hour hand. `hour`, `minute` and `seconds` are required; `day` may be left out.
   Every hand entry that is present must name a mobile of the file (not `barrel`) and a part listed in that
@@ -100,17 +126,32 @@ matrix written as four rows of four numbers; it moves the part from its assemble
 world = R x assembled + t, with R the upper-left 3x3 block, t the first three numbers of the last column, and the
 last row 0 0 0 1.
 
+The workshop puts the parts in one at a time, in the order of `order`. A name in `order` that is not a part of
+`movement.json` or `barrel` is ignored; a name that appears more than once counts at its first place only. A part
+that is not in `order` stands in its assembled position from the start. Each part moves along its path, and its
+path must obey these rules:
+
+1. Every matrix is finite and is a proper rotation plus a translation (R^T R = I and det R = +1, within 1e-6); its
+   last row is 0 0 0 1 within 1e-6; the last pose is the identity within 1e-6.
+2. In the first pose, the part's bounding box lies wholly outside the bounding box of the complete movement (all
+   its parts and the barrel, assembled) grown by 5 mm on every side.
+3. Between consecutive poses, no vertex of the part moves more than 0.2 mm.
+4. The path has at least 2 and at most 1,500 poses.
+
+
 ## `report.json` (optional)
 
 At most 100,000 bytes.
 
 ```
-{"parts": {"P1": "pass", "P2": "fail", "P3": "not_tested", "P4": "pass"}}
+{"parts": {"P1": "pass", "P2": "fail", "P3": "not_tested", "P4": "pass"}, "height_mm": 10.4}
 ```
 
-- `parts`: one key per part of QA-W100 (`P1` for Part 1, and so on for each part), each with the statement of that
-  part's result: one of `pass`, `fail`, `not_tested`. A part left out counts as `not_tested`. Other keys at the
-  top level are ignored.
+- `parts`: one key for each statement of the order (`P1`, `P2`, `P3`, `P4`), each one of `pass`, `fail`,
+  `not_tested`. A key left out counts as `not_tested`. Other keys at the top level are ignored.
 - `report.json` must be a real file in `/app/delivery/` (not a symbolic link). One that is larger than the limit,
-  is not valid JSON, has no object `parts`, names a key that is not a part of QA-W100 or gives any other value is
-  not valid: every part then counts as `not_tested`. How the statement is scored: QA-W100, section 3.
+  is not valid JSON, has no object `parts`, names another key in `parts` or gives any other value is not valid:
+  every statement then counts as `not_tested`.
+- `height_mm` (optional): your statement of the movement's height in mm: the highest point minus the lowest point,
+  along the axis, of every part and the barrel, in the assembled positions, of the taller of the two builds. It is
+  recorded and changes nothing.

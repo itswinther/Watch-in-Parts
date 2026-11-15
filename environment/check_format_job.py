@@ -30,6 +30,7 @@ MAX_ASSEMBLY_BYTES = __MAX_ASSEMBLY_BYTES__
 MIN_TEETH, MAX_TEETH = __MIN_TEETH__, __MAX_TEETH__
 MAX_NAME_LEN = __MAX_NAME_LEN__
 MATERIALS = __MATERIAL_DESIGNATIONS__
+BARRELS = __BARREL_IDS__
 REPORT_MAX_BYTES = __REPORT_MAX_BYTES__
 REPORT_PARTS = __REPORT_PARTS__
 REPORT_CLAIMS = __REPORT_CLAIMS__
@@ -74,6 +75,15 @@ def xy(v, where):
         raise Bad("%s must be [x, y]" % where)
 
 
+def movement_barrel(doc, rel):
+    """The barrel part no. one movement file names."""
+    b = doc.get("barrel") if isinstance(doc, dict) else None
+    if not isinstance(b, str) or b not in BARRELS:
+        raise Bad("%s: 'barrel' must be the part no. of one of the barrels of DS-W01, section 2: %s"
+                  % (rel, ", ".join(BARRELS)))
+    return b
+
+
 def movement_names(doc, rel):
     """The part names of one movement file, after checking its layout."""
     if not isinstance(doc, dict):
@@ -102,8 +112,8 @@ def movement_names(doc, rel):
         xy(m.get("axis"), "%s: mobile '%s' axis" % (rel, k))
         take(m.get("parts"), "mobile '%s'" % k)
         if not isinstance(m.get("material"), str) or m["material"] not in MATERIALS:
-            raise Bad("%s: mobile '%s': 'material' must be the designation of a material with a bending (tensile) "
-                      "design allowable in DS-201 section 8" % (rel, k))
+            raise Bad("%s: mobile '%s': 'material' must be one of the ordering codes FORMAT.md lists "
+                      "(%s)" % (rel, k, ", ".join(sorted(MATERIALS))))
         pm = m.get("part_materials", {})
         if not isinstance(pm, dict):
             raise Bad("%s: mobile '%s': 'part_materials' must be an object {part name: designation}" % (rel, k))
@@ -111,8 +121,8 @@ def movement_names(doc, rel):
             if pn not in m["parts"]:
                 raise Bad("%s: mobile '%s': 'part_materials' names %r, which is not a part of this mobile" % (rel, k, pn))
             if not isinstance(pmat, str) or pmat not in MATERIALS:
-                raise Bad("%s: mobile '%s': 'part_materials' of part '%s' must be the designation of a material with a "
-                          "bending (tensile) design allowable in DS-201 section 8" % (rel, k, pn))
+                raise Bad("%s: mobile '%s': 'part_materials' of part '%s' must be one of the ordering codes "
+                          "FORMAT.md lists (%s)" % (rel, k, pn, ", ".join(sorted(MATERIALS))))
     if len(names) > MAX_PARTS:
         raise Bad("%s: more than %d parts" % (rel, MAX_PARTS))
     known = set(mob) | {"barrel"}
@@ -204,11 +214,17 @@ def main(argv):
             return fn(*args)
         except Bad as e:
             errors.append(str(e))
+    barrels = {}
     for rel in MOVEMENT_FILES:
         doc = run(read_json, folder, rel, MAX_JSON_BYTES)
         if doc is not None:
+            barrels[rel] = run(movement_barrel, doc, rel)
             names = run(movement_names, doc, rel)
             parts += [n for n in names or [] if n not in parts]
+    named = [b for b in barrels.values() if b is not None]
+    if len(named) == 2 and named[0] != named[1]:
+        errors.append("%s: 'barrel' is %s, but %s names %s; both builds use the same barrel"
+                      % (MOVEMENT_FILES[1], named[1], MOVEMENT_FILES[0], named[0]))
     run(lambda: real_file(folder, "parts"))
     for n in parts:
         run(load_part, folder, n)
