@@ -120,6 +120,11 @@ MAX_NAME_LEN = 40                    # the {1,40} of NAME_RE
 # the cells from the sheet text and fails if any differs, so the sheet stays the one source.
 BARREL_TORQUE_MAX_NMM = 70.1         # N·mm: DS-101 Table 2a, "Slipping torque of the bridle", column "This series
                                      # (N·mm)", the upper end of "51.6 to 70.1" (also DS-101 Note 2)
+TOOTH_LOAD_FACTOR = 1.45             # the rated tooth load is this x the nominal W_t = T / (m z / 2): the load factor
+                                     # for unlubricated (dry) meshing that DS-W04 states (section 1 and its table of
+                                     # section 2). Basis: A's train simulation (a/train-sim 42b3eaf,
+                                     # spikes/train_sim/README.md): with dry friction the peak tooth force is 1.39 to
+                                     # 1.45 x the Lewis F. Approved by Mikael (B logs it in SESSION.md).
 # DS-201 section 8, table "Design allowables at the upper end of the matching tier": every row, as
 # (the row's Material cell, its ordering code from DS-201 section 2, Allowable (MPa), kind of strength).
 DS201_ALLOWABLE_ROWS = (
@@ -1083,7 +1088,8 @@ def strength_run(m, runs, driven):
     Rated: the going train (going_train: barrel to the seconds hand's mobile through passing meshes; the motion
     work and other branches are not rated, as a watchmaker rates a train: the cannon pinion slips; Decisions,
     orchestrator's answer (B) to builder S). For each rated mesh: T at the driver = BARREL_TORQUE_MAX_NMM x
-    |barrel speed / driver speed| (N·mm), F = T / (m z_D / 2) (N) with m = 2 x axis distance / (z_D + z_N) (mm),
+    |barrel speed / driver speed| (N·mm), F = TOOTH_LOAD_FACTOR x T / (m z_D / 2) (N) with
+    m = 2 x axis distance / (z_D + z_N) (mm),
     b = the smallest height in z of the drive test's new overlap over its steps (mm), sigma = F / (b m Y(z)) (MPa)
     for each gear with its own z, in the material of the part of its mobile that holds its teeth (teeth_part:
     that part's entry of "part_materials", which defaults to the mobile's "material"), the supplied barrel's gear
@@ -1101,8 +1107,10 @@ def strength_run(m, runs, driven):
         (a, ta, b, tb), x = m.meshes[i], runs[i]
         T = BARREL_TORQUE_MAX_NMM * float(wb / abs(driven[a]))
         mod = x["module"]
-        F = T / (mod * ta / 2.0)
-        e = {"pair": "%s/%s" % (a, b), "torque_nmm": T, "force_n": F, "module": mod}
+        F0 = T / (mod * ta / 2.0)                   # nominal tooth load on the driver's pitch circle
+        F = TOOTH_LOAD_FACTOR * F0                  # the rated load: with the load factor for dry meshing
+        e = {"pair": "%s/%s" % (a, b), "torque_nmm": T, "nominal_force_n": F0, "load_factor": TOOTH_LOAD_FACTOR,
+             "force_n": F, "module": mod}
         out.append(e)
         if not Movement.drive_passes(x):
             e["error"] = "the drive test fails, so the face width is not measured"

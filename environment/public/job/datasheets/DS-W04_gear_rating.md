@@ -9,11 +9,13 @@
 ## 1. Scope
 
 Bending strength of spur gear teeth by the Lewis formula. For a gear of z teeth and module m (mm), with face
-width b (mm), carrying a tangential load W_t (N) on its pitch circle, the bending stress at the root of a tooth is
+width b (mm), carrying a nominal tangential load W_t (N) on its pitch circle, the bending stress at the root of a
+tooth is
 
-    sigma = W_t / (b x m x Y(z))      (MPa = N/mm2)
+    sigma = K x W_t / (b x m x Y(z))      (MPa = N/mm2)
 
-where Y(z) is the Lewis form factor of section 3. Y has no unit and does not depend on the module.
+where Y(z) is the Lewis form factor of section 3 and K the load factor for unlubricated meshing of section 2.
+Y and K have no unit and do not depend on the module.
 
 ## 2. Tooth form and method
 
@@ -25,6 +27,7 @@ where Y(z) is the Lewis form factor of section 3. Y has no unit and does not dep
 | Dedendum of the basic rack | 1.25 x m |
 | Tip radius of the basic rack | 0.318 x m |
 | Load position | at the tip of one tooth |
+| Load factor K, unlubricated (dry) meshing | 1.45 |
 
 **Tooth form.** Each tooth is the one the basic rack generates: the rack's straight flank cuts the involute and
 its tip round cuts the root fillet (undercut included, for small tooth counts). The rack's tip radius follows
@@ -32,6 +35,12 @@ the rule of ISO 53 (0.38 x m at 20 degrees): the radius at which the rack's stra
 the addendum, (dedendum - addendum) / (1 - sin a). At 25 degrees that radius does not fit on the rack tooth's
 tip, so the tip is a full round, of radius half the rack's tip width x tan(45 degrees + a / 2): the value in the
 table above.
+
+**Load factor.** Lewis takes the tooth load as the nominal tangential load W_t = T / r on the pitch circle
+(T the torque on the gear, r its pitch radius). In unlubricated meshing, friction between the sliding flanks
+raises the peak load a tooth carries above W_t. This office rates dry-running gears with the load factor K of
+the table above: the largest ratio of peak to nominal tooth load that it found in contact simulations of gear
+trains running dry with friction (1.39 to 1.45).
 
 **Method (Lewis).** The tooth is a cantilever. The tangential load W_t acts at the tip, on the tooth's centre line
 at the tip circle (at its point, for a tooth pointed below the tip circle). The weakest section is where the

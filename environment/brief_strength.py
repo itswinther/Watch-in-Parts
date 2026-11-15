@@ -64,11 +64,13 @@ def ds_w04():
 ## 1. Scope
 
 Bending strength of spur gear teeth by the Lewis formula. For a gear of z teeth and module m (mm), with face
-width b (mm), carrying a tangential load W_t (N) on its pitch circle, the bending stress at the root of a tooth is
+width b (mm), carrying a nominal tangential load W_t (N) on its pitch circle, the bending stress at the root of a
+tooth is
 
-    sigma = W_t / (b x m x Y(z))      (MPa = N/mm2)
+    sigma = K x W_t / (b x m x Y(z))      (MPa = N/mm2)
 
-where Y(z) is the Lewis form factor of section 3. Y has no unit and does not depend on the module.
+where Y(z) is the Lewis form factor of section 3 and K the load factor for unlubricated meshing of section 2.
+Y and K have no unit and do not depend on the module.
 
 ## 2. Tooth form and method
 
@@ -80,6 +82,7 @@ where Y(z) is the Lewis form factor of section 3. Y has no unit and does not dep
 | Dedendum of the basic rack | {hf} x m |
 | Tip radius of the basic rack | {rho} x m |
 | Load position | at the tip of one tooth |
+| Load factor K, unlubricated (dry) meshing | {k} |
 
 **Tooth form.** Each tooth is the one the basic rack generates: the rack's straight flank cuts the involute and
 its tip round cuts the root fillet (undercut included, for small tooth counts). The rack's tip radius follows
@@ -87,6 +90,12 @@ the rule of ISO 53 (0.38 x m at 20 degrees): the radius at which the rack's stra
 the addendum, (dedendum - addendum) / (1 - sin a). At {a} degrees that radius does not fit on the rack tooth's
 tip, so the tip is a full round, of radius half the rack's tip width x tan(45 degrees + a / 2): the value in the
 table above.
+
+**Load factor.** Lewis takes the tooth load as the nominal tangential load W_t = T / r on the pitch circle
+(T the torque on the gear, r its pitch radius). In unlubricated meshing, friction between the sliding flanks
+raises the peak load a tooth carries above W_t. This office rates dry-running gears with the load factor K of
+the table above: the largest ratio of peak to nominal tooth load that it found in contact simulations of gear
+trains running dry with friction (1.39 to 1.45).
 
 **Method (Lewis).** The tooth is a cantilever. The tangential load W_t acts at the tip, on the tooth's centre line
 at the tip circle (at its point, for a tooth pointed below the tip circle). The weakest section is where the
@@ -107,7 +116,7 @@ computed by this office for the {a}-degree tooth form; they are not copied from 
 
 Read the row of the tens and the column of the units: for 47 teeth, row 40, column +7.
 
-{table}""".format(a=a, ha=_num(W.LEWIS_ADDENDUM), hf=_num(W.LEWIS_DEDENDUM), rho="%.3f" % W.rack_tip_radius(),
+{table}""".format(a=a, k=_num(W.TOOTH_LOAD_FACTOR), ha=_num(W.LEWIS_ADDENDUM), hf=_num(W.LEWIS_DEDENDUM), rho="%.3f" % W.rack_tip_radius(),
                   d=W.LEWIS_DECIMALS, table=_y_table())
 
 
@@ -155,7 +164,8 @@ def qa_strength_section(number=14, mesh_test="the mesh test (check 4)"):
         "counts give through meshes that pass the mesh test (the same speeds as the hand checks);",
         "module: m = 2 x (distance between the two axes in the assembled positions) / (z_D + z_N) (mm), as in the "
         "mesh test;",
-        "tooth load: F = T_D / (m x z_D / 2) (N), on the pitch circle of D;",
+        "tooth load: F = K x T_D / (m x z_D / 2) (N), on the pitch circle of D, with K the load factor for "
+        "unlubricated (dry) meshing of DS-W04, section 2: the gears of this movement run without lubricant;",
         "face width: b = the smallest H over the drive steps of the mesh test for this mesh (mm), H being the "
         "height in z of the region that the further-turned D shares with N and did not occupy before;",
         "bending stress of each of the two gears, each with its own tooth count z (z_D or z_N): "
@@ -213,6 +223,8 @@ def trace_rows():
     rows += [
         _cell("PRESSURE_ANGLE (tooth form of the Lewis form factors)", W.PRESSURE_ANGLE, W04, "2. Tooth form",
               "Pressure angle", "Value", [_num(W.PRESSURE_ANGLE)]),
+        _cell("TOOTH_LOAD_FACTOR (dry meshing)", W.TOOTH_LOAD_FACTOR, W04, "2. Tooth form",
+              "Load factor K, unlubricated (dry) meshing", "Value", [_num(W.TOOTH_LOAD_FACTOR)]),
         _cell("LEWIS_ADDENDUM", W.LEWIS_ADDENDUM, W04, "2. Tooth form", "Addendum of the basic rack", "Value",
               [_num(W.LEWIS_ADDENDUM)]),
         _cell("LEWIS_DEDENDUM", W.LEWIS_DEDENDUM, W04, "2. Tooth form", "Dedendum of the basic rack", "Value",
@@ -253,7 +265,7 @@ def check(folder=None):
         diff = sorted(z for z in set(printed) | set(W.LEWIS_Y) if printed.get(z) != W.LEWIS_Y.get(z))
         bad.append("DS-W04 table differs from LEWIS_Y at %d tooth counts, first %s" % (len(diff), diff[:5]))
     qa = qa_strength_section() + format_text()
-    vals = [("BARREL_TORQUE_MAX_NMM", W.BARREL_TORQUE_MAX_NMM)] + \
+    vals = [("BARREL_TORQUE_MAX_NMM", W.BARREL_TORQUE_MAX_NMM), ("TOOTH_LOAD_FACTOR", W.TOOTH_LOAD_FACTOR)] + \
         [("allowable of %s" % c, v) for _, c, v, _ in W.DS201_ALLOWABLE_ROWS] + \
         [("rack tip radius", round(W.rack_tip_radius(), 3))]
     for name, val in vals:

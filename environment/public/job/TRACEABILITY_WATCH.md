@@ -78,6 +78,7 @@ hand speeds and directions, and the weights of the checks.
 | MATERIAL_DESIGNATIONS: AD-C100-HT (ordering code) | AD-C100-HT | `datasheets/DS-201_materials.md` | 2. Ordering codes | AD-C100-HT | Code |
 | MATERIAL_DESIGNATIONS: AD-CW614N (ordering code) | AD-CW614N | `datasheets/DS-201_materials.md` | 2. Ordering codes | AD-CW614N | Code |
 | PRESSURE_ANGLE (tooth form of the Lewis form factors) | 25.0 | `datasheets/DS-W04_gear_rating.md` | 2. Tooth form | Pressure angle | Value |
+| TOOTH_LOAD_FACTOR (dry meshing) | 1.45 | `datasheets/DS-W04_gear_rating.md` | 2. Tooth form | Load factor K, unlubricated (dry) meshing | Value |
 | LEWIS_ADDENDUM | 1.0 | `datasheets/DS-W04_gear_rating.md` | 2. Tooth form | Addendum of the basic rack | Value |
 | LEWIS_DEDENDUM | 1.25 | `datasheets/DS-W04_gear_rating.md` | 2. Tooth form | Dedendum of the basic rack | Value |
 | rack_tip_radius() (rounded to 3 decimals) | 0.318 | `datasheets/DS-W04_gear_rating.md` | 2. Tooth form | Tip radius of the basic rack | Value |

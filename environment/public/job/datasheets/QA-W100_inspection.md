@@ -164,7 +164,8 @@ Requirements.
       counts give through meshes that pass the mesh test (the same speeds as the hand checks);
     - module: m = 2 x (distance between the two axes in the assembled positions) / (z_D + z_N) (mm), as in the
       mesh test;
-    - tooth load: F = T_D / (m x z_D / 2) (N), on the pitch circle of D;
+    - tooth load: F = K x T_D / (m x z_D / 2) (N), on the pitch circle of D, with K the load factor for
+      unlubricated (dry) meshing of DS-W04, section 2: the gears of this movement run without lubricant;
     - face width: b = the smallest H over the drive steps of the mesh test for this mesh (mm), H being the height
       in z of the region that the further-turned D shares with N and did not occupy before;
     - bending stress of each of the two gears, each with its own tooth count z (z_D or z_N): sigma = F / (b x m x
