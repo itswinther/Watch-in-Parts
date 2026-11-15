@@ -866,8 +866,8 @@ def barrel_rows(B):
         if e is None:
             rows.append({"no": supplied_barrel_no(), "teeth": W.BARREL_TEETH, "module": W.BARREL_MODULE,
                          "pa": W.PRESSURE_ANGLE, "tip_d": round(2 * B["tip_r"], 3), "root_d": round(2 * B["root_r"], 3),
-                         "thick": B["thickness"], "drum": W.BARREL_WHEEL_Z[1] - W.BARREL_WHEEL_Z[0],
-                         "arbor_r": W.BARREL_ARBOR_R, "arbor_l": round(W.BARREL_ARBOR_Z[1] - W.BARREL_ARBOR_Z[0], 6),
+                         "thick": B["thickness"], "drum": zr(W.BARREL_WHEEL_Z[1] - W.BARREL_WHEEL_Z[0]),
+                         "arbor_r": W.BARREL_ARBOR_R, "arbor_l": zr(W.BARREL_ARBOR_Z[1] - W.BARREL_ARBOR_Z[0]),
                          "inner_d": W.BARREL_INNER_D, "core_r": round(W.BARREL_CORE_R, 3), "square": W.BARREL_SQUARE_SIDE,
                          "run": (speeds[0], speeds[-1]), "supplied": True})
             continue
@@ -887,6 +887,12 @@ def barrel_rows(B):
         if speed_class_of(frac) not in classes_text(sup["run"]).split(", "):
             raise SystemExit("the supplied barrel is not offered in the speed class of one turn every %s" % hours(frac))
     return rows
+
+
+def zr(v):
+    """A z level of the supplied barrel as the documents give it: to 4 decimals (the thin barrel's levels are the
+    6.6 mm barrel's times 3.0/6.6, e.g. 0.454545...; the mesh itself is single precision)."""
+    return round(v, 4) + 0.0
 
 
 SPEED_COL = "Barrel speed, steady running"
@@ -944,11 +950,11 @@ The steady running speed of the barrel in the movement, for each speed class.
 
 | Speed class | {scol} | {sense} |
 |---|---|---|
-{classes}""".format(table=table, no=supplied_barrel_no(), wz0=num(W.BARREL_WHEEL_Z[0]), wz1=num(W.BARREL_WHEEL_Z[1]),
-                    az0=num(W.BARREL_ARBOR_Z[0]), az1=num(W.BARREL_ARBOR_Z[1]), vol=num(B["volume"]),
+{classes}""".format(table=table, no=supplied_barrel_no(), wz0=num(zr(W.BARREL_WHEEL_Z[0])), wz1=num(zr(W.BARREL_WHEEL_Z[1])),
+                    az0=num(zr(W.BARREL_ARBOR_Z[0])), az1=num(zr(W.BARREL_ARBOR_Z[1])), vol=num(B["volume"]),
                     scol=SPEED_COL, sense=SENSE_COL, classes=classes, bore=num(W.BARREL_BORE_R), ar=num(W.BARREL_ARBOR_R),
-                    cr=num(round(W.BARREL_CORE_R, 3)), ind=num(W.BARREL_INNER_D), sq0=num(W.BARREL_SQUARE_Z[0]),
-                    sq1=num(W.BARREL_SQUARE_Z[1]), sq=num(W.BARREL_SQUARE_SIDE))
+                    cr=num(round(W.BARREL_CORE_R, 3)), ind=num(W.BARREL_INNER_D), sq0=num(zr(W.BARREL_SQUARE_Z[0])),
+                    sq1=num(zr(W.BARREL_SQUARE_Z[1])), sq=num(W.BARREL_SQUARE_SIDE))
 
 
 def ds_w01_trace(L, B):
@@ -967,18 +973,20 @@ def ds_w01_trace(L, B):
         cell("BARREL_SQUARE_SIDE", W.BARREL_SQUARE_SIDE, f, "2. Catalogue", bn, "Winding square side",
              [num(W.BARREL_SQUARE_SIDE)]),
         cell("barrel axis (x, y) = (0, 0)", (0, 0), f, "3. ", "Axis", "Value", ["0", "0"]),
-        cell("BARREL_WHEEL_Z", W.BARREL_WHEEL_Z, f, "3. ", "Toothed drum", "Value", [num(z) for z in W.BARREL_WHEEL_Z]),
-        cell("BARREL_ARBOR_Z", W.BARREL_ARBOR_Z, f, "3. ", "Arbor", "Value", [num(z) for z in W.BARREL_ARBOR_Z]),
+        cell("BARREL_WHEEL_Z (to 4 decimals)", W.BARREL_WHEEL_Z, f, "3. ", "Toothed drum", "Value",
+             [num(zr(z)) for z in W.BARREL_WHEEL_Z]),
+        cell("BARREL_ARBOR_Z (to 4 decimals)", W.BARREL_ARBOR_Z, f, "3. ", "Arbor", "Value",
+             [num(zr(z)) for z in W.BARREL_ARBOR_Z]),
         cell("BARREL_BORE_R", W.BARREL_BORE_R, f, "3. ", "Bore of the drum", "Value", [num(W.BARREL_BORE_R)]),
         cell("BARREL_ARBOR_R (section 3)", W.BARREL_ARBOR_R, f, "3. ", "Arbor, pivots and plain sections", "Value",
              [num(W.BARREL_ARBOR_R)]),
-        cell("BARREL_WHEEL_Z, BARREL_CORE_R (the core)", (W.BARREL_WHEEL_Z, round(W.BARREL_CORE_R, 3)), f, "3. ",
-             "Arbor core (inside the drum's bore)", "Value",
-             [num(z) for z in W.BARREL_WHEEL_Z] + [num(round(W.BARREL_CORE_R, 3))]),
+        cell("BARREL_WHEEL_Z (to 4 decimals), BARREL_CORE_R (the core)", (W.BARREL_WHEEL_Z, round(W.BARREL_CORE_R, 3)), f,
+             "3. ", "Arbor core (inside the drum's bore)", "Value",
+             [num(zr(z)) for z in W.BARREL_WHEEL_Z] + [num(round(W.BARREL_CORE_R, 3))]),
         cell("BARREL_INNER_D (section 3)", W.BARREL_INNER_D, f, "3. ", "Spring chamber inside the drum (not modelled in the mesh)", "Value",
              [num(W.BARREL_INNER_D)]),
-        cell("BARREL_SQUARE_Z, BARREL_SQUARE_SIDE", (W.BARREL_SQUARE_Z, W.BARREL_SQUARE_SIDE), f, "3. ",
-             "Winding square", "Value", [num(z) for z in W.BARREL_SQUARE_Z] + [num(W.BARREL_SQUARE_SIDE)]),
+        cell("BARREL_SQUARE_Z (to 4 decimals), BARREL_SQUARE_SIDE", (W.BARREL_SQUARE_Z, W.BARREL_SQUARE_SIDE), f, "3. ",
+             "Winding square", "Value", [num(zr(z)) for z in W.BARREL_SQUARE_Z] + [num(W.BARREL_SQUARE_SIDE)]),
         cell("BARREL_TURNS_PER_HOUR (8-hour build, speed class %s in the work order)" % s8, W.BARREL_TURNS_PER_HOUR, f,
              "4. Speed classes", s8, SPEED_COL, ["1", str(1 / W.BARREL_TURNS_PER_HOUR)]),
         cell("CHANGED_BARREL_TURNS_PER_HOUR (6-hour variant, speed class %s in the work order)" % s6,

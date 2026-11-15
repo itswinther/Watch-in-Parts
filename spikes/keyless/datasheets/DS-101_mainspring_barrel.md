@@ -8,8 +8,9 @@
 
 > **About this document.** Valtorre Microtechnique SA, demonstration series.
 >
-> - **What is real:** each spring in Table 1 is a real catalogue size, cited row by row. This series
->   reproduces it with every length multiplied by s = 1.617.
+> - **What is real:** each spring in Table 1 is a real catalogue size, cited row by row, except LT,
+>   which is spring L with a lower strip.[^rLT] This series reproduces them with every length multiplied
+>   by s = 1.617.
 > - **What is specified by a maker:** the torque limits of a real 11½‴ calibre (Table 2a), and a
 >   published winding/unwinding ratio.
 > - **What is calculated:** the torque and turns figures for these springs are calculated, not
@@ -53,6 +54,7 @@
 | J | A | 1.45 × 0.100 × 380 × 10.0 | [^rJ] | 2.34 | 0.162 | 615 | 16.2 |
 | K | M (ETA 2801 size) | 1.23 × 0.134 × 400 × 10.5 | [^rK] | 1.99 | 0.217 | 647 | 17.0 |
 | L | M | 0.48 × 0.100 × 270 × 7.5 | [^rL] | 0.78 | 0.162 | 437 | 12.1 |
+| LT | M | 0.25 × 0.100 × 270 × 7.5 | [^rLT] | 0.40 | 0.162 | 437 | 12.1 |
 | M | M | 0.60 × 0.100 × 310 × 8.0 | [^rM] | 0.97 | 0.162 | 501 | 12.9 |
 | N | M | 0.60 × 0.105 × 200 × 8.5 | [^rN] | 0.97 | 0.170 | 323 | 13.7 |
 
@@ -83,6 +85,7 @@ M_el is the torque at which the outer fibre of the strip reaches its proof stres
 | J | 25.3 | 13.6 |
 | K | 38.5 | 10.7 |
 | L | 8.4 | 9.7 |
+| LT | 4.4 | 9.7 |
 | M | 10.5 | 11.1 |
 | N | 11.5 | 6.8 |
 
@@ -131,6 +134,7 @@ the core of the barrels supplied with this series, and for two other core ratios
 | J | 2.70 | 16.7 | 7.6 | 60 | 1.94 | 10.4 | 83 | 2.59 | 7.9 | 63 |
 | K | 2.83 | 13.1 | 5.2 | 41 | 2.60 | 5.8 | 47 | 3.47 | 3.5 | 28 |
 | L | 2.02 | 12.5 | 4.9 | 40 | 1.94 | 5.3 | 42 | 2.59 | 3.0 | 24 |
+| LT | 2.02 | 12.5 | 4.9 | 40 | 1.94 | 5.3 | 42 | 2.59 | 3.0 | 24 |
 | M | 2.16 | 13.3 | 5.2 | 42 | 1.94 | 6.0 | 48 | 2.59 | 3.7 | 30 |
 | N | 2.29 | 13.5 | 6.1 | 49 | 2.04 | 6.9 | 55 | 2.72 | 4.9 | 39 |
 
@@ -177,6 +181,7 @@ full wind, which is no more than M_el.
 | J | 1.9 | 3.7 | 5.6 | 7.4 | 9.3 | 11.2 | 13.0 | 14.9 | 19.3 |
 | K | 3.6 | 7.2 | 10.8 | 14.4 | 18.0 | – | – | – | 21.0 |
 | L | 0.9 | 1.7 | 2.6 | 3.5 | 4.3 | – | – | – | 4.5 |
+| LT | 0.5 | 0.9 | 1.4 | 1.8 | 2.3 | – | – | – | 2.4 |
 | M | 0.9 | 1.9 | 2.8 | 3.8 | 4.7 | 5.7 | – | – | 5.7 |
 | N | 1.7 | 3.4 | 5.1 | 6.8 | 8.5 | 10.2 | – | – | 11.5 |
 
@@ -220,6 +225,7 @@ full wind, which is no more than M_el.
 [^rJ]: https://en.ressortdebarillet.ch/products/1-45-x-10-x-380-x-10-automatique
 [^rK]: 1.23 × 0.134 × 400 × 10.5, ETA 2801, https://en.ressortdebarillet.ch/products/1-23-x-134-x-400-x-10-5-eta-2801-mecanique
 [^rL]: 0.48 × 0.10 × 270 × 7.5, non-automatic (Vacheron Constantin 1003), https://en.ressortdebarillet.ch/products/0-48-x-10-x-270-x-7-5-vacheron-constantin1003-non-automatique ; the same size for Audemars Piguet 2003, https://en.ressortdebarillet.ch/products/0-48-x-10-x-270-x-7-5-audemars-piguet-2003-bride-special-tb
+[^rLT]: Not a catalogue size: spring L ([^rL]) with the strip height reduced from 0.48 mm to 0.25 mm (1:1), for barrels with a low drum. Thickness, length and barrel diameter are L's, so its turns and run time (Table 3) are L's; its torques (Tables 2 and 4) are L's × 0.25/0.48, since M is proportional to h ([^d2], [^d3]).
 [^rM]: 0.60 × 0.10 × 310 × 8, non-automatic (Patek Philippe 177), https://en.ressortdebarillet.ch/products/0-60-x-10-x-310-x-8-patek-177-non-automatique
 [^rN]: 0.60 × 0.105 × 200 × 8.5, non-automatic (Piaget 9P2), https://en.ressortdebarillet.ch/products/0-60-x-105-x-200-x-8-5-piaget-9p2-non-automatique
 [^sjx25]: Core ratio r/e: Defossez 16; modern minimum about 10; thickness correction 0.002 to 0.004 mm; maximum turns at half the area. https://watchesbysjx.com/2025/11/in-depth-balancing-mainspring-dimensions-inside-the-barrel.html

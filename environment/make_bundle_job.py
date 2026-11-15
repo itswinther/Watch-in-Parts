@@ -6,7 +6,8 @@ writes OUT (in the task image it is /app):
     datasheets/             the watch-side sheets (DS-W01 to DS-W03, DS-W04 with the strength check), the inspection
                             procedure QA-W100, workstream A's supplier sheets (DS-101 to DS-501, from
                             spikes/keyless/datasheets/INDEX.md) and one INDEX.md for all of them
-    supplied/barrel.stl     the supplied barrel (geometry/data/barrel.stl with a neutral header)
+    supplied/barrel.stl     the supplied barrel (geometry.watch.mesh_path("barrel"), the grader's own, with a neutral
+                            header: geometry/data/thin/barrel.stl while W.THIN_BARREL is on, as on b/thin-4mm)
     tools/kernel.py         geometry/core.py
     tools/check_format.py   environment/check_format_job.py with the format numbers filled in
     delivery/               empty
@@ -74,7 +75,7 @@ def kernel_text():
 
 
 def barrel_bytes():
-    with open(os.path.join(ROOT, "geometry", "data", "barrel.stl"), "rb") as f:
+    with open(W.mesh_path("barrel"), "rb") as f:      # the barrel the grader uses (data/thin/ when W.THIN_BARREL)
         data = f.read()
     return NEUTRAL_STL_HEADER + data[80:]
 

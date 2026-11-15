@@ -139,7 +139,7 @@ def step_weights():
 
 
 
-JOB_SPRING = "L"        # the spring the supplied barrel holds (DS-101 Rev F; A's 19:50 request, B's chamber 12.12)
+JOB_SPRING = "LT"       # the spring the supplied (thin) barrel holds: DS-101 Rev F row LT, spring L with a 0.25 strip (b/thin-4mm)
 DS101 = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "spikes", "keyless", "datasheets",
                      "DS-101_mainspring_barrel.md")
 

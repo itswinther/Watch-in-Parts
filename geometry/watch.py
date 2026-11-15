@@ -23,7 +23,8 @@ BARREL_WHEEL_Z = (0.0, 1.0)         # the toothed drum
 BARREL_ARBOR_Z = (-1.0, 5.6)        # the whole arbor
 BARREL_ARBOR_R = 0.5                # the arbor's pivots and plain sections, below and above the drum
 BARREL_INNER_D = 12.12              # inside diameter of the drum's spring chamber (not modelled in the mesh):
-                                    # DS-101 Rev F: thin spring L's listed barrel at demonstration scale (A, 19:50)
+                                    # DS-101 Rev F: thin spring L's listed barrel at demonstration scale (A, 19:50);
+                                    # the thin barrel's spring LT (L with a 0.25 strip) has the same D
 BARREL_CORE_R = BARREL_INNER_D / 6  # arbor core (hub) radius, one third of the inner radius (DS-101 section 1,
                                     # Grossmann art. 108 to 111, Saunier art. 517); the core spans the drum's z
 BARREL_BORE_R = 2.0367              # the drum's bore round the core: radial clearance 0.0167
@@ -38,16 +39,19 @@ CASE_HEIGHT = 13.4         # reference is 13.1 tall, plus 0.3
 # scored afterwards by spikes/thin_probe/score.py: x = (H - THIN_TARGET_MM) / (CASE_HEIGHT - THIN_TARGET_MM), clamped
 # to 0..1, s = (1 - x) ** THIN_SCORE_EXPONENT, reward = THIN_SCORE_SHARE x share + THIN_SCORE_SHARE x [all pass] x s.
 # (Not the THIN_VOXEL ... constants below, which belong to the printability test.)
-THIN_TARGET_MM = 9.0       # mm: the thickness target, total height along z of the taller build, barrel included
+THIN_TARGET_MM = 4.0       # mm: the thickness target, total height along z of the taller build, barrel included
 THIN_SCORE_EXPONENT = 4
 THIN_SCORE_SHARE = Fraction(1, 2)   # the half of the reward that full acceptance earns (as tests/grade_watch.py)
 # stage 3, change request: the supplied barrel (same mesh) turns clockwise once every 6 hours instead of 8
 CHANGED_BARREL_TURNS_PER_HOUR = Fraction(1, 6)
-# spike only (spikes/thin_4mm/, branch a/thin-4mm), OFF by default: WATCH_THIN_BARREL=1 swaps in a thin barrel, the
-# supplied meshes scaled in z by THIN_BARREL_SCALE about z = 0 (arbor 3.0 mm instead of 6.6; teeth and module in x/y
-# unchanged), read from spikes/thin_4mm/data/. The z constants of the barrel follow. The strength load case
-# (BARREL_TORQUE_MAX_NMM, the automatic version's bridle) is kept at full value: conservative.
-THIN_BARREL = os.environ.get("WATCH_THIN_BARREL", "") == "1"
+# The thin barrel (branch b/thin-4mm, from A's spike a/thin-4mm): ON by default on this branch, so the generator, the
+# bundle, the grader, the reference and spikes/thin_probe/score.py all read the same barrel without any setting.
+# WATCH_THIN_BARREL=0 gives the 6.6 mm barrel of main (to regrade old runs). The thin barrel is the main meshes
+# scaled in z by THIN_BARREL_SCALE about z = 0 (arbor 3.0 mm instead of 6.6; teeth, module and every x/y size
+# unchanged), written by spikes/thin_4mm/make_barrel.py to data/thin/ (inside geometry/, so every image that
+# carries geometry/ carries them). The z constants of the barrel follow. The strength load case
+# (BARREL_TORQUE_MAX_NMM, the automatic version's bridle) is kept at full value: conservative (A's choice).
+THIN_BARREL = os.environ.get("WATCH_THIN_BARREL", "1") != "0"
 THIN_BARREL_SCALE = 3.0 / 6.6
 if THIN_BARREL:
     BARREL_WHEEL_Z = tuple(v * THIN_BARREL_SCALE for v in BARREL_WHEEL_Z)
@@ -153,13 +157,18 @@ def cyl(x, y, z0, z1, r, seg=48):
 _MESHES = {}
 
 
+def mesh_path(name):
+    """The file of supplied mesh `name` (barrel, barrel_drum, barrel_arbor, barrel_stage): data/thin/ when
+    THIN_BARREL (the stage task's one-body barrel_stage is never thinned), else data/."""
+    data = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
+    if THIN_BARREL and name != "barrel_stage":
+        data = os.path.join(data, "thin")
+    return os.path.join(data, name + ".stl")
+
+
 def _mesh(name):
     if name not in _MESHES:
-        data = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
-        if THIN_BARREL and name != "barrel_stage":
-            data = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "spikes", "thin_4mm", "data")
-        path = os.path.join(data, name + ".stl")
-        _MESHES[name] = core.tris_to_manifold(core.read_stl(path, MAX_TRIANGLES, MAX_STL_BYTES))
+        _MESHES[name] = core.tris_to_manifold(core.read_stl(mesh_path(name), MAX_TRIANGLES, MAX_STL_BYTES))
     return _MESHES[name]
 
 

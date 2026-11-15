@@ -247,12 +247,12 @@ when every part is installed.
 
 The order asks for a slim calibre. The movement's height H is the highest point minus the lowest point of every
 part of the movement and of the barrel, in the assembled positions, along the axis. The taller of `movement.json`
-and `variant_6h.json` counts. The target is **9.0 mm**.
+and `variant_6h.json` counts. The target is **4.0 mm**.
 
 With C the inner height of the case named in the work order (DS-W02, section 2, column "Inner height along the
 axis (mm)"):
 
-    x = (H - 9.0) / (C - 9.0), taken as 0 below 0 and as 1 above 1
+    x = (H - 4.0) / (C - 4.0), taken as 0 below 0 and as 1 above 1
     thickness score s = (1 - x) ^ 4
 
 The acceptance figure is 1/2 x (the result of Parts 1 to 4 together) + 1/2 x [every condition and every

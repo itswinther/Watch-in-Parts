@@ -8,9 +8,11 @@ report.json, the designer's statement of each part's result, scored by the hones
     python -I grade_watch.py /abs/submission_folder --stage 1|2|3|4 [--prev /abs/previous_stage_folder]
                              [--reward FILE] [--details FILE] [--skip CHECK,CHECK]
 Stage mode (kept to regrade old runs and for the stage anchors; it uses the one-body barrel those runs were given,
-geometry/data/barrel_stage.stl, and the one-job mode the two-body barrel, geometry/data/barrel.stl):
+geometry/data/barrel_stage.stl, and the one-job mode the two-body barrel, geometry/watch.py mesh_path("barrel"):
+geometry/data/thin/barrel.stl on branch b/thin-4mm, geometry/data/barrel.stl with WATCH_THIN_BARREL=0):
 --skip leaves named scored checks out (only for runs made before a check existed); the list is in the output.
-The grader reads no environment variables.
+The grader reads no environment variables of its own; geometry/watch.py reads WATCH_THIN_BARREL (unset: the thin
+barrel; 0: main's 6.6 mm barrel, to regrade runs made with it).
 Stage 1: design the movement. Stage 2: add a 24-hour hand to a frozen stage-1 movement (--prev).
 Stage 3: change request: the barrel turns once every 6 hours; every design check again, times a
 kept-parts factor against the stage-2 movement (--prev).
