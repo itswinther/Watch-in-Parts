@@ -170,13 +170,13 @@ artifacts = ["/app/delivery"]   # the whole delivery, scripts/ included; the age
 [task]
 name = "junction/watch-one"
 authors = [{{ name = "Board in a Box team, Junction 2026 (workstreams A and B)" }}]
-description = "Design a complete mechanical watch movement from one professional brief, as 3D CAD parts: going train and hands, a 24-hour hand, a 6-hour-barrel variant, crown winding and an assembly sequence. Graded only on the delivered files, by geometry and contact simulation in a separate offline verifier."
+description = "Design the movement of a thin mechanical dress watch from a customer order, as STEP parts made in CadQuery: frame, going train and hour, minute and seconds hands for a barrel chosen from a supplier catalogue, a 24-hour hand, a 6-hour variant on the same frame, and an assembly plan with a path for every part. Graded only on the delivered files, by geometry, in a separate offline verifier."
 keywords = ["mechanical-design", "cad", "watchmaking", "mechanism", "cadquery", "step", "datasheets"]
 
 [metadata]
 category = "engineering-design"
 difficulty = "hard"
-difficulty_explanation = "One unfrozen job with five parts that must work together in one movement: tooth counts and centre distances that give exact hand speeds, clearances and printable minimum features at demonstration scale, a barrel-speed variant that shares parts, contact-driven crown winding that must drive one way and slip the other, and an assembly order with collision-free paths. Limits come from supplier datasheets the agent must read. Nothing returns a verdict to the agent, and the whole-build term pays only if every part works."
+difficulty_explanation = "One unfrozen job with four graded parts that must work together in one movement: tooth counts and centre distances that give exact hand speeds, gears that mesh and drive and pass a bending check, clearances and printable minimum features at demonstration scale, a barrel-speed variant on the same frame, and an assembly order with collision-free paths, all as thin as possible. The order states no acceptance test and no target height; limits come from the order, supplier datasheets the agent must read, the file format and trade practice. Nothing returns a verdict to the agent. The whole-build term, scaled by thinness against the house design, pays only if every part works."
 expert_time_estimate_hours = 60    # author estimate, unverified: one to two weeks for an experienced movement designer in CAD
 junior_time_estimate_hours = 160   # author estimate, unverified
 grader = "{grader}"
