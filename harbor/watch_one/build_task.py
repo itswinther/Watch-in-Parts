@@ -269,7 +269,16 @@ def bundle(app, G):
     for n in need:
         if not os.path.isfile(os.path.join(app, n)):
             raise SystemExit("B's bundle builder did not produce %s (interface of Decisions 15:44)" % n)
+    if not supplied_files(app):
+        raise SystemExit("B's bundle builder did not produce any supplied/*.stl (one barrel, or the catalogue)")
     return brief_text
+
+
+def supplied_files(app):
+    """The supplied barrel meshes in the agent's /app/supplied: one barrel.stl (single-barrel briefs) or every
+    barrel of the catalogue (supplied/<part no.>.stl, make_bundle_job.py)."""
+    d = os.path.join(app, "supplied")
+    return sorted(f for f in os.listdir(d) if f.endswith(".stl")) if os.path.isdir(d) else []
 
 
 def forbidden_hashes():
@@ -299,6 +308,9 @@ def assert_clean(env_dir, G):
     anything carrying the NOT-FOR-AGENT mark."""
     app = os.path.join(env_dir, "app")
     pats, bad = allow_patterns(G), forbidden_hashes()
+    # the supplied barrel meshes are shipped on purpose (catalogue barrels may equal geometry/data meshes)
+    for f in supplied_files(app):
+        bad.discard(hashlib.sha256(open(os.path.join(app, "supplied", f), "rb").read()).hexdigest())
     n = 0
     for root, dirs, files in os.walk(env_dir):
         for d in dirs:
@@ -319,6 +331,8 @@ def assert_clean(env_dir, G):
             if hashlib.sha256(data).hexdigest() in bad or MARK in data:
                 raise SystemExit("REFUSED: %s matches a file that must never reach the agent" % rel)
             n += 1
+    if not supplied_files(app):
+        raise SystemExit("REFUSED: no supplied/*.stl in the agent image")
     for need in supplied_meshes(G) + ["tools/kernel.py", "delivery", "datasheets"]:
         if not os.path.exists(os.path.join(app, need)):
             raise SystemExit("REFUSED: %s missing from the agent image" % need)
