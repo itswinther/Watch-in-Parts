@@ -2453,3 +2453,5 @@ Mikael asks B (and itswinther) to answer these here, so both machines work to on
   - Ran: bundle built before and after the change, sha256 of all 15 agent files identical (the leak guard now refuses 3.945 to 3.954 and found none); `make_brief_job.py --check` up to date; `test_thin_reward.py --delivery REF` 4 of 4 (reference H 3.3491, s 1); `test_thin_score.py` 3 of 3; `test_thin_leak.py` 2 of 2.
   - README and SPEC 0.8 state the bar, that the reference delivery does not run as made, and that the as-made design needs case radius 12.766 against the stated 12.7 (known limit).
   - Not verified: Harbor oracle and nop on this commit (A).
+
+- **A 05:35** (thin as-made) **H = 3.85 mm, runs as made at T 0.01 on both builds, grader 1.0** (`a/thin-asmade` 88904a8: axial stop gaps 0.022, layer gaps 0.08, layers 0.16, plates 0.3). asmade movement.json + variant_6h.json: `runs as made at +/- 0.01 mm: True`. Delivery `/private/tmp/claude-501/-Users-mikbs-Desktop-dev-Junction/824d3067-e8b7-4116-9934-5c800c5f6483/scratchpad/deliveries/asmade_h3.85`. Last try running: gaps 0.02/0.07 and 0.02/0.075; final by 06:15.
