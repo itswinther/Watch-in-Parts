@@ -353,6 +353,74 @@ def b_rubs_frame(d):
     _write(d, "seconds", _seconds(lug=(1.05, 1.35, 5.2, 0.6)))
 
 
+def _rebuild_assembly(d):
+    """assembly.json again by the reference's own rule (every part straight down from above, in the same order),
+    for a delivery whose parts now reach lower or higher than the reference's."""
+    ref, P, lo, hi = _ref()
+    with open(os.path.join(d, "assembly.json")) as f:
+        order = json.load(f)["order"]
+    with open(os.path.join(d, "assembly.json"), "w") as f:
+        json.dump(ref.build_assembly(d, order), f)
+
+
+def b_minute_hand_fin(d):
+    """The judge rehearsal's attempt 2 (JUDGE_REHEARSAL.md section 4): the minute hand 12.0 long instead of 9.0
+    (a blade r 8 to 12 from the centre axis, 0.5 wide, z 10.7 to 11.0, on the reference's hand) with a fin under its
+    tip (r 11 to 12, 0.5 wide, z 9.9 to 10.7) reaching down into the layer of the seconds hand. Drawn, it points +x,
+    away from the seconds hand. assembly.json is rebuilt by the reference's rule (the fin starts lower)."""
+    ref, P, lo, hi = _ref()
+    from geometry import watch_gears_cad as GC
+    cx, cy = P["centre"]
+    blade = GC.box((cx + 8.0, cy - 0.25, 10.7), (cx + 12.0, cy + 0.25, 11.0))
+    fin = GC.box((cx + 11.0, cy - 0.25, 9.9), (cx + 12.0, cy + 0.25, 10.7))
+    _write(d, "minute_hand", ref.union([ref.hand(P["centre"], 10.7, 11.0, 9.0, 1.0, 0.35 + ref.FIT), blade, fin]))
+    _rebuild_assembly(d)
+
+
+# The 72-tooth ratchet of the check-1 anchor (on the fourth arbor, under the bridge) and the pawl that locks it
+RATCHET_Z = (4.45, 4.95)          # between the fourth wheel (layer D, top 4.4) and the bridge (bottom 5.0)
+RATCHET_RIM = (5.2, 5.5)          # rim radii, carried by three spokes 0.3 wide from the arbor
+RATCHET_TEETH = 72                # one tooth every 5 degrees: the shape repeats at every free-spin step
+RATCHET_TOOTH = (5.45, 6.1, 0.22)  # radial extent and width of each (box) tooth
+PAWL = (5.55, 6.0, 0.22)          # radial extent and width of the pawl, in the gap at half a tooth pitch
+
+
+def _ratchet_angle():
+    """Direction (degrees) of the pawl from the fourth axis: straight away from the day idler."""
+    ref, P, lo, hi = _ref()
+    return math.degrees(ref.ang(P["day_idler"], P["fourth"]))
+
+
+def b_locked_wheel(d):
+    """The judge rehearsal's attempt 3 as a delivery: a 72-tooth ratchet on the fourth arbor and a fixed pawl in
+    one tooth gap, on an arm under the bridge. The fourth part is the reference's (rebuilt with its own pinion and
+    wheel phases) plus the ratchet; the bridge is the reference's plus the arm and the pawl. assembly.json is
+    rebuilt by the reference's rule (the pawl hangs 0.55 below the bridge)."""
+    ref, P, lo, hi = _ref()
+    from geometry import watch_gears_cad as GC
+    import cadquery as cq
+    T = P["fourth"]
+    a0 = _ratchet_angle()
+    rot = lambda s, deg: s.rotate(cq.Vector(T[0], T[1], 0), cq.Vector(T[0], T[1], 1), deg)
+    z0, z1 = RATCHET_Z
+    rim = GC.cut(GC.cyl(T[0], T[1], z0, z1, RATCHET_RIM[1]), GC.cyl(T[0], T[1], z0 - 1, z1 + 1, RATCHET_RIM[0]))
+    spokes = [rot(GC.box((T[0] + 0.3, T[1] - 0.15, z0), (T[0] + RATCHET_RIM[0] + 0.05, T[1] + 0.15, z1)), a0 + 60 + 120 * k)
+              for k in range(3)]
+    r0, r1, w = RATCHET_TOOTH
+    tooth = GC.box((T[0] + r0, T[1] - w / 2, z0), (T[0] + r1, T[1] + w / 2, z1))
+    teeth = [rot(tooth, a0 + 2.5 + 360.0 * k / RATCHET_TEETH) for k in range(RATCHET_TEETH)]   # the pawl at a0: a gap
+    ratchet = ref.union([rim] + spokes + teeth)
+    # the reference's fourth (reference_watch.py main_job, one-part layout) is read back from the folder
+    old = cq.importers.importStep(os.path.join(d, "parts", "fourth.step")).val()
+    _write(d, "fourth", ref.union([old, ratchet]))
+    p0, p1, pw = PAWL
+    pawl = rot(GC.box((T[0] + p0, T[1] - pw / 2, z0), (T[0] + p1, T[1] + pw / 2, ref.BRIDGE[0] + 0.1)), a0)
+    arm = rot(GC.box((T[0] + 0.7, T[1] - 0.2, ref.BRIDGE[0]), (T[0] + p1, T[1] + 0.2, ref.BRIDGE[0] + 0.3)), a0)
+    bridge = cq.importers.importStep(os.path.join(d, "parts", "bridge.step")).val()
+    _write(d, "bridge", ref.union([bridge, arm, pawl]))
+    _rebuild_assembly(d)
+
+
 def b_day_on_hour_part(d):
     _edit(d, "movement.json", lambda doc: doc["hands"].update(day=dict(doc["hands"]["hour"])))
 
@@ -526,6 +594,48 @@ def detail(path, test, text):
     return fn
 
 
+def _failing_pairs(d, pid):
+    return {x["pair"] for x in d["parts"][pid]["details"]["clear"].get("failing", [])}
+
+
+# The judge rehearsal's attempts 2 and 3 (Decisions 2026-11-15 01:19, A1 and A2), as anchors.
+# A1, check 6 "Nothing else collides": two mobiles not declared as a mesh must not share more than VOL_TOL
+# (0.01 mm3) of their swept solids (each mobile turned through a full turn about its axis), so every pair of angles
+# counts. The fin (b_minute_hand_fin) sweeps the annulus r 11 to 12 round the centre axis at z 9.9 to 10.7. The
+# seconds hand (r <= 5.0 round the seconds axis, 15.64 from the centre axis, z 9.9 to 10.2) sweeps a disc that
+# reaches 10.64 from the centre axis, so it covers part of that annulus over its 0.3 height: of the order of 1 mm3,
+# far over 0.01 (measured 1.4364 mm3, z 9.9 to 10.2). The 24-hour hand (round the day axis 9.65 from the centre
+# axis, same z) sweeps a disc that covers the annulus too (measured 1.6999 mm3). Both are measured with
+# Movement.clear_swept on the built folder, the same at SWEEP_DZ and SWEEP_DZ / 2. With the old rule (144 steps
+# of the faster mobile, then 144 of one relative turn) the grader's clear_run gave 0.0 (JUDGE_REHEARSAL.md).
+# minute_hand is a part of both movements: P1 and P3 fail clear (1) and nothing else. D = (1/4)(1/23) +
+# (3/20)(1/27) = 1/92 + 1/180 = 17/1035; R = 1/2 - 34/3105 = 3037/6210; x 16/17 = 24296/52785 = 0.460282
+ANCHOR_FIN = (
+    "job minute hand with a fin into the seconds hand's layer (rehearsal attempt 2)", b_minute_hand_fin,
+    X(P1={"checks": ["clear"]}, P3={"checks": ["clear"]}),
+    [detail(["P1", "details", "clear", "worst_volume"], lambda v: v > 0.5, "> 0.5 (measured 1.70)"),
+     lambda d: None if {"centre/seconds", "centre/day"} <= _failing_pairs(d, "P1")
+     else "P1 clear failing pairs %s, expected centre/seconds and centre/day among them" % sorted(_failing_pairs(d, "P1")),
+     lambda d: None if {"centre/seconds", "centre/day"} <= _failing_pairs(d, "P3")
+     else "P3 clear failing pairs %s, expected centre/seconds and centre/day among them" % sorted(_failing_pairs(d, "P3"))])
+# A2, check 1 "Free to turn": the 72 steps of 5 degrees, and after every step i also the poses i + 1/3 and
+# i + 1/5 of a step (SPIN_OFFGRID, exact fractions). The ratchet (b_locked_wheel) has 72 teeth, one every 5
+# degrees, so at every step i the wheel looks the same and the pawl sits in a gap with clearance on both sides:
+# at the pawl's inner end (r 5.55) the gap is 2 pi 5.55 / 72 - 0.22 = 0.2643 wide, the pawl 0.22, so 0.0222 per
+# side (0.0377 at its outer end, r 6.0). At i + 1/5 (1 degree) a tooth flank moves 2 pi r / 360 = 0.0969 to
+# 0.1047 towards the pawl, at i + 1/3 (5/3 degree) 0.1614 to 0.1745: the tooth enters the pawl by about 0.07 and
+# 0.14 over its radial 0.45 and height 0.5 (z 4.45 to 4.95), about 0.016 and 0.031 mm3, both over 0.01 (measured
+# with Movement.spin on the built folder: 0 at every step, 0.0155 at i + 1/5, 0.0306 at i + 1/3, so the worst pose is
+# an i + 1/3). Both the fourth and the bridge are in both movements: P1 and P3 fail spin (1) and nothing else:
+# 24296/52785 = 0.460282
+ANCHOR_LOCKED = (
+    "job a wheel locked by a pawl between the free-spin steps (rehearsal attempt 3)", b_locked_wheel,
+    X(P1={"checks": ["spin"]}, P3={"checks": ["spin"]}),
+    [detail(["P1", "details", "spin", "fourth", "worst_volume"], lambda v: v > 0.01, "> 0.01"),
+     detail(["P1", "details", "spin", "fourth", "step_exact"], lambda v: "/" in v, "an off-grid pose (i + 1/3 or i + 1/5)"),
+     detail(["P3", "details", "spin", "fourth", "worst_volume"], lambda v: v > 0.01, "> 0.01")])
+
+
 # ---------------- the anchors ----------------
 # (name, builder, expected X, [extra assertions]). The reward of each is X(...).reward() = R x factor; the
 # arithmetic in the comments uses the deficit form R = 1/2 - (2/3) D, D = sum w_p (1 - s_p), and, for an anchor
@@ -682,6 +792,8 @@ ANCHORS = [
     ("job a mobile rubs the frame when turned (seconds arm into a pillar)", b_rubs_frame,
      X(P1={"checks": ["spin"]}, P3={"checks": ["spin"]}),
      [detail(["P1", "details", "spin", "seconds", "worst_volume"], lambda v: v > 0.01, "> 0.01")]),
+    ANCHOR_FIN,
+    ANCHOR_LOCKED,
     # The third mobile declared brass (AD-CW614N, allowable 110 MPa, DS-201 section 8) in both movements, the
     # parts unchanged: its 24-tooth pinion on the barrel carries F = 70.1 / (0.2 x 96/2) = 7.302 N at b = 0.8
     # (layer A), sigma = 7.302 / (0.8 x 0.2 x 0.3634) = 125.6 MPa > 110 (in steel, 725, it passes); the variant's
