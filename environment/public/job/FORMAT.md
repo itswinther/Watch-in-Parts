@@ -46,6 +46,7 @@ Each is at most 1,048,576 bytes and names at most 60 parts.
 
 ```
 {
+  "barrel": "part no.",
   "case_centre": [x, y],
   "fixed": ["part_name", ...],
   "mobiles": {
@@ -66,6 +67,8 @@ Each is at most 1,048,576 bytes and names at most 60 parts.
 }
 ```
 
+- `barrel`: the part no. of the barrel the movement is built on, one of the barrels of the catalogue DS-W01, as
+  that sheet prints it. Required. `movement.json` and `variant_6h.json` name the same barrel.
 - `case_centre`: x and y of the case's axis, in mm.
 - `fixed`: the parts that do not move. A non-empty list.
 - `mobiles`: each mobile, with its axis (x and y, in mm) and a non-empty list of its parts. `barrel` is not listed;

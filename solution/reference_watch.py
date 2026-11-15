@@ -1,7 +1,7 @@
 """Reference for the watch task.
     python solution/reference_watch.py OUT_DIR
 writes OUT_DIR/stage1 .. OUT_DIR/stage4, each with movement.json and parts/*.step (stage4 also assembly.json).
-    python solution/reference_watch.py OUT_DIR --job [--one-part-mobiles]
+    python solution/reference_watch.py OUT_DIR --job [--one-part-mobiles] [--barrel PART_NO]
 writes OUT_DIR as one delivery folder (Decisions 2026-11-14 15:44): movement.json (the stage-2 design: 8-hour
 barrel, with the 24-hour hand), variant_6h.json (the stage-3 design: same frame, 1/6 barrel turn per hour),
 assembly.json (order and paths for movement.json) and parts/*.step, one file per part name for both movements.
@@ -29,12 +29,14 @@ from geometry import watch as W
 from geometry import watch_gears_cad as GC
 
 union, box = GC.union, GC.box
-# barrel catalogue: REF_BARREL=<id> builds the reference for that catalogue barrel (its z constants) and names it in
-# movement.json and variant_6h.json; unset: the default barrel, no "barrel" key
-REF_BARREL = os.environ.get("REF_BARREL") or None
-if REF_BARREL:
-    _bz = W.barrel_z(REF_BARREL)
-    W.BARREL_WHEEL_Z, W.BARREL_ARBOR_Z, W.BARREL_SQUARE_Z = _bz["wheel"], _bz["arbor"], _bz["square"]
+# barrel catalogue: `--barrel <id>` (or REF_BARREL=<id>) builds the reference for that catalogue barrel (its z
+# constants, set in this process only) and names it in every movement file ("barrel", required in one-job mode).
+# Default: geometry/watch.py DEFAULT_BARREL, BR-096-30, the slimmest barrel of the catalogue, which the house design
+# passes with (b/thin-cat: reward 1.0). The layout is the thin build's (W.THIN_BARREL), stacked on the chosen drum.
+_ba = sys.argv[sys.argv.index("--barrel") + 1] if __name__ == "__main__" and "--barrel" in sys.argv[1:-1] else None
+REF_BARREL = W.barrel_id_of({"barrel": _ba or os.environ.get("REF_BARREL") or W.DEFAULT_BARREL}, "--barrel", True)
+_bz = W.barrel_z(REF_BARREL)
+W.BARREL_WHEEL_Z, W.BARREL_ARBOR_Z, W.BARREL_SQUARE_Z = _bz["wheel"], _bz["arbor"], _bz["square"]
 _FILES = {}                # id(solid) -> the STEP file it was first written to
 _GEARS = {}                # part name -> (pinion, wheel) solids of a stage build, read by the one-job mode's split_wheels
 
@@ -380,7 +382,7 @@ def build_stage1():
     parts["minute_hand"] = hand(C, MIN0, MIN0 + HAND_T, HANDS["minute"], 1.0, 0.35 + FIT)
     parts["seconds_hand"] = hand(S, SEC0, SEC0 + HAND_T, HANDS["seconds"], 0.9, 0.3 + FIT)
     parts.update(frame(P, with_day=False))
-    doc = ({"barrel": REF_BARREL} if REF_BARREL else {})
+    doc = {"barrel": REF_BARREL}
     doc.update({
         "case_centre": list(P["case"][0]),
         "fixed": ["main_plate"] + (["mid_plate"] if PO else []) + ["bridge", "dial", "barrel_cock"],
@@ -683,7 +685,8 @@ def main_job(out, split=True):
 
 
 if __name__ == "__main__":
-    args = [a for a in sys.argv[1:] if a not in ("--job", "--one-part-mobiles")]
+    args = [a for i, a in enumerate(sys.argv[1:]) if a not in ("--job", "--one-part-mobiles", "--barrel")
+            and not (i > 0 and sys.argv[i] == "--barrel")]
     if "--job" in sys.argv[1:]:
         main_job(args[0] if args else "out_job", split="--one-part-mobiles" not in sys.argv[1:])
     else:

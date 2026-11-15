@@ -653,7 +653,43 @@ def case_f(job, tmp):
     return _summary(d, sec) + "; P3 checks all ran and passed, same_frame: %s" % p3["details"]["same_frame"]["error"]
 
 
-QUICK = [("a", case_a), ("frame_gate", case_frame_gate), ("day_gate", case_day_gate), ("cache", case_cache), ("deadline", case_deadline),
+def case_barrel_field(job, tmp):
+    """The catalogue barrel (b/thin-cat): each movement file names its barrel under "barrel" (required in one-job
+    mode); the movement turns that barrel's own solid; a missing or unknown part no. is a format error (C1); the variant
+    naming another barrel than movement.json fails its files gate with a plain message."""
+    from geometry import watch as W
+    from geometry.core import FormatError
+    m = W.load_movement(job, cache=CACHE, materials=True)
+    assert m.barrel_id in W.BARREL_IDS and m.mobiles["barrel"]["solid"] is W.barrel(m.barrel_id), m.barrel_id
+    folder = os.path.join(tmp, "barrel_field")
+    shutil.copytree(job, folder)
+    msgs = {}
+    for label, edit in (("missing", lambda d: d.pop("barrel")), ("unknown", lambda d: d.update(barrel="BR-096-20")),
+                        ("not a string", lambda d: d.update(barrel=96))):
+        _edit(folder, G.JOB_MOVEMENT, edit)
+        try:
+            W.load_movement(folder, cache=CACHE, materials=True)
+            raise AssertionError("%s barrel key loaded" % label)
+        except FormatError as e:
+            msgs[label] = str(e)
+            assert "'barrel' must be the part no." in str(e) and "DS-W01" in str(e), e
+        _edit(folder, G.JOB_MOVEMENT, lambda d: d.update(barrel=m.barrel_id))
+    W.load_movement(folder, cache=CACHE)            # stage mode and tools: the key may be left out (default barrel)
+    other = [b for b in W.BARREL_IDS if b != m.barrel_id][0]
+    _edit(folder, G.JOB_VARIANT, lambda d: d.update(barrel=other))
+    v = W.load_movement(folder, G.JOB_VARIANT, cache=CACHE, materials=True)
+    assert v.barrel_id == other and v.mobiles["barrel"]["solid"] is W.barrel(other)
+    zb = W.barrel_z(other)["arbor"]
+    bb = v.mobiles["barrel"]["solid"].bounding_box()
+    assert abs(bb[2] - zb[0]) < 1e-3 and abs(bb[5] - zb[1]) < 1e-3, (bb, zb)
+    ok, info = G._run(lambda: (G.job_same_barrel(folder, G.JOB_VARIANT, v) or True, {}))
+    assert not ok and "both builds use the same barrel" in info["error"], info
+    ok2, _ = G._run(lambda: (G.job_same_barrel(folder, G.JOB_VARIANT, m) or True, {}))
+    assert ok2
+    return "%s; missing: %r; variant on %s: %r" % (m.barrel_id, msgs["missing"], other, info["error"])
+
+
+QUICK = [("a", case_a), ("barrel_field", case_barrel_field), ("frame_gate", case_frame_gate), ("day_gate", case_day_gate), ("cache", case_cache), ("deadline", case_deadline),
          ("reward_formula", case_reward_formula), ("keyless_format", case_keyless_format), ("friction_on", case_friction_on),
          ("keyless_assembly", case_keyless_assembly), ("keyless_switch", case_keyless_switch),
          ("keyless_engine", case_keyless_engine), ("keyless_phases", case_keyless_phases),

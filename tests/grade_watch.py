@@ -8,11 +8,13 @@ report.json, the designer's statement of each part's result, scored by the hones
     python -I grade_watch.py /abs/submission_folder --stage 1|2|3|4 [--prev /abs/previous_stage_folder]
                              [--reward FILE] [--details FILE] [--skip CHECK,CHECK]
 Stage mode (kept to regrade old runs and for the stage anchors; it uses the one-body barrel those runs were given,
-geometry/data/barrel_stage.stl, and the one-job mode the two-body barrel, geometry/watch.py mesh_path("barrel"):
-geometry/data/thin/barrel.stl on branch b/thin-4mm, geometry/data/barrel.stl with WATCH_THIN_BARREL=0):
+geometry/data/barrel_stage.stl, and the one-job mode the two-body barrel of the barrel catalogue that each movement
+file names under "barrel" (geometry/watch.py BARREL_CATALOGUE, meshes geometry/data/<part no.>/; required in one-job
+mode, and variant_6h.json must name the same barrel as movement.json, else its files gate fails; a one-job delivery
+made before the catalogue, without the key, fails every files gate)):
 --skip leaves named scored checks out (only for runs made before a check existed); the list is in the output.
-The grader reads no environment variables of its own; geometry/watch.py reads WATCH_THIN_BARREL (unset: the thin
-barrel; 0: main's 6.6 mm barrel, to regrade runs made with it).
+The grader reads no environment variables of its own; geometry/watch.py reads WATCH_THIN_BARREL (it sets the default
+barrel of files without the key, which only stage mode and the tools read: unset BR-096-30, 0 BR-096-66).
 Stage 1: design the movement. Stage 2: add a 24-hour hand to a frozen stage-1 movement (--prev).
 Stage 3: change request: the barrel turns once every 6 hours; every design check again, times a
 kept-parts factor against the stage-2 movement (--prev).
@@ -531,6 +533,22 @@ def job_same_frame(folder, v):
     return same_fixed and same_cc, info
 
 
+def job_same_barrel(folder, name, v):
+    """Format rule (files gate of the variant): the movement file `name` (variant_6h.json), loaded as v, names the
+    same catalogue barrel as movement.json. Read from movement.json's JSON only; when movement.json cannot be read
+    or names no catalogue barrel, there is nothing to compare with here (P3's same_frame gate then fails anyway).
+    Raises FormatError when the two differ."""
+    from geometry import watch as W
+    from geometry.core import FormatError
+    try:
+        mb = W.barrel_id_of(_read_json(folder, JOB_MOVEMENT), JOB_MOVEMENT, required=True)
+    except FormatError:
+        return
+    if v.barrel_id != mb:
+        raise FormatError("%s: 'barrel' is %s, but %s names %s; both builds use the same barrel"
+                          % (name, v.barrel_id, JOB_MOVEMENT, mb))
+
+
 def _job_movement(folder, name, barrel_speed, keys, extra_gates, run, cache, thin_cache):
     """Load the movement file `name` of the delivery with the barrel at barrel_speed and grade it: the gates
     files and assembled, extra_gates (gate -> fn(movement) -> (passed, details)) and the checks in keys.
@@ -541,7 +559,9 @@ def _job_movement(folder, name, barrel_speed, keys, extra_gates, run, cache, thi
 
     def load():
         st["m"] = W.load_movement(folder, name, cache=cache, materials=True)
-        return True, {}
+        if name != JOB_MOVEMENT:
+            job_same_barrel(folder, name, st["m"])
+        return True, {"barrel": st["m"].barrel_id}
     gates["files"], details["files"] = run(load)
     if not gates["files"]:
         for k in ["assembled"] + list(extra_gates):

@@ -119,7 +119,7 @@ def _doc(material):
     mob = {"axis": [5.0, 0.0], "parts": ["p"]}
     if material is not None:
         mob["material"] = material
-    return {"case_centre": [0, 0], "fixed": ["plate"], "mobiles": {"p": mob},
+    return {"barrel": W.DEFAULT_BARREL, "case_centre": [0, 0], "fixed": ["plate"], "mobiles": {"p": mob},
             "meshes": [{"driver": "barrel", "driver_teeth": 96, "driven": "p", "driven_teeth": 12}],
             "hands": {h: {"mobile": "p", "part": "p"} for h in ("hour", "minute", "seconds")}}
 
@@ -170,7 +170,7 @@ def case_barrel():
         res = {}
         x = None
         for mat in ("AD-C100-HT", "AD-CW614N"):
-            doc = {"case_centre": [0, 0], "fixed": ["plate"],
+            doc = {"barrel": W.DEFAULT_BARREL, "case_centre": [0, 0], "fixed": ["plate"],
                    "mobiles": {"p": {"axis": [cd, 0.0], "parts": ["pinion"], "material": mat}},
                    "meshes": [{"driver": "barrel", "driver_teeth": W.BARREL_TEETH, "driven": "p", "driven_teeth": 12}],
                    "hands": {h: {"mobile": "p", "part": "pinion"} for h in ("hour", "minute", "seconds")}}
@@ -198,7 +198,7 @@ def _doc2(part_materials, material="AD-CW614N"):
     mob = {"axis": [5.0, 0.0], "parts": ["pin", "wheel"], "material": material}
     if part_materials is not None:
         mob["part_materials"] = part_materials
-    return {"case_centre": [0, 0], "fixed": ["plate"], "mobiles": {"p": mob},
+    return {"barrel": W.DEFAULT_BARREL, "case_centre": [0, 0], "fixed": ["plate"], "mobiles": {"p": mob},
             "meshes": [{"driver": "barrel", "driver_teeth": 96, "driven": "p", "driven_teeth": 12}],
             "hands": {h: {"mobile": "p", "part": "wheel"} for h in ("hour", "minute", "seconds")}}
 
@@ -278,7 +278,7 @@ def case_per_part():
             mob = {"axis": [px, 0.0], "parts": ["pin", "wheel"], "material": material}
             if pm is not None:
                 mob["part_materials"] = pm
-            doc = {"case_centre": [0, 0], "fixed": ["plate"],
+            doc = {"barrel": W.DEFAULT_BARREL, "case_centre": [0, 0], "fixed": ["plate"],
                    "mobiles": {"p": mob, "q": {"axis": [qx, 0.0], "parts": ["q"], "material": "AD-C100-HT"}},
                    "meshes": [{"driver": "barrel", "driver_teeth": W.BARREL_TEETH, "driven": "p", "driven_teeth": 12},
                               {"driver": "p", "driver_teeth": 36, "driven": "q", "driven_teeth": 12}],

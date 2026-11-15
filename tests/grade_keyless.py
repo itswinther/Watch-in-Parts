@@ -35,8 +35,8 @@ def setup(world_dir):
     global E, G
     E = KJ._import_a("engine")
     G = KJ._import_a("grade")
-    KJ.apply_to_engine(E, G)
     defs, parts, meta = KJ.read_world(world_dir)
+    KJ.apply_to_engine(E, G, meta.get("barrel"))      # the delivery's catalogue barrel (its spring's capacity)
     fits = G.relieve_fits(parts, {}, defs)      # in place, as A's load() does for files
     # A's worker reads (spec, parts, sup, defs) from load() for a path, or (spec, parts, sup) from a dict; spec and
     # sup are empty dicts (no keyless.json: pull_of gives the scaled PULL; B's plates are in the fixed body)

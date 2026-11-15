@@ -64,17 +64,25 @@ del _tcr
 if THIN_CASE_RADIUS is not None:
     CASE_RADIUS = THIN_CASE_RADIUS
 THIN_BARREL_SCALE = 3.0 / 6.6
-if THIN_BARREL:
-    BARREL_WHEEL_Z = tuple(v * THIN_BARREL_SCALE for v in BARREL_WHEEL_Z)
-    BARREL_ARBOR_Z = tuple(v * THIN_BARREL_SCALE for v in BARREL_ARBOR_Z)
-    BARREL_SQUARE_Z = tuple(v * THIN_BARREL_SCALE for v in BARREL_SQUARE_Z)
 # Barrel catalogue (branch a/barrel-catalogue): the agent may choose its barrel. Each entry is BR-096-20 (96 teeth,
 # module 0.2, every x/y size unchanged) scaled in z only, about z = 0, by the factor below; meshes in data/<id>/
 # (barrel.stl, barrel_drum.stl, barrel_arbor.stl; written by spikes/barrel_catalogue/make_barrels.py: BR-096-66 is
 # byte for byte data/, BR-096-30 byte for byte data/thin/). movement.json may name one under the top-level key
-# "barrel"; without it the loader keeps the barrel above (THIN_BARREL). Unscaled z of BR-096-20: drum (0, 1),
-# arbor (-1, 5.6), square (3.3, 4.9).
+# "barrel". Unscaled z of BR-096-20: drum (0, 1), arbor (-1, 5.6), square (3.3, 4.9).
+# b/thin-cat: this table (with BARREL_SPRING_GEOMETRY and BARREL_SPRING_TORQUE below, keyed by the same part
+# numbers) is the one source of every barrel-dependent number; barrel_row() gathers one barrel's. In one-job mode
+# (Movement(..., materials=True)) the "barrel" key is required, and the grader requires variant_6h.json to name the
+# same barrel as movement.json; elsewhere (stage mode, tools) a file without it gets DEFAULT_BARREL. The grader
+# reads each movement's own barrel (Movement.barrel_id): its solid (every going-train check, the height and the
+# case fit, the strength check's face width, which is the measured overlap height and so the drum height at most),
+# and in Part 5 its two bodies and its spring (geometry/keyless_job.py). The module constants BARREL_WHEEL_Z,
+# BARREL_ARBOR_Z and BARREL_SQUARE_Z further down are DEFAULT_BARREL's, for code that has no movement (the
+# reference's default, solution/fit_keyless.py, geometry/watch_gears.py, tests).
 BARREL_CATALOGUE = {"BR-096-66": 1.0, "BR-096-45": 4.5 / 6.6, "BR-096-30": 3.0 / 6.6}
+_BR096_Z = {"wheel": BARREL_WHEEL_Z, "arbor": BARREL_ARBOR_Z, "square": BARREL_SQUARE_Z}   # BR-096-20, unscaled
+BARREL_IDS = tuple(sorted(BARREL_CATALOGUE))
+# WATCH_THIN_BARREL=0 makes BR-096-66 (main's 6.6 mm barrel) the default instead of BR-096-30 (the thin one)
+DEFAULT_BARREL = "BR-096-30" if THIN_BARREL else "BR-096-66"
 
 
 # Geometry the catalogue sheet may print (drawing data only): spring strip h x t x L (mm, demonstration scale s =
@@ -98,7 +106,40 @@ BARREL_SPRING_TORQUE = {
 def barrel_z(barrel_id):
     """{"wheel": drum z range, "arbor": arbor z range, "square": winding square z range} of a catalogue barrel."""
     k = BARREL_CATALOGUE[barrel_id]
-    return {"wheel": (0.0, 1.0 * k), "arbor": (-1.0 * k, 5.6 * k), "square": (3.3 * k, 4.9 * k)}
+    return {key: tuple(v * k for v in zr) for key, zr in _BR096_Z.items()}
+
+
+def barrel_row(barrel_id=None):
+    """Every number of one catalogue barrel (default DEFAULT_BARREL), from the tables above: part no., z scale, drum,
+    arbor and square z ranges, the x/y sizes (BR-096-20's, the same for every barrel), its spring (geometry: what
+    the sheet prints; torque: grader-internal) and its mesh folder (data/<id>/)."""
+    bid = DEFAULT_BARREL if barrel_id is None else barrel_id
+    z = barrel_z(bid)
+    return {"id": bid, "z_scale": BARREL_CATALOGUE[bid], "wheel_z": z["wheel"], "arbor_z": z["arbor"],
+            "square_z": z["square"], "drum_height": z["wheel"][1] - z["wheel"][0],
+            "arbor_length": z["arbor"][1] - z["arbor"][0], "teeth": BARREL_TEETH, "module": BARREL_MODULE,
+            "arbor_r": BARREL_ARBOR_R, "inner_d": BARREL_INNER_D, "core_r": BARREL_CORE_R, "bore_r": BARREL_BORE_R,
+            "square_side": BARREL_SQUARE_SIDE, "spring": BARREL_SPRING_GEOMETRY[bid],
+            "spring_torque": BARREL_SPRING_TORQUE[bid],
+            "data": os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", bid)}
+
+
+def barrel_id_of(doc, where="movement.json", required=False):
+    """The catalogue barrel a movement file names under "barrel" (FormatError if it names none of BARREL_IDS);
+    DEFAULT_BARREL when the key is absent and not required (stage mode, tools)."""
+    bid = doc.get("barrel") if isinstance(doc, dict) else None
+    if bid is None and not required:
+        return DEFAULT_BARREL
+    if not isinstance(bid, str) or bid not in BARREL_CATALOGUE:
+        raise FormatError("%s: 'barrel' must be the part no. of one of the barrels of DS-W01, section 2: %s"
+                          % (where, ", ".join(BARREL_IDS)))
+    return bid
+
+
+# the default barrel's z ranges under the old single-barrel names (see the table's note)
+_bz = barrel_z(DEFAULT_BARREL)
+BARREL_WHEEL_Z, BARREL_ARBOR_Z, BARREL_SQUARE_Z = _bz["wheel"], _bz["arbor"], _bz["square"]
+del _bz
 
 
 REF_KEPT_VOLUME_SHARE = 0.626   # stage 3: the reference keeps 0.6267 of the mobile volume and all of the fixed volume it receives (rounded down)
@@ -214,20 +255,14 @@ _MESHES = {}
 
 def mesh_path(name, barrel_id=None):
     """The file of supplied mesh `name` (barrel, barrel_drum, barrel_arbor, barrel_stage): data/<barrel_id>/ for a
-    catalogue barrel (BARREL_CATALOGUE), else data/thin/ when THIN_BARREL (the stage task's one-body barrel_stage is
-    never thinned), else data/."""
-    data = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
-    if barrel_id is not None and name != "barrel_stage":
-        if barrel_id not in BARREL_CATALOGUE:
-            raise FormatError("movement.json: 'barrel' must be one of %s" % ", ".join(sorted(BARREL_CATALOGUE)))
-        data = os.path.join(data, barrel_id)
-    elif THIN_BARREL and name != "barrel_stage":
-        data = os.path.join(data, "thin")
-    return os.path.join(data, name + ".stl")
+    catalogue barrel (BARREL_CATALOGUE; None: DEFAULT_BARREL). The stage task's one-body barrel_stage is data/'s."""
+    if name == "barrel_stage":
+        return os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", name + ".stl")
+    return os.path.join(barrel_row(barrel_id_of({"barrel": barrel_id}))["data"], name + ".stl")
 
 
 def _mesh(name, barrel_id=None):
-    key = (name, barrel_id)
+    key = (name, DEFAULT_BARREL if barrel_id is None and name != "barrel_stage" else barrel_id)
     if key not in _MESHES:
         _MESHES[key] = core.tris_to_manifold(core.read_stl(mesh_path(name, barrel_id), MAX_TRIANGLES, MAX_STL_BYTES))
     return _MESHES[key]
@@ -261,12 +296,14 @@ def rot_about(man, axis_xy, deg):
 class Movement:
     """A parsed movement: fixed solid, mobiles (name -> solid, axis), meshes, hands."""
 
-    def __init__(self, doc, load_stl, barrel_solid=None, materials=False):
+    def __init__(self, doc, load_stl, barrel_solid=None, materials=False, name="movement.json"):
         """materials: one-job mode; every mobile must declare "material", a key of MATERIAL_ALLOWABLE_MPA (a format
         error otherwise, C1), and may declare "part_materials", {part of that mobile: such a key}, overriding
         "material" for those parts (a format error if a key is not a part of the mobile or a value does not
         qualify). mobiles[name]["part_materials"] then gives every part its material. Without it (stage mode)
-        neither field is read."""
+        neither field is read. The barrel: "barrel", the part no. of a catalogue barrel (barrel_id_of), required in
+        one-job mode (materials) and DEFAULT_BARREL when absent otherwise; barrel_solid (stage mode) overrides its
+        solid. name: the movement file's name, for messages."""
         if not isinstance(doc, dict):
             raise FormatError("movement.json: top level must be an object")
         cc = doc.get("case_centre")
@@ -303,9 +340,7 @@ class Movement:
         mob = doc.get("mobiles")
         if not isinstance(mob, dict) or not mob:
             raise FormatError("movement.json: 'mobiles' must be a non-empty object")
-        bid = doc.get("barrel")         # optional: a catalogue barrel (BARREL_CATALOGUE); default the supplied one
-        if bid is not None and (not isinstance(bid, str) or bid not in BARREL_CATALOGUE):
-            raise FormatError("movement.json: 'barrel' must be one of %s" % ", ".join(sorted(BARREL_CATALOGUE)))
+        bid = barrel_id_of(doc, name, required=materials)      # the catalogue barrel this movement is built on
         self.barrel_id = bid
         if barrel_solid is None:
             barrel_solid = barrel(bid)
@@ -1120,7 +1155,7 @@ def load_movement(folder, name="movement.json", cache=None, barrel_solid=None, m
         if key is not None:
             cache[key] = solid
         return solid
-    return Movement(doc, load, barrel_solid, materials=materials)
+    return Movement(doc, load, barrel_solid, materials=materials, name=name)
 
 
 def inside(folder, path):

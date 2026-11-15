@@ -7,9 +7,9 @@ or a similar process.
 ## The goal
 
 The wearer reads the time from four hands: hours and minutes on a common centre, seconds, and a 24-hour hand that
-shows the hour of the day. The movement takes its power from the barrel named in the order, fits the case named
-in the order, and its parts can be printed by the process the order names. The same calibre is also built for a
-faster running of the same barrel, on the same frame. The workshop assembles the 8-hour build part by part,
+shows the hour of the day. The movement takes its power from a barrel of the catalogue the order names, fits the
+case named in the order, and its parts can be printed by the process the order names. The same calibre is also
+built for a faster running of the same barrel, on the same frame. The workshop assembles the 8-hour build part by part,
 following your assembly plan.
 
 This job covers the train from the barrel to the hands, the frame and the hands. The movement has no escapement
@@ -20,11 +20,11 @@ in the order.
 
 | Item | Specification |
 |---|---|
-| Barrel | part no. BR-096-20, catalogue sheet DS-W01; supplied as `/app/supplied/barrel.stl` |
+| Barrel | your choice from catalogue sheet DS-W01; each of its barrels is supplied as a mesh |
 | Case | part no. CS-254-134, catalogue sheet DS-W02 |
 | Parts | printed by the process of process sheet DS-W03 |
-| 8-hour build (`movement.json`) | barrel BR-096-20, speed class D (DS-W01) |
-| 6-hour variant (`variant_6h.json`) | the same barrel BR-096-20, in the same place, speed class B (DS-W01) |
+| 8-hour build (`movement.json`) | the chosen barrel, speed class D (DS-W01) |
+| 6-hour variant (`variant_6h.json`) | the same barrel, in the same place, speed class B (DS-W01) |
 | Materials | each mobile's material is chosen from the design allowables of AD-DS-201 (`DS-201_materials.md`, section 8) |
 | Going-train rating | this calibre is the base of a family that includes an automatic version; the going train is rated for that version's barrel load (QA-W100, gear strength) |
 | Thickness | the calibre is for a slim watch: make the movement as thin as you can. The thickness target and how thickness is scored are in QA-W100, section 9 |
@@ -60,8 +60,8 @@ Installed software: Python 3 with CadQuery 2.8.0 (OpenCASCADE, importable as `ca
 
 - `/app/datasheets/`: the supplier documents and the inspection procedure QA-W100;
   `/app/datasheets/INDEX.md` lists them.
-- `/app/supplied/barrel.stl`: barrel BR-096-20 as a mesh, in its assembled position (DS-W01, section 3). It is not
-  part of the delivery.
+- `/app/supplied/<part no.>.stl`: each barrel of DS-W01 as a mesh, in its assembled position (DS-W01, section 3). They
+  are not part of the delivery.
 
 ## Acceptance
 

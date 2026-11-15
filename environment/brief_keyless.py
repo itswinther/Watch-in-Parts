@@ -244,7 +244,7 @@ time; a step not finished by then fails.
            chgt=H.cite_case("Inner height along the axis (mm)"), prot=n(sc["STEM_PROTRUDE"]), wt=n(C.WIND_TURNS),
            wlo=n(C.WIND_BAND[0]), whi=n(C.WIND_BAND[1]), still=n(C.STILL_TOL), hs=C.HOLD_STEPS, te=C.TAP_EVERY,
            tap=n(sc["TAP_ARC"]), rb=n(C.CLICK_RUNBACK), hl=C.HELD_LAST_STEPS, hd=n(C.HELD_DRIFT),
-           spring=KJ.JOB_SPRING, res=n(C.RESERVE_MIN), fr=n(C.FREE_RUN_DEG), frs=n(C.FREE_RUN_STEP),
+           spring=KJ.job_spring(), res=n(C.RESERVE_MIN), fr=n(C.FREE_RUN_DEG), frs=n(C.FREE_RUN_STEP),
            ct=n(C.COUPLED_TURN), bt=BACKWARD_TURN, htol=n(C.HOLD_TOL), ns=C.SWEEP_SAMPLES, sw=n(C.SWEEP_TURN),
            st=n(C.SET_TURN), smin=n(C.SET_MIN), rw=n(C.REWIND_TURN), pt=KJ.KEYLESS_TIMEOUT_S)
     return _rewrap(text, H)
@@ -311,8 +311,8 @@ def trace_rows(H):
              "the 8-hour build's speed class, cited; the capacity is cited to VM-DS-101)", (C.RESERVE_MIN, C.FREE_RUN_DEG,
                                                        C.FREE_RUN_STEP, C.COUPLED_TURN), Q, P, "3. **AT-3", None,
              [n(C.RESERVE_MIN), n(C.FREE_RUN_DEG), n(C.FREE_RUN_STEP), n(C.COUPLED_TURN)]),
-        cell(k + "CAPACITY_TURNS in the joined job (geometry/keyless_job.capacity_turns: spring %s)" % KJ.JOB_SPRING,
-             KJ.capacity_turns(), "datasheets/DS-101_mainspring_barrel.md", "5. Turns and run time", KJ.JOB_SPRING,
+        cell(k + "CAPACITY_TURNS in the joined job (geometry/keyless_job.capacity_turns: spring %s)" % KJ.job_spring(),
+             KJ.capacity_turns(), "datasheets/DS-101_mainspring_barrel.md", "5. Turns and run time", KJ.job_spring(),
              "N at r = D/6", [n(KJ.capacity_turns())]),
         cell(k + "AT-4 backward turn (literal 360 in A's grade.worker), HOLD_TOL", (BACKWARD_TURN, C.HOLD_TOL), Q, P,
              "4. **AT-4", None, [BACKWARD_TURN, n(C.HOLD_TOL)]),

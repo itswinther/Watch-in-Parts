@@ -11,28 +11,61 @@ hand speeds and directions, and the weights of the checks.
 
 | Constant | Value | Document | Section | Row, or statement anchor | Column |
 |---|---|---|---|---|---|
-| work order names the barrel (the DS-W01 row of BARREL_TEETH ...) | BR-096-20 | `instruction.md` | Order | Barrel | Specification |
+| work order leaves the barrel to the designer, from the DS-W01 catalogue (geometry/watch.py BARREL_IDS) | DS-W01 | `instruction.md` | Order | Barrel | Specification |
 | work order names the case (the DS-W02 row of CASE_RADIUS, CASE_HEIGHT) | CS-254-134 | `instruction.md` | Order | Case | Specification |
 | work order names the print process (DS-W03) | DS-W03 | `instruction.md` | Order | Parts | Specification |
 | work order names the speed class of the 8-hour build (the DS-W01 row of BARREL_TURNS_PER_HOUR) | D | `instruction.md` | Order | 8-hour build (movement.json) | Specification |
 | work order names the speed class of the 6-hour variant (the DS-W01 row of CHANGED_BARREL_TURNS_PER_HOUR) | B | `instruction.md` | Order | 6-hour variant (variant_6h.json) | Specification |
 | demonstration scale of the parts, context only, not graded: DEMO_SCALE (A's sheets' s), and REAL_CALIBRE_DIAMETER_MM | 1.617 | `instruction.md` | Work order | You are a movement designer | statement |
 | work order cites the inspection procedure | QA-W100 | `instruction.md` | Acceptance | The delivery is inspected | statement |
-| BARREL_TEETH | 96 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-20 | Teeth |
-| BARREL_MODULE | 0.2 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-20 | Module (mm) |
-| PRESSURE_ANGLE | 25.0 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-20 | Pressure angle |
-| BARREL_ARBOR_R | 0.5 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-20 | Arbor pivot radius |
-| BARREL_INNER_D | 12.12 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-20 | Spring chamber inner diameter |
-| BARREL_CORE_R (= BARREL_INNER_D / 6, to 3 decimals) | 2.02 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-20 | Arbor core radius |
-| BARREL_SQUARE_SIDE | 1.4 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-20 | Winding square side |
-| barrel axis (x, y) = (0, 0) | (0, 0) | `datasheets/DS-W01_barrel.md` | 3.  | Axis | Value |
-| BARREL_WHEEL_Z (to 4 decimals) | (0.0, 0.4545454545454546) | `datasheets/DS-W01_barrel.md` | 3.  | Toothed drum | Value |
-| BARREL_ARBOR_Z (to 4 decimals) | (-0.4545454545454546, 2.5454545454545454) | `datasheets/DS-W01_barrel.md` | 3.  | Arbor | Value |
-| BARREL_BORE_R | 2.0367 | `datasheets/DS-W01_barrel.md` | 3.  | Bore of the drum | Value |
-| BARREL_ARBOR_R (section 3) | 0.5 | `datasheets/DS-W01_barrel.md` | 3.  | Arbor, pivots and plain sections | Value |
-| BARREL_WHEEL_Z (to 4 decimals), BARREL_CORE_R (the core) | ((0.0, 0.4545454545454546), 2.02) | `datasheets/DS-W01_barrel.md` | 3.  | Arbor core (inside the drum's bore) | Value |
-| BARREL_INNER_D (section 3) | 12.12 | `datasheets/DS-W01_barrel.md` | 3.  | Spring chamber inside the drum (not modelled in the mesh) | Value |
-| BARREL_SQUARE_Z (to 4 decimals), BARREL_SQUARE_SIDE | ((1.5, 2.2272727272727275), 1.4) | `datasheets/DS-W01_barrel.md` | 3.  | Winding square | Value |
+| barrel axis (x, y) = (0, 0), every barrel | (0, 0) | `datasheets/DS-W01_barrel.md` | 3.  | Axis | Value |
+| BARREL_BORE_R, every barrel | 2.0367 | `datasheets/DS-W01_barrel.md` | 3.  | Bore of the drum | Value |
+| BARREL_ARBOR_R (section 3), every barrel | 0.5 | `datasheets/DS-W01_barrel.md` | 3.  | Arbor, pivots and plain sections | Value |
+| BARREL_CORE_R (the core, to 3 decimals), every barrel | 2.02 | `datasheets/DS-W01_barrel.md` | 3.  | Arbor core (inside the drum's bore) | Value |
+| BARREL_INNER_D (section 3), every barrel | 12.12 | `datasheets/DS-W01_barrel.md` | 3.  | Spring chamber inside the drum (not modelled in the mesh) | Value |
+| BARREL_SQUARE_SIDE (section 3), every barrel | 1.4 | `datasheets/DS-W01_barrel.md` | 3.  | Winding square | Value |
+| BARREL_TEETH (BR-096-30) | 96 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-30 | Teeth |
+| BARREL_MODULE (BR-096-30) | 0.2 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-30 | Module (mm) |
+| PRESSURE_ANGLE (BR-096-30) | 25.0 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-30 | Pressure angle |
+| drum height = barrel_z wheel (BR-096-30, to 4 decimals) | 0.4545454545454546 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-30 | Drum height |
+| arbor length = barrel_z arbor (BR-096-30, to 4 decimals) | 3.0 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-30 | Arbor length |
+| BARREL_ARBOR_R (BR-096-30) | 0.5 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-30 | Arbor pivot radius |
+| BARREL_INNER_D (BR-096-30) | 12.12 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-30 | Spring chamber inner diameter |
+| BARREL_CORE_R (= BARREL_INNER_D / 6, to 3 decimals; BR-096-30) | 2.02 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-30 | Arbor core radius |
+| BARREL_SQUARE_SIDE (BR-096-30) | 1.4 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-30 | Winding square side |
+| BARREL_SPRING_GEOMETRY h, t, L (BR-096-30, spring LT; drawing data, not graded) | (0.4, 0.162, 437) | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-30 | Mainspring fitted, h x t x L (mm) |
+| barrel_z wheel (BR-096-30, to 4 decimals): the toothed drum of the mesh | (0.0, 0.4545454545454546) | `datasheets/DS-W01_barrel.md` | 3.  | BR-096-30 | Toothed drum |
+| barrel_z arbor (BR-096-30, to 4 decimals) | (-0.4545454545454546, 2.5454545454545454) | `datasheets/DS-W01_barrel.md` | 3.  | BR-096-30 | Arbor |
+| barrel_z square (BR-096-30, to 4 decimals) | (1.5, 2.2272727272727275) | `datasheets/DS-W01_barrel.md` | 3.  | BR-096-30 | Winding square |
+| supplied mesh of BR-096-30 (make_bundle_job.supplied_name) | /app/supplied/BR-096-30.stl | `datasheets/DS-W01_barrel.md` | 3.  | BR-096-30 | Mesh |
+| BARREL_TEETH (BR-096-45) | 96 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-45 | Teeth |
+| BARREL_MODULE (BR-096-45) | 0.2 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-45 | Module (mm) |
+| PRESSURE_ANGLE (BR-096-45) | 25.0 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-45 | Pressure angle |
+| drum height = barrel_z wheel (BR-096-45, to 4 decimals) | 0.6818181818181819 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-45 | Drum height |
+| arbor length = barrel_z arbor (BR-096-45, to 4 decimals) | 4.5 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-45 | Arbor length |
+| BARREL_ARBOR_R (BR-096-45) | 0.5 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-45 | Arbor pivot radius |
+| BARREL_INNER_D (BR-096-45) | 12.12 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-45 | Spring chamber inner diameter |
+| BARREL_CORE_R (= BARREL_INNER_D / 6, to 3 decimals; BR-096-45) | 2.02 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-45 | Arbor core radius |
+| BARREL_SQUARE_SIDE (BR-096-45) | 1.4 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-45 | Winding square side |
+| BARREL_SPRING_GEOMETRY h, t, L (BR-096-45, spring L39; drawing data, not graded) | (0.63, 0.162, 437) | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-45 | Mainspring fitted, h x t x L (mm) |
+| barrel_z wheel (BR-096-45, to 4 decimals): the toothed drum of the mesh | (0.0, 0.6818181818181819) | `datasheets/DS-W01_barrel.md` | 3.  | BR-096-45 | Toothed drum |
+| barrel_z arbor (BR-096-45, to 4 decimals) | (-0.6818181818181819, 3.8181818181818183) | `datasheets/DS-W01_barrel.md` | 3.  | BR-096-45 | Arbor |
+| barrel_z square (BR-096-45, to 4 decimals) | (2.25, 3.3409090909090913) | `datasheets/DS-W01_barrel.md` | 3.  | BR-096-45 | Winding square |
+| supplied mesh of BR-096-45 (make_bundle_job.supplied_name) | /app/supplied/BR-096-45.stl | `datasheets/DS-W01_barrel.md` | 3.  | BR-096-45 | Mesh |
+| BARREL_TEETH (BR-096-66) | 96 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-66 | Teeth |
+| BARREL_MODULE (BR-096-66) | 0.2 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-66 | Module (mm) |
+| PRESSURE_ANGLE (BR-096-66) | 25.0 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-66 | Pressure angle |
+| drum height = barrel_z wheel (BR-096-66, to 4 decimals) | 1.0 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-66 | Drum height |
+| arbor length = barrel_z arbor (BR-096-66, to 4 decimals) | 6.6 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-66 | Arbor length |
+| BARREL_ARBOR_R (BR-096-66) | 0.5 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-66 | Arbor pivot radius |
+| BARREL_INNER_D (BR-096-66) | 12.12 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-66 | Spring chamber inner diameter |
+| BARREL_CORE_R (= BARREL_INNER_D / 6, to 3 decimals; BR-096-66) | 2.02 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-66 | Arbor core radius |
+| BARREL_SQUARE_SIDE (BR-096-66) | 1.4 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-66 | Winding square side |
+| BARREL_SPRING_GEOMETRY h, t, L (BR-096-66, spring L; drawing data, not graded) | (0.78, 0.162, 437) | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-66 | Mainspring fitted, h x t x L (mm) |
+| barrel_z wheel (BR-096-66, to 4 decimals): the toothed drum of the mesh | (0.0, 1.0) | `datasheets/DS-W01_barrel.md` | 3.  | BR-096-66 | Toothed drum |
+| barrel_z arbor (BR-096-66, to 4 decimals) | (-1.0, 5.6) | `datasheets/DS-W01_barrel.md` | 3.  | BR-096-66 | Arbor |
+| barrel_z square (BR-096-66, to 4 decimals) | (3.3, 4.9) | `datasheets/DS-W01_barrel.md` | 3.  | BR-096-66 | Winding square |
+| supplied mesh of BR-096-66 (make_bundle_job.supplied_name) | /app/supplied/BR-096-66.stl | `datasheets/DS-W01_barrel.md` | 3.  | BR-096-66 | Mesh |
 | BARREL_TURNS_PER_HOUR (8-hour build, speed class D in the work order) | 1/8 | `datasheets/DS-W01_barrel.md` | 4. Speed classes | D | Barrel speed, steady running |
 | CHANGED_BARREL_TURNS_PER_HOUR (6-hour variant, speed class B in the work order) | 1/6 | `datasheets/DS-W01_barrel.md` | 4. Speed classes | B | Barrel speed, steady running |
 | barrel running sense, both builds (the grader turns the barrel clockwise seen from +z) | clockwise | `datasheets/DS-W01_barrel.md` | 4. Speed classes | D | Running sense, seen from the dial side |
@@ -1101,17 +1134,20 @@ Thinness probe (environment/brief_thin.py THIN_IN_BRIEF on): QA-W100 rev B state
 
 Numbers the scan cannot tell apart (a document's own number equal to a supplier value):
 
-- `instruction.md` prints 1/2 for its own reasons; that number is also a value of: BARREL_ARBOR_R; BARREL_ARBOR_R (section 3); LEWIS_Y[167] (geometry/data/lewis_y.json).
+- `instruction.md` prints 1/2 for its own reasons; that number is also a value of: BARREL_ARBOR_R (section 3), every barrel; BARREL_ARBOR_R (BR-096-30); BARREL_ARBOR_R (BR-096-45); BARREL_ARBOR_R (BR-096-66); LEWIS_Y[167] (geometry/data/lewis_y.json).
+- `instruction.md` prints 3 for its own reasons; that number is also a value of: arbor length = barrel_z arbor (BR-096-30, to 4 decimals).
 - `instruction.md` prints 6 for its own reasons; that number is also a value of: CHANGED_BARREL_TURNS_PER_HOUR (6-hour variant, speed class B in the work order).
 - `instruction.md` prints 8 for its own reasons; that number is also a value of: BARREL_TURNS_PER_HOUR (8-hour build, speed class D in the work order).
-- `FORMAT.md` prints 0 for its own reasons; that number is also a value of: barrel axis (x, y) = (0, 0); BARREL_WHEEL_Z (to 4 decimals); BARREL_WHEEL_Z (to 4 decimals), BARREL_CORE_R (the core).
-- `FORMAT.md` prints 0.5 for its own reasons; that number is also a value of: BARREL_ARBOR_R; BARREL_ARBOR_R (section 3); LEWIS_Y[167] (geometry/data/lewis_y.json).
-- `FORMAT.md` prints 1 for its own reasons; that number is also a value of: BARREL_TURNS_PER_HOUR (8-hour build, speed class D in the work order); CHANGED_BARREL_TURNS_PER_HOUR (6-hour variant, speed class B in the work order); THIN_VOXEL, THIN_ERODE_VOX, THIN_DILATE_VOX, THIN_DEV, voxel grid offset (the printability test); LEWIS_ADDENDUM.
+- `FORMAT.md` prints 0 for its own reasons; that number is also a value of: barrel axis (x, y) = (0, 0), every barrel; barrel_z wheel (BR-096-30, to 4 decimals): the toothed drum of the mesh; barrel_z wheel (BR-096-45, to 4 decimals): the toothed drum of the mesh; barrel_z wheel (BR-096-66, to 4 decimals): the toothed drum of the mesh.
+- `FORMAT.md` prints 0.5 for its own reasons; that number is also a value of: BARREL_ARBOR_R (section 3), every barrel; BARREL_ARBOR_R (BR-096-30); BARREL_ARBOR_R (BR-096-45); BARREL_ARBOR_R (BR-096-66); LEWIS_Y[167] (geometry/data/lewis_y.json).
+- `FORMAT.md` prints 1 for its own reasons; that number is also a value of: drum height = barrel_z wheel (BR-096-66, to 4 decimals); barrel_z wheel (BR-096-66, to 4 decimals): the toothed drum of the mesh; BARREL_TURNS_PER_HOUR (8-hour build, speed class D in the work order); CHANGED_BARREL_TURNS_PER_HOUR (6-hour variant, speed class B in the work order); THIN_VOXEL, THIN_ERODE_VOX, THIN_DILATE_VOX, THIN_DEV, voxel grid offset (the printability test); LEWIS_ADDENDUM.
+- `FORMAT.md` prints 3 for its own reasons; that number is also a value of: arbor length = barrel_z arbor (BR-096-30, to 4 decimals).
 - `FORMAT.md` prints 6 for its own reasons; that number is also a value of: CHANGED_BARREL_TURNS_PER_HOUR (6-hour variant, speed class B in the work order).
 - `FORMAT.md` prints 8 for its own reasons; that number is also a value of: BARREL_TURNS_PER_HOUR (8-hour build, speed class D in the work order).
-- `datasheets/QA-W100_inspection.md` prints 0 for its own reasons; that number is also a value of: barrel axis (x, y) = (0, 0); BARREL_WHEEL_Z (to 4 decimals); BARREL_WHEEL_Z (to 4 decimals), BARREL_CORE_R (the core).
-- `datasheets/QA-W100_inspection.md` prints 0.2 for its own reasons; that number is also a value of: BARREL_MODULE; MIN_FEATURE; THIN_VOXEL, THIN_ERODE_VOX, THIN_DILATE_VOX, THIN_DEV, voxel grid offset (the printability test).
-- `datasheets/QA-W100_inspection.md` prints 1/2 for its own reasons; that number is also a value of: BARREL_ARBOR_R; BARREL_ARBOR_R (section 3); LEWIS_Y[167] (geometry/data/lewis_y.json).
-- `datasheets/QA-W100_inspection.md` prints 1 for its own reasons; that number is also a value of: BARREL_TURNS_PER_HOUR (8-hour build, speed class D in the work order); CHANGED_BARREL_TURNS_PER_HOUR (6-hour variant, speed class B in the work order); THIN_VOXEL, THIN_ERODE_VOX, THIN_DILATE_VOX, THIN_DEV, voxel grid offset (the printability test); LEWIS_ADDENDUM.
+- `datasheets/QA-W100_inspection.md` prints 0 for its own reasons; that number is also a value of: barrel axis (x, y) = (0, 0), every barrel; barrel_z wheel (BR-096-30, to 4 decimals): the toothed drum of the mesh; barrel_z wheel (BR-096-45, to 4 decimals): the toothed drum of the mesh; barrel_z wheel (BR-096-66, to 4 decimals): the toothed drum of the mesh.
+- `datasheets/QA-W100_inspection.md` prints 0.2 for its own reasons; that number is also a value of: BARREL_MODULE (BR-096-30); BARREL_MODULE (BR-096-45); BARREL_MODULE (BR-096-66); MIN_FEATURE; THIN_VOXEL, THIN_ERODE_VOX, THIN_DILATE_VOX, THIN_DEV, voxel grid offset (the printability test).
+- `datasheets/QA-W100_inspection.md` prints 1/2 for its own reasons; that number is also a value of: BARREL_ARBOR_R (section 3), every barrel; BARREL_ARBOR_R (BR-096-30); BARREL_ARBOR_R (BR-096-45); BARREL_ARBOR_R (BR-096-66); LEWIS_Y[167] (geometry/data/lewis_y.json).
+- `datasheets/QA-W100_inspection.md` prints 1 for its own reasons; that number is also a value of: drum height = barrel_z wheel (BR-096-66, to 4 decimals); barrel_z wheel (BR-096-66, to 4 decimals): the toothed drum of the mesh; BARREL_TURNS_PER_HOUR (8-hour build, speed class D in the work order); CHANGED_BARREL_TURNS_PER_HOUR (6-hour variant, speed class B in the work order); THIN_VOXEL, THIN_ERODE_VOX, THIN_DILATE_VOX, THIN_DEV, voxel grid offset (the printability test); LEWIS_ADDENDUM.
+- `datasheets/QA-W100_inspection.md` prints 3 for its own reasons; that number is also a value of: arbor length = barrel_z arbor (BR-096-30, to 4 decimals).
 - `datasheets/QA-W100_inspection.md` prints 6 for its own reasons; that number is also a value of: CHANGED_BARREL_TURNS_PER_HOUR (6-hour variant, speed class B in the work order).
 - `datasheets/QA-W100_inspection.md` prints 8 for its own reasons; that number is also a value of: BARREL_TURNS_PER_HOUR (8-hour build, speed class D in the work order).

@@ -20,8 +20,8 @@ Values that belong to a supplied item are taken from that item's supplier docume
 
 | Document | Used for |
 |---|---|
-| The work order | the barrel part no. and its speed class for each build, the case part no., the print process |
-| DS-W01 | the barrel: its catalogue data (section 2), the barrel as supplied (section 3) and the speed classes (section 4) |
+| The work order | the barrel's speed class for each build, the case part no., the print process |
+| DS-W01 | the barrels: their catalogue data (section 2), the barrels as supplied (section 3) and the speed classes (section 4) |
 | DS-W02 | the case: inner radius and inner height (section 2) |
 | DS-W03 | the printability test (section 3) |
 | `/app/FORMAT.md` | the file formats, and how a part file becomes the solid that is measured |
@@ -70,8 +70,8 @@ change any result.
   (rotation axis) is parallel to z. The dial side is +z: the hands are read looking from +z towards -z, and
   "clockwise" always means clockwise in that view.
 - **Solids.** Every test measures the solids built from the part files as `/app/FORMAT.md` describes; the barrel
-  is the solid of `/app/supplied/barrel.stl`. "Intersect by at most 0.01 mm3" means that the volume of the
-  intersection of the two solids is at most 0.01 mm3.
+  is the solid of the mesh of the barrel that the movement file names (DS-W01, section 3). "Intersect by at most
+  0.01 mm3" means that the volume of the intersection of the two solids is at most 0.01 mm3.
 - **The frame** is the fixed parts of a movement, taken together.
 - **A mobile** is a set of parts that turn together as one rigid body about the vertical line through its axis.
   The barrel is the mobile `barrel` (its drum and its arbor together, as one solid); its axis is the axis of the

@@ -6,8 +6,8 @@ writes OUT (in the task image it is /app):
     datasheets/             the watch-side sheets (DS-W01 to DS-W03, DS-W04 with the strength check), the inspection
                             procedure QA-W100, workstream A's supplier sheets (DS-101 to DS-501, from
                             spikes/keyless/datasheets/INDEX.md) and one INDEX.md for all of them
-    supplied/barrel.stl     the supplied barrel (geometry.watch.mesh_path("barrel"), the grader's own, with a neutral
-                            header: geometry/data/thin/barrel.stl while W.THIN_BARREL is on, as on b/thin-4mm)
+    supplied/<part no.>.stl every barrel of the catalogue (geometry.watch.BARREL_IDS; mesh_path("barrel", id), the
+                            grader's own meshes, with a neutral header), named by its DS-W01 part no.
     tools/kernel.py         geometry/core.py
     tools/check_format.py   environment/check_format_job.py with the format numbers filled in
     delivery/               empty
@@ -55,7 +55,7 @@ def fill_check_format():
     for k in ("MAX_PARTS", "MAX_TRIANGLES", "MAX_STEP_BYTES", "STEP_LINEAR_DEFLECTION", "STEP_ANGULAR_DEFLECTION",
               "STEP_MAX_TRIANGLE_FACES", "STEP_TIMEOUT_S", "STEP_MEMORY_MB", "SELF_UNION_TOL", "MAX_SCRIPTS_BYTES",
               "MAX_SCRIPT_FILES", "MAX_JSON_BYTES", "MAX_ASSEMBLY_BYTES", "MIN_TEETH", "MAX_TEETH", "MAX_NAME_LEN",
-              "MATERIAL_DESIGNATIONS"):
+              "MATERIAL_DESIGNATIONS", "BARREL_IDS"):
         s = s.replace("__%s__" % k, repr(getattr(W, k)))
     HC = B.H.constants()             # the designer's statement (report.json): A's limit and claims, the part ids
     s = s.replace("__REPORT_MAX_BYTES__", repr(HC.REPORT_MAX_BYTES))
@@ -74,10 +74,15 @@ def kernel_text():
     return s.replace('b"board-in-a-box"', 'b"kernel"')
 
 
-def barrel_bytes():
-    with open(W.mesh_path("barrel"), "rb") as f:      # the barrel the grader uses (data/thin/ when W.THIN_BARREL)
+def barrel_bytes(barrel_id):
+    with open(W.mesh_path("barrel", barrel_id), "rb") as f:      # the mesh the grader uses for that barrel
         data = f.read()
     return NEUTRAL_STL_HEADER + data[80:]
+
+
+def supplied_name(barrel_id):
+    """The file name of a catalogue barrel's mesh in supplied/ (the work order and DS-W01 cite it)."""
+    return barrel_id + ".stl"
 
 
 def reference_numbers():
@@ -122,7 +127,7 @@ def cell_errors_in(out, S):
     """make_brief_job.verify() on the files as they are in OUT: every home cell (A's DS-101 and DS-201 cells
     included, through builder S's trace rows) exists and matches the constants, and no graded number is printed
     where it has no home."""
-    L, Bf = B._literals(), B.barrel_facts()
+    L, Bf = B._literals(), B.catalogue_facts()
     rows = B.traceability_rows(L, Bf, S)
     texts = {}
     for root, _, files in os.walk(out):
@@ -149,8 +154,9 @@ def build(out):
         shutil.copyfile(os.path.join(JOB, "datasheets", f), os.path.join(out, "datasheets", f))
     for f, _, _ in B.external_sheets():
         shutil.copyfile(os.path.join(B.A_SHEETS, f), os.path.join(out, "datasheets", f))
-    with open(os.path.join(out, "supplied", "barrel.stl"), "wb") as f:
-        f.write(barrel_bytes())
+    for bid in W.BARREL_IDS:
+        with open(os.path.join(out, "supplied", supplied_name(bid)), "wb") as f:
+            f.write(barrel_bytes(bid))
     with open(os.path.join(out, "tools", "kernel.py"), "w", encoding="utf-8") as f:
         f.write(kernel_text())
     with open(os.path.join(out, "tools", "check_format.py"), "w", encoding="utf-8") as f:
