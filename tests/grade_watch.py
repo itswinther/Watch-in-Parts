@@ -47,6 +47,11 @@ TIMEOUT_S = 1800
 JOB_MOVEMENT, JOB_VARIANT, JOB_ASSEMBLY = "movement.json", "variant_6h.json", "assembly.json"
 JOB_CHECKS_1 = {k: w for k, w in WEIGHTS.items() if k != "light"}      # P1: stage-1 checks without light
 JOB_CHECKS_1["strength"] = 2        # P1 and P3: gear strength (Decisions 17:56, option 2), one-job mode only
+# The movement as made (geometry/asmade.py): only when its switch is on; off, the grader is unchanged.
+from geometry import asmade_job as AMJ      # noqa: E402  (light: two constants)
+AS_MADE_CHECKS = {"made_free": 2, "made_mesh": 3, "made_clear": 1}
+if AMJ.AS_MADE_IN_JOB:
+    JOB_CHECKS_1.update(AS_MADE_CHECKS)
 JOB_CHECKS_2 = dict(WEIGHTS_2)                                          # P2: the 24-hour hand
 # The parts of the job: (id, what it is, weight, gates, check weights). Gates are the brief's conditions
 # (environment/public/job/PROMPT.md): files C1, assembled C2, day_declared C3, same_frame C4; P4's are C1 of
@@ -280,7 +285,20 @@ def _check_table(m, runs, speeds, conflicts, driven, thin_cache=None, job=False)
         """One-job mode only (needs the mobiles' materials): tooth bending under the load case, W.strength_run."""
         return W.strength_run(m, runs, driven)
 
-    return {"seated": seated, "light": light, "strength": strength, "printable": printable, "day_hand": day_hand, "day_place": day_place,
+    # the movement as made (geometry/asmade.py; one-job mode, only when asmade.AS_MADE_IN_JOB): three checks that
+    # share one AsMade object, so the resized parts and the plays are worked out once
+    made = {}
+
+    def as_made(which):
+        def fn():
+            from geometry import asmade
+            if "obj" not in made:
+                made["obj"] = asmade.AsMade(m)
+            return getattr(made["obj"], which)()
+        return fn
+
+    return {"made_free": as_made("free"), "made_mesh": as_made("mesh"), "made_clear": as_made("clear"),
+            "seated": seated, "light": light, "strength": strength, "printable": printable, "day_hand": day_hand, "day_place": day_place,
             "spin": spin, "held": held, "train": train, "clear": clear, "minute": hand("minute"), "hour": hand("hour"),
             "seconds": hand("seconds"), "coaxial": coaxial, "hands": hands, "size": size, "tolerant": tolerant}
 
