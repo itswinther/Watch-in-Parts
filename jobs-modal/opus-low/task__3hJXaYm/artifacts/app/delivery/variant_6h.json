@@ -1,0 +1,153 @@
+{
+ "barrel": "BR-096-30",
+ "case_centre": [
+  2.8,
+  0.0
+ ],
+ "fixed": [
+  "plate",
+  "midplate",
+  "upperplate",
+  "motionplate",
+  "dial"
+ ],
+ "mobiles": {
+  "inter6": {
+   "axis": [
+    9.62857142857143,
+    4.891892501363653
+   ],
+   "parts": [
+    "inter6_arbor",
+    "inter6_wheel"
+   ],
+   "material": "AD-C100-HT"
+  },
+  "centre": {
+   "axis": [
+    2.8,
+    0.0
+   ],
+   "parts": [
+    "centre",
+    "hand_minute"
+   ],
+   "material": "AD-C100-HT"
+  },
+  "hour": {
+   "axis": [
+    2.8,
+    0.0
+   ],
+   "parts": [
+    "hourwheel",
+    "hand_hour"
+   ],
+   "material": "AD-C100-HT"
+  },
+  "third": {
+   "axis": [
+    2.517385836288103,
+    -5.392599487674699
+   ],
+   "parts": [
+    "third"
+   ],
+   "material": "AD-C100-HT"
+  },
+  "seconds": {
+   "axis": [
+    7.450849218352699,
+    -4.099951408022794
+   ],
+   "parts": [
+    "secondswheel",
+    "hand_seconds"
+   ],
+   "material": "AD-C100-HT"
+  },
+  "minutewheel": {
+   "axis": [
+    -0.09777747886720478,
+    -0.7764571353075631
+   ],
+   "parts": [
+    "minutewheel"
+   ],
+   "material": "AD-C100-HT"
+  },
+  "day": {
+   "axis": [
+    -4.327934496092747,
+    2.33292730692815
+   ],
+   "parts": [
+    "daywheel",
+    "hand_day"
+   ],
+   "material": "AD-C100-HT"
+  }
+ },
+ "meshes": [
+  {
+   "driver": "barrel",
+   "driver_teeth": 96,
+   "driven": "inter6",
+   "driven_teeth": 12
+  },
+  {
+   "driver": "inter6",
+   "driver_teeth": 48,
+   "driven": "centre",
+   "driven_teeth": 64
+  },
+  {
+   "driver": "centre",
+   "driver_teeth": 64,
+   "driven": "third",
+   "driven_teeth": 8
+  },
+  {
+   "driver": "third",
+   "driver_teeth": 60,
+   "driven": "seconds",
+   "driven_teeth": 8
+  },
+  {
+   "driver": "centre",
+   "driver_teeth": 8,
+   "driven": "minutewheel",
+   "driven_teeth": 32
+  },
+  {
+   "driver": "minutewheel",
+   "driver_teeth": 8,
+   "driven": "hour",
+   "driven_teeth": 24
+  },
+  {
+   "driver": "minutewheel",
+   "driver_teeth": 8,
+   "driven": "day",
+   "driven_teeth": 48
+  }
+ ],
+ "hands": {
+  "hour": {
+   "mobile": "hour",
+   "part": "hand_hour"
+  },
+  "minute": {
+   "mobile": "centre",
+   "part": "hand_minute"
+  },
+  "seconds": {
+   "mobile": "seconds",
+   "part": "hand_seconds"
+  },
+  "day": {
+   "mobile": "day",
+   "part": "hand_day"
+  }
+ }
+}
