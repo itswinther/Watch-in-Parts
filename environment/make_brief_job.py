@@ -146,12 +146,14 @@ def _literals():
     return {"gap_every": 4, "push_every": 8, "pose_tol": "1e-6", "voxel_centre_offset": centre}
 
 
-def barrel_facts():
-    """Measured from the supplied mesh, and checked against the constants."""
+def barrel_facts(barrel_id=None):
+    """Measured from one catalogue barrel's supplied mesh (geometry/watch.py barrel_row; None: DEFAULT_BARREL), and
+    checked against that barrel's constants."""
     import numpy as np
     from geometry import core
-    b = W.barrel()
-    bodies = W.barrel_bodies()
+    row = W.barrel_row(barrel_id)
+    b = W.barrel(row["id"])
+    bodies = W.barrel_bodies(row["id"])
     drum, arbor = bodies["barrel_drum"], bodies["barrel_arbor"]
     # barrel.stl is the two bodies together; they do not touch
     if (drum ^ arbor).volume() > 0.0 or abs((drum + arbor).volume() - b.volume()) > 1e-3:
@@ -161,30 +163,30 @@ def barrel_facts():
 
     def levels(man):
         return [round(z, 4) for z in sorted(set(np.round(core.verts(man)[:, 2], 6)))]
-    sq = W.BARREL_SQUARE_Z
-    arbor_z = {W.BARREL_ARBOR_Z[0], W.BARREL_WHEEL_Z[0], W.BARREL_WHEEL_Z[1], sq[0], sq[1], W.BARREL_ARBOR_Z[1]}
-    for name, man, zset in (("barrel.stl", b, arbor_z), ("barrel_drum.stl", drum, set(W.BARREL_WHEEL_Z)),
+    sq = row["square_z"]
+    arbor_z = {row["arbor_z"][0], row["wheel_z"][0], row["wheel_z"][1], sq[0], sq[1], row["arbor_z"][1]}
+    for name, man, zset in (("barrel.stl", b, arbor_z), ("barrel_drum.stl", drum, set(row["wheel_z"])),
                             ("barrel_arbor.stl", arbor, arbor_z)):
         if levels(man) != [round(z, 4) for z in sorted(zset)]:
             raise SystemExit("%s z levels %s disagree with the constants %s" % (name, levels(man), sorted(zset)))
     Va = core.verts(arbor)
     ra = np.hypot(Va[:, 0], Va[:, 1])
-    ends = np.isclose(Va[:, 2], W.BARREL_ARBOR_Z[0]) | np.isclose(Va[:, 2], W.BARREL_ARBOR_Z[1])
-    if abs(ra[ends].max() - W.BARREL_ARBOR_R) > 1e-4:
+    ends = np.isclose(Va[:, 2], row["arbor_z"][0]) | np.isclose(Va[:, 2], row["arbor_z"][1])
+    if abs(ra[ends].max() - row["arbor_r"]) > 1e-4:
         raise SystemExit("barrel_arbor.stl pivot radius %.6f disagrees with BARREL_ARBOR_R" % ra[ends].max())
-    core_z = (Va[:, 2] >= W.BARREL_WHEEL_Z[0] - 1e-6) & (Va[:, 2] <= W.BARREL_WHEEL_Z[1] + 1e-6)
-    if abs(ra[core_z].max() - W.BARREL_CORE_R) > 1e-4:
+    core_z = (Va[:, 2] >= row["wheel_z"][0] - 1e-6) & (Va[:, 2] <= row["wheel_z"][1] + 1e-6)
+    if abs(ra[core_z].max() - row["core_r"]) > 1e-4:
         raise SystemExit("barrel_arbor.stl core radius %.6f disagrees with BARREL_CORE_R" % ra[core_z].max())
     sq_z = (Va[:, 2] >= sq[0] - 1e-6) & (Va[:, 2] <= sq[1] + 1e-6)
     half = np.abs(Va[sq_z, :2]).max(axis=0)
-    if np.abs(half - W.BARREL_SQUARE_SIDE / 2).max() > 1e-4 or abs(ra[sq_z].max() - W.BARREL_SQUARE_SIDE / math.sqrt(2)) > 1e-4:
+    if np.abs(half - row["square_side"] / 2).max() > 1e-4 or abs(ra[sq_z].max() - row["square_side"] / math.sqrt(2)) > 1e-4:
         raise SystemExit("barrel_arbor.stl square %s disagrees with BARREL_SQUARE_SIDE" % half)
-    if abs(np.hypot(*core.verts(drum)[:, :2].T).min() - W.BARREL_BORE_R) > 1e-4:
+    if abs(np.hypot(*core.verts(drum)[:, :2].T).min() - row["bore_r"]) > 1e-4:
         raise SystemExit("barrel_drum.stl bore radius disagrees with BARREL_BORE_R")
-    if abs(W.BARREL_CORE_R * 6 - W.BARREL_INNER_D) > 1e-9 or W.BARREL_BORE_R <= W.BARREL_CORE_R:
+    if abs(row["core_r"] * 6 - row["inner_d"]) > 1e-9 or row["bore_r"] <= row["core_r"]:
         raise SystemExit("BARREL_CORE_R is not BARREL_INNER_D / 6, or the bore does not clear the core")
-    pitch_r = W.BARREL_MODULE * W.BARREL_TEETH / 2.0
-    poly = np.asarray(max(b.slice(sum(W.BARREL_WHEEL_Z) / 2).to_polygons(), key=len), float)
+    pitch_r = row["module"] * row["teeth"] / 2.0
+    poly = np.asarray(max(b.slice(sum(row["wheel_z"]) / 2).to_polygons(), key=len), float)
     pr = np.hypot(poly[:, 0], poly[:, 1])
     tip, root = float(r.max()), float(pr.min())
 
@@ -205,19 +207,24 @@ def barrel_facts():
             else:
                 b_ = mid
         return a
-    half = math.pi / W.BARREL_TEETH
+    half = math.pi / row["teeth"]
     if not inside(0.0) or inside(half):
         raise SystemExit("barrel.stl: no tooth centred on +x")
     e0, e1 = edge(0.0, -half), edge(0.0, half)
     # count teeth: sign changes of inside() round the pitch circle
-    n = 4 * W.BARREL_TEETH
+    n = 4 * row["teeth"]
     s = [inside(2 * math.pi * k / n + half / 2) for k in range(n)]
     teeth = sum(1 for k in range(n) if s[k] and not s[k - 1])
-    if teeth != W.BARREL_TEETH:
-        raise SystemExit("barrel.stl has %d teeth, BARREL_TEETH is %d" % (teeth, W.BARREL_TEETH))
+    if teeth != row["teeth"]:
+        raise SystemExit("barrel.stl has %d teeth, BARREL_TEETH is %d" % (teeth, row["teeth"]))
     return {"tip_r": round(tip, 3), "root_r": round(root, 3), "pitch_r": pitch_r,
             "thickness": round(pitch_r * (e1 - e0), 3), "phase": round(math.degrees((e0 + e1) / 2), 3),
-            "volume": round(float(b.volume()), 1)}
+            "volume": round(float(b.volume()), 1), "row": row}
+
+
+def catalogue_facts():
+    """{part no.: barrel_facts(part no.)} for every barrel of the catalogue (geometry/watch.py BARREL_IDS)."""
+    return {bid: barrel_facts(bid) for bid in W.BARREL_IDS}
 
 
 # ------------------------------------------------------------------ builder S's gear-strength module (hook)
@@ -535,9 +542,8 @@ def qa_w100(L, S=None):
     words = {4: "four", 5: "five"}
     lead = "- **Frame and units.** "
     frame = wrap(lead + frame_text(), "  ")[len(lead):]
-    docs = [("The work order", "the barrel part no. and its speed class for each build, the case part no., the print "
-             "process"),
-            ("DS-W01", "the barrel: its catalogue data (section 2), the barrel as supplied (section 3) and the speed "
+    docs = [("The work order", "the barrel's speed class for each build, the case part no., the print process"),
+            ("DS-W01", "the barrels: their catalogue data (section 2), the barrels as supplied (section 3) and the speed "
              "classes (section 4)"),
             ("DS-W02", "the case: inner radius and inner height (section 2)"),
             ("DS-W03", "the printability test (section 3)"),
@@ -603,8 +609,8 @@ Values that belong to a supplied item are taken from that item's supplier docume
 
 - **Frame and units.** {frame}
 - **Solids.** Every test measures the solids built from the part files as `/app/FORMAT.md` describes; the barrel
-  is the solid of `/app/supplied/barrel.stl`. "Intersect by at most {vt}" means that the volume of the
-  intersection of the two solids is at most {vt}.
+  is the solid of the mesh of the barrel that the movement file names (DS-W01, section 3). "Intersect by at most
+  {vt}" means that the volume of the intersection of the two solids is at most {vt}.
 - **The frame** is the fixed parts of a movement, taken together.
 - **A mobile** is a set of parts that turn together as one rigid body about the vertical line through its axis.
   The barrel is the mobile `barrel` (its drum and its arbor together, as one solid); its axis is the axis of the
@@ -662,9 +668,9 @@ or a similar process.
 ## The goal
 
 The wearer reads the time from four hands: hours and minutes on a common centre, seconds, and a 24-hour hand that
-shows the hour of the day. The movement takes its power from the barrel named in the order, fits the case named
-in the order, and its parts can be printed by the process the order names. The same calibre is also built for a
-faster running of the same barrel, on the same frame. The workshop assembles the 8-hour build part by part,
+shows the hour of the day. The movement takes its power from a barrel of the catalogue the order names, fits the
+case named in the order, and its parts can be printed by the process the order names. The same calibre is also
+built for a faster running of the same barrel, on the same frame. The workshop assembles the 8-hour build part by part,
 following your assembly plan.
 
 {covers}
@@ -673,11 +679,11 @@ following your assembly plan.
 
 | Item | Specification |
 |---|---|
-| Barrel | part no. {bn}, catalogue sheet DS-W01; supplied as `/app/supplied/barrel.stl` |
+| Barrel | your choice from catalogue sheet DS-W01; each of its barrels is supplied as a mesh |
 | Case | part no. {cn}, catalogue sheet DS-W02 |
 | Parts | printed by the process of process sheet DS-W03 |
-| 8-hour build (`movement.json`) | barrel {bn}, speed class {s8} (DS-W01) |
-| 6-hour variant (`variant_6h.json`) | the same barrel {bn}, in the same place, speed class {s6} (DS-W01) |
+| 8-hour build (`movement.json`) | the chosen barrel, speed class {s8} (DS-W01) |
+| 6-hour variant (`variant_6h.json`) | the same barrel, in the same place, speed class {s6} (DS-W01) |
 {materials}
 ## Deliverables
 
@@ -709,8 +715,8 @@ Installed software: Python 3 with CadQuery 2.8.0 (OpenCASCADE, importable as `ca
 
 - `/app/datasheets/`: the supplier documents and the inspection procedure {qa};
   `/app/datasheets/INDEX.md` lists them.
-- `/app/supplied/barrel.stl`: barrel {bn} as a mesh, in its assembled position (DS-W01, section 3). It is not
-  part of the delivery.
+- `{sup}<part no.>.stl`: each barrel of DS-W01 as a mesh, in its assembled position (DS-W01, section 3). They
+  are not part of the delivery.
 
 ## Acceptance
 
@@ -721,7 +727,7 @@ Installed software: Python 3 with CadQuery 2.8.0 (OpenCASCADE, importable as `ca
 You work alone and unattended; nobody answers questions during the job. The job ends when you stop.
 
 Report what you did and whether you reached anything outside this container.
-""".format(scale=num(round(scale, 3)), real=num(REAL_CALIBRE_DIAMETER_MM), bn=supplied_barrel_no(),
+""".format(scale=num(round(scale, 3)), real=num(REAL_CALIBRE_DIAMETER_MM), sup=SUPPLIED_DIR,
            cn=ordered_case_no(), s8=s8, s6=s6, materials=materials, qa=QA, title=title, covers=covers,
            movement_line=movement_line, report_row=report_row,
            acceptance=wrap("The delivery is inspected after hand-over per %s rev %s (`/app/datasheets/%s`); each part of "
@@ -787,6 +793,7 @@ Each is at most {jb} bytes and names at most {mp} parts.
 
 ```
 {{
+  "barrel": "part no.",
   "case_centre": [x, y],
   "fixed": ["part_name", ...],
   "mobiles": {{
@@ -807,6 +814,8 @@ Each is at most {jb} bytes and names at most {mp} parts.
 }}
 ```
 
+- `barrel`: the part no. of the barrel the movement is built on, one of the barrels of the catalogue DS-W01, as
+  that sheet prints it. Required. `movement.json` and `variant_6h.json` name the same barrel.
 - `case_centre`: x and y of the case's axis, in mm.
 - `fixed`: the parts that do not move. A non-empty list.
 - `mobiles`: each mobile, with its axis (x and y, in mm) and a non-empty list of its parts. `barrel` is not listed;
@@ -870,27 +879,19 @@ def head(doc, title, issuer, kind, rev=REVISION, date=DATE):
 """.format(doc=doc, title=title, rev=rev, date=date, issuer=issuer, kind=kind)
 
 
-# ------------------------------------------------------------------ DS-W01, the barrel catalogue (one block, so a
-# change to the barrel, e.g. builder K's two-body barrel, stays inside it)
-# The supplied barrel is the row built from the constants; the other rows are members of the same family at the
-# same scale, with values that differ from it. Catalogue data only: no test reads them. (teeth, module mm, pressure
-# angle deg, drum height mm, arbor pivot radius mm, arbor length mm, spring chamber inner diameter mm, winding square
-# side mm, speed classes offered: one turn every (lo, hi) hours). Every row's arbor core radius is its inner diameter / 6.
-BARREL_FAMILY = [(84, 0.2, 25.0, 0.9, 0.45, 5.9, 14.6, 1.25, (7, 9)),
-                 (90, 0.22, 25.0, 1.2, 0.55, 7.2, 17.6, 1.55, (8, 10)),
-                 None,                                        # the supplied barrel goes here
-                 (100, 0.18, 20.0, 1.0, 0.5, 6.4, 15.9, 1.4, (6, 8)),
-                 (108, 0.16, 25.0, 0.8, 0.4, 5.4, 15.2, 1.1, (5, 7))]
-BACKLASH_FAMILY = 0.03     # mm, tooth thickness of the family's teeth on the pitch circle: pi m / 2 less this
+# ------------------------------------------------------------------ DS-W01, the barrel catalogue (one block)
+# b/thin-cat (Mikael, 14/15 Nov 04:11 and 04:16): the work order names no barrel; the designer chooses one of the
+# catalogue's barrels (geometry/watch.py BARREL_CATALOGUE, every one supplied as a mesh, the grader's own). The sheet
+# is a supplier drawing: geometry and the fitted spring's dimensions only, no torque, no margins, no usage hints.
+# Every barrel is made for every speed class (SPEED_CLASS_HOURS: one turn every lo to hi hours; class A is lo).
+SPEED_CLASS_HOURS = (5, 10)
 RUNNING_SENSE = "clockwise"     # the barrel's sense seen from the dial side (+z), as the grader drives it
+SUPPLIED_DIR = APP + "/supplied/"
 
 
-def barrel_no(teeth, module):
-    return "BR-%03d-%02d" % (teeth, round(module * 100))
-
-
-def supplied_barrel_no():
-    return barrel_no(W.BARREL_TEETH, W.BARREL_MODULE)
+def supplied_mesh(barrel_id):
+    """Where the agent finds a catalogue barrel's mesh (make_bundle_job.supplied_name writes it there)."""
+    return SUPPLIED_DIR + barrel_id + ".stl"
 
 
 def supplied_hours():
@@ -898,11 +899,10 @@ def supplied_hours():
 
 
 def speed_classes():
-    """[(class letter, hours per turn)] covering every speed the family is offered in, slowest class last."""
-    runs = [e[-1] for e in BARREL_FAMILY if e is not None] + [(supplied_hours()[0], supplied_hours()[-1])]
-    lo, hi = min(r[0] for r in runs), max(r[1] for r in runs)
-    if hi - lo > 25:
-        raise SystemExit("too many speed classes")
+    """[(class letter, hours per turn)], slowest class last."""
+    lo, hi = SPEED_CLASS_HOURS
+    if not lo <= supplied_hours()[0] <= supplied_hours()[-1] <= hi:
+        raise SystemExit("the builds' barrel speeds are not speed classes of the catalogue")
     return [(chr(ord("A") + h - lo), h) for h in range(lo, hi + 1)]
 
 
@@ -914,59 +914,52 @@ def speed_class_of(frac):
     raise SystemExit("no speed class for one turn every %d h" % h)
 
 
-def classes_text(run):
-    return ", ".join(c for c, h in speed_classes() if run[0] <= h <= run[1])
-
-
 def barrel_rows(B):
-    """Catalogue rows as dicts; the supplied one from the constants and the measured mesh."""
-    speeds = supplied_hours()
+    """Catalogue rows as dicts, one per barrel, from its constants and its measured mesh. B: catalogue_facts()."""
     rows = []
-    for e in BARREL_FAMILY:
-        if e is None:
-            rows.append({"no": supplied_barrel_no(), "teeth": W.BARREL_TEETH, "module": W.BARREL_MODULE,
-                         "pa": W.PRESSURE_ANGLE, "tip_d": round(2 * B["tip_r"], 3), "root_d": round(2 * B["root_r"], 3),
-                         "thick": B["thickness"], "drum": zr(W.BARREL_WHEEL_Z[1] - W.BARREL_WHEEL_Z[0]),
-                         "arbor_r": W.BARREL_ARBOR_R, "arbor_l": zr(W.BARREL_ARBOR_Z[1] - W.BARREL_ARBOR_Z[0]),
-                         "inner_d": W.BARREL_INNER_D, "core_r": round(W.BARREL_CORE_R, 3), "square": W.BARREL_SQUARE_SIDE,
-                         "run": (speeds[0], speeds[-1]), "supplied": True})
-            continue
-        z, m, pa, drum, ar, al, inner_d, sq, run = e
-        rows.append({"no": barrel_no(z, m), "teeth": z, "module": m, "pa": pa, "tip_d": round(m * (z + 2), 3),
-                     "root_d": round(m * (z - 2.5), 3), "thick": round(math.pi * m / 2 - BACKLASH_FAMILY, 3),
-                     "drum": drum, "arbor_r": ar, "arbor_l": al, "inner_d": inner_d, "core_r": round(inner_d / 6, 3),
-                     "square": sq, "run": run, "supplied": False})
-    nos = [r["no"] for r in rows]
-    if len(set(nos)) != len(nos):
-        raise SystemExit("two barrel rows share a part number")
-    for r in rows:
-        if not r["supplied"] and r["teeth"] == W.BARREL_TEETH and r["module"] == W.BARREL_MODULE:
-            raise SystemExit("a catalogue row repeats the supplied barrel")
-    sup = [r for r in rows if r["supplied"]][0]
-    for frac in (W.BARREL_TURNS_PER_HOUR, W.CHANGED_BARREL_TURNS_PER_HOUR):
-        if speed_class_of(frac) not in classes_text(sup["run"]).split(", "):
-            raise SystemExit("the supplied barrel is not offered in the speed class of one turn every %s" % hours(frac))
-    return rows
+    for bid in W.BARREL_IDS:
+        f = B[bid]
+        r = f["row"]
+        sp = r["spring"]
+        rows.append({"no": bid, "teeth": r["teeth"], "module": r["module"], "pa": W.PRESSURE_ANGLE,
+                     "tip_d": round(2 * f["tip_r"], 3), "root_d": round(2 * f["root_r"], 3), "thick": f["thickness"],
+                     "drum": zr(r["drum_height"]), "arbor_r": r["arbor_r"], "arbor_l": zr(r["arbor_length"]),
+                     "inner_d": r["inner_d"], "core_r": round(r["core_r"], 3), "square": r["square_side"],
+                     "spring": (sp["h"], sp["t"], sp["L"]), "facts": f})
+    for k in ("teeth", "module", "tip_d", "root_d", "thick", "arbor_r", "inner_d", "core_r", "square"):
+        if len({r[k] for r in rows}) != 1:
+            raise SystemExit("the catalogue's barrels differ in %s; DS-W01 section 3 states it once for all" % k)
+    return sorted(rows, key=lambda r: -r["drum"])
 
 
 def zr(v):
-    """A z level of the supplied barrel as the documents give it: to 4 decimals (the thin barrel's levels are the
-    6.6 mm barrel's times 3.0/6.6, e.g. 0.454545...; the mesh itself is single precision)."""
+    """A z level of a barrel as the documents give it: to 4 decimals (the scaled barrels' levels are BR-096-20's
+    times 4.5/6.6 or 3.0/6.6, e.g. 0.454545...; the mesh itself is single precision)."""
     return round(v, 4) + 0.0
+
+
+def z_range(zz):
+    return "z %s mm to z %s mm" % (num(zr(zz[0])), num(zr(zz[1])))
 
 
 SPEED_COL = "Barrel speed, steady running"
 SENSE_COL = "Running sense, seen from the dial side"
+SPRING_COL = "Mainspring fitted, h x t x L (mm)"
 
 
 def ds_w01(L, B):
     rows = barrel_rows(B)
-    table = "".join("| {no} | {teeth} | {mod} | {pa} | {tip} | {root} | {th} | {drum} | {ind} | {ar} | {al} | {cr} | {sq} | {cl} |\n".format(
+    table = "".join("| {no} | {teeth} | {mod} | {pa} | {tip} | {root} | {th} | {drum} | {ind} | {ar} | {al} | {cr} | {sq} | {spr} |\n".format(
         no=r["no"], teeth=r["teeth"], mod=num(r["module"]), pa=num(r["pa"]), tip=num(r["tip_d"]), root=num(r["root_d"]),
         th=num(r["thick"]), drum=num(r["drum"]), ind=num(r["inner_d"]), ar=num(r["arbor_r"]), al=num(r["arbor_l"]),
-        cr=num(r["core_r"]), sq=num(r["square"]), cl=classes_text(r["run"]))
+        cr=num(r["core_r"]), sq=num(r["square"]), spr=" x ".join(num(v) for v in r["spring"]))
         for r in rows)
+    each = "".join("| {no} | `{mesh}` | {wz} | {az} | {sqz} | {vol} |\n".format(
+        no=r["no"], mesh=supplied_mesh(r["no"]), wz=z_range(r["facts"]["row"]["wheel_z"]),
+        az=z_range(r["facts"]["row"]["arbor_z"]), sqz=z_range(r["facts"]["row"]["square_z"]),
+        vol=num(r["facts"]["volume"])) for r in rows)
     classes = "".join("| %s | 1 turn every %d h | %s |\n" % (c, h, RUNNING_SENSE) for c, h in speed_classes())
+    r0 = rows[0]
     return head("DS-W01", "Mainspring barrels, demonstration-scale series: catalogue sheet", "the barrel supplier",
                 "catalogue sheet") + """
 ## 1. Scope
@@ -980,73 +973,97 @@ dedendum 1.25 x module. All lengths in millimetres.
 The arbor core radius of every barrel in this series is one third of the inner radius of its spring chamber
 (the hub proportion of Grossmann, *Lessons in Horology*, art. 108 to 111, and Saunier, art. 517).
 
+Each barrel is delivered with its mainspring fitted: a strip of the spring alloy of VM-DS-101 (section 3 of that
+sheet), of the height h, thickness t and length L given in section 2, at the scale of this series.
+
 ## 2. Catalogue
 
-| Part no. | Teeth | Module (mm) | Pressure angle (degrees) | Tip diameter (mm) | Root diameter (mm) | Tooth thickness on the pitch circle, arc (mm) | Drum height (mm) | Spring chamber inner diameter (mm) | Arbor pivot radius (mm) | Arbor length (mm) | Arbor core radius (mm) | Winding square side (mm) | Speed classes (section 4) |
+| Part no. | Teeth | Module (mm) | Pressure angle (degrees) | Tip diameter (mm) | Root diameter (mm) | Tooth thickness on the pitch circle, arc (mm) | Drum height (mm) | Spring chamber inner diameter (mm) | Arbor pivot radius (mm) | Arbor length (mm) | Arbor core radius (mm) | Winding square side (mm) | {scol} |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 {table}
-A barrel is ordered for one speed class; the speed classes listed are those it is made for.
+Every barrel is made for every speed class of section 4; a barrel is ordered for one speed class.
 
-## 3. {no} as supplied
+## 3. The barrels as supplied
 
-The barrel {no} is supplied as a mesh in its assembled position, `/app/supplied/barrel.stl` (binary STL,
-millimetres): the drum and the arbor together, as one mesh. In that position:
+Each barrel is supplied as a mesh in its assembled position (binary STL, millimetres): the drum and the arbor
+together, as one mesh. In that position, for every barrel of the series:
 
 | Quantity | Value |
 |---|---|
 | Axis | the vertical line x = 0 mm, y = 0 mm |
-| Toothed drum | z {wz0} mm to z {wz1} mm |
 | Bore of the drum | radius {bore} mm |
-| Arbor | z {az0} mm to z {az1} mm |
 | Arbor, pivots and plain sections | round, radius {ar} mm |
-| Arbor core (inside the drum's bore) | z {wz0} mm to z {wz1} mm, radius {cr} mm |
+| Arbor core (inside the drum's bore) | over the height of the toothed drum, radius {cr} mm |
 | Spring chamber inside the drum (not modelled in the mesh) | inner diameter {ind} mm |
-| Winding square | z {sq0} mm to z {sq1} mm, side {sq} mm, sides parallel to x and y |
-| Volume of the mesh | {vol} mm3 |
+| Winding square | side {sq} mm, sides parallel to x and y |
 
+and for each barrel:
+
+| Part no. | Mesh | Toothed drum | Arbor | Winding square | Volume of the mesh (mm3) |
+|---|---|---|---|---|---|
+{each}
 ## 4. Speed classes
 
 The steady running speed of the barrel in the movement, for each speed class.
 
-| Speed class | {scol} | {sense} |
+| Speed class | {speed} | {sense} |
 |---|---|---|
-{classes}""".format(table=table, no=supplied_barrel_no(), wz0=num(zr(W.BARREL_WHEEL_Z[0])), wz1=num(zr(W.BARREL_WHEEL_Z[1])),
-                    az0=num(zr(W.BARREL_ARBOR_Z[0])), az1=num(zr(W.BARREL_ARBOR_Z[1])), vol=num(B["volume"]),
-                    scol=SPEED_COL, sense=SENSE_COL, classes=classes, bore=num(W.BARREL_BORE_R), ar=num(W.BARREL_ARBOR_R),
-                    cr=num(round(W.BARREL_CORE_R, 3)), ind=num(W.BARREL_INNER_D), sq0=num(zr(W.BARREL_SQUARE_Z[0])),
-                    sq1=num(zr(W.BARREL_SQUARE_Z[1])), sq=num(W.BARREL_SQUARE_SIDE))
+{classes}""".format(table=table, each=each, scol=SPRING_COL, speed=SPEED_COL, sense=SENSE_COL, classes=classes,
+                    bore=num(r0["facts"]["row"]["bore_r"]), ar=num(r0["arbor_r"]), cr=num(r0["core_r"]),
+                    ind=num(r0["inner_d"]), sq=num(r0["square"]))
 
 
 def ds_w01_trace(L, B):
-    """Home cells of the barrel's graded numbers, all on DS-W01."""
-    f, bn = "datasheets/DS-W01_barrel.md", supplied_barrel_no()
+    """Home cells of the barrels' graded numbers, all on DS-W01: one row of section 2 and one of section 3 per
+    barrel (the meshes the grader loads), and the sizes common to every barrel in section 3's first table."""
+    f = "datasheets/DS-W01_barrel.md"
     s8, s6 = speed_class_of(W.BARREL_TURNS_PER_HOUR), speed_class_of(W.CHANGED_BARREL_TURNS_PER_HOUR)
-    return [
-        cell("BARREL_TEETH", W.BARREL_TEETH, f, "2. Catalogue", bn, "Teeth", [num(W.BARREL_TEETH)]),
-        cell("BARREL_MODULE", W.BARREL_MODULE, f, "2. Catalogue", bn, "Module (mm)", [num(W.BARREL_MODULE)]),
-        cell("PRESSURE_ANGLE", W.PRESSURE_ANGLE, f, "2. Catalogue", bn, "Pressure angle", [num(W.PRESSURE_ANGLE)]),
-        cell("BARREL_ARBOR_R", W.BARREL_ARBOR_R, f, "2. Catalogue", bn, "Arbor pivot radius", [num(W.BARREL_ARBOR_R)]),
-        cell("BARREL_INNER_D", W.BARREL_INNER_D, f, "2. Catalogue", bn, "Spring chamber inner diameter",
-             [num(W.BARREL_INNER_D)]),
-        cell("BARREL_CORE_R (= BARREL_INNER_D / 6, to 3 decimals)", round(W.BARREL_CORE_R, 3), f, "2. Catalogue", bn,
-             "Arbor core radius", [num(round(W.BARREL_CORE_R, 3))]),
-        cell("BARREL_SQUARE_SIDE", W.BARREL_SQUARE_SIDE, f, "2. Catalogue", bn, "Winding square side",
-             [num(W.BARREL_SQUARE_SIDE)]),
-        cell("barrel axis (x, y) = (0, 0)", (0, 0), f, "3. ", "Axis", "Value", ["0", "0"]),
-        cell("BARREL_WHEEL_Z (to 4 decimals)", W.BARREL_WHEEL_Z, f, "3. ", "Toothed drum", "Value",
-             [num(zr(z)) for z in W.BARREL_WHEEL_Z]),
-        cell("BARREL_ARBOR_Z (to 4 decimals)", W.BARREL_ARBOR_Z, f, "3. ", "Arbor", "Value",
-             [num(zr(z)) for z in W.BARREL_ARBOR_Z]),
-        cell("BARREL_BORE_R", W.BARREL_BORE_R, f, "3. ", "Bore of the drum", "Value", [num(W.BARREL_BORE_R)]),
-        cell("BARREL_ARBOR_R (section 3)", W.BARREL_ARBOR_R, f, "3. ", "Arbor, pivots and plain sections", "Value",
-             [num(W.BARREL_ARBOR_R)]),
-        cell("BARREL_WHEEL_Z (to 4 decimals), BARREL_CORE_R (the core)", (W.BARREL_WHEEL_Z, round(W.BARREL_CORE_R, 3)), f,
-             "3. ", "Arbor core (inside the drum's bore)", "Value",
-             [num(zr(z)) for z in W.BARREL_WHEEL_Z] + [num(round(W.BARREL_CORE_R, 3))]),
-        cell("BARREL_INNER_D (section 3)", W.BARREL_INNER_D, f, "3. ", "Spring chamber inside the drum (not modelled in the mesh)", "Value",
-             [num(W.BARREL_INNER_D)]),
-        cell("BARREL_SQUARE_Z (to 4 decimals), BARREL_SQUARE_SIDE", (W.BARREL_SQUARE_Z, W.BARREL_SQUARE_SIDE), f, "3. ",
-             "Winding square", "Value", [num(zr(z)) for z in W.BARREL_SQUARE_Z] + [num(W.BARREL_SQUARE_SIDE)]),
+    r0 = W.barrel_row(W.BARREL_IDS[0])
+    out = [
+        cell("barrel axis (x, y) = (0, 0), every barrel", (0, 0), f, "3. ", "Axis", "Value", ["0", "0"]),
+        cell("BARREL_BORE_R, every barrel", r0["bore_r"], f, "3. ", "Bore of the drum", "Value", [num(r0["bore_r"])]),
+        cell("BARREL_ARBOR_R (section 3), every barrel", r0["arbor_r"], f, "3. ", "Arbor, pivots and plain sections",
+             "Value", [num(r0["arbor_r"])]),
+        cell("BARREL_CORE_R (the core, to 3 decimals), every barrel", round(r0["core_r"], 3), f, "3. ",
+             "Arbor core (inside the drum's bore)", "Value", [num(round(r0["core_r"], 3))]),
+        cell("BARREL_INNER_D (section 3), every barrel", r0["inner_d"], f, "3. ",
+             "Spring chamber inside the drum (not modelled in the mesh)", "Value", [num(r0["inner_d"])]),
+        cell("BARREL_SQUARE_SIDE (section 3), every barrel", r0["square_side"], f, "3. ", "Winding square", "Value",
+             [num(r0["square_side"])]),
+    ]
+    for bid in W.BARREL_IDS:
+        r = B[bid]["row"]
+        sp = r["spring"]
+        out += [
+            cell("BARREL_TEETH (%s)" % bid, r["teeth"], f, "2. Catalogue", bid, "Teeth", [num(r["teeth"])]),
+            cell("BARREL_MODULE (%s)" % bid, r["module"], f, "2. Catalogue", bid, "Module (mm)", [num(r["module"])]),
+            cell("PRESSURE_ANGLE (%s)" % bid, W.PRESSURE_ANGLE, f, "2. Catalogue", bid, "Pressure angle",
+                 [num(W.PRESSURE_ANGLE)]),
+            cell("drum height = barrel_z wheel (%s, to 4 decimals)" % bid, r["drum_height"], f, "2. Catalogue", bid,
+                 "Drum height", [num(zr(r["drum_height"]))]),
+            cell("arbor length = barrel_z arbor (%s, to 4 decimals)" % bid, r["arbor_length"], f, "2. Catalogue", bid,
+                 "Arbor length", [num(zr(r["arbor_length"]))]),
+            cell("BARREL_ARBOR_R (%s)" % bid, r["arbor_r"], f, "2. Catalogue", bid, "Arbor pivot radius",
+                 [num(r["arbor_r"])]),
+            cell("BARREL_INNER_D (%s)" % bid, r["inner_d"], f, "2. Catalogue", bid, "Spring chamber inner diameter",
+                 [num(r["inner_d"])]),
+            cell("BARREL_CORE_R (= BARREL_INNER_D / 6, to 3 decimals; %s)" % bid, round(r["core_r"], 3), f,
+                 "2. Catalogue", bid, "Arbor core radius", [num(round(r["core_r"], 3))]),
+            cell("BARREL_SQUARE_SIDE (%s)" % bid, r["square_side"], f, "2. Catalogue", bid, "Winding square side",
+                 [num(r["square_side"])]),
+            cell("BARREL_SPRING_GEOMETRY h, t, L (%s, spring %s; drawing data, not graded)" % (bid, sp["row"]),
+                 (sp["h"], sp["t"], sp["L"]), f, "2. Catalogue", bid, SPRING_COL,
+                 [num(sp["h"]), num(sp["t"]), num(sp["L"])]),
+            cell("barrel_z wheel (%s, to 4 decimals): the toothed drum of the mesh" % bid, r["wheel_z"], f, "3. ", bid,
+                 "Toothed drum", [num(zr(z)) for z in r["wheel_z"]]),
+            cell("barrel_z arbor (%s, to 4 decimals)" % bid, r["arbor_z"], f, "3. ", bid, "Arbor",
+                 [num(zr(z)) for z in r["arbor_z"]]),
+            cell("barrel_z square (%s, to 4 decimals)" % bid, r["square_z"], f, "3. ", bid, "Winding square",
+                 [num(zr(z)) for z in r["square_z"]]),
+            cell("supplied mesh of %s (make_bundle_job.supplied_name)" % bid, supplied_mesh(bid), f, "3. ", bid,
+                 "Mesh", [], text=supplied_mesh(bid)),
+        ]
+    out += [
         cell("BARREL_TURNS_PER_HOUR (8-hour build, speed class %s in the work order)" % s8, W.BARREL_TURNS_PER_HOUR, f,
              "4. Speed classes", s8, SPEED_COL, ["1", str(1 / W.BARREL_TURNS_PER_HOUR)]),
         cell("CHANGED_BARREL_TURNS_PER_HOUR (6-hour variant, speed class %s in the work order)" % s6,
@@ -1055,6 +1072,7 @@ def ds_w01_trace(L, B):
         cell("barrel running sense, both builds (the grader turns the barrel clockwise seen from +z)", RUNNING_SENSE, f,
              "4. Speed classes", s8, SENSE_COL, [], text=RUNNING_SENSE),
     ]
+    return out
 
 
 # ------------------------------------------------------------------ DS-W02 and DS-W03
@@ -1184,8 +1202,8 @@ def traceability_rows(L, B, S=None):
     o, spec = "Order", "Specification"
     s8, s6 = speed_class_of(W.BARREL_TURNS_PER_HOUR), speed_class_of(W.CHANGED_BARREL_TURNS_PER_HOUR)
     links = [
-        cell("work order names the barrel (the DS-W01 row of BARREL_TEETH ...)", supplied_barrel_no(), "instruction.md",
-             o, "Barrel", spec, has=supplied_barrel_no()),
+        cell("work order leaves the barrel to the designer, from the DS-W01 catalogue (geometry/watch.py BARREL_IDS)",
+             "DS-W01", "instruction.md", o, "Barrel", spec, has="DS-W01"),
         cell("work order names the case (the DS-W02 row of CASE_RADIUS, CASE_HEIGHT)", ordered_case_no(),
              "instruction.md", o, "Case", spec, has=ordered_case_no()),
         cell("work order names the print process (DS-W03)", "DS-W03", "instruction.md", o, "Parts", spec, has="DS-W03"),
@@ -1511,7 +1529,7 @@ def documents(keyless=None):
         LITERALS["FORMAT.md"].setdefault("-1", "a spring's rest side, 1 or -1")
     _hands_rule()
     L = _literals()
-    B = barrel_facts()
+    B = catalogue_facts()
     S = strength_module()
     out = {"PROMPT.md": prompt(L, S), "FORMAT.md": format_sheet(L, S), "datasheets/INDEX.md": index_sheet(S),
            "datasheets/DS-W01_barrel.md": ds_w01(L, B), "datasheets/DS-W02_case.md": ds_w02(L),

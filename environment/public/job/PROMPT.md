@@ -15,9 +15,10 @@ and minutes are read from hands on the centre of the dial; the hour, minute and 
 mm long. The 24-hour hand has a small dial of its own, whose centre is at least 6 mm from the centre of the dial,
 and is at least 3 mm long.
 
-**Barrel, case and printing.** The movement is driven by barrel BR-096-20 (catalogue sheet DS-W01), supplied as
-`/app/supplied/barrel.stl`. It goes in case CS-254-134 (catalogue sheet DS-W02). Its parts are printed by the process
-of process sheet DS-W03, and each mobile is made in one of the materials that `/app/FORMAT.md` lists.
+**Barrel, case and printing.** The movement is driven by a barrel of your choice from catalogue sheet DS-W01; each
+barrel of the catalogue is supplied as a mesh, `/app/supplied/<part no.>.stl`. It goes in case CS-254-134
+(catalogue sheet DS-W02). Its parts are printed by the process of process sheet DS-W03, and each mobile is made in
+one of the materials that `/app/FORMAT.md` lists.
 
 **Two builds.** The calibre is built in two versions. In the 8-hour build (`movement.json`) the barrel runs at
 speed class D; in the 6-hour variant (`variant_6h.json`) the same barrel, in the same place, runs at speed
@@ -72,8 +73,8 @@ Installed software: Python 3 with CadQuery 2.8.0 (OpenCASCADE, importable as `ca
 ## Supplied
 
 - `/app/datasheets/`: the supplier documents; `/app/datasheets/INDEX.md` lists them.
-- `/app/supplied/barrel.stl`: barrel BR-096-20 as a mesh, in its assembled position (DS-W01, section 3). It is not
-  part of the delivery.
+- `/app/supplied/<part no.>.stl`: each barrel of DS-W01 as a mesh, in its assembled position (DS-W01, section 3).
+  They are not part of the delivery.
 
 ## How you work
 

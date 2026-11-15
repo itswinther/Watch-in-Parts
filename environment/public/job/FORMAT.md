@@ -23,9 +23,9 @@ file outside the folder, is a format error.
 - **Frame.** Millimetres (mm), cubic millimetres (mm3) and degrees. A right-handed frame. Every arbor (rotation
   axis) is parallel to z. The dial side is +z: the hands are read looking from +z towards -z, and "clockwise"
   always means clockwise in that view. Positions are those of the parts as assembled.
-- **The barrel** is the mobile `barrel`: the supplied mesh, its drum and its arbor turning together, on the axis
-  of the barrel as supplied (DS-W01, section 3). It is listed in no file; meshes and the assembly plan name it
-  `barrel`.
+- **The barrel** is the mobile `barrel`: the supplied mesh of the barrel the movement is built on, its drum and
+  its arbor turning together, on the axis of the barrel as supplied (DS-W01, section 3). It is listed under no
+  mobile; meshes and the assembly plan name it `barrel`.
 - **Drawing.** Each part is drawn at its nominal size, in its assembled position. Parts that are joined (pressed,
   riveted, screwed or bonded) are drawn touching, never overlapping: the factory makes the joint where the drawn
   parts touch. Two solids whose intersection is at most 0.01 mm3 are taken as touching, not overlapping, and two
@@ -69,6 +69,7 @@ Each is at most 1,048,576 bytes and names at most 60 parts.
 
 ```
 {
+  "barrel": "part no.",
   "case_centre": [x, y],
   "fixed": ["part_name", ...],
   "mobiles": {
@@ -89,6 +90,8 @@ Each is at most 1,048,576 bytes and names at most 60 parts.
 }
 ```
 
+- `barrel`: the part no. of the barrel the movement is built on, one of the barrels of the catalogue DS-W01, as
+  that sheet prints it. Required. `movement.json` and `variant_6h.json` name the same barrel.
 - `case_centre`: x and y of the case's axis, in mm.
 - `fixed`: the parts that do not move. A non-empty list.
 - `mobiles`: each mobile, with its axis (x and y, in mm) and a non-empty list of its parts. `barrel` is not listed;

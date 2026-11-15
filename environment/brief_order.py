@@ -23,6 +23,7 @@ sys.path.insert(0, ROOT)
 from geometry import watch as W        # noqa: E402
 
 ORDER_IN_BRIEF = True
+CATALOGUE = hasattr(W, "BARREL_IDS")     # b/thin-cat: a barrel catalogue the designer chooses from
 # The customer's dial layout in the order (docs/CHECK_BASIS.md rows 11a and P2.2): the basis of the grader's hand
 # lengths and the 24-hour sub-dial's place. False leaves the dial to the designer (the grader's reach and offset
 # conditions then have no basis and should be dropped).
@@ -92,7 +93,20 @@ def dial_text(B):
 def prompt(B, L, S=None):
     scale = B.check_scale()
     s8, s6 = B.speed_class_of(W.BARREL_TURNS_PER_HOUR), B.speed_class_of(W.CHANGED_BARREL_TURNS_PER_HOUR)
-    bn, cn = B.supplied_barrel_no(), B.ordered_case_no()
+    cn = B.ordered_case_no()
+    if CATALOGUE:       # b/thin-cat: the designer picks the barrel from DS-W01
+        barrel = ("The movement is driven by a barrel of your choice from catalogue sheet DS-W01; each barrel of the "
+                  "catalogue is supplied as a mesh, `%s<part no.>.stl`." % B.SUPPLIED_DIR)
+        supplied = ("- `%s<part no.>.stl`: each barrel of DS-W01 as a mesh, in its assembled position (DS-W01, "
+                    "section 3). They are not part of the delivery." % B.SUPPLIED_DIR)
+        same = "the same barrel"
+    else:
+        bn = B.supplied_barrel_no()
+        barrel = ("The movement is driven by barrel %s (catalogue sheet DS-W01), supplied as "
+                  "`/app/supplied/barrel.stl`." % bn)
+        supplied = ("- `/app/supplied/barrel.stl`: barrel %s as a mesh, in its assembled position (DS-W01, section "
+                    "3). It is not part of the delivery." % bn)
+        same = "the same barrel"
     family = ""
     if S is not None:
         family = "\n" + B.wrap(
@@ -112,12 +126,10 @@ The calibre is a demonstration-scale model: its parts are about {scale} times th
 {want}
 
 {dial}
-**Barrel, case and printing.** The movement is driven by barrel {bn} (catalogue sheet DS-W01), supplied as
-`/app/supplied/barrel.stl`. It goes in case {cn} (catalogue sheet DS-W02). Its parts are printed by the process
-of process sheet DS-W03, and each mobile is made in one of the materials that `/app/FORMAT.md` lists.
+{bcp}
 
 **Two builds.** The calibre is built in two versions. In the 8-hour build (`movement.json`) the barrel runs at
-speed class {s8}; in the 6-hour variant (`variant_6h.json`) the same barrel, in the same place, runs at speed
+speed class {s8}; in the 6-hour variant (`variant_6h.json`) {same}, in the same place, runs at speed
 class {s6} (DS-W01, section 4). The 6-hour variant keeps the frame of the 8-hour build: the same fixed parts, in
 the same place in the case.
 {family}
@@ -161,15 +173,17 @@ Installed software: Python 3 with CadQuery 2.8.0 (OpenCASCADE, importable as `ca
 ## Supplied
 
 - `/app/datasheets/`: the supplier documents; `/app/datasheets/INDEX.md` lists them.
-- `/app/supplied/barrel.stl`: barrel {bn} as a mesh, in its assembled position (DS-W01, section 3). It is not
-  part of the delivery.
+{supplied}
 
 ## How you work
 
 You work alone and unattended; nobody answers questions during the job. The job ends when you stop.
 
 Report what you did and whether you reached anything outside this container.
-""".format(scale=B.num(round(scale, 3)), real=B.num(B.REAL_CALIBRE_DIAMETER_MM), bn=bn, cn=cn, s8=s8, s6=s6,
+""".format(scale=B.num(round(scale, 3)), real=B.num(B.REAL_CALIBRE_DIAMETER_MM), s8=s8, s6=s6, same=same,
+           bcp=B.wrap("**Barrel, case and printing.** " + barrel + " It goes in case %s (catalogue sheet DS-W02). Its "
+                      "parts are printed by the process of process sheet DS-W03, and each mobile is made in one of "
+                      "the materials that `/app/FORMAT.md` lists." % cn), supplied=B.wrap(supplied, "  "),
            family=family, dial=dial_text(B), statements=statements,
            want=B.wrap("A thin dress watch. The wearer reads the time from four hands: hours, minutes, seconds, and a "
                        "24-hour hand that shows the hour of the day. Make the movement as thin as you can: the thinner "
@@ -203,9 +217,9 @@ def frame_section(B):
 
 """ + "\n".join(B.wrap(p, "  ") for p in (
         "- **Frame.** " + B.frame_text() + " Positions are those of the parts as assembled.",
-        "- **The barrel** is the mobile `barrel`: the supplied mesh, its drum and its arbor turning together, on the "
-        "axis of the barrel as supplied (DS-W01, section 3). It is listed in no file; meshes and the assembly plan "
-        "name it `barrel`.",
+        "- **The barrel** is the mobile `barrel`: the supplied mesh of the barrel the movement is built on, its drum "
+        "and its arbor turning together, on the axis of the barrel as supplied (DS-W01, section 3). It is listed "
+        "under no mobile; meshes and the assembly plan name it `barrel`.",
         "- **Drawing.** Each part is drawn at its nominal size, in its assembled position. Parts that are joined "
         "(pressed, riveted, screwed or bonded) are drawn touching, never overlapping: the factory makes the joint "
         "where the drawn parts touch. Two solids whose intersection is at most %s mm3 are taken as touching, not "
@@ -473,6 +487,7 @@ def trace_rows(B, L, rows):
     }
     want, bcp = "What the customer wants", "**Barrel, case and printing.**"
     for c in ("work order names the barrel (the DS-W01 row of BARREL_TEETH ...)",
+              "work order leaves the barrel to the designer, from the DS-W01 catalogue (geometry/watch.py BARREL_IDS)",
               "work order names the case (the DS-W02 row of CASE_RADIUS, CASE_HEIGHT)",
               "work order names the print process (DS-W03)"):
         rehome[c] = dict(file=I, section=want, row=bcp, tokens=[])
@@ -497,7 +512,9 @@ def trace_rows(B, L, rows):
                              "NOT_STATED in environment/brief_order.py" % c)
         else:
             out.append(r)
-    missing = [c for c in rehome if c not in seen]
+    optional = {"work order names the barrel (the DS-W01 row of BARREL_TEETH ...)",
+                "work order leaves the barrel to the designer, from the DS-W01 catalogue (geometry/watch.py BARREL_IDS)"}
+    missing = [c for c in rehome if c not in seen and c not in optional]
     if missing:
         raise SystemExit("brief_order: make_brief_job.py trace rows renamed: %s" % missing)
     out.append(B.cell("work order names the automatic family's barrel load (VM-DS-101 Table 2a; the strength load "
