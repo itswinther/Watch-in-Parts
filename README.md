@@ -61,14 +61,14 @@ The reward:
 ```
 share  = sum(w_p x s_p) / sum(w_p)          s_p = weighted share of part p's checks that pass (0 if a gate fails)
 all    = 1 if every gate and check of every part passes, else 0
-x      = (H - 3.95) / (13.4 - 3.95), clamped to 0..1      H = total height of the taller build, mm
+x      = (H - 3.85) / (13.4 - 3.85), clamped to 0..1      H = total height of the taller build, mm
 s      = (1 - x)^4
 reward = (1/2 x share + 1/2 x all x s) x (0.75 + 0.10 h) / 0.85
 ```
 
-- **Thickness.** 3.95 mm (`THIN_REFERENCE_MM`) is the height of the thinnest design of ours that still runs when
+- **Thickness.** 3.85 mm (`THIN_REFERENCE_MM`) is the height of the thinnest design of ours that still runs when
   every part is made 0.01 mm larger or smaller than drawn, the size accuracy the process sheet states; 13.4 mm is
-  the case height. A build at or below 3.95 mm gets s = 1. At 4.71 mm s = 0.72; at 6 mm s = 0.38. Thickness pays only
+  the case height. A build at or below 3.85 mm gets s = 1. At 4.71 mm s = 0.69; at 6 mm s = 0.36. Thickness pays only
   for a watch that fully works. The agent is told only that thinner is better.
 - **Statement factor.** h scores `report.json` against the truth, part by part: `pass` on a part that passes
   in full 1, `pass` on one that does not -2, `fail` 0.5 or 1, `not_tested` 0.5; h = max(0, mean over the four
@@ -152,7 +152,7 @@ python3 solution/reference_watch.py /tmp/ref --job                     # the ref
 mkdir -p /tmp/empty && (cd tests && python3 -I grade_watch.py /tmp/empty --reward /tmp/e.txt)   # reward 0
 python3 environment/make_bundle_job.py /tmp/bundle                     # the agent's /app
 python3 environment/make_brief_job.py --check                          # documents agree with the constants
-python3 tests/test_anchors_job.py 2 --only "job stop-early"            # stop-early anchors
+python3 tests/test_anchors_job.py 3 --only "job stop-early"            # stop-early baselines: 0.157, 0.220, 0.333
 ```
 
 Grading the reference takes a few minutes (188 s in the Harbor oracle run; about 8 min on a busy 4-core machine).
@@ -186,8 +186,8 @@ How to read these:
   run passes 89 to 96 % of the weighted checks, and the assembly plan (P4) passes in all three. Half of the
   reward is paid only when every check of every part passes, and none of the three reaches that.
 - **Thickness did not change these three scores**, because it only applies to a watch that fully works. Had
-  the faults been fixed at the delivered heights, the thickness scores would be 0.026, 0.0008 and 0.003: the
-  watches are 9.6 to 11.8 mm against 3.95 mm. The order says "as thin as you can".
+  the faults been fixed at the delivered heights, the thickness scores would be 0.025, 0.0008 and 0.003: the
+  watches are 9.6 to 11.8 mm against 3.85 mm. The order says "as thin as you can".
 - **The model said so itself.** All three reports state P1 to P3 `not_tested` and P4 `pass`. That is truthful,
   and costs 3/68 of the reward.
 - **It stopped early.** The three agents ran for 810 to 2,036 s (14 to 34 minutes) of a 10,800 s limit.
@@ -266,8 +266,10 @@ what we do not show.
 > successful play.
 
 - **Doing nothing:** 0.000 in Harbor (nop agent); an empty delivery folder grades 0.000000 outside Harbor.
-- **Stopping early:** three stop-early deliveries are defined in `tests/test_anchors_job.py` (Part 1 only; Parts 1
-  and 2; Parts 1 to 3 with no assembly plan). Their rewards on the submitted grader are being re-run and go here.
+- **Stopping early:** three stop-early deliveries, each the reference cut off after its first parts, graded on
+  the submitted grader: Part 1 only 0.157; Parts 1 and 2: 0.220; Parts 1 to 3 without an assembly plan, with a
+  truthful report: 0.333. Command: `python3 tests/test_anchors_job.py 3 --only "job stop-early"` (3 of 3 as
+  expected, about 6 minutes). A flawless three quarters of the job earns one third.
 - **Completing the task well is the best way to score:** half of the reward is paid only when every check of
   every part passes, and that half is scaled by thickness. A partial delivery cannot pass one half.
 - **Measures success at the task:** the checks are geometric tests of the delivered solids: nothing overlaps,
@@ -314,10 +316,10 @@ Not done.
   and the grader can include it as Part 5, but it is switched off (`geometry/keyless_job.py`,
   `KEYLESS_IN_JOB = False`); it does not fit the thin layout.
 - **Thickness is scored against our own design.** If a better design than ours is possible, the scale tops out
-  at 3.95 mm and does not reward going further.
+  at 3.85 mm and does not reward going further.
 - **The reference delivery is thinner than the bar, and would not run as printed.** `solution/` builds a 3.35 mm
   design. It passes every check of the grader, but with parts grown by the stated 0.01 mm one gear pair jams
-  (`spikes/asmade/asmade.py --tol 0.01`). So full thickness score is set at 3.95 mm, the height of our design that
+  (`spikes/asmade/asmade.py --tol 0.01`). So full thickness score is set at 3.85 mm, the height of our design that
   does run as made. That design needs a case radius of 12.766 mm, 0.066 mm more than the 12.7 mm case the agent is
   given; we have not found one that fits. The as-made test itself is not part of the score.
 

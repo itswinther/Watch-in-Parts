@@ -53,12 +53,12 @@ THIN_TARGET_MM = 4.0       # mm: the stated thickness target (THIN_TARGET_STATED
 # mm: the height that earns the full thickness score: total height along z of the taller build, barrel included.
 # Where the value comes from (itswinther, 2026-11-15 05:30, SESSION.md): the thinnest house design that runs as made
 # at the print process's stated size accuracy (DS-W03 section 4, +/- 0.01 mm; spikes/asmade/asmade.py --tol 0.01,
-# both builds), which is 3.95 mm (branch a/thin-asmade 527f036, SESSION.md A 05:25; that design needs case radius
+# both builds), which is 3.85 mm (branch a/thin-asmade 88904a8, SESSION.md A 05:44; that design needs case radius
 # 12.766). The reference delivery of solution/reference_watch.py OUT --job is thinner (H = 3.3491) and does not run as
 # made at 0.01 (SESSION.md H 05:27), so it is not the bar; it scores s = 1 like anything at or below this height.
 # THE ONE PLACE this number lives (the score, the bundle's leak check and the traceability note all read it). It must
 # not be below the reference's measured H, or the reference loses score.
-THIN_REFERENCE_MM = 3.95
+THIN_REFERENCE_MM = 3.85
 THIN_SCORE_EXPONENT = 4
 THIN_SCORE_SHARE = Fraction(1, 2)   # the half of the reward that full acceptance earns (as tests/grade_watch.py)
 
