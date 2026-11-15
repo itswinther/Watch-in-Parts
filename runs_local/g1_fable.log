@@ -1,0 +1,4 @@
+exit 0 wall 575 s peak RSS of largest child 2.26 GB
+seated": true}}, "P2": {"s": 1.0, "gates": {"files": true, "assembled": true, "day_declared": true}, "checks": {"day_hand": true, "day_place": true}}, "P3": {"s": 1.0, "gates": {"files": true, "assembled": true, "day_declared": true, "same_frame": true}, "checks": {"spin": true, "held": true, "train": true, "clear": true, "minute": true, "hour": true, "seconds": true, "coaxial": true, "hands": true, "size": true, "printable": true, "tolerant": true, "seated": true, "day_hand": true, "day_place": true}}, "P4": {"s": 1.0, "gates": {"files": true, "plan": true}, "checks": "15 of 15 installed"}}}
+ 
+reward 1.000000

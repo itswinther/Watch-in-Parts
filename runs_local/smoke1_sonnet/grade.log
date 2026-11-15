@@ -1,0 +1,2 @@
+{"reward": 0.4168241965973534, "p": 0.9130434782608695, "gates": {"files": true, "assembled": true}, "checks": {"spin": true, "held": true, "train": true, "clear": true, "minute": true, "hour": true, "seconds": true, "coaxial": true, "hands": true, "size": true, "printable": true, "tolerant": true, "seated": true, "light": false}, "skipped": []}
+graded: 0.416824

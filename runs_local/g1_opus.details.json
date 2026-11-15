@@ -1,0 +1,2600 @@
+{
+ "mode": "job",
+ "reward": 1.0,
+ "reward_exact": "1",
+ "all_pass": true,
+ "parts_graded": [
+  "P1",
+  "P2",
+  "P3",
+  "P4"
+ ],
+ "parts": {
+  "P1": {
+   "name": "going train and hands",
+   "weight": 0.25,
+   "gates": {
+    "files": true,
+    "assembled": true
+   },
+   "checks": {
+    "spin": true,
+    "held": true,
+    "train": true,
+    "clear": true,
+    "minute": true,
+    "hour": true,
+    "seconds": true,
+    "coaxial": true,
+    "hands": true,
+    "size": true,
+    "printable": true,
+    "tolerant": true,
+    "seated": true
+   },
+   "check_weights": {
+    "spin": 1,
+    "held": 2,
+    "train": 3,
+    "clear": 1,
+    "minute": 2,
+    "hour": 2,
+    "seconds": 2,
+    "coaxial": 1,
+    "hands": 1,
+    "size": 1,
+    "printable": 1,
+    "tolerant": 2,
+    "seated": 2
+   },
+   "share_of_checks": 1.0,
+   "s": 1.0,
+   "s_exact": "1",
+   "passed": true,
+   "details": {
+    "files": {},
+    "assembled": {
+     "worst_volume": 0.0,
+     "pair": null,
+     "fixed_parts_worst": 0.0,
+     "fixed_pair": null,
+     "mobile_parts_worst": 1.0733601507606494e-17,
+     "mobile_pair": "seconds:seconds_mobile/seconds_hand",
+     "one_frame": true,
+     "frame_groups": [
+      [
+       "main_plate",
+       "deck",
+       "bridge"
+      ]
+     ]
+    },
+    "spin": {
+     "barrel": {
+      "worst_volume": 0.0,
+      "step": 0,
+      "steps": 72
+     },
+     "intermediate": {
+      "worst_volume": 0.0,
+      "step": 0,
+      "steps": 72
+     },
+     "centre": {
+      "worst_volume": 0.0,
+      "step": 0,
+      "steps": 72
+     },
+     "hour": {
+      "worst_volume": 0.0,
+      "step": 0,
+      "steps": 72
+     },
+     "minute_wheel": {
+      "worst_volume": 0.0,
+      "step": 0,
+      "steps": 72
+     },
+     "day_idler": {
+      "worst_volume": 0.0,
+      "step": 0,
+      "steps": 72
+     },
+     "day": {
+      "worst_volume": 0.0,
+      "step": 0,
+      "steps": 72
+     },
+     "third": {
+      "worst_volume": 0.0,
+      "step": 0,
+      "steps": 72
+     },
+     "fourth": {
+      "worst_volume": 0.0,
+      "step": 0,
+      "steps": 72
+     },
+     "fifth": {
+      "worst_volume": 0.0,
+      "step": 0,
+      "steps": 72
+     },
+     "seconds": {
+      "worst_volume": 0.0,
+      "step": 0,
+      "steps": 72
+     }
+    },
+    "held": {
+     "not_held": [],
+     "moves": {
+      "barrel": {
+       "+x": {
+        "held": true,
+        "fixed_volume": 0.23985740054714338,
+        "via": null
+       },
+       "-x": {
+        "held": true,
+        "fixed_volume": 0.2398574005471434,
+        "via": null
+       },
+       "+y": {
+        "held": true,
+        "fixed_volume": 0.239855944649611,
+        "via": null
+       },
+       "-y": {
+        "held": true,
+        "fixed_volume": 0.239855944649611,
+        "via": null
+       },
+       "+z": {
+        "held": true,
+        "fixed_volume": 57.22516752512531,
+        "via": null
+       },
+       "-z": {
+        "held": true,
+        "fixed_volume": 57.302111054113354,
+        "via": null
+       }
+      },
+      "intermediate": {
+       "+x": {
+        "held": true,
+        "fixed_volume": 0.3029624416368647,
+        "via": null
+       },
+       "-x": {
+        "held": true,
+        "fixed_volume": 0.3029624416368647,
+        "via": null
+       },
+       "+y": {
+        "held": true,
+        "fixed_volume": 0.302963011552745,
+        "via": null
+       },
+       "-y": {
+        "held": true,
+        "fixed_volume": 0.3029629484479616,
+        "via": null
+       },
+       "+z": {
+        "held": true,
+        "fixed_volume": 3.360358740571162,
+        "via": null
+       },
+       "-z": {
+        "held": true,
+        "fixed_volume": 10.74241676889425,
+        "via": null
+       }
+      },
+      "centre": {
+       "+x": {
+        "held": true,
+        "fixed_volume": 0.048919528909415,
+        "via": null
+       },
+       "-x": {
+        "held": true,
+        "fixed_volume": 0.04891955100993034,
+        "via": null
+       },
+       "+y": {
+        "held": true,
+        "fixed_volume": 0.048919531600109374,
+        "via": null
+       },
+       "-y": {
+        "held": true,
+        "fixed_volume": 0.04891953160010937,
+        "via": null
+       },
+       "+z": {
+        "held": true,
+        "fixed_volume": 0.0,
+        "via": "hour"
+       },
+       "-z": {
+        "held": true,
+        "fixed_volume": 1.8115690154713215,
+        "via": null
+       }
+      },
+      "hour": {
+       "+x": {
+        "held": true,
+        "fixed_volume": 0.18480888536391052,
+        "via": null
+       },
+       "-x": {
+        "held": true,
+        "fixed_volume": 0.18480912120263723,
+        "via": null
+       },
+       "+y": {
+        "held": true,
+        "fixed_volume": 0.18480944608462974,
+        "via": null
+       },
+       "-y": {
+        "held": true,
+        "fixed_volume": 0.18480944608462968,
+        "via": null
+       },
+       "+z": {
+        "held": true,
+        "fixed_volume": 10.376137793278591,
+        "via": null
+       },
+       "-z": {
+        "held": true,
+        "fixed_volume": 0.0,
+        "via": "centre"
+       }
+      },
+      "minute_wheel": {
+       "+x": {
+        "held": true,
+        "fixed_volume": 0.10482762151131317,
+        "via": null
+       },
+       "-x": {
+        "held": true,
+        "fixed_volume": 0.10482760920722306,
+        "via": null
+       },
+       "+y": {
+        "held": true,
+        "fixed_volume": 0.10482759116320095,
+        "via": null
+       },
+       "-y": {
+        "held": true,
+        "fixed_volume": 0.10482759190115065,
+        "via": null
+       },
+       "+z": {
+        "held": true,
+        "fixed_volume": 0.5852805421193243,
+        "via": null
+       },
+       "-z": {
+        "held": true,
+        "fixed_volume": 0.09263859399356963,
+        "via": null
+       }
+      },
+      "day_idler": {
+       "+x": {
+        "held": true,
+        "fixed_volume": 0.10482759301067446,
+        "via": null
+       },
+       "-x": {
+        "held": true,
+        "fixed_volume": 0.10482761575107767,
+        "via": null
+       },
+       "+y": {
+        "held": true,
+        "fixed_volume": 0.10482758445398042,
+        "via": null
+       },
+       "-y": {
+        "held": true,
+        "fixed_volume": 0.10482756156367795,
+        "via": null
+       },
+       "+z": {
+        "held": true,
+        "fixed_volume": 4.680741034554672,
+        "via": null
+       },
+       "-z": {
+        "held": true,
+        "fixed_volume": 0.09263859720086653,
+        "via": null
+       }
+      },
+      "day": {
+       "+x": {
+        "held": true,
+        "fixed_volume": 0.11880459085258749,
+        "via": null
+       },
+       "-x": {
+        "held": true,
+        "fixed_volume": 0.1188045930549893,
+        "via": null
+       },
+       "+y": {
+        "held": true,
+        "fixed_volume": 0.11880459345546629,
+        "via": null
+       },
+       "-y": {
+        "held": true,
+        "fixed_volume": 0.11880457787189835,
+        "via": null
+       },
+       "+z": {
+        "held": true,
+        "fixed_volume": 0.050244674952618924,
+        "via": null
+       },
+       "-z": {
+        "held": true,
+        "fixed_volume": 0.49510835656381286,
+        "via": null
+       }
+      },
+      "third": {
+       "+x": {
+        "held": true,
+        "fixed_volume": 0.104827578128722,
+        "via": null
+       },
+       "-x": {
+        "held": true,
+        "fixed_volume": 0.1048275534506026,
+        "via": null
+       },
+       "+y": {
+        "held": true,
+        "fixed_volume": 0.10482757377307074,
+        "via": null
+       },
+       "-y": {
+        "held": true,
+        "fixed_volume": 0.10482756203018485,
+        "via": null
+       },
+       "+z": {
+        "held": true,
+        "fixed_volume": 0.05024463881777465,
+        "via": null
+       },
+       "-z": {
+        "held": true,
+        "fixed_volume": 0.09263854921608722,
+        "via": null
+       }
+      },
+      "fourth": {
+       "+x": {
+        "held": true,
+        "fixed_volume": 0.10482767970971167,
+        "via": null
+       },
+       "-x": {
+        "held": true,
+        "fixed_volume": 0.10482770219515276,
+        "via": null
+       },
+       "+y": {
+        "held": true,
+        "fixed_volume": 0.10482760397305567,
+        "via": null
+       },
+       "-y": {
+        "held": true,
+        "fixed_volume": 0.10482763337184912,
+        "via": null
+       },
+       "+z": {
+        "held": true,
+        "fixed_volume": 0.050244703189657555,
+        "via": null
+       },
+       "-z": {
+        "held": true,
+        "fixed_volume": 5.9947292494749345,
+        "via": null
+       }
+      },
+      "fifth": {
+       "+x": {
+        "held": true,
+        "fixed_volume": 0.1048274719417929,
+        "via": null
+       },
+       "-x": {
+        "held": true,
+        "fixed_volume": 0.10482767773330548,
+        "via": null
+       },
+       "+y": {
+        "held": true,
+        "fixed_volume": 0.10482752287142866,
+        "via": null
+       },
+       "-y": {
+        "held": true,
+        "fixed_volume": 0.10482753843667898,
+        "via": null
+       },
+       "+z": {
+        "held": true,
+        "fixed_volume": 0.050244679274892214,
+        "via": null
+       },
+       "-z": {
+        "held": true,
+        "fixed_volume": 0.6276748598274232,
+        "via": null
+       }
+      },
+      "seconds": {
+       "+x": {
+        "held": true,
+        "fixed_volume": 0.11880437270197662,
+        "via": null
+       },
+       "-x": {
+        "held": true,
+        "fixed_volume": 0.11880470412380921,
+        "via": null
+       },
+       "+y": {
+        "held": true,
+        "fixed_volume": 0.11880455496136556,
+        "via": null
+       },
+       "-y": {
+        "held": true,
+        "fixed_volume": 0.11880455568606936,
+        "via": null
+       },
+       "+z": {
+        "held": true,
+        "fixed_volume": 0.050244635614647974,
+        "via": null
+       },
+       "-z": {
+        "held": true,
+        "fixed_volume": 0.09263854457304722,
+        "via": null
+       }
+      }
+     }
+    },
+    "train": {
+     "conflicts": [],
+     "meshes": [
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 768,
+       "largest_gap": 0.02222043474748859,
+       "smallest_drive_overlap": 0.09170581547144768,
+       "smallest_drive_ratio": 2.292645386786192,
+       "module": 0.2,
+       "pair": "barrel/intermediate",
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 320,
+       "largest_gap": 0.022420602596315304,
+       "smallest_drive_overlap": 0.0367999619830586,
+       "smallest_drive_ratio": 1.8399985378427666,
+       "module": 0.2,
+       "pair": "intermediate/centre",
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 384,
+       "largest_gap": 0.02226608160467855,
+       "smallest_drive_overlap": 0.03045300364524277,
+       "smallest_drive_ratio": 1.5226501822621383,
+       "module": 0.2,
+       "pair": "centre/third",
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 280,
+       "largest_gap": 0.022575559595090906,
+       "smallest_drive_overlap": 0.03197975899897484,
+       "smallest_drive_ratio": 1.5989879499487414,
+       "module": 0.20000000000000004,
+       "pair": "third/fourth",
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 288,
+       "largest_gap": 0.022398922487273275,
+       "smallest_drive_overlap": 0.02798572187748171,
+       "smallest_drive_ratio": 1.3992864274899675,
+       "module": 0.19999999999999998,
+       "pair": "fourth/fifth",
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 192,
+       "largest_gap": 0.022638359621127698,
+       "smallest_drive_overlap": 0.02860345722378029,
+       "smallest_drive_ratio": 1.4301728611890143,
+       "module": 0.2,
+       "pair": "fifth/seconds",
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 360,
+       "largest_gap": 0.022322187505271603,
+       "smallest_drive_overlap": 0.03376365599974161,
+       "smallest_drive_ratio": 1.6881827999870802,
+       "module": 0.2,
+       "pair": "centre/minute_wheel",
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 384,
+       "largest_gap": 0.022388164408234986,
+       "smallest_drive_overlap": 0.02954977439299477,
+       "smallest_drive_ratio": 1.4774894241715966,
+       "module": 0.2,
+       "pair": "minute_wheel/hour",
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 384,
+       "largest_gap": 0.02232068725960373,
+       "smallest_drive_overlap": 0.04579893874668328,
+       "smallest_drive_ratio": 2.2899480292664744,
+       "module": 0.2,
+       "pair": "hour/day_idler",
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 288,
+       "largest_gap": 0.022595242822499008,
+       "smallest_drive_overlap": 0.02773504527561026,
+       "smallest_drive_ratio": 1.3867522637805125,
+       "module": 0.20000000000000004,
+       "pair": "day_idler/day",
+       "passes": true
+      }
+     ],
+     "not_driven": []
+    },
+    "clear": {
+     "worst_volume": 0.0,
+     "pair": null
+    },
+    "minute": {
+     "clockwise_turns_per_hour_through_working_meshes": "1"
+    },
+    "hour": {
+     "clockwise_turns_per_hour_through_working_meshes": "1/12"
+    },
+    "seconds": {
+     "clockwise_turns_per_hour_through_working_meshes": "60"
+    },
+    "coaxial": {
+     "distance": 0.0
+    },
+    "hands": {
+     "hour": {
+      "reach": 5.399999967217471,
+      "above_fixed": 1.3000001907348633,
+      "centre_from_axis": 1.3767933916944353
+     },
+     "minute": {
+      "reach": 7.49999962276046,
+      "above_fixed": 1.9000000953674316,
+      "centre_from_axis": 3.0870895767769877
+     },
+     "seconds": {
+      "reach": 5.599999645143667,
+      "above_fixed": 0.7000002861022949,
+      "centre_from_axis": 2.065855714541444
+     }
+    },
+    "size": {
+     "radius": 20.400000894541677,
+     "z_min": -1.2000000476837158,
+     "z_max": 7.449999809265137
+    },
+    "printable": {
+     "main_plate": {
+      "pieces": 1,
+      "max_deviation": 0.07071067811865477
+     },
+     "deck": {
+      "pieces": 1,
+      "max_deviation": 0.07071067811865477
+     },
+     "bridge": {
+      "pieces": 1,
+      "max_deviation": 0.07071067811865477
+     },
+     "intermediate_arbor": {
+      "pieces": 1,
+      "max_deviation": 0.1118033988749895
+     },
+     "intermediate_wheel_8h": {
+      "pieces": 1,
+      "max_deviation": 0.08660254037844387
+     },
+     "centre_arbor_8h": {
+      "pieces": 1,
+      "max_deviation": 0.1118033988749895
+     },
+     "minute_hand": {
+      "pieces": 1,
+      "max_deviation": 0.1224744871391589
+     },
+     "hour_wheel": {
+      "pieces": 1,
+      "max_deviation": 0.1118033988749895
+     },
+     "hour_hand": {
+      "pieces": 1,
+      "max_deviation": 0.07071067811865477
+     },
+     "minute_wheel_mobile": {
+      "pieces": 1,
+      "max_deviation": 0.1118033988749895
+     },
+     "day_idler_mobile": {
+      "pieces": 1,
+      "max_deviation": 0.08660254037844387
+     },
+     "day_mobile": {
+      "pieces": 1,
+      "max_deviation": 0.08660254037844387
+     },
+     "day_hand": {
+      "pieces": 1,
+      "max_deviation": 0.1224744871391589
+     },
+     "third_mobile": {
+      "pieces": 1,
+      "max_deviation": 0.08660254037844387
+     },
+     "fourth_mobile": {
+      "pieces": 1,
+      "max_deviation": 0.1118033988749895
+     },
+     "fifth_mobile": {
+      "pieces": 1,
+      "max_deviation": 0.1118033988749895
+     },
+     "seconds_mobile": {
+      "pieces": 1,
+      "max_deviation": 0.08660254037844387
+     },
+     "seconds_hand": {
+      "pieces": 1,
+      "max_deviation": 0.1224744871391589
+     }
+    },
+    "tolerant": {
+     "meshes": [
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 768,
+       "largest_gap": 0.03484781002844008,
+       "smallest_drive_overlap": 0.07213476167448836,
+       "smallest_drive_ratio": 1.8033690418622086,
+       "module": 0.2,
+       "pair": "barrel/intermediate",
+       "position": "away",
+       "shift": 0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 768,
+       "largest_gap": 0.009662507868490551,
+       "smallest_drive_overlap": 0.11373380501532648,
+       "smallest_drive_ratio": 2.8433451253831614,
+       "module": 0.2,
+       "pair": "barrel/intermediate",
+       "position": "towards",
+       "shift": -0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 320,
+       "largest_gap": 0.03542329995571412,
+       "smallest_drive_overlap": 0.030111991136531707,
+       "smallest_drive_ratio": 1.5055999157895779,
+       "module": 0.2,
+       "pair": "intermediate/centre",
+       "position": "away",
+       "shift": 0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 320,
+       "largest_gap": 0.009645868500442923,
+       "smallest_drive_overlap": 0.044623054665064575,
+       "smallest_drive_ratio": 2.2311532652016197,
+       "module": 0.2,
+       "pair": "intermediate/centre",
+       "position": "towards",
+       "shift": -0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 384,
+       "largest_gap": 0.03509356001461739,
+       "smallest_drive_overlap": 0.02463556061526483,
+       "smallest_drive_ratio": 1.2317780307632413,
+       "module": 0.2,
+       "pair": "centre/third",
+       "position": "away",
+       "shift": 0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 384,
+       "largest_gap": 0.009735702006054243,
+       "smallest_drive_overlap": 0.036822910881072,
+       "smallest_drive_ratio": 1.8411455440535998,
+       "module": 0.2,
+       "pair": "centre/third",
+       "position": "towards",
+       "shift": -0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 280,
+       "largest_gap": 0.03525077463544139,
+       "smallest_drive_overlap": 0.026031465024078104,
+       "smallest_drive_ratio": 1.3015732512039047,
+       "module": 0.20000000000000004,
+       "pair": "third/fourth",
+       "position": "away",
+       "shift": 0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 280,
+       "largest_gap": 0.010115100138408448,
+       "smallest_drive_overlap": 0.03818424238812949,
+       "smallest_drive_ratio": 1.9092121194064737,
+       "module": 0.20000000000000004,
+       "pair": "third/fourth",
+       "position": "towards",
+       "shift": -0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 288,
+       "largest_gap": 0.03540950825146835,
+       "smallest_drive_overlap": 0.02258115714884347,
+       "smallest_drive_ratio": 1.129058126630608,
+       "module": 0.19999999999999998,
+       "pair": "fourth/fifth",
+       "position": "away",
+       "shift": 0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 288,
+       "largest_gap": 0.009862212447737731,
+       "smallest_drive_overlap": 0.034788535589097766,
+       "smallest_drive_ratio": 1.7394271941666484,
+       "module": 0.19999999999999998,
+       "pair": "fourth/fifth",
+       "position": "towards",
+       "shift": -0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 192,
+       "largest_gap": 0.03549475662310024,
+       "smallest_drive_overlap": 0.02301589251778,
+       "smallest_drive_ratio": 1.1507946258889998,
+       "module": 0.2,
+       "pair": "fifth/seconds",
+       "position": "away",
+       "shift": 0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 192,
+       "largest_gap": 0.01003046626342479,
+       "smallest_drive_overlap": 0.03444458159417718,
+       "smallest_drive_ratio": 1.7222290797088586,
+       "module": 0.2,
+       "pair": "fifth/seconds",
+       "position": "towards",
+       "shift": -0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 360,
+       "largest_gap": 0.03479470986330532,
+       "smallest_drive_overlap": 0.02639264980148762,
+       "smallest_drive_ratio": 1.3196324900743808,
+       "module": 0.2,
+       "pair": "centre/minute_wheel",
+       "position": "away",
+       "shift": 0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 360,
+       "largest_gap": 0.00998647327670013,
+       "smallest_drive_overlap": 0.04174753769118794,
+       "smallest_drive_ratio": 2.0873768845593967,
+       "module": 0.2,
+       "pair": "centre/minute_wheel",
+       "position": "towards",
+       "shift": -0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 384,
+       "largest_gap": 0.03513922400700175,
+       "smallest_drive_overlap": 0.0228689048937168,
+       "smallest_drive_ratio": 1.143445789923281,
+       "module": 0.2,
+       "pair": "minute_wheel/hour",
+       "position": "away",
+       "shift": 0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 384,
+       "largest_gap": 0.009956864191291643,
+       "smallest_drive_overlap": 0.03688455327969397,
+       "smallest_drive_ratio": 1.844228543381396,
+       "module": 0.2,
+       "pair": "minute_wheel/hour",
+       "position": "towards",
+       "shift": -0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 384,
+       "largest_gap": 0.03491220641383215,
+       "smallest_drive_overlap": 0.03632938771794727,
+       "smallest_drive_ratio": 1.8164702520578762,
+       "module": 0.2,
+       "pair": "hour/day_idler",
+       "position": "away",
+       "shift": 0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 384,
+       "largest_gap": 0.009998552102682412,
+       "smallest_drive_overlap": 0.05671201587848011,
+       "smallest_drive_ratio": 2.8356021460444745,
+       "module": 0.2,
+       "pair": "hour/day_idler",
+       "position": "towards",
+       "shift": -0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 288,
+       "largest_gap": 0.0355552557621717,
+       "smallest_drive_overlap": 0.021428385979908184,
+       "smallest_drive_ratio": 1.0714192989954088,
+       "module": 0.20000000000000004,
+       "pair": "day_idler/day",
+       "position": "away",
+       "shift": 0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 288,
+       "largest_gap": 0.009894925962138779,
+       "smallest_drive_overlap": 0.034718883455782765,
+       "smallest_drive_ratio": 1.7359441727891376,
+       "module": 0.20000000000000004,
+       "pair": "day_idler/day",
+       "position": "towards",
+       "shift": -0.03,
+       "passes": true
+      }
+     ]
+    },
+    "seated": {
+     "not_seated": [],
+     "not_in_one_piece": [],
+     "pieces": {
+      "intermediate": [
+       [
+        "intermediate_arbor",
+        "intermediate_wheel_8h"
+       ]
+      ],
+      "centre": [
+       [
+        "centre_arbor_8h",
+        "minute_hand"
+       ]
+      ],
+      "hour": [
+       [
+        "hour_wheel",
+        "hour_hand"
+       ]
+      ],
+      "day": [
+       [
+        "day_mobile",
+        "day_hand"
+       ]
+      ],
+      "seconds": [
+       [
+        "seconds_mobile",
+        "seconds_hand"
+       ]
+      ]
+     },
+     "moves": {
+      "intermediate": {
+       "intermediate_arbor": {
+        "+x": 0.10166840362850806,
+        "-x": 0.1016684036285081,
+        "+y": 0.10166805501459222,
+        "-y": 0.10166805501459222,
+        "+z": 0.07536693316765188,
+        "-z": 6.5052130349130266e-18
+       },
+       "intermediate_wheel_8h": {
+        "+x": 0.10166840362850808,
+        "-x": 0.10166840362850811,
+        "+y": 0.10166805501459221,
+        "-y": 0.10166805501459225,
+        "+z": 3.469446951953614e-18,
+        "-z": 0.07536693316765194
+       }
+      },
+      "centre": {
+       "centre_arbor_8h": {
+        "+x": 0.03510110250307646,
+        "-x": 0.03510110250307637,
+        "+y": 0.035101036170029666,
+        "-y": 0.03510103617002967,
+        "+z": 0.0392536015835295,
+        "-z": 0.0
+       },
+       "minute_hand": {
+        "+x": 0.03510110250307645,
+        "-x": 0.03510110250307634,
+        "+y": 0.03510103617002963,
+        "-y": 0.035101036170029624,
+        "+z": 0.0,
+        "-z": 0.039253601583529495
+       }
+      },
+      "hour": {
+       "hour_wheel": {
+        "+x": 0.11926868684777915,
+        "-x": 0.11926868684777883,
+        "+y": 0.11926746339461694,
+        "-y": 0.11926746339461694,
+        "+z": 0.3454316376449715,
+        "-z": 0.0
+       },
+       "hour_hand": {
+        "+x": 0.11926868684777883,
+        "-x": 0.11926868684777914,
+        "+y": 0.11926746339461687,
+        "-y": 0.11926746339461693,
+        "+z": 0.0,
+        "-z": 0.3454316376449715
+       }
+      },
+      "minute_wheel": {},
+      "day_idler": {},
+      "day": {
+       "day_mobile": {
+        "+x": 0.04303774228622592,
+        "-x": 0.04303740004680403,
+        "+y": 0.04303755545439045,
+        "-y": 0.04303757041775366,
+        "+z": 0.05652530310179853,
+        "-z": 0.0
+       },
+       "day_hand": {
+        "+x": 0.04303740003969768,
+        "-x": 0.043037742279119565,
+        "+y": 0.04303757041775378,
+        "-y": 0.043037555454390426,
+        "+z": 0.0,
+        "-z": 0.05652530310179855
+       }
+      },
+      "third": {},
+      "fourth": {},
+      "fifth": {},
+      "seconds": {
+       "seconds_mobile": {
+        "+x": 0.04303763244182984,
+        "-x": 0.04303757527250552,
+        "+y": 0.04303736901033277,
+        "-y": 0.04303775316067329,
+        "+z": 0.05652516702232278,
+        "-z": 0.0
+       },
+       "seconds_hand": {
+        "+x": 0.0430375752863854,
+        "-x": 0.04303763245572734,
+        "+y": 0.043037753160673285,
+        "-y": 0.043037369010332754,
+        "+z": 0.0,
+        "-z": 0.05652516702232277
+       }
+      }
+     }
+    }
+   }
+  },
+  "P2": {
+   "name": "24-hour hand",
+   "weight": 0.1,
+   "gates": {
+    "files": true,
+    "assembled": true,
+    "day_declared": true
+   },
+   "checks": {
+    "day_hand": true,
+    "day_place": true
+   },
+   "check_weights": {
+    "day_hand": 3,
+    "day_place": 1
+   },
+   "share_of_checks": 1.0,
+   "s": 1.0,
+   "s_exact": "1",
+   "passed": true,
+   "details": {
+    "files": {},
+    "assembled": {
+     "worst_volume": 0.0,
+     "pair": null,
+     "fixed_parts_worst": 0.0,
+     "fixed_pair": null,
+     "mobile_parts_worst": 1.0733601507606494e-17,
+     "mobile_pair": "seconds:seconds_mobile/seconds_hand",
+     "one_frame": true,
+     "frame_groups": [
+      [
+       "main_plate",
+       "deck",
+       "bridge"
+      ]
+     ]
+    },
+    "day_declared": {
+     "part": "day_hand",
+     "also_used_by": []
+    },
+    "day_hand": {
+     "clockwise_turns_per_hour_through_working_meshes": "1/24"
+    },
+    "day_place": {
+     "reach": 3.6000000547709816,
+     "above_fixed": 0.09999990463256836,
+     "centre_from_axis": 1.12803891845931,
+     "axis_distance": 12.164272955436624
+    }
+   }
+  },
+  "P3": {
+   "name": "6-hour variant",
+   "weight": 0.15,
+   "gates": {
+    "files": true,
+    "assembled": true,
+    "day_declared": true,
+    "same_frame": true
+   },
+   "checks": {
+    "spin": true,
+    "held": true,
+    "train": true,
+    "clear": true,
+    "minute": true,
+    "hour": true,
+    "seconds": true,
+    "coaxial": true,
+    "hands": true,
+    "size": true,
+    "printable": true,
+    "tolerant": true,
+    "seated": true,
+    "day_hand": true,
+    "day_place": true
+   },
+   "check_weights": {
+    "spin": 1,
+    "held": 2,
+    "train": 3,
+    "clear": 1,
+    "minute": 2,
+    "hour": 2,
+    "seconds": 2,
+    "coaxial": 1,
+    "hands": 1,
+    "size": 1,
+    "printable": 1,
+    "tolerant": 2,
+    "seated": 2,
+    "day_hand": 3,
+    "day_place": 1
+   },
+   "share_of_checks": 1.0,
+   "s": 1.0,
+   "s_exact": "1",
+   "passed": true,
+   "details": {
+    "files": {},
+    "assembled": {
+     "worst_volume": 0.0,
+     "pair": null,
+     "fixed_parts_worst": 0.0,
+     "fixed_pair": null,
+     "mobile_parts_worst": 1.0733601507606494e-17,
+     "mobile_pair": "seconds:seconds_mobile/seconds_hand",
+     "one_frame": true,
+     "frame_groups": [
+      [
+       "main_plate",
+       "deck",
+       "bridge"
+      ]
+     ]
+    },
+    "day_declared": {
+     "part": "day_hand",
+     "also_used_by": []
+    },
+    "same_frame": {
+     "movement_fixed": [
+      "main_plate",
+      "deck",
+      "bridge"
+     ],
+     "variant_fixed": [
+      "main_plate",
+      "deck",
+      "bridge"
+     ],
+     "movement_case_centre": [
+      8.0,
+      0.0
+     ],
+     "variant_case_centre": [
+      8.0,
+      0.0
+     ],
+     "same_fixed": true,
+     "same_case_centre": true,
+     "only_in_movement": [],
+     "only_in_variant": []
+    },
+    "spin": {
+     "barrel": {
+      "worst_volume": 0.0,
+      "step": 0,
+      "steps": 72
+     },
+     "intermediate": {
+      "worst_volume": 0.0,
+      "step": 0,
+      "steps": 72
+     },
+     "centre": {
+      "worst_volume": 0.0,
+      "step": 0,
+      "steps": 72
+     },
+     "hour": {
+      "worst_volume": 0.0,
+      "step": 0,
+      "steps": 72
+     },
+     "minute_wheel": {
+      "worst_volume": 0.0,
+      "step": 0,
+      "steps": 72
+     },
+     "day_idler": {
+      "worst_volume": 0.0,
+      "step": 0,
+      "steps": 72
+     },
+     "day": {
+      "worst_volume": 0.0,
+      "step": 0,
+      "steps": 72
+     },
+     "third": {
+      "worst_volume": 0.0,
+      "step": 0,
+      "steps": 72
+     },
+     "fourth": {
+      "worst_volume": 0.0,
+      "step": 0,
+      "steps": 72
+     },
+     "fifth": {
+      "worst_volume": 0.0,
+      "step": 0,
+      "steps": 72
+     },
+     "seconds": {
+      "worst_volume": 0.0,
+      "step": 0,
+      "steps": 72
+     }
+    },
+    "held": {
+     "not_held": [],
+     "moves": {
+      "barrel": {
+       "+x": {
+        "held": true,
+        "fixed_volume": 0.23985740054714338,
+        "via": null
+       },
+       "-x": {
+        "held": true,
+        "fixed_volume": 0.2398574005471434,
+        "via": null
+       },
+       "+y": {
+        "held": true,
+        "fixed_volume": 0.239855944649611,
+        "via": null
+       },
+       "-y": {
+        "held": true,
+        "fixed_volume": 0.239855944649611,
+        "via": null
+       },
+       "+z": {
+        "held": true,
+        "fixed_volume": 57.22516752512531,
+        "via": null
+       },
+       "-z": {
+        "held": true,
+        "fixed_volume": 57.302111054113354,
+        "via": null
+       }
+      },
+      "intermediate": {
+       "+x": {
+        "held": true,
+        "fixed_volume": 0.3029624416368647,
+        "via": null
+       },
+       "-x": {
+        "held": true,
+        "fixed_volume": 0.3029624416368647,
+        "via": null
+       },
+       "+y": {
+        "held": true,
+        "fixed_volume": 0.302963011552745,
+        "via": null
+       },
+       "-y": {
+        "held": true,
+        "fixed_volume": 0.3029629484479616,
+        "via": null
+       },
+       "+z": {
+        "held": true,
+        "fixed_volume": 3.360358740571162,
+        "via": null
+       },
+       "-z": {
+        "held": true,
+        "fixed_volume": 9.320152394368394,
+        "via": null
+       }
+      },
+      "centre": {
+       "+x": {
+        "held": true,
+        "fixed_volume": 0.048919528909415,
+        "via": null
+       },
+       "-x": {
+        "held": true,
+        "fixed_volume": 0.04891955100993034,
+        "via": null
+       },
+       "+y": {
+        "held": true,
+        "fixed_volume": 0.048919531600109374,
+        "via": null
+       },
+       "-y": {
+        "held": true,
+        "fixed_volume": 0.04891953160010937,
+        "via": null
+       },
+       "+z": {
+        "held": true,
+        "fixed_volume": 0.0,
+        "via": "hour"
+       },
+       "-z": {
+        "held": true,
+        "fixed_volume": 2.631529352611744,
+        "via": null
+       }
+      },
+      "hour": {
+       "+x": {
+        "held": true,
+        "fixed_volume": 0.18480888536391052,
+        "via": null
+       },
+       "-x": {
+        "held": true,
+        "fixed_volume": 0.18480912120263723,
+        "via": null
+       },
+       "+y": {
+        "held": true,
+        "fixed_volume": 0.18480944608462974,
+        "via": null
+       },
+       "-y": {
+        "held": true,
+        "fixed_volume": 0.18480944608462968,
+        "via": null
+       },
+       "+z": {
+        "held": true,
+        "fixed_volume": 10.376137793278591,
+        "via": null
+       },
+       "-z": {
+        "held": true,
+        "fixed_volume": 0.0,
+        "via": "centre"
+       }
+      },
+      "minute_wheel": {
+       "+x": {
+        "held": true,
+        "fixed_volume": 0.10482762151131317,
+        "via": null
+       },
+       "-x": {
+        "held": true,
+        "fixed_volume": 0.10482760920722306,
+        "via": null
+       },
+       "+y": {
+        "held": true,
+        "fixed_volume": 0.10482759116320095,
+        "via": null
+       },
+       "-y": {
+        "held": true,
+        "fixed_volume": 0.10482759190115065,
+        "via": null
+       },
+       "+z": {
+        "held": true,
+        "fixed_volume": 0.5852805421193243,
+        "via": null
+       },
+       "-z": {
+        "held": true,
+        "fixed_volume": 0.09263859399356963,
+        "via": null
+       }
+      },
+      "day_idler": {
+       "+x": {
+        "held": true,
+        "fixed_volume": 0.10482759301067446,
+        "via": null
+       },
+       "-x": {
+        "held": true,
+        "fixed_volume": 0.10482761575107767,
+        "via": null
+       },
+       "+y": {
+        "held": true,
+        "fixed_volume": 0.10482758445398042,
+        "via": null
+       },
+       "-y": {
+        "held": true,
+        "fixed_volume": 0.10482756156367795,
+        "via": null
+       },
+       "+z": {
+        "held": true,
+        "fixed_volume": 4.680741034554672,
+        "via": null
+       },
+       "-z": {
+        "held": true,
+        "fixed_volume": 0.09263859720086653,
+        "via": null
+       }
+      },
+      "day": {
+       "+x": {
+        "held": true,
+        "fixed_volume": 0.11880459085258749,
+        "via": null
+       },
+       "-x": {
+        "held": true,
+        "fixed_volume": 0.1188045930549893,
+        "via": null
+       },
+       "+y": {
+        "held": true,
+        "fixed_volume": 0.11880459345546629,
+        "via": null
+       },
+       "-y": {
+        "held": true,
+        "fixed_volume": 0.11880457787189835,
+        "via": null
+       },
+       "+z": {
+        "held": true,
+        "fixed_volume": 0.050244674952618924,
+        "via": null
+       },
+       "-z": {
+        "held": true,
+        "fixed_volume": 0.49510835656381286,
+        "via": null
+       }
+      },
+      "third": {
+       "+x": {
+        "held": true,
+        "fixed_volume": 0.104827578128722,
+        "via": null
+       },
+       "-x": {
+        "held": true,
+        "fixed_volume": 0.1048275534506026,
+        "via": null
+       },
+       "+y": {
+        "held": true,
+        "fixed_volume": 0.10482757377307074,
+        "via": null
+       },
+       "-y": {
+        "held": true,
+        "fixed_volume": 0.10482756203018485,
+        "via": null
+       },
+       "+z": {
+        "held": true,
+        "fixed_volume": 0.05024463881777465,
+        "via": null
+       },
+       "-z": {
+        "held": true,
+        "fixed_volume": 0.09263854921608722,
+        "via": null
+       }
+      },
+      "fourth": {
+       "+x": {
+        "held": true,
+        "fixed_volume": 0.10482767970971167,
+        "via": null
+       },
+       "-x": {
+        "held": true,
+        "fixed_volume": 0.10482770219515276,
+        "via": null
+       },
+       "+y": {
+        "held": true,
+        "fixed_volume": 0.10482760397305567,
+        "via": null
+       },
+       "-y": {
+        "held": true,
+        "fixed_volume": 0.10482763337184912,
+        "via": null
+       },
+       "+z": {
+        "held": true,
+        "fixed_volume": 0.050244703189657555,
+        "via": null
+       },
+       "-z": {
+        "held": true,
+        "fixed_volume": 5.9947292494749345,
+        "via": null
+       }
+      },
+      "fifth": {
+       "+x": {
+        "held": true,
+        "fixed_volume": 0.1048274719417929,
+        "via": null
+       },
+       "-x": {
+        "held": true,
+        "fixed_volume": 0.10482767773330548,
+        "via": null
+       },
+       "+y": {
+        "held": true,
+        "fixed_volume": 0.10482752287142866,
+        "via": null
+       },
+       "-y": {
+        "held": true,
+        "fixed_volume": 0.10482753843667898,
+        "via": null
+       },
+       "+z": {
+        "held": true,
+        "fixed_volume": 0.050244679274892214,
+        "via": null
+       },
+       "-z": {
+        "held": true,
+        "fixed_volume": 0.6276748598274232,
+        "via": null
+       }
+      },
+      "seconds": {
+       "+x": {
+        "held": true,
+        "fixed_volume": 0.11880437270197662,
+        "via": null
+       },
+       "-x": {
+        "held": true,
+        "fixed_volume": 0.11880470412380921,
+        "via": null
+       },
+       "+y": {
+        "held": true,
+        "fixed_volume": 0.11880455496136556,
+        "via": null
+       },
+       "-y": {
+        "held": true,
+        "fixed_volume": 0.11880455568606936,
+        "via": null
+       },
+       "+z": {
+        "held": true,
+        "fixed_volume": 0.050244635614647974,
+        "via": null
+       },
+       "-z": {
+        "held": true,
+        "fixed_volume": 0.09263854457304722,
+        "via": null
+       }
+      }
+     }
+    },
+    "train": {
+     "conflicts": [],
+     "meshes": [
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 768,
+       "largest_gap": 0.02222043474748859,
+       "smallest_drive_overlap": 0.09170581547144768,
+       "smallest_drive_ratio": 2.292645386786192,
+       "module": 0.2,
+       "pair": "barrel/intermediate",
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 288,
+       "largest_gap": 0.022533990434386846,
+       "smallest_drive_overlap": 0.040361518357308286,
+       "smallest_drive_ratio": 2.0180763990123216,
+       "module": 0.2,
+       "pair": "intermediate/centre",
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 384,
+       "largest_gap": 0.02226608160467855,
+       "smallest_drive_overlap": 0.03045300364524277,
+       "smallest_drive_ratio": 1.5226501822621383,
+       "module": 0.2,
+       "pair": "centre/third",
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 280,
+       "largest_gap": 0.022575559595090906,
+       "smallest_drive_overlap": 0.03197975899897484,
+       "smallest_drive_ratio": 1.5989879499487414,
+       "module": 0.20000000000000004,
+       "pair": "third/fourth",
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 288,
+       "largest_gap": 0.022398922487273275,
+       "smallest_drive_overlap": 0.02798572187748171,
+       "smallest_drive_ratio": 1.3992864274899675,
+       "module": 0.19999999999999998,
+       "pair": "fourth/fifth",
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 192,
+       "largest_gap": 0.022638359621127698,
+       "smallest_drive_overlap": 0.02860345722378029,
+       "smallest_drive_ratio": 1.4301728611890143,
+       "module": 0.2,
+       "pair": "fifth/seconds",
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 360,
+       "largest_gap": 0.022322187505271603,
+       "smallest_drive_overlap": 0.03376365599974161,
+       "smallest_drive_ratio": 1.6881827999870802,
+       "module": 0.2,
+       "pair": "centre/minute_wheel",
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 384,
+       "largest_gap": 0.022388164408234986,
+       "smallest_drive_overlap": 0.02954977439299477,
+       "smallest_drive_ratio": 1.4774894241715966,
+       "module": 0.2,
+       "pair": "minute_wheel/hour",
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 384,
+       "largest_gap": 0.02232068725960373,
+       "smallest_drive_overlap": 0.04579893874668328,
+       "smallest_drive_ratio": 2.2899480292664744,
+       "module": 0.2,
+       "pair": "hour/day_idler",
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 288,
+       "largest_gap": 0.022595242822499008,
+       "smallest_drive_overlap": 0.02773504527561026,
+       "smallest_drive_ratio": 1.3867522637805125,
+       "module": 0.20000000000000004,
+       "pair": "day_idler/day",
+       "passes": true
+      }
+     ],
+     "not_driven": []
+    },
+    "clear": {
+     "worst_volume": 0.0,
+     "pair": null
+    },
+    "minute": {
+     "clockwise_turns_per_hour_through_working_meshes": "1"
+    },
+    "hour": {
+     "clockwise_turns_per_hour_through_working_meshes": "1/12"
+    },
+    "seconds": {
+     "clockwise_turns_per_hour_through_working_meshes": "60"
+    },
+    "coaxial": {
+     "distance": 0.0
+    },
+    "hands": {
+     "hour": {
+      "reach": 5.399999967217471,
+      "above_fixed": 1.3000001907348633,
+      "centre_from_axis": 1.3767933916944353
+     },
+     "minute": {
+      "reach": 7.49999962276046,
+      "above_fixed": 1.9000000953674316,
+      "centre_from_axis": 3.0870895767769877
+     },
+     "seconds": {
+      "reach": 5.599999645143667,
+      "above_fixed": 0.7000002861022949,
+      "centre_from_axis": 2.065855714541444
+     }
+    },
+    "size": {
+     "radius": 20.400000894541677,
+     "z_min": -1.2000000476837158,
+     "z_max": 7.449999809265137
+    },
+    "printable": {
+     "main_plate": {
+      "pieces": 1,
+      "max_deviation": 0.07071067811865477
+     },
+     "deck": {
+      "pieces": 1,
+      "max_deviation": 0.07071067811865477
+     },
+     "bridge": {
+      "pieces": 1,
+      "max_deviation": 0.07071067811865477
+     },
+     "intermediate_arbor": {
+      "pieces": 1,
+      "max_deviation": 0.1118033988749895
+     },
+     "intermediate_wheel_6h": {
+      "pieces": 1,
+      "max_deviation": 0.08660254037844387
+     },
+     "centre_arbor_6h": {
+      "pieces": 1,
+      "max_deviation": 0.1118033988749895
+     },
+     "minute_hand": {
+      "pieces": 1,
+      "max_deviation": 0.1224744871391589
+     },
+     "hour_wheel": {
+      "pieces": 1,
+      "max_deviation": 0.1118033988749895
+     },
+     "hour_hand": {
+      "pieces": 1,
+      "max_deviation": 0.07071067811865477
+     },
+     "minute_wheel_mobile": {
+      "pieces": 1,
+      "max_deviation": 0.1118033988749895
+     },
+     "day_idler_mobile": {
+      "pieces": 1,
+      "max_deviation": 0.08660254037844387
+     },
+     "day_mobile": {
+      "pieces": 1,
+      "max_deviation": 0.08660254037844387
+     },
+     "day_hand": {
+      "pieces": 1,
+      "max_deviation": 0.1224744871391589
+     },
+     "third_mobile": {
+      "pieces": 1,
+      "max_deviation": 0.08660254037844387
+     },
+     "fourth_mobile": {
+      "pieces": 1,
+      "max_deviation": 0.1118033988749895
+     },
+     "fifth_mobile": {
+      "pieces": 1,
+      "max_deviation": 0.1118033988749895
+     },
+     "seconds_mobile": {
+      "pieces": 1,
+      "max_deviation": 0.08660254037844387
+     },
+     "seconds_hand": {
+      "pieces": 1,
+      "max_deviation": 0.1224744871391589
+     }
+    },
+    "tolerant": {
+     "meshes": [
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 768,
+       "largest_gap": 0.03484781002844008,
+       "smallest_drive_overlap": 0.07213476167448836,
+       "smallest_drive_ratio": 1.8033690418622086,
+       "module": 0.2,
+       "pair": "barrel/intermediate",
+       "position": "away",
+       "shift": 0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 768,
+       "largest_gap": 0.009662507868490551,
+       "smallest_drive_overlap": 0.11373380501532648,
+       "smallest_drive_ratio": 2.8433451253831614,
+       "module": 0.2,
+       "pair": "barrel/intermediate",
+       "position": "towards",
+       "shift": -0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 288,
+       "largest_gap": 0.034916370007405245,
+       "smallest_drive_overlap": 0.031708313801571894,
+       "smallest_drive_ratio": 1.5854160680712408,
+       "module": 0.2,
+       "pair": "intermediate/centre",
+       "position": "away",
+       "shift": 0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 288,
+       "largest_gap": 0.010152044774840422,
+       "smallest_drive_overlap": 0.04966297830388706,
+       "smallest_drive_ratio": 2.4831495072233296,
+       "module": 0.2,
+       "pair": "intermediate/centre",
+       "position": "towards",
+       "shift": -0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 384,
+       "largest_gap": 0.03509356001461739,
+       "smallest_drive_overlap": 0.02463556061526483,
+       "smallest_drive_ratio": 1.2317780307632413,
+       "module": 0.2,
+       "pair": "centre/third",
+       "position": "away",
+       "shift": 0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 384,
+       "largest_gap": 0.009735702006054243,
+       "smallest_drive_overlap": 0.036822910881072,
+       "smallest_drive_ratio": 1.8411455440535998,
+       "module": 0.2,
+       "pair": "centre/third",
+       "position": "towards",
+       "shift": -0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 280,
+       "largest_gap": 0.03525077463544139,
+       "smallest_drive_overlap": 0.026031465024078104,
+       "smallest_drive_ratio": 1.3015732512039047,
+       "module": 0.20000000000000004,
+       "pair": "third/fourth",
+       "position": "away",
+       "shift": 0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 280,
+       "largest_gap": 0.010115100138408448,
+       "smallest_drive_overlap": 0.03818424238812949,
+       "smallest_drive_ratio": 1.9092121194064737,
+       "module": 0.20000000000000004,
+       "pair": "third/fourth",
+       "position": "towards",
+       "shift": -0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 288,
+       "largest_gap": 0.03540950825146835,
+       "smallest_drive_overlap": 0.02258115714884347,
+       "smallest_drive_ratio": 1.129058126630608,
+       "module": 0.19999999999999998,
+       "pair": "fourth/fifth",
+       "position": "away",
+       "shift": 0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 288,
+       "largest_gap": 0.009862212447737731,
+       "smallest_drive_overlap": 0.034788535589097766,
+       "smallest_drive_ratio": 1.7394271941666484,
+       "module": 0.19999999999999998,
+       "pair": "fourth/fifth",
+       "position": "towards",
+       "shift": -0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 192,
+       "largest_gap": 0.03549475662310024,
+       "smallest_drive_overlap": 0.02301589251778,
+       "smallest_drive_ratio": 1.1507946258889998,
+       "module": 0.2,
+       "pair": "fifth/seconds",
+       "position": "away",
+       "shift": 0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 192,
+       "largest_gap": 0.01003046626342479,
+       "smallest_drive_overlap": 0.03444458159417718,
+       "smallest_drive_ratio": 1.7222290797088586,
+       "module": 0.2,
+       "pair": "fifth/seconds",
+       "position": "towards",
+       "shift": -0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 360,
+       "largest_gap": 0.03479470986330532,
+       "smallest_drive_overlap": 0.02639264980148762,
+       "smallest_drive_ratio": 1.3196324900743808,
+       "module": 0.2,
+       "pair": "centre/minute_wheel",
+       "position": "away",
+       "shift": 0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 360,
+       "largest_gap": 0.00998647327670013,
+       "smallest_drive_overlap": 0.04174753769118794,
+       "smallest_drive_ratio": 2.0873768845593967,
+       "module": 0.2,
+       "pair": "centre/minute_wheel",
+       "position": "towards",
+       "shift": -0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 384,
+       "largest_gap": 0.03513922400700175,
+       "smallest_drive_overlap": 0.0228689048937168,
+       "smallest_drive_ratio": 1.143445789923281,
+       "module": 0.2,
+       "pair": "minute_wheel/hour",
+       "position": "away",
+       "shift": 0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 384,
+       "largest_gap": 0.009956864191291643,
+       "smallest_drive_overlap": 0.03688455327969397,
+       "smallest_drive_ratio": 1.844228543381396,
+       "module": 0.2,
+       "pair": "minute_wheel/hour",
+       "position": "towards",
+       "shift": -0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 384,
+       "largest_gap": 0.03491220641383215,
+       "smallest_drive_overlap": 0.03632938771794727,
+       "smallest_drive_ratio": 1.8164702520578762,
+       "module": 0.2,
+       "pair": "hour/day_idler",
+       "position": "away",
+       "shift": 0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 384,
+       "largest_gap": 0.009998552102682412,
+       "smallest_drive_overlap": 0.05671201587848011,
+       "smallest_drive_ratio": 2.8356021460444745,
+       "module": 0.2,
+       "pair": "hour/day_idler",
+       "position": "towards",
+       "shift": -0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 288,
+       "largest_gap": 0.0355552557621717,
+       "smallest_drive_overlap": 0.021428385979908184,
+       "smallest_drive_ratio": 1.0714192989954088,
+       "module": 0.20000000000000004,
+       "pair": "day_idler/day",
+       "position": "away",
+       "shift": 0.03,
+       "passes": true
+      },
+      {
+       "worst_volume": 0.0,
+       "step": 0,
+       "steps": 288,
+       "largest_gap": 0.009894925962138779,
+       "smallest_drive_overlap": 0.034718883455782765,
+       "smallest_drive_ratio": 1.7359441727891376,
+       "module": 0.20000000000000004,
+       "pair": "day_idler/day",
+       "position": "towards",
+       "shift": -0.03,
+       "passes": true
+      }
+     ]
+    },
+    "seated": {
+     "not_seated": [],
+     "not_in_one_piece": [],
+     "pieces": {
+      "intermediate": [
+       [
+        "intermediate_arbor",
+        "intermediate_wheel_6h"
+       ]
+      ],
+      "centre": [
+       [
+        "centre_arbor_6h",
+        "minute_hand"
+       ]
+      ],
+      "hour": [
+       [
+        "hour_wheel",
+        "hour_hand"
+       ]
+      ],
+      "day": [
+       [
+        "day_mobile",
+        "day_hand"
+       ]
+      ],
+      "seconds": [
+       [
+        "seconds_mobile",
+        "seconds_hand"
+       ]
+      ]
+     },
+     "moves": {
+      "intermediate": {
+       "intermediate_arbor": {
+        "+x": 0.10166840362850806,
+        "-x": 0.1016684036285081,
+        "+y": 0.10166805501459224,
+        "-y": 0.10166805501459222,
+        "+z": 0.07536693316765192,
+        "-z": 1.3010426069826053e-18
+       },
+       "intermediate_wheel_6h": {
+        "+x": 0.1016684036285081,
+        "-x": 0.1016684036285081,
+        "+y": 0.10166805501459224,
+        "-y": 0.10166805501459225,
+        "+z": 1.734723475976807e-18,
+        "-z": 0.07536693316765196
+       }
+      },
+      "centre": {
+       "centre_arbor_6h": {
+        "+x": 0.03510110250307646,
+        "-x": 0.03510110250307637,
+        "+y": 0.035101036170029666,
+        "-y": 0.03510103617002967,
+        "+z": 0.0392536015835295,
+        "-z": 0.0
+       },
+       "minute_hand": {
+        "+x": 0.03510110250307645,
+        "-x": 0.03510110250307634,
+        "+y": 0.03510103617002963,
+        "-y": 0.035101036170029624,
+        "+z": 0.0,
+        "-z": 0.039253601583529495
+       }
+      },
+      "hour": {
+       "hour_wheel": {
+        "+x": 0.11926868684777915,
+        "-x": 0.11926868684777883,
+        "+y": 0.11926746339461694,
+        "-y": 0.11926746339461694,
+        "+z": 0.3454316376449715,
+        "-z": 0.0
+       },
+       "hour_hand": {
+        "+x": 0.11926868684777883,
+        "-x": 0.11926868684777914,
+        "+y": 0.11926746339461687,
+        "-y": 0.11926746339461693,
+        "+z": 0.0,
+        "-z": 0.3454316376449715
+       }
+      },
+      "minute_wheel": {},
+      "day_idler": {},
+      "day": {
+       "day_mobile": {
+        "+x": 0.04303774228622592,
+        "-x": 0.04303740004680403,
+        "+y": 0.04303755545439045,
+        "-y": 0.04303757041775366,
+        "+z": 0.05652530310179853,
+        "-z": 0.0
+       },
+       "day_hand": {
+        "+x": 0.04303740003969768,
+        "-x": 0.043037742279119565,
+        "+y": 0.04303757041775378,
+        "-y": 0.043037555454390426,
+        "+z": 0.0,
+        "-z": 0.05652530310179855
+       }
+      },
+      "third": {},
+      "fourth": {},
+      "fifth": {},
+      "seconds": {
+       "seconds_mobile": {
+        "+x": 0.04303763244182984,
+        "-x": 0.04303757527250552,
+        "+y": 0.04303736901033277,
+        "-y": 0.04303775316067329,
+        "+z": 0.05652516702232278,
+        "-z": 0.0
+       },
+       "seconds_hand": {
+        "+x": 0.0430375752863854,
+        "-x": 0.04303763245572734,
+        "+y": 0.043037753160673285,
+        "-y": 0.043037369010332754,
+        "+z": 0.0,
+        "-z": 0.05652516702232277
+       }
+      }
+     }
+    },
+    "day_hand": {
+     "clockwise_turns_per_hour_through_working_meshes": "1/24"
+    },
+    "day_place": {
+     "reach": 3.6000000547709816,
+     "above_fixed": 0.09999990463256836,
+     "centre_from_axis": 1.12803891845931,
+     "axis_distance": 12.164272955436624
+    }
+   }
+  },
+  "P4": {
+   "name": "assembly",
+   "weight": 0.25,
+   "gates": {
+    "files": true,
+    "plan": true
+   },
+   "checks": {
+    "barrel": true,
+    "main_plate": true,
+    "deck": true,
+    "bridge": true,
+    "intermediate_arbor": true,
+    "intermediate_wheel_8h": true,
+    "centre_arbor_8h": true,
+    "minute_hand": true,
+    "hour_wheel": true,
+    "hour_hand": true,
+    "minute_wheel_mobile": true,
+    "day_idler_mobile": true,
+    "day_mobile": true,
+    "day_hand": true,
+    "third_mobile": true,
+    "fourth_mobile": true,
+    "fifth_mobile": true,
+    "seconds_mobile": true,
+    "seconds_hand": true
+   },
+   "check_weights": {
+    "barrel": 1,
+    "main_plate": 1,
+    "deck": 1,
+    "bridge": 1,
+    "intermediate_arbor": 1,
+    "intermediate_wheel_8h": 1,
+    "centre_arbor_8h": 1,
+    "minute_hand": 1,
+    "hour_wheel": 1,
+    "hour_hand": 1,
+    "minute_wheel_mobile": 1,
+    "day_idler_mobile": 1,
+    "day_mobile": 1,
+    "day_hand": 1,
+    "third_mobile": 1,
+    "fourth_mobile": 1,
+    "fifth_mobile": 1,
+    "seconds_mobile": 1,
+    "seconds_hand": 1
+   },
+   "share_of_checks": 1.0,
+   "s": 1.0,
+   "s_exact": "1",
+   "passed": true,
+   "details": {
+    "files": {},
+    "plan": {
+     "order": [
+      "main_plate",
+      "barrel",
+      "intermediate_arbor",
+      "deck",
+      "intermediate_wheel_8h",
+      "centre_arbor_8h",
+      "minute_wheel_mobile",
+      "day_mobile",
+      "day_idler_mobile",
+      "fourth_mobile",
+      "fifth_mobile",
+      "third_mobile",
+      "hour_wheel",
+      "seconds_mobile",
+      "bridge",
+      "day_hand",
+      "seconds_hand",
+      "hour_hand",
+      "minute_hand"
+     ]
+    },
+    "parts": {
+     "main_plate": {
+      "format_messages": [],
+      "worst_volume": 0.0,
+      "pose_index": -1,
+      "hit": null,
+      "poses": 76
+     },
+     "barrel": {
+      "format_messages": [],
+      "worst_volume": 0.0,
+      "pose_index": -1,
+      "hit": null,
+      "poses": 75
+     },
+     "intermediate_arbor": {
+      "format_messages": [],
+      "worst_volume": 0.0,
+      "pose_index": -1,
+      "hit": null,
+      "poses": 74
+     },
+     "deck": {
+      "format_messages": [],
+      "worst_volume": 0.0,
+      "pose_index": -1,
+      "hit": null,
+      "poses": 64
+     },
+     "intermediate_wheel_8h": {
+      "format_messages": [],
+      "worst_volume": 1.3877787807814457e-17,
+      "pose_index": 59,
+      "hit": "intermediate_arbor",
+      "poses": 60
+     },
+     "centre_arbor_8h": {
+      "format_messages": [],
+      "worst_volume": 0.0,
+      "pose_index": -1,
+      "hit": null,
+      "poses": 63
+     },
+     "minute_wheel_mobile": {
+      "format_messages": [],
+      "worst_volume": 0.0,
+      "pose_index": -1,
+      "hit": null,
+      "poses": 63
+     },
+     "day_mobile": {
+      "format_messages": [],
+      "worst_volume": 0.0,
+      "pose_index": -1,
+      "hit": null,
+      "poses": 63
+     },
+     "day_idler_mobile": {
+      "format_messages": [],
+      "worst_volume": 0.0,
+      "pose_index": -1,
+      "hit": null,
+      "poses": 63
+     },
+     "fourth_mobile": {
+      "format_messages": [],
+      "worst_volume": 0.0,
+      "pose_index": -1,
+      "hit": null,
+      "poses": 63
+     },
+     "fifth_mobile": {
+      "format_messages": [],
+      "worst_volume": 0.0,
+      "pose_index": -1,
+      "hit": null,
+      "poses": 63
+     },
+     "third_mobile": {
+      "format_messages": [],
+      "worst_volume": 0.0,
+      "pose_index": -1,
+      "hit": null,
+      "poses": 63
+     },
+     "hour_wheel": {
+      "format_messages": [],
+      "worst_volume": 0.0,
+      "pose_index": -1,
+      "hit": null,
+      "poses": 49
+     },
+     "seconds_mobile": {
+      "format_messages": [],
+      "worst_volume": 0.0,
+      "pose_index": -1,
+      "hit": null,
+      "poses": 63
+     },
+     "bridge": {
+      "format_messages": [],
+      "worst_volume": 0.0,
+      "pose_index": -1,
+      "hit": null,
+      "poses": 45
+     },
+     "day_hand": {
+      "format_messages": [],
+      "worst_volume": 1.5111067779016718e-18,
+      "pose_index": 40,
+      "hit": "day_mobile",
+      "poses": 42
+     },
+     "seconds_hand": {
+      "format_messages": [],
+      "worst_volume": 0.0,
+      "pose_index": -1,
+      "hit": null,
+      "poses": 39
+     },
+     "hour_hand": {
+      "format_messages": [],
+      "worst_volume": 0.0,
+      "pose_index": -1,
+      "hit": null,
+      "poses": 36
+     },
+     "minute_hand": {
+      "format_messages": [],
+      "worst_volume": 6.505213034913027e-19,
+      "pose_index": 31,
+      "hit": "centre_arbor_8h",
+      "poses": 33
+     }
+    }
+   }
+  }
+ },
+ "elapsed_s": 351.8,
+ "constants": {
+  "part_weights": {
+   "P1": 0.25,
+   "P2": 0.1,
+   "P3": 0.15,
+   "P4": 0.25
+  },
+  "check_weights": {
+   "P1": {
+    "spin": 1,
+    "held": 2,
+    "train": 3,
+    "clear": 1,
+    "minute": 2,
+    "hour": 2,
+    "seconds": 2,
+    "coaxial": 1,
+    "hands": 1,
+    "size": 1,
+    "printable": 1,
+    "tolerant": 2,
+    "seated": 2
+   },
+   "P2": {
+    "day_hand": 3,
+    "day_place": 1
+   },
+   "P3": {
+    "spin": 1,
+    "held": 2,
+    "train": 3,
+    "clear": 1,
+    "minute": 2,
+    "hour": 2,
+    "seconds": 2,
+    "coaxial": 1,
+    "hands": 1,
+    "size": 1,
+    "printable": 1,
+    "tolerant": 2,
+    "seated": 2,
+    "day_hand": 3,
+    "day_place": 1
+   },
+   "P4": "one per part of movement.json, 1 each"
+  },
+  "gates": {
+   "P1": [
+    "files",
+    "assembled"
+   ],
+   "P2": [
+    "files",
+    "assembled",
+    "day_declared"
+   ],
+   "P3": [
+    "files",
+    "assembled",
+    "day_declared",
+    "same_frame"
+   ],
+   "P4": [
+    "files",
+    "plan"
+   ]
+  },
+  "barrel_turns_per_hour": {
+   "movement.json": "1/8",
+   "variant_6h.json": "1/6"
+  },
+  "check_timeout_s": 600,
+  "time_limit_s": 3600
+ }
+}
