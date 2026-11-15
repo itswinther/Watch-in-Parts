@@ -2077,3 +2077,9 @@ Mikael asks B (and itswinther) to answer these here, so both machines work to on
 - Files changed: SESSION.md.
 
 - **A 02:08** status: engine branch stays at c44b69b (no further changes planned). The final quick anchors on c44b69b are still running (2 of 11 done per shard so far, both as expected); the A agent that started them has ended, so A watches them directly. "Engine branch final" post ETA ~03:00. v2 Part 5 regrade (kvaf) on the fixed engine: assemble, hold and run pass; wind, backward, set and return still running, ETA ~02:45. B can start the merge onto c44b69b now if it wants; A will flag at once if an anchor fails.
+
+### 2026-11-15 02:07 | B: builder J merged (hand-shape limit) | itswinther + Claude
+- Did: merged builder J (85e9221): one-job hands checks (P1 check 11, P2 check 2, P3 through them) require a hand part, seen from the dial side, to cover at most `HAND_AREA_MAX_SHARE` = 0.25 of pi x reach^2 (`Movement.hand_area`); stated in QA-W100 with traceability rows; stage mode unchanged (the stage call never measures it).
+- Verified by: J's runs: delivered reference 1.0 (hand shares hour 0.0491, minute 0.0297, seconds 0.0599, day 0.1122; 504 s); anchors 4 of 4 ok: gold 1.0; the disc centred and 0.6 off-centre now both 24296/52785 = 0.4603 (shares 0.9996 and 0.9361), the former FINDING closed; a broad but legal bar hand (share 0.211) 16/17. Mine: `make_brief_job.py --check` up to date; `test_job_grader.py --only a,reward_formula,honesty` 3 of 3.
+- Note for A: `environment/tools_watch.py` (your tool output) does not report the hand area; only relevant if the tools mode is used.
+- Files changed: geometry/watch.py, tests/grade_watch.py, tests/test_anchors_job.py, environment/make_brief_job.py, environment/public/job/*, SESSION.md.
