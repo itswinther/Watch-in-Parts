@@ -255,11 +255,20 @@ def bundle(app, G):
         for f in sorted(os.listdir(pd)):
             if f.endswith((".txt", ".pdf")) or f == "README.md":
                 shutil.copyfile(os.path.join(pd, f), os.path.join(ds, "public_domain", f))
-    need = ["supplied/barrel.stl", "tools/kernel.py"] + ([] if G["bundle_map"] else ["tools/check_format.py"])
+    need = ["tools/kernel.py"] + ([] if G["bundle_map"] else ["tools/check_format.py"])
     for n in need:
         if not os.path.isfile(os.path.join(app, n)):
             raise SystemExit("B's bundle builder did not produce %s (interface of Decisions 15:44)" % n)
+    if not supplied_meshes(app):
+        raise SystemExit("B's bundle builder did not produce any supplied/*.stl (one barrel, or the catalogue)")
     return brief_text
+
+
+def supplied_meshes(app):
+    """The supplied barrel meshes in the agent's /app/supplied: one barrel.stl (single-barrel briefs) or every
+    barrel of the catalogue (supplied/<part no.>.stl, make_bundle_job.py)."""
+    d = os.path.join(app, "supplied")
+    return sorted(f for f in os.listdir(d) if f.endswith(".stl")) if os.path.isdir(d) else []
 
 
 def forbidden_hashes():
@@ -289,6 +298,9 @@ def assert_clean(env_dir, G):
     anything carrying the NOT-FOR-AGENT mark."""
     app = os.path.join(env_dir, "app")
     pats, bad = allow_patterns(G), forbidden_hashes()
+    # the supplied barrel meshes are shipped on purpose (catalogue barrels may equal geometry/data meshes)
+    for f in supplied_meshes(app):
+        bad.discard(hashlib.sha256(open(os.path.join(app, "supplied", f), "rb").read()).hexdigest())
     n = 0
     for root, dirs, files in os.walk(env_dir):
         for d in dirs:
@@ -309,7 +321,9 @@ def assert_clean(env_dir, G):
             if hashlib.sha256(data).hexdigest() in bad or MARK in data:
                 raise SystemExit("REFUSED: %s matches a file that must never reach the agent" % rel)
             n += 1
-    for need in ("supplied/barrel.stl", "tools/kernel.py", "delivery", "datasheets"):
+    if not supplied_meshes(app):
+        raise SystemExit("REFUSED: no supplied/*.stl in the agent image")
+    for need in ("tools/kernel.py", "delivery", "datasheets"):
         if not os.path.exists(os.path.join(app, need)):
             raise SystemExit("REFUSED: %s missing from the agent image" % need)
     if os.listdir(os.path.join(app, "delivery")):
