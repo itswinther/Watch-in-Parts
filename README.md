@@ -175,8 +175,20 @@ We also ran Marco Lang's ml01 going train, from his public CAD file, through an 
 
 ## How to run it
 
-The Harbor task, with one command. Needs Docker, `uv` and a Harbor 0.26 checkout (`HARBOR_SRC`); details in
-[harbor/watch_one/README.md](harbor/watch_one/README.md).
+The task is a plain Harbor task, checked in at [`task/`](task/): `instruction.md`, `task.toml`,
+`environment/` (Dockerfile and the agent's `/app`), `tests/` (the verifier) and `solution/` (the reference,
+replayed by the oracle agent). With Harbor 0.26 or later installed:
+
+```bash
+harbor run -p task -a oracle                                           # the reference: 1.0
+harbor run -p task -a nop                                              # do nothing: 0.0
+harbor run -p task -a opencode -m <provider/model> -k 3 --ak disable_web_search=true
+```
+
+`task/` is generated, not hand-written: `harbor/watch_one/build_task.py` writes it from the sources in this repo
+(`environment/`, `geometry/`, `tests/`, `solution/`) and refuses anything that would leak the solution into the
+agent's image. To rebuild it and run everything with one command (needs Docker, `uv` and a Harbor checkout in
+`HARBOR_SRC`; details in [harbor/watch_one/README.md](harbor/watch_one/README.md)):
 
 ```bash
 SKIP_MODEL=1 harbor/watch_one/run_all.sh none 0                        # oracle and nop only, no key
@@ -388,7 +400,8 @@ Not done.
 | `geometry/watch.py` | the constants and the mechanical tests |
 | `solution/reference_watch.py` | the reference (house design) |
 | `tests/test_anchors_job.py` | anchor suite: the reference with one change each, and its expected reward |
-| `harbor/watch_one/` | the Harbor task |
+| `task/` | the Harbor task, ready to run |
+| `harbor/watch_one/` | the script that builds `task/`, and the one-command runner |
 | `REAL_WATCH_WORK.md`, `REAL_ML01_FAIRNESS.md` | the task against real watches and a real CAD design |
 | `visualizer/` | demo pages, open `index.html` or `xray.html` in a browser |
 | `SESSION.md` | shared log of the four sessions: decisions, requests, every result |

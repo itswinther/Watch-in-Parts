@@ -1,24 +1,19 @@
-# Agent image /app tree: harbor/watch_one, build_task.py --agent opencode, GRADER one-job (SPEC 0.7; P5 off: KEYLESS_IN_JOB = False)
-# built 2026-11-14T23:27Z from origin/main 1f15e48; listed with: docker run --rm watch-one-agent (find /app ...)
+# Agent image /app tree: task/environment/app, written by harbor/watch_one/build_task.py --agent opencode (grader one-job, SPEC 0.8; P5 off)
+# generated from main d276104; listed with: find task/environment/app -type f | sort | xargs sha256sum
 
-/app/
-/app/FORMAT.md  6006 bytes  sha256 59f787f48d6b6093
-/app/datasheets/
-/app/datasheets/DS-101_mainspring_barrel.md  16800 bytes  sha256 da74537f43938623
-/app/datasheets/DS-201_materials.md  8711 bytes  sha256 f1dc328456694968
-/app/datasheets/DS-301_jewel_bearings.md  8972 bytes  sha256 a56998bf4d501ba2
-/app/datasheets/DS-401_crown_stem.md  8417 bytes  sha256 1947c0ceaecb6bde
-/app/datasheets/DS-501_human_factors_crown.md  7075 bytes  sha256 fc3230063ece48b6
-/app/datasheets/DS-W01_barrel.md  3141 bytes  sha256 e8c5fcc81baee68b
-/app/datasheets/DS-W02_case.md  633 bytes  sha256 46add0ea5ba38e7a
-/app/datasheets/DS-W03_process.md  1074 bytes  sha256 2bd69fa791f2dc00
-/app/datasheets/DS-W04_gear_rating.md  12954 bytes  sha256 c659534892da9908
-/app/datasheets/INDEX.md  1058 bytes  sha256 8965abca69491e88
-/app/datasheets/QA-W100_inspection.md  17796 bytes  sha256 18e663eef6a6a079
-/app/delivery/
-/app/instruction.md  4433 bytes  sha256 52713bb99f84ce1a
-/app/supplied/
-/app/supplied/barrel.stl  432684 bytes  sha256 d588adb907cd53a0
-/app/tools/
-/app/tools/check_format.py  10110 bytes  sha256 d7f343ee98b61e71
+/app/FORMAT.md  9094 bytes  sha256 eda66ecc4c7084ef
+/app/datasheets/DS-101_mainspring_barrel.md  9310 bytes  sha256 81e780d70a68b0db
+/app/datasheets/DS-201_materials.md  6670 bytes  sha256 a7013e6a9bcd12a2
+/app/datasheets/DS-301_jewel_bearings.md  5860 bytes  sha256 ae74adbd6f51220b
+/app/datasheets/DS-W01_barrel.md  3605 bytes  sha256 4323ed03615c772c
+/app/datasheets/DS-W02_case.md  756 bytes  sha256 1478baad64f77985
+/app/datasheets/DS-W03_process.md  1343 bytes  sha256 18798ef0fbfdfb4e
+/app/datasheets/DS-W04_gear_rating.md  12962 bytes  sha256 411cac670d0a14eb
+/app/datasheets/INDEX.md  706 bytes  sha256 6bc36c64e4ffad03
+/app/instruction.md  5076 bytes  sha256 af30bae23f75b583
+/app/supplied/BR-096-30.stl  432684 bytes  sha256 fdcac35ad7597e16
+/app/supplied/BR-096-45.stl  432684 bytes  sha256 4d2120cfd7baeb21
+/app/supplied/BR-096-66.stl  432684 bytes  sha256 d588adb907cd53a0
+/app/tools/check_format.py  10851 bytes  sha256 9010cf07e545b0d3
 /app/tools/kernel.py  21767 bytes  sha256 6a5912d36dd6a06f
+/app/delivery/  (empty; created by the image)
