@@ -5,6 +5,20 @@ order for a thin dress watch and a folder of supplier sheets. It designs the mov
 with CadQuery) and delivers one folder. A separate offline verifier grades that folder by geometry. The agent
 never sees a check, a score or a verdict.
 
+**In one minute**
+
+- **The task:** design a thin dress-watch movement from a customer order: gear train, four hands, a 6-hour
+  variant on the same frame, and an assembly plan. One job, start to finish, about 20 CAD parts.
+- **The reference:** our own design, built by one script: reward **1.000** (Harbor oracle, in Docker and on
+  Modal).
+- **The frontier agent:** GPT-6.1-sol, six runs: **0.427 to 0.467**, mean 0.447. Every run delivers a complete
+  movement that does not fully work, 2.5 to 3.1 times the height of our 3.85 mm design, and says itself that it
+  did not test it.
+- **Baselines:** do nothing **0.000**; stop early **0.157, 0.220, 0.333**.
+- **Run it:** `harbor run -p task -a oracle`, then `-a nop`, then `-a opencode -m <provider/model>`.
+- **What we do not show:** a valid run of a Claude model, and some grader thresholds the agent is not told.
+  Both are spelled out below.
+
 The repo is still named `board-in-a-box` after our first idea, which we dropped.
 
 **Where to look first**
