@@ -494,12 +494,12 @@ Not done.
 Reading our own results as someone who builds environments would, these are the faults that matter most, and
 the fix for each.
 
-1. **The reward hardly separates good from bad work.** Every agent run scores between 0.41 and 0.47: a 4 mm
+1. **The reward hardly separates good from bad work.** Every agent run scores between 0.42 and 0.47: a 4 mm
    watch with one near-miss and a 12 mm watch with hands below the dial get about the same. Half of the reward
    sits behind "every check passes", nobody reached it, so the thickness term has not yet changed a score.
    *Fix:* pay the working-watch half in steps (per build, per function: runs, shows the time, can be
    assembled), and let thickness scale each step, so that a better watch always scores more.
-2. **A complete but faulty watch scores little more than stopping early** (0.43 to 0.47 against 0.33 for three
+2. **A complete but faulty watch scores little more than stopping early** (0.42 to 0.47 against 0.33 for three
    flawless parts of four). *Fix:* the same graded term; and weight the checks by what a fault costs the
    wearer, not evenly.
 3. **Some pass marks are numbers the agent cannot read**, and three of the eight scored runs rest on a close
