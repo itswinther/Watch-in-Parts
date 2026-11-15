@@ -35,9 +35,10 @@ BARREL_TURNS_PER_HOUR = Fraction(1, 8)          # clockwise
 CASE_RADIUS = 20.7         # reference reaches 20.354 at its largest stage, plus 0.3, rounded up to 0.05 (main; on
                            # b/thin-4mm SMALL_CASE_RADIUS 12.7 below replaces it, by the same rule)
 CASE_HEIGHT = 13.4         # reference is 13.1 tall, plus 0.3
-# Thickness score (SESSION.md Proposed spec changes, 2026-11-15 02:20; spikes/thin_probe/): not graded by
-# tests/grade_watch.py. Described in QA-W100 section 9 only when environment/brief_thin.py THIN_IN_BRIEF is on, and
-# scored afterwards by spikes/thin_probe/score.py with thin_score() below:
+# Thickness score (SESSION.md Proposed spec changes, 2026-11-15 02:20; spikes/thin_probe/): applied by the one-job
+# grader, tests/grade_watch.py job_thickness() and job_reward() (stage mode unchanged), with thin_score() below.
+# Described in QA-W100 section 9 only when environment/brief_thin.py THIN_IN_BRIEF is on. spikes/thin_probe/score.py
+# measures the same H and rescores old runs, graded before the grader applied it:
 #     x = (H - H0) / (CASE_HEIGHT - H0), clamped to 0..1;  s = (1 - x) ** THIN_SCORE_EXPONENT
 #     reward = (THIN_SCORE_SHARE x share + THIN_SCORE_SHARE x [all pass] x s) x statement factor
 # H0 = thin_full_score_height(): the height that earns s = 1, and anything thinner earns s = 1 too.
