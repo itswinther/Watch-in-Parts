@@ -16,7 +16,7 @@ hand speeds and directions, and the weights of the checks.
 | work order names the print process (DS-W03) | DS-W03 | `instruction.md` | Order | Parts | Specification |
 | work order names the speed class of the 8-hour build (the DS-W01 row of BARREL_TURNS_PER_HOUR) | D | `instruction.md` | Order | 8-hour build (movement.json) | Specification |
 | work order names the speed class of the 6-hour variant (the DS-W01 row of CHANGED_BARREL_TURNS_PER_HOUR) | B | `instruction.md` | Order | 6-hour variant (variant_6h.json) | Specification |
-| demonstration scale, context only, not graded: 2 x CASE_RADIUS / REAL_CALIBRE_DIAMETER_MM (rounded), and REAL_CALIBRE_DIAMETER_MM | 1.617 | `instruction.md` | Work order | You are a movement designer | statement |
+| demonstration scale of the parts, context only, not graded: DEMO_SCALE (A's sheets' s), and REAL_CALIBRE_DIAMETER_MM | 1.617 | `instruction.md` | Work order | You are a movement designer | statement |
 | work order cites the inspection procedure | QA-W100 | `instruction.md` | Acceptance | The delivery is inspected | statement |
 | BARREL_TEETH | 96 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-20 | Teeth |
 | BARREL_MODULE | 0.2 | `datasheets/DS-W01_barrel.md` | 2. Catalogue | BR-096-20 | Module (mm) |
@@ -37,6 +37,7 @@ hand speeds and directions, and the weights of the checks.
 | CHANGED_BARREL_TURNS_PER_HOUR (6-hour variant, speed class B in the work order) | 1/6 | `datasheets/DS-W01_barrel.md` | 4. Speed classes | B | Barrel speed, steady running |
 | barrel running sense, both builds (the grader turns the barrel clockwise seen from +z) | clockwise | `datasheets/DS-W01_barrel.md` | 4. Speed classes | D | Running sense, seen from the dial side |
 | CASE_RADIUS | 20.7 | `datasheets/DS-W02_case.md` | 2. Catalogue | CS-414-134 | Inner radius |
+| case outer diameter, context only, not graded: case_outer_d(CASE_RADIUS) (CASE_WALL_MM each side) | 48 | `datasheets/DS-W02_case.md` | 2. Catalogue | CS-414-134 | Outer diameter |
 | CASE_HEIGHT | 13.4 | `datasheets/DS-W02_case.md` | 2. Catalogue | CS-414-134 | Inner height |
 | MIN_FEATURE | 0.2 | `datasheets/DS-W03_process.md` | 2. Smallest feature | Smallest printable feature | Value |
 | THIN_VOXEL, THIN_ERODE_VOX, THIN_DILATE_VOX, THIN_DEV, voxel grid offset (the printability test) | (0.05, 1.5, 1.0, 0.2, 0.0113) | `datasheets/DS-W03_process.md` | 3. What the smallest | (whole section) | statement |

@@ -39,9 +39,15 @@ A_SHEETS = os.path.join(ROOT, "spikes", "keyless", "datasheets")      # workstre
 DATE = "2026-11-14"
 REVISION = "A"
 # Real-world context only (not a test number): the movement the demonstration scale refers to is 25.6 mm across
-# (the ETA 2824-2, an 11 1/2-ligne class calibre). The case's inner diameter, 2 x CASE_RADIUS = 41.4 mm, is that
-# times the scale (41.4 / 25.6 = 1.617).
+# (the ETA 2824-2, an 11 1/2-ligne class calibre). The supplier sheets' parts (A's DS-101 to DS-501: "s = 1.617",
+# 41.4 / 25.6) are DEMO_SCALE times real size. On main the case's inner diameter, 2 x CASE_RADIUS = 41.4 mm, was
+# that movement times the scale; on b/thin-4mm the case is a smaller, real watch case, so the work order states
+# the scale of the parts, not of the case.
 REAL_CALIBRE_DIAMETER_MM = 25.6
+DEMO_SCALE = 1.617          # A's sheets' s, the scale of the supplied parts (check_scale() reads it from DS-101)
+# DS-W02's outer diameter (context only, not graded): the inner diameter plus a wall and bezel of CASE_WALL_MM on
+# each side, rounded to the nearest whole mm
+CASE_WALL_MM = 3.5
 APP = "/app"
 QA = "QA-W100"
 QA_FILE = "QA-W100_inspection.md"
@@ -576,8 +582,16 @@ Values that belong to a supplied item are taken from that item's supplier docume
 
 
 # ------------------------------------------------------------------ the work order (PROMPT.md -> instruction.md)
+def check_scale():
+    """DEMO_SCALE is the s of A's sheets: DS-101 states "(s = 1.617)" in its heading."""
+    with open(os.path.join(A_SHEETS, "DS-101_mainspring_barrel.md"), encoding="utf-8") as f:
+        if "(s = %s)" % num(DEMO_SCALE) not in f.read():
+            raise SystemExit("DEMO_SCALE %s is not the scale s of DS-101" % num(DEMO_SCALE))
+    return DEMO_SCALE
+
+
 def prompt(L, S=None):
-    scale = 2 * W.CASE_RADIUS / REAL_CALIBRE_DIAMETER_MM
+    scale = check_scale()
     s8, s6 = speed_class_of(W.BARREL_TURNS_PER_HOUR), speed_class_of(W.CHANGED_BARREL_TURNS_PER_HOUR)
     materials = ""
     if S is not None:
@@ -603,8 +617,9 @@ in the order."""
         accept_extra = THIN.acceptance_sentence()
     return """# Work order: movement design, {title}
 
-You are a movement designer at a watch manufacturer. The calibre is a demonstration-scale model, about {scale}
-times the size of a {real} mm (11 1/2-ligne class) movement, to be made by 3D printing or a similar process.
+You are a movement designer at a watch manufacturer. The calibre is a demonstration-scale model: its parts are
+about {scale} times the size of those of a {real} mm (11 1/2-ligne class) movement, and it is made by 3D printing
+or a similar process.
 
 ## The goal
 
@@ -1009,24 +1024,31 @@ def ordered_case_no():
     return case_no(W.CASE_RADIUS, W.CASE_HEIGHT)
 
 
+def case_outer_d(radius):
+    """DS-W02's outer diameter (mm, context only): 2 x radius + 2 x CASE_WALL_MM, to the nearest whole mm."""
+    return int(math.floor(2 * radius + 2 * CASE_WALL_MM + 0.5))
+
+
 def ds_w02(L):
     rows = []
-    for e in CASE_FAMILY:
-        r, h = (W.CASE_RADIUS, W.CASE_HEIGHT) if e is None else e
-        if e is not None and (r, h) == (W.CASE_RADIUS, W.CASE_HEIGHT):
+    fam = [(W.CASE_RADIUS, W.CASE_HEIGHT) if e is None else e for e in CASE_FAMILY]
+    for i, (r, h) in enumerate(fam):
+        if CASE_FAMILY[i] is not None and (r, h) == (W.CASE_RADIUS, W.CASE_HEIGHT):
             raise SystemExit("a case row repeats the ordered case")
-        rows.append("| %s | %s | %s |\n" % (case_no(r, h), num(r), num(h)))
+    for r, h in sorted(fam):        # by inner radius, then height
+        rows.append("| %s | %s | %s | %s |\n" % (case_no(r, h), num(r), num(h), num(case_outer_d(r))))
     return head("DS-W02", "Watch cases, demonstration-scale series: catalogue sheet", "the case maker",
                 "catalogue sheet") + """
 ## 1. Scope
 
 Round cases for demonstration-scale movements. The inner space of each case is a cylinder; its axis is parallel
-to the arbors of the movement it holds. All lengths in millimetres.
+to the arbors of the movement it holds. The outer diameter is the watch case's size across, wall and bezel
+included. All lengths in millimetres.
 
 ## 2. Catalogue
 
-| Part no. | Inner radius (mm) | Inner height along the axis (mm) |
-|---|---|---|
+| Part no. | Inner radius (mm) | Inner height along the axis (mm) | Outer diameter (mm) |
+|---|---|---|---|
 {rows}""".format(rows="".join(rows))
 
 
@@ -1119,16 +1141,18 @@ def traceability_rows(L, B, S=None):
              "instruction.md", o, "8-hour build (movement.json)", spec, has="speed class " + s8),
         cell("work order names the speed class of the 6-hour variant (the DS-W01 row of CHANGED_BARREL_TURNS_PER_HOUR)",
              s6, "instruction.md", o, "6-hour variant (variant_6h.json)", spec, has="speed class " + s6),
-        cell("demonstration scale, context only, not graded: 2 x CASE_RADIUS / REAL_CALIBRE_DIAMETER_MM (rounded), "
-             "and REAL_CALIBRE_DIAMETER_MM", round(2 * W.CASE_RADIUS / REAL_CALIBRE_DIAMETER_MM, 3), "instruction.md",
-             "Work order", "You are a movement designer", None,
-             [num(round(2 * W.CASE_RADIUS / REAL_CALIBRE_DIAMETER_MM, 3)), num(REAL_CALIBRE_DIAMETER_MM)]),
+        cell("demonstration scale of the parts, context only, not graded: DEMO_SCALE (A's sheets' s), and "
+             "REAL_CALIBRE_DIAMETER_MM", DEMO_SCALE, "instruction.md", "Work order", "You are a movement designer",
+             None, [num(DEMO_SCALE), num(REAL_CALIBRE_DIAMETER_MM)]),
         cell("work order cites the inspection procedure", QA, "instruction.md", "Acceptance", "The delivery is inspected",
              None, []),
     ]
     rows = links + ds_w01_trace(L, B) + [
         cell("CASE_RADIUS", W.CASE_RADIUS, "datasheets/DS-W02_case.md", "2. Catalogue", ordered_case_no(),
              "Inner radius", [num(W.CASE_RADIUS)]),
+        cell("case outer diameter, context only, not graded: case_outer_d(CASE_RADIUS) (CASE_WALL_MM each side)",
+             case_outer_d(W.CASE_RADIUS), "datasheets/DS-W02_case.md", "2. Catalogue", ordered_case_no(),
+             "Outer diameter", [num(case_outer_d(W.CASE_RADIUS))]),
         cell("CASE_HEIGHT", W.CASE_HEIGHT, "datasheets/DS-W02_case.md", "2. Catalogue", ordered_case_no(),
              "Inner height", [num(W.CASE_HEIGHT)]),
         cell("MIN_FEATURE", W.MIN_FEATURE, "datasheets/DS-W03_process.md", "2. Smallest feature",

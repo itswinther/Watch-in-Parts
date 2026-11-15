@@ -1,7 +1,8 @@
 # Work order: movement design, going train and hands, a 6-hour variant and an assembly plan
 
-You are a movement designer at a watch manufacturer. The calibre is a demonstration-scale model, about 1.617
-times the size of a 25.6 mm (11 1/2-ligne class) movement, to be made by 3D printing or a similar process.
+You are a movement designer at a watch manufacturer. The calibre is a demonstration-scale model: its parts are
+about 1.617 times the size of those of a 25.6 mm (11 1/2-ligne class) movement, and it is made by 3D printing
+or a similar process.
 
 ## The goal
 
