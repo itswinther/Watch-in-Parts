@@ -137,12 +137,12 @@ AGENT=codex CODEX_FORCE_AUTH_JSON=1 harbor/watch_one/run_all.sh openai/gpt-6.1-s
 It builds the task, checks the network settings, runs `harbor lint`, the oracle, nop and the model (OpenCode by
 default, agent cap 3 h), and summarises the results.
 
-**Claude models under OpenCode need one extra setting.** The task image caps one reply at 64,000 output
-tokens. Sonnet 5.5 spent the whole cap on thinking in a single reply and delivered nothing, three runs out of
-three (SESSION.md, A 05:09). Our Claude runs therefore pass
-`--ae OPENCODE_EXPERIMENTAL_OUTPUT_TOKEN_MAX=128000` to `harbor run`. At 128,000 and default thinking Sonnet
-still did the same in two of two finished runs (A 05:43), so a zero from an empty delivery is a harness
-outcome, not a result; we do not count those runs.
+**Sonnet 5.5 under OpenCode.** The task image lets one reply use the model's full output limit
+(`OPENCODE_EXPERIMENTAL_OUTPUT_TOKEN_MAX=128000`, set in `harbor/watch_one/build_task.py`; an earlier image
+capped it at 64,000). At that limit Sonnet 5.5, at default and at medium thinking, ended in a single reply of
+128,000 thinking tokens with nothing delivered, in four runs of four (SESSION.md, A 06:20). It read the order,
+the sheets and `kernel.py`, then tried to plan the whole movement in one reply and never wrote a script. No
+tool failed. We report these runs separately and do not count them in the gap.
 
 Without Harbor (Python 3.12 or 3.13, `pip install -r requirements.txt`, from the repo root):
 
@@ -198,9 +198,10 @@ These three rewards were graded three times with grader `3d5d96f`: in Harbor's v
 workstream A (SESSION.md, A 05:48), and a third time on another machine outside Harbor from the files on
 `a/final-runs`. All three gave the same rewards to six decimals and the same failed checks.
 
-**Claude models: no valid result yet.** Sonnet 5.5 at default thinking produced no delivery (see "How to run
-it"). The Sonnet runs at low and medium thinking and the one Opus 5.5 run ended when our API credit ran out;
-Harbor marks them invalid (SESSION.md, A 05:46). More runs are in progress and this table will be updated.
+**Claude models: no scored watch yet.** Sonnet 5.5 at default and medium thinking delivered nothing in four
+runs of four (see "How to run it"). Earlier Sonnet runs and one Opus 5.5 run ended when our API credit ran out;
+Harbor marks those invalid (SESSION.md, A 05:46). Sonnet at low thinking, Opus and three more GPT runs are in
+progress and this table will be updated.
 
 Earlier briefs, for context only:
 
@@ -254,8 +255,9 @@ what we do not show.
   sheet, the format or trade practice ([docs/CHECK_BASIS.md](docs/CHECK_BASIS.md)). Three grader numbers do
   not (known limits); none of the faults above depends on them.
 - **Timing:** no run came near the 3-hour limit.
-- **Broken tools:** one, and we exclude it. Under OpenCode, Sonnet 5.5 at default thinking spends a whole
-  reply on thinking and delivers nothing ("How to run it"). We report those runs as invalid, not as a gap.
+- **Broken tools:** none that we know of. Sonnet 5.5 delivers nothing under OpenCode because it spends a whole
+  reply, at its full output limit, on thinking ("How to run it"). No tool fails in those runs, but we do not
+  count them in the gap either: the gap we claim is from runs that delivered a complete watch.
 - **Not done:** a trace of each fault through the agent's transcript to the step where it was introduced.
 
 ### Reward integrity (25 p)
