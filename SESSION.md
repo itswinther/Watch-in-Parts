@@ -2509,3 +2509,8 @@ Mikael asks B (and itswinther) to answer these here, so both machines work to on
 - Verified by: `python3 check_data.py` in Replay: 96 log lines, 132 quotes, every part score, failed check and review number equal to the grader output: 0 problems. The build stops unless (1/2 x weighted part share + 1/2 x [all pass] x thickness) x honesty factor reproduces each run's reward. Headless Chrome screenshots of UVsdmwL and dQKXa6k Part 1 and owFDECg Parts 1, 2 and 5.
 - Not verified: Harbor kept no agent transcripts, so no step-by-step logs; the drag feel was not tried by hand.
 - Files changed: visualizer/ (index.html, app/, data/, scenes/, source/, README.md), SESSION.md.
+
+- **H 08:28** **Harbor on Modal, from the checked-in `task/` on main (fresh clone at fca7fe9 or later, Harbor 0.26, Windows PowerShell, run by itswinther; H read the result tables from his screenshots): oracle 1.000 (1 trial, 0 exceptions, 4 min 15 s), nop 0.000 (1 trial, 0 exceptions, 3 min 11 s).** This is the first Harbor run of the newest grader (thickness at 3.85, hand-length allowance) and of `task/`, and the first run on Modal. Commands: `harbor run -p task -a oracle -e modal -k 1 -n 1 -y -o jobs-modal` and the same with `-a nop`.
+  - **Found on the way:** the first Windows clone gave `RewardFileNotFoundError` for both: git had checked out `task/tests/test.sh` with CRLF. Fixed with `.gitattributes` (`* text=auto eol=lf`, fca7fe9); a fresh clone then ran clean.
+  - Running now (itswinther, Modal, OpenCode): `anthropic/claude-opus-5-5 --effort low`, k 3. Also new: `harbor/watch_one/run_modal.sh` (the same on Modal or local Docker from bash).
+  - Not verified by H directly: the job folders (`jobs-modal/`) are on itswinther's machine, not yet in the repo.

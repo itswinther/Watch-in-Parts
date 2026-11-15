@@ -181,9 +181,10 @@ We also ran Marco Lang's ml01 going train, from his public CAD file, through an 
 - `tests/test.sh` writes reward 0 first; the grader writes 0 again and overwrites it once at the end. Each gate
   and check runs in its own try block with its own time limit (1,800 s each, 7,200 s in all); an exception or a
   timeout fails that check only.
-- Baselines in Harbor on the submitted grader (`3d5d96f`): oracle (our reference, built in the container)
-  1.000, nop 0.000, both marked valid by Harbor (SESSION.md, A 05:49). Outside Harbor an empty delivery folder
-  grades 0.000000.
+- Baselines in Harbor, twice. On Modal sandboxes, from the checked-in `task/` with the grader on `main`
+  (Harbor 0.26, 15 Nov 08:55): oracle 1.000 in 4 min 15 s, nop 0.000 in 3 min 11 s, no exceptions. In local
+  Docker on grader `3d5d96f`: oracle 1.000, nop 0.000 (SESSION.md, A 05:49). Outside Harbor an empty delivery
+  folder grades 0.000000.
 - Leak guard: `make_bundle_job.py` refuses any file name, mark, phrase or number that would point at the
   solution, including the house design's height and the thickness formula. `harbor/watch_one/build_task.py`
   admits only an allowlist of paths into the agent image and refuses copies of secret files by sha256.
@@ -209,6 +210,9 @@ uv tool install 'harbor[modal]' && modal token new                     # once
 harbor/watch_one/run_modal.sh                                          # oracle and nop
 OPENAI_API_KEY=... harbor/watch_one/run_modal.sh openai/gpt-6.1-sol 3  # then a model, 3 runs
 ```
+
+On Windows, run the three `harbor run` lines above with `-e modal` from PowerShell (the `.sh` runners need
+bash); clone after 15 Nov 08:40, when the line-ending rule went in.
 
 `task/` is generated, not hand-written: `harbor/watch_one/build_task.py` writes it from the sources in this repo
 (`environment/`, `geometry/`, `tests/`, `solution/`) and refuses anything that would leak the solution into the
@@ -252,8 +256,8 @@ grader details are on branch `a/final-runs`, under `runs/final_4c5d8d3/` and `ru
 
 | Agent | Runs | Reward | Notes |
 | --- | --- | --- | --- |
-| Oracle (our reference) | 1 | 1.000 | H 3.35 mm, built in the container in 37 s |
-| nop (does nothing) | 1 | 0.000 | |
+| Oracle (our reference) | 2 | 1.000, 1.000 | H 3.35 mm; once in local Docker, once on Modal |
+| nop (does nothing) | 2 | 0.000, 0.000 | once in local Docker, once on Modal |
 | Stop-early (three cut-off deliveries) | 3 | 0.157, 0.220, 0.333 | Part 1 only; Parts 1 and 2; Parts 1 to 3 |
 | GPT-6.1-sol (Codex) | 6 | 0.457, 0.447, 0.427, 0.467, 0.458, 0.427 (mean 0.447) | no run delivers a watch that fully works |
 | Sonnet 5.5 (OpenCode) | 0 valid | | see below |
@@ -373,7 +377,8 @@ what we do not show.
 > Zero points: an exploit, scoring loophole, or strategy that avoids the task earns a better score than
 > successful play.
 
-- **Doing nothing:** 0.000 in Harbor (nop agent); an empty delivery folder grades 0.000000 outside Harbor.
+- **Doing nothing:** 0.000 in Harbor (nop agent), in local Docker and on Modal; an empty delivery folder grades
+  0.000000 outside Harbor.
 - **Stopping early:** three stop-early deliveries, each the reference cut off after its first parts, graded on
   the submitted grader: Part 1 only 0.157; Parts 1 and 2: 0.220; Parts 1 to 3 without an assembly plan, with a
   truthful report: 0.333. Command: `python3 tests/test_anchors_job.py 3 --only "job stop-early"` (3 of 3 as
@@ -409,10 +414,12 @@ what we do not show.
 - **Makes sense for the setting:** the task is a movement designer's job from a customer order and supplier
   sheets, and its numbers come from real calibres ("Why it is hard, and why that is fair").
 - **One command:** `harbor/watch_one/run_all.sh MODEL K` builds the task and runs oracle, nop and the model.
-- **Reproduce:** oracle 1.000 and nop 0.000 were reproduced in Harbor on the submitted grader; the GPT
+- **Reproduce:** oracle 1.000 and nop 0.000 were reproduced by a second team member on a second machine and a
+  second sandbox (Windows, Modal), from a fresh clone and the three commands under "How to run it"; the GPT
   deliveries can be regraded from `a/final-runs`.
 - **Rules in one place:** `SPEC.md` names the constant and file behind every number.
-- **Not done:** a run of the README from a clean clone by someone who did not write it.
+- **Found by that clean-clone run and fixed:** a Windows checkout turned the verifier's shell script into CRLF
+  and no reward was written. `.gitattributes` now keeps LF on every checkout.
 
 ### Tiebreaker: a smaller model that improves after training
 
