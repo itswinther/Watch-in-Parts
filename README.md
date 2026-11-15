@@ -7,6 +7,22 @@ never sees a check, a score or a verdict.
 
 The repo is still named `board-in-a-box` after our first idea, which we dropped.
 
+**Where to look first**
+
+| You want | Go to |
+| --- | --- |
+| The task, ready for `harbor run` | [`task/`](task/) |
+| What the agent is told | [`task/instruction.md`](task/instruction.md) |
+| The rules and every number | [`SPEC.md`](SPEC.md) |
+| The grader | [`tests/grade_watch.py`](tests/grade_watch.py) |
+| The reference solution, and the job step by step | [`solution/reference_watch.py`](solution/reference_watch.py), [`solution/STEP_BY_STEP_WATCH.md`](solution/STEP_BY_STEP_WATCH.md) |
+| Results and the rubric, point by point | below, "Results" and "The judging rubric" |
+| Everything else | "Where things are", at the end |
+
+Folders that are not part of the submitted task: `spikes/` (experiments), `holdtheline/` (a dropped idea),
+`transcripts/` and `docs/history/` (earlier versions), `docs/research/` (our notes on real watches, standards
+and the harness).
+
 ## What the agent gets and what it must deliver
 
 The instruction is [environment/public/job/PROMPT.md](environment/public/job/PROMPT.md), written as a customer
@@ -138,7 +154,7 @@ check, is [docs/CHECK_BASIS.md](docs/CHECK_BASIS.md). Where a check had no basis
 or to `FORMAT.md` (for example the dial layout and hand lengths, the dial side, the drawing convention), or we
 list it under known limits below.
 
-The task is grounded in real watches (`REAL_WATCH_WORK.md`):
+The task is grounded in real watches (`docs/research/REAL_WATCH_WORK.md`):
 
 - Barrel to centre is 8, as in Grossmann's textbook train. Real barrels run 6.3 to 8 hours per turn, so the
   8-hour and 6-hour builds are both in range.
@@ -153,7 +169,7 @@ The task is grounded in real watches (`REAL_WATCH_WORK.md`):
   ml01 has that wheel, and so does US patent 7,452,123.
 
 We also ran Marco Lang's ml01 going train, from his public CAD file, through an earlier version of our checks
-(`REAL_ML01_FAIRNESS.md`).
+(`docs/research/REAL_ML01_FAIRNESS.md`).
 
 ## Reward integrity
 
@@ -402,7 +418,7 @@ Not done.
 | `tests/test_anchors_job.py` | anchor suite: the reference with one change each, and its expected reward |
 | `task/` | the Harbor task, ready to run |
 | `harbor/watch_one/` | the script that builds `task/`, and the one-command runner |
-| `REAL_WATCH_WORK.md`, `REAL_ML01_FAIRNESS.md` | the task against real watches and a real CAD design |
+| `docs/research/REAL_WATCH_WORK.md`, `docs/research/REAL_ML01_FAIRNESS.md` | the task against real watches and a real CAD design |
 | `visualizer/` | demo pages, open `index.html` or `xray.html` in a browser |
 | `SESSION.md` | shared log of the four sessions: decisions, requests, every result |
 
