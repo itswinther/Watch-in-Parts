@@ -1,0 +1,43 @@
+{
+  "parts": {
+    "P1": "not_tested",
+    "P2": "not_tested",
+    "P3": "not_tested",
+    "P4": "pass"
+  },
+  "height_mm": 11.15,
+  "barrel": "BR-096-30",
+  "verification": {
+    "format": "pass",
+    "STEP_part_count": 29,
+    "case_radius_mm": 12.7,
+    "maximum_nominal_radius_mm": 12.65,
+    "literal_DS_W03_voxel_printability": "pass for every part",
+    "nominal_static_overlap": "none above 0.01 mm3 in either build",
+    "gear_mesh_motion": "129 relative poses per tooth cycle, no overlap above 0.01 mm3",
+    "mobile_against_frame_rotation": "72 poses per revolution, no overlap above 0.01 mm3",
+    "assembly": "All 28 components included; 201 poses each; 0.15 mm translation steps; full continuous vertical sweeps checked against previously installed components.",
+    "hand_revolutions_per_hour_clockwise": {
+      "hour": 0.08333333333333333,
+      "minute": 1,
+      "seconds": 60,
+      "day": 0.041666666666666664
+    },
+    "shared_frame": "Identical fixed part names, files and case position in both builds",
+    "Lewis_rating_at_70_1_Nmm": {
+      "8h": {
+        "maximum_nominal_tooth_stress_MPa": 1005.6021074895409,
+        "conservative_steel_proof_MPa": 1450
+      },
+      "6h": {
+        "maximum_nominal_tooth_stress_MPa": 1340.8028099860549,
+        "conservative_steel_proof_MPa": 1450
+      }
+    },
+    "dry_running_loaded_performance": "not_tested"
+  },
+  "limitations": [
+    "P1, P2 and P3 are not claimed as passes: the geometric, kinematic and nominal Lewis checks do not establish full dry-running performance under load or durability."
+  ],
+  "outside_container_access": false
+}

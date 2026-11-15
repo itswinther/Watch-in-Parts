@@ -1,0 +1,202 @@
+{
+  "a_body": {
+    "survives": true,
+    "deviation_mm": 0.1118033988749895,
+    "pass": true
+  },
+  "a_wheel1": {
+    "survives": true,
+    "deviation_mm": 0.08660254037844387,
+    "pass": true
+  },
+  "b_body": {
+    "survives": true,
+    "deviation_mm": 0.1118033988749895,
+    "pass": true
+  },
+  "b_wheel1": {
+    "survives": true,
+    "deviation_mm": 0.1118033988749895,
+    "pass": true
+  },
+  "c_body": {
+    "survives": true,
+    "deviation_mm": 0.08660254037844387,
+    "pass": true
+  },
+  "c_wheel1": {
+    "survives": true,
+    "deviation_mm": 0.08660254037844387,
+    "pass": true
+  },
+  "day_body": {
+    "survives": true,
+    "deviation_mm": 0.07071067811865477,
+    "pass": true
+  },
+  "day_hand": {
+    "survives": true,
+    "deviation_mm": 0.158113883008419,
+    "pass": true
+  },
+  "first_6h_body": {
+    "survives": true,
+    "deviation_mm": 0.08660254037844387,
+    "pass": true
+  },
+  "first_6h_wheel1": {
+    "survives": true,
+    "deviation_mm": 0.08660254037844387,
+    "pass": true
+  },
+  "first_body": {
+    "survives": true,
+    "deviation_mm": 0.08660254037844387,
+    "pass": true
+  },
+  "first_wheel1": {
+    "survives": true,
+    "deviation_mm": 0.07071067811865477,
+    "pass": true
+  },
+  "hour_body": {
+    "survives": true,
+    "deviation_mm": 0.1224744871391589,
+    "pass": true
+  },
+  "hour_hand": {
+    "survives": true,
+    "deviation_mm": 0.1118033988749895,
+    "pass": true
+  },
+  "hour_wheel1": {
+    "survives": true,
+    "deviation_mm": 0.07071067811865477,
+    "pass": true
+  },
+  "idler_body": {
+    "survives": true,
+    "deviation_mm": 0.07071067811865477,
+    "pass": true
+  },
+  "idler_wheel1": {
+    "survives": true,
+    "deviation_mm": 0.07071067811865477,
+    "pass": true
+  },
+  "minute_6h_body": {
+    "survives": true,
+    "deviation_mm": 0.08660254037844387,
+    "pass": true
+  },
+  "minute_6h_wheel1": {
+    "survives": true,
+    "deviation_mm": 0.08660254037844387,
+    "pass": true
+  },
+  "minute_6h_wheel2": {
+    "survives": true,
+    "deviation_mm": 0.08660254037844387,
+    "pass": true
+  },
+  "minute_body": {
+    "survives": true,
+    "deviation_mm": 0.08660254037844387,
+    "pass": true
+  },
+  "minute_hand": {
+    "survives": true,
+    "deviation_mm": 0.1118033988749895,
+    "pass": true
+  },
+  "minute_wheel1": {
+    "survives": true,
+    "deviation_mm": 0.08660254037844387,
+    "pass": true
+  },
+  "minute_wheel2": {
+    "survives": true,
+    "deviation_mm": 0.08660254037844387,
+    "pass": true
+  },
+  "plate_00": {
+    "survives": true,
+    "deviation_mm": 0.07071067811865477,
+    "pass": true
+  },
+  "plate_01": {
+    "survives": true,
+    "deviation_mm": 0.07071067811865477,
+    "pass": true
+  },
+  "plate_02": {
+    "survives": true,
+    "deviation_mm": 0.07071067811865477,
+    "pass": true
+  },
+  "plate_03": {
+    "survives": true,
+    "deviation_mm": 0.07071067811865477,
+    "pass": true
+  },
+  "plate_04": {
+    "survives": true,
+    "deviation_mm": 0.07071067811865477,
+    "pass": true
+  },
+  "plate_05": {
+    "survives": true,
+    "deviation_mm": 0.07071067811865477,
+    "pass": true
+  },
+  "plate_06": {
+    "survives": true,
+    "deviation_mm": 0.07071067811865477,
+    "pass": true
+  },
+  "plate_07": {
+    "survives": true,
+    "deviation_mm": 0.07071067811865477,
+    "pass": true
+  },
+  "plate_08": {
+    "survives": true,
+    "deviation_mm": 0.07071067811865477,
+    "pass": true
+  },
+  "plate_09": {
+    "survives": true,
+    "deviation_mm": 0.07071067811865477,
+    "pass": true
+  },
+  "plate_10": {
+    "survives": true,
+    "deviation_mm": 0.07071067811865477,
+    "pass": true
+  },
+  "plate_11": {
+    "survives": true,
+    "deviation_mm": 0.07071067811865477,
+    "pass": true
+  },
+  "reducer_body": {
+    "survives": true,
+    "deviation_mm": 0.08660254037844387,
+    "pass": true
+  },
+  "reducer_wheel1": {
+    "survives": true,
+    "deviation_mm": 0.08660254037844387,
+    "pass": true
+  },
+  "seconds_body": {
+    "survives": true,
+    "deviation_mm": 0.1224744871391589,
+    "pass": true
+  },
+  "seconds_hand": {
+    "survives": true,
+    "deviation_mm": 0.1118033988749895,
+    "pass": true
+  }
+}

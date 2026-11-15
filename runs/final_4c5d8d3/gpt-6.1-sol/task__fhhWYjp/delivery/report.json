@@ -1,0 +1,29 @@
+{
+  "parts": {
+    "P1": "not_tested",
+    "P2": "not_tested",
+    "P3": "not_tested",
+    "P4": "pass"
+  },
+  "height_mm": 11.8,
+  "verification": {
+    "format": "passed",
+    "nominal_static_interference": "none in either build",
+    "case_swept_envelopes": "within 12.7 mm radius",
+    "hand_revolutions_per_hour": {
+      "hour": 0.08333333333333333,
+      "minute": 1,
+      "seconds": 60,
+      "day": 0.041666666666666664
+    },
+    "gear_cycle_interference": "none at 65 samples per driver tooth pitch in either build",
+    "printing": "all 40 STEP parts passed DS-W03 voxel test",
+    "assembly": "no intersections exceeding 0.01 mm3 at axial profile-boundary displacements; 201 poses per path, 0.15 mm steps",
+    "unverified": [
+      "Complete dry-running torque and friction budget",
+      "Complete automatic-family structural load rating",
+      "Physical manufacture and running test"
+    ]
+  },
+  "external_access": "None; only local container files and installed software used."
+}

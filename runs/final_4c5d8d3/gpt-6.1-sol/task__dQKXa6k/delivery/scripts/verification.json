@@ -1,0 +1,11 @@
+{
+  "format": "pass",
+  "step_parts": 19,
+  "height_mm": 9.6,
+  "nominal_assembled_collisions": "none in either build",
+  "sampled_mesh_cycles": "zero intersection volume at 81 poses per mesh in each build",
+  "voxel_printability": "all 19 parts passed on factory-meshed solids",
+  "assembly": "continuous translational sweeps checked; 201 poses per part, 0.1 mm spacing",
+  "unverified": "Complete dry-running performance and full mechanical acceptance P1, P2, P3",
+  "external_access": "none"
+}

@@ -1,0 +1,168 @@
+{
+  "barrel": "BR-096-30",
+  "case_centre": [
+    2.87,
+    0
+  ],
+  "fixed": [
+    "frame",
+    "barrel_bridge",
+    "day_shelf",
+    "dial"
+  ],
+  "mobiles": {
+    "sec_inter": {
+      "axis": [
+        2.87,
+        -6.528
+      ],
+      "parts": [
+        "sec_inter"
+      ],
+      "material": "AD-C100-HT"
+    },
+    "seconds": {
+      "axis": [
+        8.469999999999999,
+        -4.059316140126484
+      ],
+      "parts": [
+        "seconds",
+        "seconds_hand"
+      ],
+      "material": "AD-C100-HT"
+    },
+    "hour_inter": {
+      "axis": [
+        -3.5300000000000002,
+        0
+      ],
+      "parts": [
+        "hour_inter"
+      ],
+      "material": "AD-C100-HT"
+    },
+    "hour": {
+      "axis": [
+        2.87,
+        0
+      ],
+      "parts": [
+        "hour",
+        "hour_hand"
+      ],
+      "material": "AD-C100-HT"
+    },
+    "day_inter": {
+      "axis": [
+        7.218673054634968,
+        1.0767741935483879
+      ],
+      "parts": [
+        "day_inter"
+      ],
+      "material": "AD-C100-HT"
+    },
+    "day": {
+      "axis": [
+        2.87,
+        6.2
+      ],
+      "parts": [
+        "day",
+        "day_hand"
+      ],
+      "material": "AD-C100-HT"
+    },
+    "input": {
+      "axis": [
+        10.8,
+        0
+      ],
+      "parts": [
+        "input8"
+      ],
+      "material": "AD-C100-HT"
+    },
+    "minute": {
+      "axis": [
+        2.87,
+        0
+      ],
+      "parts": [
+        "minute8",
+        "minute_pinion",
+        "minute_hand"
+      ],
+      "material": "AD-C100-HT"
+    }
+  },
+  "meshes": [
+    {
+      "driver": "barrel",
+      "driver_teeth": 96,
+      "driven": "input",
+      "driven_teeth": 12
+    },
+    {
+      "driver": "input",
+      "driver_teeth": 48,
+      "driven": "minute",
+      "driven_teeth": 48
+    },
+    {
+      "driver": "minute",
+      "driver_teeth": 60,
+      "driven": "sec_inter",
+      "driven_teeth": 8
+    },
+    {
+      "driver": "sec_inter",
+      "driver_teeth": 64,
+      "driven": "seconds",
+      "driven_teeth": 8
+    },
+    {
+      "driver": "minute",
+      "driver_teeth": 16,
+      "driven": "hour_inter",
+      "driven_teeth": 48
+    },
+    {
+      "driver": "hour_inter",
+      "driver_teeth": 16,
+      "driven": "hour",
+      "driven_teeth": 64
+    },
+    {
+      "driver": "hour",
+      "driver_teeth": 16,
+      "driven": "day_inter",
+      "driven_teeth": 16
+    },
+    {
+      "driver": "day_inter",
+      "driver_teeth": 16,
+      "driven": "day",
+      "driven_teeth": 32
+    }
+  ],
+  "hands": {
+    "hour": {
+      "mobile": "hour",
+      "part": "hour_hand"
+    },
+    "minute": {
+      "mobile": "minute",
+      "part": "minute_hand"
+    },
+    "seconds": {
+      "mobile": "seconds",
+      "part": "seconds_hand"
+    },
+    "day": {
+      "mobile": "day",
+      "part": "day_hand"
+    }
+  }
+}
