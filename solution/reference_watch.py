@@ -1,12 +1,15 @@
 """Reference for the watch task.
     python solution/reference_watch.py OUT_DIR
 writes OUT_DIR/stage1 .. OUT_DIR/stage4, each with movement.json and parts/*.step (stage4 also assembly.json).
-    python solution/reference_watch.py OUT_DIR --job [--one-part-mobiles] [--barrel PART_NO]
+    python solution/reference_watch.py OUT_DIR --job [--one-part-mobiles | --split-wheels] [--barrel PART_NO]
 writes OUT_DIR as one delivery folder (Decisions 2026-11-14 15:44): movement.json (the stage-2 design: 8-hour
 barrel, with the 24-hour hand), variant_6h.json (the stage-3 design: same frame, 1/6 barrel turn per hour),
 assembly.json (order and paths for movement.json) and parts/*.step, one file per part name for both movements.
 In the delivery the going train and the minute wheel are brass wheels on steel pinion arbors, two parts each
-(split_wheels, part_materials); --one-part-mobiles keeps them one part each, as in the stage folders.
+(split_wheels, part_materials); --one-part-mobiles keeps them one part each, as in the stage folders. With the thin
+build (W.THIN_BARREL, the default of geometry/watch.py) one-part mobiles are the default (SPLIT_DEFAULT), so that
+`reference_watch.py OUT --job` with no flags and no environment variables, as Harbor's solve.sh runs it, writes the
+delivery that passes; --split-wheels asks for the split wheels anyway.
 Parts are built on the CAD kernel (geometry/watch_gears_cad.py, CadQuery/OpenCASCADE) and written as STEP.
 Like an agent, each stage copies the part files it keeps from the stage before and writes only new ones.
 
@@ -630,7 +633,12 @@ def job_order(order):
     return out
 
 
-def main_job(out, split=True):
+# one-job mode's default: split wheels for main's 6.6 mm layout, one-part steel mobiles for the thin layout (whose
+# layers are too thin for a collar inside a wheel; A's thin reference was graded with --one-part-mobiles)
+SPLIT_DEFAULT = not W.THIN_BARREL
+
+
+def main_job(out, split=SPLIT_DEFAULT):
     """One delivery folder: the 8-hour movement with its 24-hour hand, the 6-hour variant on the same frame,
     the assembly plan for the 8-hour movement, and one parts/ folder. A part name used by both movements is
     one solid and one file; a part that differs between them has its own name. Every mobile declares its material.
@@ -685,9 +693,14 @@ def main_job(out, split=True):
 
 
 if __name__ == "__main__":
-    args = [a for i, a in enumerate(sys.argv[1:]) if a not in ("--job", "--one-part-mobiles", "--barrel")
+    args = [a for i, a in enumerate(sys.argv[1:]) if a not in ("--job", "--one-part-mobiles", "--split-wheels", "--barrel")
             and not (i > 0 and sys.argv[i] == "--barrel")]
     if "--job" in sys.argv[1:]:
-        main_job(args[0] if args else "out_job", split="--one-part-mobiles" not in sys.argv[1:])
+        split = SPLIT_DEFAULT
+        if "--one-part-mobiles" in sys.argv[1:]:
+            split = False
+        if "--split-wheels" in sys.argv[1:]:
+            split = True
+        main_job(args[0] if args else "out_job", split=split)
     else:
         main(args[0] if args else "out")
