@@ -230,6 +230,12 @@ harbor/watch_one/run_modal.sh                                          # oracle 
 OPENAI_API_KEY=... harbor/watch_one/run_modal.sh openai/gpt-6.1-sol 3  # then a model, 3 runs
 ```
 
+**Any model provider works.** `task.toml` limits the agent's network to an allowlist, because this repo is
+public and an open network would let the agent download the reference. The list names Anthropic, OpenAI,
+Google and OpenRouter. For any other provider, Harbor 0.26 adds the model's own endpoint to the allowlist by
+itself when it starts the agent (it logs "Allowlisting inference host ..."). If it cannot work the endpoint out,
+it says so, and one flag adds it: `--allow-agent-host <hostname>`. The verifier stays offline either way.
+
 On Windows, run the three `harbor run` lines above with `-e modal` from PowerShell (the `.sh` runners need
 bash); use a clone that has `.gitattributes` (commit `fca7fe9` or later), which keeps the shell scripts in LF.
 
