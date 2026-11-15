@@ -106,7 +106,7 @@ if W.THIN_BARREL:
     BACKLASH = float(os.environ.get("THIN_BACKLASH", "0.027"))
     PIVOT_R = float(os.environ.get("THIN_PIVOT_R", "0.4"))     # big pivots: the bearings stop a mobile within little play
     PLATE_T = float(os.environ.get("THIN_PLATE_T", "0.3"))     # mid plate, bridge and dial: long bearings
-    LAYER_T = float(os.environ.get("THIN_LAYER_T", "0.2"))
+    LAYER_T = float(os.environ.get("THIN_LAYER_T", "0.16"))
     GAP = SG
     ZB = W.BARREL_WHEEL_Z[1]
     PLATE = (W.BARREL_ARBOR_Z[0], -SG)               # the barrel's core rests SG above it
