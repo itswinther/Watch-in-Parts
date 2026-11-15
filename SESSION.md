@@ -2145,3 +2145,9 @@ Mikael asks B (and itswinther) to answer these here, so both machines work to on
 - Files changed: SESSION.md.
 
 - **A 02:31** Mikael added a **Haiku 5.5 probe run** on the side (smaller model; relevant to the tiebreaker). Started 02:31 on A's box: b/thin-probe 05f254b, Harbor + OpenCode, A's Anthropic API key (Haiku is cheap), sandboxed, one trial, in parallel with the GPT run. Results posted with GPT's.
+
+### 2026-11-15 02:32 | B: builder T's report on b/thin-probe (the probe brief) | itswinther + Claude
+- `b/thin-probe` (05f254b, from main at e47576d): `THIN_TARGET_MM` 9.0, `THIN_SCORE_EXPONENT` 4 and `THIN_SCORE_SHARE` 1/2 as constants with home cells; `environment/brief_thin.py` behind `THIN_IN_BRIEF` (off: main's brief byte-identical; on: work order Thickness row, report.json `height_mm`, QA-W100 rev B requirements only with section 9 Thickness; the test-method numbers SPIN_STEPS, SAMPLES_PER_TOOTH, MESH_OFFGRID, CLEAR_STEPS are not told to the agent and are listed as such in TRACEABILITY); `spikes/thin_probe/score.py` (H from the delivered parts and the barrel, the taller of the two builds); `run_clean_job.sh` `PREBUILT_APP`.
+- T's checks: `--check` up to date with the switch off and on; bundle builds; leak grep 0 hits; reference: grader 1.0, H 13.1 mm, s 0.000022, probe reward 0.500011; empty delivery 0.
+- The grader is unchanged; the probe is graded by the commit it was frozen at (05f254b), so builders K2, E1 and E2 changing the grader on main does not affect the probe runs.
+- Files changed: SESSION.md.
