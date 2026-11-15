@@ -2,7 +2,7 @@
 
 | Document | Revision | Date | Status |
 |---|---|---|---|
-| QA-W100 | C | 2026-11-15 | Released |
+| QA-W100 | B | 2026-11-15 | Released |
 
 **Issued by:** the manufacturer's quality department. **Document type:** inspection procedure.
 
@@ -260,20 +260,16 @@ when every part is installed.
 
 ## 9. Thickness
 
-The calibre is for a slim watch. The order asks for a movement that is as thin as possible.
+The order asks for a slim calibre. The movement's height H is the highest point minus the lowest point of every
+part of the movement and of the barrel, in the assembled positions, along the axis. The taller of `movement.json`
+and `variant_6h.json` counts. The target is **4.0 mm**.
 
-**How thickness is measured.** The movement's height H is the highest point minus the lowest point of every part
-of the movement and of the barrel, in the assembled positions, along the axis. It is measured for `movement.json`
-and for `variant_6h.json`, and the taller of the two counts. A movement file that does not load earns no thickness
-score.
+With C the inner height of the case named in the work order (DS-W02, section 2, column "Inner height along the
+axis (mm)"):
 
-**What it is compared with.** H is compared with the height of the manufacturer's own design of this calibre. That
-height is not stated in this procedure or in any other document of the order. A movement as thin as that design,
-or thinner, earns the full thickness score. A thicker movement earns less: the score falls steeply with every
-tenth of a millimetre by which the movement is thicker than that design. Thinner is never worse: making a movement
-thinner never lowers its thickness score.
+    x = (H - 4.0) / (C - 4.0), taken as 0 below 0 and as 1 above 1
+    thickness score s = (1 - x) ^ 4
 
-**When it counts.** Thickness counts only when every condition and every requirement of Parts 1 to 4 is met; a
-thin movement that fails any of them earns nothing for its thickness. The acceptance figure is 1/2 x (the result
-of Parts 1 to 4 together) + 1/2 x [every condition and every requirement of Parts 1 to 4 is met] x (the thickness
-score), times the statement factor of section 3.
+The acceptance figure is 1/2 x (the result of Parts 1 to 4 together) + 1/2 x [every condition and every
+requirement of Parts 1 to 4 is met] x s, times the statement factor of section 3. A movement file that does not
+load counts as no thickness score (s = 0).

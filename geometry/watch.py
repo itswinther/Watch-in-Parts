@@ -35,45 +35,14 @@ BARREL_TURNS_PER_HOUR = Fraction(1, 8)          # clockwise
 CASE_RADIUS = 20.7         # reference reaches 20.354 at its largest stage, plus 0.3, rounded up to 0.05 (main; on
                            # b/thin-4mm SMALL_CASE_RADIUS 12.7 below replaces it, by the same rule)
 CASE_HEIGHT = 13.4         # reference is 13.1 tall, plus 0.3
-# Thickness score (SESSION.md Proposed spec changes, 2026-11-15 02:20; spikes/thin_probe/): not graded by
-# tests/grade_watch.py. Described in QA-W100 section 9 only when environment/brief_thin.py THIN_IN_BRIEF is on, and
-# scored afterwards by spikes/thin_probe/score.py with thin_score() below:
-#     x = (H - H0) / (CASE_HEIGHT - H0), clamped to 0..1;  s = (1 - x) ** THIN_SCORE_EXPONENT
-#     reward = (THIN_SCORE_SHARE x share + THIN_SCORE_SHARE x [all pass] x s) x statement factor
-# H0 = thin_full_score_height(): the height that earns s = 1, and anything thinner earns s = 1 too.
-#   THIN_TARGET_STATED off (default): H0 = THIN_REFERENCE_MM, the height the house design (solution/reference_watch.py)
-#     reaches. The agent's documents print neither H0, the exponent nor the formula: they say that thickness is
-#     compared with the manufacturer's own design, so no stated figure scores full marks when touched.
-#   THIN_TARGET_STATED on (WATCH_THIN_TARGET_STATED=1): H0 = THIN_TARGET_MM, and QA-W100 section 9 prints the target,
-#     the exponent and the formula (the documents of b/thin-4mm 92d9622, byte for byte; to regrade its runs).
+# thinness probe (SESSION.md Proposed spec changes, 2026-11-15 02:20; spikes/thin_probe/): not graded by
+# tests/grade_watch.py. Stated in QA-W100 section 9 only when environment/brief_thin.py THIN_IN_BRIEF is on, and
+# scored afterwards by spikes/thin_probe/score.py: x = (H - THIN_TARGET_MM) / (CASE_HEIGHT - THIN_TARGET_MM), clamped
+# to 0..1, s = (1 - x) ** THIN_SCORE_EXPONENT, reward = THIN_SCORE_SHARE x share + THIN_SCORE_SHARE x [all pass] x s.
 # (Not the THIN_VOXEL ... constants below, which belong to the printability test.)
-THIN_TARGET_STATED = os.environ.get("WATCH_THIN_TARGET_STATED", "0") == "1"
-THIN_TARGET_MM = 4.0       # mm: the stated thickness target (THIN_TARGET_STATED on only)
-# mm: the house design's height, total height along z of the taller build, barrel included. Where the value comes
-# from: the reference delivery (python3 solution/reference_watch.py OUT --job, thin barrel, small case) measures
-# H = 3.3491 with spikes/thin_probe/score.py; rounded up to 0.01. THE ONE PLACE this number lives: when the reference
-# changes, re-measure it and change this constant, nothing else (the score, the bundle's leak check and the
-# traceability note all read it). It must not be below the reference's measured H, or the reference loses score.
-THIN_REFERENCE_MM = 3.35
+THIN_TARGET_MM = 4.0       # mm: the thickness target, total height along z of the taller build, barrel included
 THIN_SCORE_EXPONENT = 4
 THIN_SCORE_SHARE = Fraction(1, 2)   # the half of the reward that full acceptance earns (as tests/grade_watch.py)
-
-
-def thin_full_score_height(stated=None):
-    """The height H0 (mm) at and below which the thickness score is 1 (stated: default THIN_TARGET_STATED)."""
-    return THIN_TARGET_MM if (THIN_TARGET_STATED if stated is None else stated) else THIN_REFERENCE_MM
-
-
-def thin_score(H, exponent=None, stated=None):
-    """(x, s) for a movement of height H mm; H None (a movement file that does not load) or non-finite: (1.0, 0.0).
-    exponent: default THIN_SCORE_EXPONENT (the argument is for tables of alternatives only)."""
-    if H is None or not math.isfinite(H):
-        return 1.0, 0.0
-    h0 = thin_full_score_height(stated)
-    x = min(1.0, max(0.0, (H - h0) / (CASE_HEIGHT - h0)))
-    return x, (1.0 - x) ** (THIN_SCORE_EXPONENT if exponent is None else exponent)
-
-
 # stage 3, change request: the supplied barrel (same mesh) turns clockwise once every 6 hours instead of 8
 CHANGED_BARREL_TURNS_PER_HOUR = Fraction(1, 6)
 # The thin barrel (branch b/thin-4mm, from A's spike a/thin-4mm): ON by default on this branch, so the generator, the
