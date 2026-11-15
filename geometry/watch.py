@@ -48,6 +48,8 @@ CHANGED_BARREL_TURNS_PER_HOUR = Fraction(1, 6)
 # unchanged), read from spikes/thin_4mm/data/. The z constants of the barrel follow. The strength load case
 # (BARREL_TORQUE_MAX_NMM, the automatic version's bridle) is kept at full value: conservative.
 THIN_BARREL = os.environ.get("WATCH_THIN_BARREL", "") == "1"
+# spike only: round 2's DS-W04 friction tooth-load factor (F x 1.45); env TOOTH_LOAD_FACTOR, default 1 (off)
+TOOTH_LOAD_FACTOR = float(os.environ.get("TOOTH_LOAD_FACTOR", "1"))
 # spike only (branch a/thin-po), OFF by default: THIN_CASE_RADIUS=15.5 (say) checks the size requirement against
 # that inner radius instead of CASE_RADIUS (a 43.5 mm diving case: movement about 31 mm across)
 THIN_CASE_RADIUS = float(os.environ["THIN_CASE_RADIUS"]) if os.environ.get("THIN_CASE_RADIUS") else None
@@ -1097,7 +1099,7 @@ def strength_run(m, runs, driven):
         (a, ta, b, tb), x = m.meshes[i], runs[i]
         T = BARREL_TORQUE_MAX_NMM * float(wb / abs(driven[a]))
         mod = x["module"]
-        F = T / (mod * ta / 2.0)
+        F = T / (mod * ta / 2.0) * TOOTH_LOAD_FACTOR
         e = {"pair": "%s/%s" % (a, b), "torque_nmm": T, "force_n": F, "module": mod}
         out.append(e)
         if not Movement.drive_passes(x):
