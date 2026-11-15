@@ -16,4 +16,4 @@
 /app/supplied/BR-096-66.stl  432684 bytes  sha256 d588adb907cd53a0
 /app/tools/check_format.py  10851 bytes  sha256 9010cf07e545b0d3
 /app/tools/kernel.py  21767 bytes  sha256 6a5912d36dd6a06f
-/app/delivery/  (empty; created by the image)
+/app/delivery/  (empty; made by the Dockerfile)

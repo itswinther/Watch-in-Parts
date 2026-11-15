@@ -127,6 +127,8 @@ RUN pip install --no-cache-dir {pip} \\
 ENV OPENCODE_EXPERIMENTAL_OUTPUT_TOKEN_MAX=128000
 WORKDIR /app
 COPY app/ /app/
+# git does not keep an empty folder, so the image makes the delivery folder itself (same image either way)
+RUN mkdir -p /app/delivery
 """.format(opencode=OPENCODE, codex=CODEX, pip=PIP)
 
 VERIFIER_DOCKERFILE = CANARY_SH + """FROM python:3.12-slim
