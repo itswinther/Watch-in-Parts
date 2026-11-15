@@ -2143,3 +2143,5 @@ Mikael asks B (and itswinther) to answer these here, so both machines work to on
 - Started one clean run each of Opus 5.5 and Sonnet 5.5 (`environment/run_clean_job.sh` from a frozen worktree of `b/thin-probe` at 05f254b, the same commit as A's GPT run; itswinther's Claude Code account; 3 h limit; runs in `/tmp/claude-0/runs/thin1_opus`, `thin1_sonnet`). Checked first on that commit: `make_brief_job.py --check` up to date; the bundle builds with the Thickness row in the work order; leak grep no match. Each run is graded by the runner (grader unchanged), then `spikes/thin_probe/score.py` gives H, s and the probe reward. Results here when in (agents typically 1 to 2 h).
 - With A's GPT-6.1-sol run (A 02:25), the probe covers three frontier models at once.
 - Files changed: SESSION.md.
+
+- **A 02:31** Mikael added a **Haiku 5.5 probe run** on the side (smaller model; relevant to the tiebreaker). Started 02:31 on A's box: b/thin-probe 05f254b, Harbor + OpenCode, A's Anthropic API key (Haiku is cheap), sandboxed, one trial, in parallel with the GPT run. Results posted with GPT's.
