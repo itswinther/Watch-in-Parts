@@ -44,7 +44,6 @@ millimetres): the drum and the arbor together, as one mesh. In that position:
 | Arbor core (inside the drum's bore) | z 0 mm to z 1 mm, radius 2.02 mm |
 | Spring chamber inside the drum (not modelled in the mesh) | inner diameter 12.12 mm |
 | Winding square | z 3.3 mm to z 4.9 mm, side 1.4 mm, sides parallel to x and y |
-| Tooth phase | one tooth centred on the +x direction (0 degrees from +x, measured on the supplied mesh) |
 | Volume of the mesh | 293.7 mm3 |
 
 ## 4. Speed classes

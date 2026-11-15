@@ -1,0 +1,420 @@
+{
+ "step_ok": false,
+ "clutch_push_dmax": 0.0,
+ "signs": [
+  1.0
+ ],
+ "only": null,
+ "dqs": {
+  "barrel": [
+   0.5,
+   0.0
+  ],
+  "retaining_click": [
+   0.0,
+   0.01496
+  ],
+  "winding_transfer": [
+   3.0158,
+   0.0
+  ],
+  "winding_pinion": [
+   3.0066,
+   0.0
+  ]
+ },
+ "clutch_overlaps": {
+  "winding_pinion": 0.00025
+ },
+ "clutch_slide_scan(own coord mm, max pen, pairs>TOL)": [
+  [
+   0.005,
+   0.00018,
+   {}
+  ],
+  [
+   0.01,
+   0.0001,
+   {}
+  ],
+  [
+   0.02,
+   0.0,
+   {}
+  ],
+  [
+   0.03,
+   0.0,
+   {}
+  ],
+  [
+   0.05,
+   0.0,
+   {}
+  ],
+  [
+   0.08,
+   0.00592,
+   {
+    "stem": 0.00592
+   }
+  ],
+  [
+   0.12,
+   0.01807,
+   {
+    "stem": 0.01807
+   }
+  ],
+  [
+   -0.005,
+   0.00033,
+   {
+    "winding_pinion": 0.00033
+   }
+  ],
+  [
+   -0.01,
+   0.00041,
+   {
+    "winding_pinion": 0.00041
+   }
+  ],
+  [
+   -0.02,
+   0.00056,
+   {
+    "winding_pinion": 0.00056
+   }
+  ]
+ ],
+ "clutch_pinion_patches": [
+  {
+   "vol": 8e-06,
+   "centre": [
+    4.127,
+    -0.447,
+    -0.3
+   ],
+   "travel_pinion": 0.02822,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 8e-06,
+   "centre": [
+    4.128,
+    -0.291,
+    -0.438
+   ],
+   "travel_pinion": 0.02759,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 8e-06,
+   "centre": [
+    4.127,
+    -0.38,
+    -0.381
+   ],
+   "travel_pinion": 0.02822,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 8e-06,
+   "centre": [
+    4.127,
+    -0.496,
+    -0.207
+   ],
+   "travel_pinion": 0.02822,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 8e-06,
+   "centre": [
+    4.127,
+    -0.527,
+    -0.106
+   ],
+   "travel_pinion": 0.02822,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 8e-06,
+   "centre": [
+    4.127,
+    -0.538,
+    -0.001
+   ],
+   "travel_pinion": 0.02822,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 8e-06,
+   "centre": [
+    4.128,
+    -0.204,
+    -0.495
+   ],
+   "travel_pinion": 0.02811,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 8e-06,
+   "centre": [
+    4.128,
+    -0.104,
+    -0.526
+   ],
+   "travel_pinion": 0.02811,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 8e-06,
+   "centre": [
+    4.128,
+    -0.526,
+    0.104
+   ],
+   "travel_pinion": 0.02811,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 8e-06,
+   "centre": [
+    4.128,
+    -0.495,
+    0.204
+   ],
+   "travel_pinion": 0.02811,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 8e-06,
+   "centre": [
+    4.128,
+    -0.438,
+    0.291
+   ],
+   "travel_pinion": 0.02759,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 8e-06,
+   "centre": [
+    4.127,
+    -0.381,
+    0.38
+   ],
+   "travel_pinion": 0.02822,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 8e-06,
+   "centre": [
+    4.127,
+    -0.3,
+    0.447
+   ],
+   "travel_pinion": 0.02822,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 8e-06,
+   "centre": [
+    4.127,
+    -0.207,
+    0.496
+   ],
+   "travel_pinion": 0.02822,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 8e-06,
+   "centre": [
+    4.127,
+    -0.106,
+    0.527
+   ],
+   "travel_pinion": 0.02822,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 8e-06,
+   "centre": [
+    4.127,
+    -0.001,
+    0.538
+   ],
+   "travel_pinion": 0.02822,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 8e-06,
+   "centre": [
+    4.127,
+    0.001,
+    -0.538
+   ],
+   "travel_pinion": 0.02822,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 8e-06,
+   "centre": [
+    4.127,
+    0.106,
+    -0.527
+   ],
+   "travel_pinion": 0.02822,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 8e-06,
+   "centre": [
+    4.127,
+    0.207,
+    -0.496
+   ],
+   "travel_pinion": 0.02822,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 8e-06,
+   "centre": [
+    4.127,
+    0.3,
+    -0.447
+   ],
+   "travel_pinion": 0.02822,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 8e-06,
+   "centre": [
+    4.127,
+    0.381,
+    -0.38
+   ],
+   "travel_pinion": 0.02822,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 8e-06,
+   "centre": [
+    4.128,
+    0.438,
+    -0.291
+   ],
+   "travel_pinion": 0.02759,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 8e-06,
+   "centre": [
+    4.128,
+    0.495,
+    -0.204
+   ],
+   "travel_pinion": 0.02811,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 8e-06,
+   "centre": [
+    4.128,
+    0.526,
+    -0.104
+   ],
+   "travel_pinion": 0.02811,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 8e-06,
+   "centre": [
+    4.127,
+    0.38,
+    0.381
+   ],
+   "travel_pinion": 0.02822,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 8e-06,
+   "centre": [
+    4.128,
+    0.104,
+    0.525
+   ],
+   "travel_pinion": 0.02809,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 8e-06,
+   "centre": [
+    4.128,
+    0.204,
+    0.495
+   ],
+   "travel_pinion": 0.02809,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 8e-06,
+   "centre": [
+    4.128,
+    0.291,
+    0.438
+   ],
+   "travel_pinion": 0.02759,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 8e-06,
+   "centre": [
+    4.127,
+    0.538,
+    0.001
+   ],
+   "travel_pinion": 0.02822,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 8e-06,
+   "centre": [
+    4.127,
+    0.527,
+    0.106
+   ],
+   "travel_pinion": 0.02822,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 8e-06,
+   "centre": [
+    4.127,
+    0.496,
+    0.207
+   ],
+   "travel_pinion": 0.02822,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 8e-06,
+   "centre": [
+    4.127,
+    0.447,
+    0.3
+   ],
+   "travel_pinion": 0.02822,
+   "travel_clutch": 0.0
+  }
+ ],
+ "TOL": 0.0002,
+ "K": 1.9607843137254901,
+ "clutch_lo_hi_q": [
+  -Infinity,
+  Infinity,
+  0.0395
+ ]
+}

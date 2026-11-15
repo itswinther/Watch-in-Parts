@@ -1,29 +1,24 @@
-# Agent image /app tree: harbor/watch_one, build_task.py --agent opencode, GRADER one-job (SPEC 0.7, two-body barrel of builder K)
-# built 2026-11-14T16:56Z from origin/main 566415f; listed with: docker run --rm watch-one-agent (find /app ...)
+# Agent image /app tree: harbor/watch_one, build_task.py --agent opencode, GRADER one-job (SPEC 0.7; P5 off: KEYLESS_IN_JOB = False)
+# built 2026-11-14T23:27Z from origin/main 1f15e48; listed with: docker run --rm watch-one-agent (find /app ...)
 
 /app/
-/app/FORMAT.md  4280 bytes  sha256 a123ecf847e0ba5a
+/app/FORMAT.md  6006 bytes  sha256 59f787f48d6b6093
 /app/datasheets/
-/app/datasheets/DS-101_mainspring_barrel.md  15945 bytes  sha256 b0d7a6dd08878463
-/app/datasheets/DS-201_materials.md  8646 bytes  sha256 6fb33380593be0af
-/app/datasheets/DS-301_jewel_bearings.md  8925 bytes  sha256 4b2ebe446c0fe00c
-/app/datasheets/DS-401_crown_stem.md  8534 bytes  sha256 751ef708627c489d
-/app/datasheets/DS-501_human_factors_crown.md  7043 bytes  sha256 4abf068535f87660
-/app/datasheets/DS-W01_barrel.md  3242 bytes  sha256 d4b98b3bb44bd171
+/app/datasheets/DS-101_mainspring_barrel.md  16800 bytes  sha256 da74537f43938623
+/app/datasheets/DS-201_materials.md  8711 bytes  sha256 f1dc328456694968
+/app/datasheets/DS-301_jewel_bearings.md  8972 bytes  sha256 a56998bf4d501ba2
+/app/datasheets/DS-401_crown_stem.md  8417 bytes  sha256 1947c0ceaecb6bde
+/app/datasheets/DS-501_human_factors_crown.md  7075 bytes  sha256 fc3230063ece48b6
+/app/datasheets/DS-W01_barrel.md  3141 bytes  sha256 e8c5fcc81baee68b
 /app/datasheets/DS-W02_case.md  633 bytes  sha256 46add0ea5ba38e7a
 /app/datasheets/DS-W03_process.md  1074 bytes  sha256 2bd69fa791f2dc00
-/app/datasheets/INDEX.md  981 bytes  sha256 ed9baa848d56c75b
-/app/datasheets/QA-W100_inspection.md  12807 bytes  sha256 d9ecbb3dc9bb113d
+/app/datasheets/DS-W04_gear_rating.md  12954 bytes  sha256 c659534892da9908
+/app/datasheets/INDEX.md  1058 bytes  sha256 8965abca69491e88
+/app/datasheets/QA-W100_inspection.md  17796 bytes  sha256 18e663eef6a6a079
 /app/delivery/
-/app/instruction.md  3976 bytes  sha256 b72534eb1f5090c8
+/app/instruction.md  4433 bytes  sha256 52713bb99f84ce1a
 /app/supplied/
-/app/supplied/barrel.stl  432684 bytes  sha256 6f05bc941df374e7
+/app/supplied/barrel.stl  432684 bytes  sha256 d588adb907cd53a0
 /app/tools/
-/app/tools/check_format.py  8111 bytes  sha256 c7170fce66254486
+/app/tools/check_format.py  10110 bytes  sha256 d7f343ee98b61e71
 /app/tools/kernel.py  21767 bytes  sha256 6a5912d36dd6a06f
-absent /tests
-absent /solution
-absent /geometry
-forbidden names found: 0
-
-# versions: opencode 1.19.5, codex-cli 0.169.0, node v20.19.2, Python 3.12.16, cadquery 2.8.0, manifold3d 3.5.5, numpy 2.5.4, scipy 1.18.1, trimesh 5.2.1; OPENCODE_EXPERIMENTAL_OUTPUT_TOKEN_MAX=64000 (unchanged image layers)

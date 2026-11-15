@@ -256,6 +256,42 @@ def b_nothing(d):
         shutil.rmtree(p) if os.path.isdir(p) and not os.path.islink(p) else os.remove(p)
 
 
+def _declared(doc):
+    """The part names a movement file declares: its fixed parts and every mobile's parts."""
+    return set(doc["fixed"]) | {p for mm in doc["mobiles"].values() for p in mm["parts"]}
+
+
+def _stop_early(d, day=True, variant=False):
+    """The delivery as an agent leaves it when it stops after its first parts: no assembly.json (and no report,
+    removed by build()), no variant_6h.json unless variant, movement.json without the 24-hour train unless day,
+    and parts/ holding only the files the remaining movement file(s) declare."""
+    os.remove(os.path.join(d, "assembly.json"))
+    if not day:
+        b_no_day_train(d)
+    if not variant:
+        os.remove(os.path.join(d, "variant_6h.json"))
+    names = set()
+    for n in ("movement.json", "variant_6h.json"):
+        if os.path.isfile(os.path.join(d, n)):
+            with open(os.path.join(d, n)) as f:
+                names |= _declared(json.load(f))
+    for fn in os.listdir(os.path.join(d, "parts")):
+        if os.path.splitext(fn)[0] not in names:
+            os.remove(os.path.join(d, "parts", fn))
+
+
+def b_stop_after_p1(d):
+    _stop_early(d, day=False)
+
+
+def b_stop_after_p2(d):
+    _stop_early(d)
+
+
+def b_stop_after_p3(d):
+    _stop_early(d, variant=True)
+
+
 def b_plan_without_paths(d):
     _edit(d, "assembly.json", lambda a: a.update(paths={}))
 
@@ -363,7 +399,9 @@ def b_day_too_close(d):
         return ref.union([c(x, y, z0, z1, 0.6), c(x, y, z1 - 0.4, z1, 0.8), c(x, y, z0 - 0.7, z0 + 0.01, 0.3),
                           c(x, y, z1 - 0.01, 10.3, 0.5), c(x, y, 10.29, 10.7, 0.3), gear_solid])
     ref.place_day, ref.hand, ref.hand_arbor = (lambda P: Dn), hand, hand_arbor
-    ref.main_job(d)
+    ref.main_job(d, split=False)     # the one-part layout the suite is written for (B, after builder M)
+    if os.path.exists(os.path.join(d, "report.json")):
+        os.remove(os.path.join(d, "report.json"))   # main_job writes a report; the anchors run without one
     # the day wheel now lies under the hour wheel's rim (5.96 < 5.0 + 3.36), so it goes in before the hour wheel
     # (measured: in the reference's order it is the one part not installed, blocked by the hour wheel)
     order = [n for n in ORDER_8H if n != "day"]
@@ -417,6 +455,16 @@ def b_disc_centred(d):
 
 def b_disc_off_centre(d):
     _disc_hand(d, 0.6)
+
+
+def b_broad_hand(d):
+    """The minute hand a broad flat bar: x from -1 to +9 about the centre axis, y +-3, same z and bore."""
+    ref, P, lo, hi = _ref()
+    from geometry import watch_gears_cad as GC
+    cx, cy = P["centre"]
+    bar = GC.cut(GC.box((cx - 1.0, cy - 3.0, 10.7), (cx + 9.0, cy + 3.0, 11.0)),
+                 GC.cyl(cx, cy, 10.0, 11.5, 0.35 + ref.FIT))
+    _write(d, "minute_hand", bar)
 
 
 def b_barrel_as_part(d):
@@ -488,6 +536,36 @@ ANCHORS = [
     ("job do nothing", b_nothing,
      X(P1={"gates": GATES["P1"], "checks": ALL_FAIL}, P2={"gates": GATES["P2"], "checks": ALL_FAIL},
        P3={"gates": GATES["P3"], "checks": ALL_FAIL}, P4={"gates": GATES["P4"]}), []),
+
+    # ---- 2. stop early: the delivery as an agent leaves it when it stops after its first parts ----
+    # (the judges' stop-early baseline; see _stop_early). Each has no assembly.json: movement.json loads, so P4's
+    # files gate passes and its plan gate fails ("assembly.json not found"), s4 = 0. Without variant_6h.json,
+    # P3's files gate fails and with it every P3 gate (assembled, day_declared, same_frame are not run), s3 = 0.
+    # Part 1 only: movement.json without the 24-hour train (mobiles day and day_idler, their meshes and the day
+    # hand) and parts/ with only the 8-hour movement's files (no day, day_idler, day_hand, third_54, centre_36).
+    # P1 loses nothing, as in "everything except the 24-hour hand" (the day train is not rated for strength and
+    # moves no other mobile); P2: C3 fails, s2 = 0, day_hand and day_place fail (no 24-hour hand to test).
+    # D = 1/10 + 3/20 + 1/4 = 1/2; R = 1/2 - (2/3)(1/2) = 1/6 (= 1/2 x (1/4)/(3/4)); x 16/17 = 8/51 = 0.156863
+    ("job stop-early: Part 1 only", b_stop_after_p1,
+     X(P2={"gates": ["day_declared"], "checks": ["day_hand", "day_place"]}, P3={"gates": GATES["P3"], "checks": ALL_FAIL},
+       P4={"gates": ["plan"]}),
+     [detail(["P2", "details", "day_declared", "error"], lambda v: "no 'day' hand" in v, "no 'day' hand declared"),
+      detail(["P3", "details", "files", "error"], lambda v: "variant_6h.json" in v, "variant_6h.json not found"),
+      detail(["P4", "details", "plan", "error"], lambda v: "assembly.json not found" in v, "assembly.json not found")]),
+    # Parts 1 and 2: the reference's movement.json (with the 24-hour hand) and its parts only (no third_54,
+    # centre_36): P1 and P2 pass. D = 3/20 + 1/4 = 2/5; R = 1/2 - 4/15 = 7/30 (= 1/2 x (7/20)/(3/4));
+    # x 16/17 = 56/255 = 0.219608
+    ("job stop-early: Parts 1 and 2", b_stop_after_p2,
+     X(P3={"gates": GATES["P3"], "checks": ALL_FAIL}, P4={"gates": ["plan"]}),
+     [detail(["P3", "details", "files", "error"], lambda v: "variant_6h.json" in v, "variant_6h.json not found"),
+      detail(["P4", "details", "plan", "error"], lambda v: "assembly.json not found" in v, "assembly.json not found")]),
+    # Parts 1 to 3 (both movement files and every part file), no assembly.json, and a truthful report: pass for P1
+    # to P3, fail for P4. D = 1/4; R = 1/2 - 1/6 = 1/3; points 1, 1, 1, 1 (fail/false 1), h = 1, factor 1;
+    # reward 1/3 = 0.333333. (Without the report: x 16/17 = 16/51 = 0.313725, as with an assembly.json that has
+    # no paths; claiming pass for P4 too: points 1, 1, 1, -2, h = 1/4, factor 31/34, reward 31/102 = 0.303922.)
+    ("job stop-early: Parts 1 to 3, no assembly, truthful partial report", b_stop_after_p3,
+     X(report=dict(REF_REPORT, P4="fail"), P4={"gates": ["plan"]}),
+     [detail(["P4", "details", "plan", "error"], lambda v: "assembly.json not found" in v, "assembly.json not found")]),
 
     # ---- 3. everything except one part ----
     # The hardest part is P4, the assembly: it is the only part whose result depends on every other design
@@ -675,15 +753,28 @@ ANCHORS = [
 
     # ---- 8. exploit-style and format ----
     # The minute hand replaced by a disc r 18 (0.3 thick) on the centre axis, over the whole dial: it reaches
-    # and lies above the frame but its centre of volume is on the axis (< 0.5): Hands fails in P1 and P3 (1).
-    # 24296/52785 = 0.460282
+    # and lies above the frame but its centre of volume is on the axis (< 0.5), and seen from the dial it covers
+    # (pi 18^2 - pi 0.355^2) / (pi 18^2) = 0.9996 > 0.25 of its swept disc: Hands fails in P1 and P3 (1).
+    # D = (1/4)(1/23) + (3/20)(1/27) = 17/1035; R = 3037/6210; x 16/17 = 24296/52785 = 0.460282
     ("x minute hand is a disc over the whole dial (centred)", b_disc_centred,
      X(P1={"checks": ["hands"]}, P3={"checks": ["hands"]}),
-     [detail(["P1", "details", "hands", "minute", "centre_from_axis"], lambda v: v < 0.5, "< 0.5")]),
+     [detail(["P1", "details", "hands", "minute", "centre_from_axis"], lambda v: v < 0.5, "< 0.5"),
+      detail(["P1", "details", "hands", "minute", "area_share_of_swept_disc"], lambda v: v > 0.99, "about 0.9996")]),
     # The same disc 0.6 off-centre: reach 18.6 (+1.72 to the case centre = 20.32 <= 20.7), above the frame,
-    # centre of volume 0.6 from the axis: every stated rule holds, so the rule gives R = 1; x 16/17 = 0.941176.
-    # FINDING (reported 18:39): a hand may be a disc that hides the seconds and 24-hour hands; no stated rule stops it.
-    ("x minute hand is a disc over the whole dial, 0.6 off-centre (FINDING)", b_disc_off_centre, X(), []),
+    # centre of volume 0.6 from the axis, but seen from the dial it covers (pi 18^2 - pi 0.355^2) / (pi 18.6^2)
+    # = 1017.5 / 1086.9 = 0.936 > 0.25 of its swept disc (HAND_AREA_MAX_SHARE, B Decisions 00:50, 15 Nov; before
+    # that rule it scored R = 1, the finding of 18:39). Only Hands fails, in P1 and P3 (1), as for the centred
+    # disc: D = (1/4)(1/23) + (3/20)(1/27) = 17/1035; R = 3037/6210; x 16/17 = 24296/52785 = 0.460282
+    ("x minute hand is a disc over the whole dial, 0.6 off-centre", b_disc_off_centre,
+     X(P1={"checks": ["hands"]}, P3={"checks": ["hands"]}),
+     [detail(["P1", "details", "hands", "minute", "centre_from_axis"], lambda v: abs(v - 0.6) < 0.01, "0.6"),
+      detail(["P1", "details", "hands", "minute", "area_share_of_swept_disc"], lambda v: 0.93 < v < 0.94, "about 0.936")]),
+    # The minute hand a broad flat bar, x -1 to +9 and y -3 to +3 about the centre axis (same z 10.7-11.0 and bore
+    # 0.355; inside the disc above, which cleared every other part and was installed): reach sqrt(9^2 + 3^2) =
+    # 9.487 >= 5, centre of volume 4.0 from the axis, seen from the dial (60 - pi 0.355^2) / (pi 90) = 59.60 /
+    # 282.74 = 0.211 <= 0.25. Every rule holds: R = 1; x 16/17 = 16/17 = 0.941176
+    ("x minute hand a broad bar (0.21 of its swept disc)", b_broad_hand, X(),
+     [detail(["P1", "details", "hands", "minute", "area_share_of_swept_disc"], lambda v: 0.2 < v < 0.22, "about 0.211")]),
     # movement.json lists 'barrel' as a part of the third mobile: a format error (C1), so P1, P2 and P4 score 0;
     # the variant still passes (C4 reads movement.json's fixed list and case centre only).
     # R = 1/2 - (2/3)(3/5) = 1/10; x 16/17 = 8/85 = 0.094118

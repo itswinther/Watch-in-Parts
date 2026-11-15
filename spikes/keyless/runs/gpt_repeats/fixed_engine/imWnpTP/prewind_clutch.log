@@ -1,0 +1,3458 @@
+{
+ "step_ok": false,
+ "clutch_push_dmax": 0.0,
+ "signs": [
+  1.0
+ ],
+ "only": null,
+ "dqs": {
+  "barrel": [
+   0.5,
+   0.0
+  ],
+  "barrel_click": [
+   0.0,
+   0.0113
+  ],
+  "winding_face_wheel": [
+   0.2899,
+   0.0
+  ],
+  "winding_pinion": [
+   1.4455,
+   0.0
+  ]
+ },
+ "clutch_overlaps": {
+  "winding_pinion": 0.00024
+ },
+ "clutch_slide_scan(own coord mm, max pen, pairs>TOL)": [
+  [
+   0.005,
+   0.0,
+   {}
+  ],
+  [
+   0.01,
+   0.0,
+   {}
+  ],
+  [
+   0.02,
+   0.0,
+   {}
+  ],
+  [
+   0.03,
+   0.0,
+   {}
+  ],
+  [
+   0.05,
+   0.0,
+   {}
+  ],
+  [
+   0.08,
+   0.0,
+   {}
+  ],
+  [
+   0.12,
+   0.0,
+   {}
+  ],
+  [
+   -0.005,
+   0.00647,
+   {
+    "winding_pinion": 0.00647
+   }
+  ],
+  [
+   -0.01,
+   0.01315,
+   {
+    "winding_pinion": 0.01315,
+    "stem": 0.00195
+   }
+  ],
+  [
+   -0.02,
+   0.02683,
+   {
+    "winding_pinion": 0.02683,
+    "stem": 0.00878
+   }
+  ]
+ ],
+ "clutch_pinion_patches": [
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.541,
+    -0.635,
+    -0.373
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.551,
+    -0.63,
+    -0.382
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.541,
+    -0.517,
+    -0.525
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.551,
+    -0.51,
+    -0.532
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.561,
+    -0.625,
+    -0.39
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.561,
+    -0.502,
+    -0.539
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.541,
+    -0.71,
+    -0.196
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.551,
+    -0.707,
+    -0.206
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.541,
+    -0.737,
+    -0.006
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.551,
+    -0.737,
+    -0.016
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.561,
+    -0.705,
+    -0.215
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.561,
+    -0.736,
+    -0.026
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.571,
+    -0.619,
+    -0.399
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.571,
+    -0.702,
+    -0.225
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.571,
+    -0.736,
+    -0.036
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.541,
+    -0.363,
+    -0.641
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.541,
+    -0.185,
+    -0.713
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.551,
+    -0.355,
+    -0.646
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.551,
+    -0.176,
+    -0.716
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.561,
+    -0.346,
+    -0.65
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.571,
+    -0.337,
+    -0.655
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.561,
+    -0.166,
+    -0.718
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.571,
+    -0.156,
+    -0.72
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.571,
+    -0.495,
+    -0.546
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.581,
+    -0.614,
+    -0.407
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.581,
+    -0.488,
+    -0.552
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.591,
+    -0.608,
+    -0.416
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.601,
+    -0.603,
+    -0.424
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.591,
+    -0.48,
+    -0.559
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.601,
+    -0.472,
+    -0.565
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.581,
+    -0.698,
+    -0.234
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.581,
+    -0.735,
+    -0.046
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.591,
+    -0.695,
+    -0.244
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.591,
+    -0.735,
+    -0.056
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.601,
+    -0.692,
+    -0.253
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.601,
+    -0.734,
+    -0.066
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.581,
+    -0.328,
+    -0.66
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.591,
+    -0.319,
+    -0.664
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.581,
+    -0.146,
+    -0.722
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.591,
+    -0.136,
+    -0.724
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.601,
+    -0.31,
+    -0.668
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.601,
+    -0.126,
+    -0.726
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.541,
+    -0.713,
+    0.185
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.551,
+    -0.716,
+    0.176
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.541,
+    -0.641,
+    0.363
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.551,
+    -0.646,
+    0.355
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.561,
+    -0.718,
+    0.166
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.561,
+    -0.65,
+    0.346
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.571,
+    -0.72,
+    0.156
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.571,
+    -0.655,
+    0.337
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.541,
+    -0.525,
+    0.517
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.551,
+    -0.532,
+    0.51
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.541,
+    -0.373,
+    0.635
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.551,
+    -0.382,
+    0.63
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.561,
+    -0.539,
+    0.502
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.561,
+    -0.39,
+    0.625
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.571,
+    -0.546,
+    0.495
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.541,
+    -0.196,
+    0.71
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.551,
+    -0.206,
+    0.707
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.541,
+    -0.006,
+    0.737
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.551,
+    -0.016,
+    0.737
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.571,
+    -0.399,
+    0.619
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.561,
+    -0.215,
+    0.705
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.561,
+    -0.026,
+    0.736
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.571,
+    -0.225,
+    0.702
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.571,
+    -0.036,
+    0.736
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.581,
+    -0.722,
+    0.146
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.581,
+    -0.66,
+    0.328
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.591,
+    -0.724,
+    0.136
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.591,
+    -0.664,
+    0.319
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.601,
+    -0.726,
+    0.126
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.601,
+    -0.668,
+    0.31
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.581,
+    -0.552,
+    0.488
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.581,
+    -0.407,
+    0.614
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.591,
+    -0.559,
+    0.48
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.601,
+    -0.565,
+    0.472
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.591,
+    -0.416,
+    0.608
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.601,
+    -0.424,
+    0.603
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.581,
+    -0.234,
+    0.698
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.581,
+    -0.046,
+    0.735
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.591,
+    -0.244,
+    0.695
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.591,
+    -0.056,
+    0.735
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.601,
+    -0.253,
+    0.692
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.601,
+    -0.066,
+    0.734
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.541,
+    0.006,
+    -0.737
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.551,
+    0.016,
+    -0.737
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.541,
+    0.196,
+    -0.71
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.551,
+    0.206,
+    -0.707
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.541,
+    0.373,
+    -0.635
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.551,
+    0.382,
+    -0.63
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.561,
+    0.026,
+    -0.736
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.561,
+    0.215,
+    -0.705
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.571,
+    0.036,
+    -0.736
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.571,
+    0.225,
+    -0.702
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.561,
+    0.39,
+    -0.625
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.571,
+    0.399,
+    -0.619
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.541,
+    0.525,
+    -0.517
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.551,
+    0.532,
+    -0.51
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.561,
+    0.539,
+    -0.502
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.571,
+    0.546,
+    -0.495
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.541,
+    0.641,
+    -0.363
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.551,
+    0.646,
+    -0.355
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.541,
+    0.713,
+    -0.185
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.551,
+    0.716,
+    -0.176
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.561,
+    0.65,
+    -0.346
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.571,
+    0.655,
+    -0.337
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.561,
+    0.718,
+    -0.166
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.571,
+    0.72,
+    -0.156
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.581,
+    0.046,
+    -0.735
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.581,
+    0.234,
+    -0.698
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.591,
+    0.056,
+    -0.735
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.591,
+    0.244,
+    -0.695
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.601,
+    0.066,
+    -0.734
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.601,
+    0.253,
+    -0.692
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.581,
+    0.407,
+    -0.614
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.581,
+    0.552,
+    -0.488
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.591,
+    0.416,
+    -0.608
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.591,
+    0.559,
+    -0.48
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.601,
+    0.424,
+    -0.603
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.601,
+    0.565,
+    -0.472
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.581,
+    0.66,
+    -0.328
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.591,
+    0.664,
+    -0.319
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.581,
+    0.722,
+    -0.146
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.591,
+    0.724,
+    -0.136
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.601,
+    0.668,
+    -0.31
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.601,
+    0.726,
+    -0.126
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.541,
+    0.517,
+    0.525
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.551,
+    0.51,
+    0.532
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.561,
+    0.502,
+    0.539
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.571,
+    0.495,
+    0.546
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.541,
+    0.185,
+    0.713
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.551,
+    0.176,
+    0.716
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.541,
+    0.363,
+    0.641
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.551,
+    0.355,
+    0.646
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.561,
+    0.166,
+    0.718
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.571,
+    0.156,
+    0.72
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.561,
+    0.346,
+    0.65
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.571,
+    0.337,
+    0.655
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.541,
+    0.737,
+    0.006
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.541,
+    0.71,
+    0.196
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.551,
+    0.737,
+    0.016
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.551,
+    0.707,
+    0.206
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.541,
+    0.635,
+    0.373
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.551,
+    0.63,
+    0.382
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.561,
+    0.736,
+    0.026
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.561,
+    0.705,
+    0.215
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.571,
+    0.736,
+    0.036
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.571,
+    0.702,
+    0.225
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.561,
+    0.625,
+    0.39
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.571,
+    0.619,
+    0.399
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.581,
+    0.614,
+    0.407
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.581,
+    0.488,
+    0.552
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.591,
+    0.608,
+    0.416
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.591,
+    0.48,
+    0.559
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.601,
+    0.603,
+    0.424
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.601,
+    0.472,
+    0.565
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.581,
+    0.146,
+    0.722
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.591,
+    0.136,
+    0.724
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.581,
+    0.328,
+    0.66
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.591,
+    0.319,
+    0.664
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.601,
+    0.126,
+    0.726
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.601,
+    0.31,
+    0.668
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.581,
+    0.735,
+    0.046
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.581,
+    0.698,
+    0.234
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.591,
+    0.735,
+    0.056
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.591,
+    0.695,
+    0.244
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.601,
+    0.734,
+    0.066
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.601,
+    0.692,
+    0.253
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.611,
+    -0.597,
+    -0.432
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.611,
+    -0.465,
+    -0.572
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.621,
+    -0.591,
+    -0.44
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.631,
+    -0.585,
+    -0.448
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.621,
+    -0.457,
+    -0.578
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.631,
+    -0.449,
+    -0.584
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.611,
+    -0.688,
+    -0.263
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.611,
+    -0.733,
+    -0.076
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.621,
+    -0.685,
+    -0.272
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.621,
+    -0.732,
+    -0.086
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.631,
+    -0.681,
+    -0.281
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.631,
+    -0.73,
+    -0.096
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.641,
+    -0.677,
+    -0.291
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.641,
+    -0.729,
+    -0.106
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.611,
+    -0.301,
+    -0.672
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.611,
+    -0.117,
+    -0.727
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.621,
+    -0.292,
+    -0.677
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.621,
+    -0.107,
+    -0.729
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.631,
+    -0.282,
+    -0.68
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.631,
+    -0.097,
+    -0.73
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.641,
+    -0.273,
+    -0.684
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.641,
+    -0.087,
+    -0.732
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.641,
+    -0.579,
+    -0.456
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.641,
+    -0.441,
+    -0.59
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.651,
+    -0.572,
+    -0.464
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.651,
+    -0.433,
+    -0.596
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.661,
+    -0.566,
+    -0.472
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 0.0,
+   "centre": [
+    4.669,
+    -0.517,
+    -0.441
+   ],
+   "travel_pinion": 0.01715,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.661,
+    -0.425,
+    -0.602
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 0.0,
+   "centre": [
+    4.669,
+    -0.385,
+    -0.56
+   ],
+   "travel_pinion": 0.01715,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.651,
+    -0.673,
+    -0.3
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.651,
+    -0.728,
+    -0.115
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.661,
+    -0.669,
+    -0.309
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 0.0,
+   "centre": [
+    4.669,
+    -0.614,
+    -0.292
+   ],
+   "travel_pinion": 0.01715,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.661,
+    -0.726,
+    -0.125
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 0.0,
+   "centre": [
+    4.669,
+    -0.668,
+    -0.123
+   ],
+   "travel_pinion": 0.01715,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.651,
+    -0.264,
+    -0.688
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.651,
+    -0.077,
+    -0.733
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.661,
+    -0.254,
+    -0.691
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 0.0,
+   "centre": [
+    4.669,
+    -0.227,
+    -0.641
+   ],
+   "travel_pinion": 0.01715,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.661,
+    -0.067,
+    -0.734
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 0.0,
+   "centre": [
+    4.669,
+    -0.054,
+    -0.678
+   ],
+   "travel_pinion": 0.01715,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.611,
+    -0.727,
+    0.117
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.611,
+    -0.672,
+    0.301
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.621,
+    -0.729,
+    0.107
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.621,
+    -0.677,
+    0.292
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.631,
+    -0.73,
+    0.097
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.631,
+    -0.68,
+    0.282
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.641,
+    -0.732,
+    0.087
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.641,
+    -0.684,
+    0.273
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.611,
+    -0.572,
+    0.465
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.611,
+    -0.432,
+    0.597
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.621,
+    -0.578,
+    0.457
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.631,
+    -0.584,
+    0.449
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.621,
+    -0.44,
+    0.591
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.631,
+    -0.448,
+    0.585
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.641,
+    -0.59,
+    0.441
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.641,
+    -0.456,
+    0.579
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.611,
+    -0.263,
+    0.688
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.611,
+    -0.076,
+    0.733
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.621,
+    -0.272,
+    0.685
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.621,
+    -0.086,
+    0.732
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.631,
+    -0.281,
+    0.681
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.631,
+    -0.096,
+    0.73
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.641,
+    -0.291,
+    0.677
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.641,
+    -0.106,
+    0.729
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.651,
+    -0.733,
+    0.077
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.651,
+    -0.688,
+    0.264
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.661,
+    -0.734,
+    0.067
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 0.0,
+   "centre": [
+    4.669,
+    -0.678,
+    0.054
+   ],
+   "travel_pinion": 0.01715,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.661,
+    -0.691,
+    0.254
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 0.0,
+   "centre": [
+    4.669,
+    -0.641,
+    0.227
+   ],
+   "travel_pinion": 0.01715,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 0.0,
+   "centre": [
+    4.669,
+    -0.56,
+    0.385
+   ],
+   "travel_pinion": 0.01715,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.651,
+    -0.596,
+    0.433
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.651,
+    -0.464,
+    0.572
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.661,
+    -0.602,
+    0.425
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.661,
+    -0.472,
+    0.566
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 0.0,
+   "centre": [
+    4.669,
+    -0.441,
+    0.517
+   ],
+   "travel_pinion": 0.01715,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.651,
+    -0.3,
+    0.673
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.651,
+    -0.115,
+    0.728
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 0.0,
+   "centre": [
+    4.669,
+    -0.292,
+    0.614
+   ],
+   "travel_pinion": 0.01715,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.661,
+    -0.309,
+    0.669
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.661,
+    -0.125,
+    0.726
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 0.0,
+   "centre": [
+    4.669,
+    -0.123,
+    0.668
+   ],
+   "travel_pinion": 0.01715,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.611,
+    0.076,
+    -0.733
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.611,
+    0.263,
+    -0.688
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.621,
+    0.086,
+    -0.732
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.621,
+    0.272,
+    -0.685
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.631,
+    0.096,
+    -0.73
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.631,
+    0.281,
+    -0.681
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.641,
+    0.106,
+    -0.729
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.641,
+    0.291,
+    -0.677
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.611,
+    0.432,
+    -0.597
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.611,
+    0.572,
+    -0.465
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.621,
+    0.44,
+    -0.591
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.621,
+    0.578,
+    -0.457
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.631,
+    0.448,
+    -0.585
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.631,
+    0.584,
+    -0.449
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.641,
+    0.456,
+    -0.579
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.641,
+    0.59,
+    -0.441
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.611,
+    0.672,
+    -0.301
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.611,
+    0.727,
+    -0.117
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.621,
+    0.677,
+    -0.292
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.621,
+    0.729,
+    -0.107
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.631,
+    0.68,
+    -0.282
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.631,
+    0.73,
+    -0.097
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.641,
+    0.684,
+    -0.273
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.641,
+    0.732,
+    -0.087
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.651,
+    0.115,
+    -0.728
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.651,
+    0.3,
+    -0.673
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.661,
+    0.125,
+    -0.726
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 0.0,
+   "centre": [
+    4.669,
+    0.123,
+    -0.668
+   ],
+   "travel_pinion": 0.01715,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.661,
+    0.309,
+    -0.669
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 0.0,
+   "centre": [
+    4.669,
+    0.292,
+    -0.614
+   ],
+   "travel_pinion": 0.01715,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 0.0,
+   "centre": [
+    4.669,
+    0.441,
+    -0.517
+   ],
+   "travel_pinion": 0.01715,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.651,
+    0.464,
+    -0.572
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.651,
+    0.596,
+    -0.433
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.661,
+    0.472,
+    -0.566
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.661,
+    0.602,
+    -0.425
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 0.0,
+   "centre": [
+    4.669,
+    0.56,
+    -0.385
+   ],
+   "travel_pinion": 0.01715,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.651,
+    0.688,
+    -0.264
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.651,
+    0.733,
+    -0.077
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 0.0,
+   "centre": [
+    4.669,
+    0.641,
+    -0.227
+   ],
+   "travel_pinion": 0.01715,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.661,
+    0.691,
+    -0.254
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.661,
+    0.734,
+    -0.067
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 0.0,
+   "centre": [
+    4.669,
+    0.678,
+    -0.054
+   ],
+   "travel_pinion": 0.01715,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.611,
+    0.465,
+    0.572
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.611,
+    0.597,
+    0.432
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.621,
+    0.457,
+    0.578
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.621,
+    0.591,
+    0.44
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.631,
+    0.449,
+    0.584
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.631,
+    0.585,
+    0.448
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.641,
+    0.441,
+    0.59
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.641,
+    0.579,
+    0.456
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.611,
+    0.117,
+    0.727
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.611,
+    0.301,
+    0.672
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.621,
+    0.107,
+    0.729
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.621,
+    0.292,
+    0.677
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.631,
+    0.097,
+    0.73
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.631,
+    0.282,
+    0.68
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.641,
+    0.087,
+    0.732
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.641,
+    0.273,
+    0.684
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.611,
+    0.733,
+    0.076
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.611,
+    0.688,
+    0.263
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.621,
+    0.732,
+    0.086
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.621,
+    0.685,
+    0.272
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.631,
+    0.73,
+    0.096
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.631,
+    0.681,
+    0.281
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.641,
+    0.729,
+    0.106
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.641,
+    0.677,
+    0.291
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.651,
+    0.433,
+    0.596
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.651,
+    0.572,
+    0.464
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.661,
+    0.425,
+    0.602
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.661,
+    0.566,
+    0.472
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 0.0,
+   "centre": [
+    4.669,
+    0.385,
+    0.56
+   ],
+   "travel_pinion": 0.01715,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 0.0,
+   "centre": [
+    4.669,
+    0.517,
+    0.441
+   ],
+   "travel_pinion": 0.01715,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.651,
+    0.077,
+    0.733
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.651,
+    0.264,
+    0.688
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.661,
+    0.067,
+    0.734
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.661,
+    0.254,
+    0.691
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 0.0,
+   "centre": [
+    4.669,
+    0.054,
+    0.678
+   ],
+   "travel_pinion": 0.01715,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 0.0,
+   "centre": [
+    4.669,
+    0.227,
+    0.641
+   ],
+   "travel_pinion": 0.01715,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.651,
+    0.728,
+    0.115
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.651,
+    0.673,
+    0.3
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.661,
+    0.726,
+    0.125
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 1e-06,
+   "centre": [
+    4.661,
+    0.669,
+    0.309
+   ],
+   "travel_pinion": 0.01859,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 0.0,
+   "centre": [
+    4.669,
+    0.668,
+    0.123
+   ],
+   "travel_pinion": 0.01715,
+   "travel_clutch": 0.0
+  },
+  {
+   "vol": 0.0,
+   "centre": [
+    4.669,
+    0.614,
+    0.292
+   ],
+   "travel_pinion": 0.01715,
+   "travel_clutch": 0.0
+  }
+ ],
+ "TOL": 0.0002,
+ "K": 1.9607843137254901,
+ "clutch_lo_hi_q": [
+  -Infinity,
+  Infinity,
+  0.0071
+ ]
+}

@@ -92,3 +92,37 @@ about +x.
 - `replay_<id>.html`: the grader's own recorded simulation of each submission, regraded in Docker with
   `--trace`. Each regrade reproduced the trial's reward exactly.
 - `job/`: job config, log and result. `STATUS.md`: the live monitor's last table. `diag/`: diagnostics.
+
+## Regraded on the fixed engine
+
+The same four GPT designs (these three plus the prelim) were regraded in Docker on
+`origin/a/keyless-engine-fixes` at fde5cf9 (the branch has since gained 7d99dd5 and f005958: named
+constants with unchanged defaults and an anchor early-stop option; not regraded), one container at a time (3 GB). Probes and logs are in
+[fixed_engine/](fixed_engine/). No model runs.
+
+| Design | Old reward | Fixed reward | Passes on the fixed engine |
+|---|---|---|---|
+| b7qdG8X | 0.024 | 0.119 | AT-0, AT-1 |
+| imWnpTP | 0.022 | 0.421 | AT-0, AT-1, AT-3 to AT-6 |
+| QZeuFhk | 0.066 | 0.110 | AT-0, AT-1 |
+| prelim | 0.024 | 0.024 | AT-0 |
+
+- **The first forward crown turn no longer jams** in any of the three repeats. They wind 59.8°, 101.9° and
+  71.7° per crown turn, matching their own solvers' predictions. **The old AT-1 failures, and the
+  causes given above for them, were simulator artifacts of the old engine,** not design faults.
+- **prelim:** unchanged. It still winds the arbor the wrong way (−8.3°): a design fault (the mirror image).
+- **b7qdG8X:**
+  - **AT-2:** the rig's arbor pre-wind back-drives the train, and the clutch slips only for 16.5°.
+    Then the barrel jams against the winding transfer wheel. Cause **unclear** (from rest, a backward
+    crown turn slips freely for 120°).
+  - **AT-3 and AT-4:** fail from that partial AT-2 state. **Unclear.**
+  - **AT-5 and AT-6:** the first 0.03 mm of pull collides the stem with its own clutch (0.004 mm³), on
+    both engines. **Likely a design fault:** no axial clearance for the stem to slide.
+- **imWnpTP:**
+  - **AT-2 only:** the pre-wind stalls after 35° of 45° (the face wheel against the barrel,
+    0.0006 mm³). Cause **unclear**; its own report marked AT-2 not_tested.
+- **QZeuFhk:**
+  - **AT-2, AT-3 and AT-4:** the crown clutch does not slip when back-driven. The pre-wind blocks from
+    1.5°, and a backward crown turn blocks after 6°, with the clutch against the winding rotor and only
+    0.01 mm of give. **Likely a design fault:** the one-way clutch does not release.
+  - **AT-5 and AT-6:** fail from the AT-2 state (AT-6 passed on the old engine). **Unclear.**

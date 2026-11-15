@@ -1,201 +1,267 @@
 # SPEC.md
 
-Version: 0.7 (2026-11-14): the one-job watch. One brief (`environment/public/job/PROMPT.md`, generated from the constants with `FORMAT.md` and the datasheets DS-W01..03), one delivery folder graded in one call (`tests/grade_watch.py` without `--stage`): P1 going train and hands, P2 24-hour hand, P3 6-hour variant on the same frame, P4 assembly; reward = 0.5 x weighted share + 0.5 x all pass; nothing frozen, no `light` (Decisions 15:44 and 17:40 in SESSION.md). The staged text below describes version 0.6, which the `--stage N` mode still grades for old runs.
+Version: 0.7 (2026-11-14): the one-job watch. Decisions 15:44 and 17:40 in `SESSION.md` set it up;
+17:56 (documents cited, gear strength, honesty term), 18:39 (time limits), 20:14 (hand speeds stated),
+20:34 (the 70.1 N·mm platform load) and 21:43 (material per part) filled it in. This body was rewritten on
+14 Nov at about 23:30 to describe 0.7 as it is built. No rule changed in that rewrite.
 
-**The task under test is the staged mechanical watch gear train.** Its
-specification, exactly as the agent sees it, is `environment/public/SPEC_WATCH.md`
-with its "Tools" section replaced by `environment/public/SPEC_WATCH_GIVEN_NOTOOLS.md`
-(`environment/make_bundle_watch.py` does this), plus the stage's
-`INSTRUCTION_WATCH_S1..S4.md`. Four stages, each a fresh agent conversation that
-inherits the previous stage's submission: 1 design, 2 extend (24-hour hand),
-3 change (the barrel turns once every 6 hours), 4 assemble. Every number the
-grader uses is a constant in `geometry/watch.py` and is stated in that spec. The
-only things not stated are what the hands of a watch do (in `tests/grade_watch.py`)
-and the reference (`solution/reference_watch.py`). The chain score is the product
-of the four stage scores (`tests/grade_chain.py`).
+This file is for the team and the judges. The agent never sees it. What the agent reads is listed in
+section 2. Every number below is read from the code or the constants, and the file is named next to it.
+If this file and the code disagree, the code is what grades; please log the difference in `SESSION.md`.
 
-Version 0.5 adds three requirements to stages 1 to 3 (totals 23, 27 and 27): a
-volume budget for fixed and for mobile parts, parts of one mobile that do not
-overlap, form one piece and are each seated, and the mesh test repeated with the
-driven arbor 0.03 out of place. Stage 4 now tests every pair of parts, parts of
-the same mobile included.
+History is at the end (section 9).
 
-Moving Day (version 0.3, `environment/public/SPEC_MD.md`) is a fallback, not the
-task under test.
+## 1. The task in one paragraph
 
-Board in a Box (H1 below, and H2 in `environment/public/SPEC_H2.md`) is scrapped
-as the challenge: clean agents scored 1.0 on both. The code stays as history.
+The agent is a movement designer. It gets one work order and a folder of supplier documents. It must design,
+in CadQuery, the going train, frame and hands of a demonstration-scale watch for a supplied barrel. It also
+designs a 24-hour hand, a 6-hour variant of the same calibre on the same frame, and an assembly plan. It
+delivers one folder. Nothing is frozen and nothing is graded while it works. After it stops, one grader call
+inspects the folder part by part and writes one reward.
 
----
+## 2. What the agent has
 
-H1, version 0.1. The reference passes every gate and check.
+In the task image the agent's folder is `/app`. `environment/make_bundle_job.py OUT` builds it:
 
-This file is the single source of truth for instance H1, the assembly contract,
-the checks and the score. Changes go through "Proposed spec changes" in
-SESSION.md.
+| Path in `/app` | What it is | Made from |
+|---|---|---|
+| `instruction.md` | the work order | `environment/public/job/PROMPT.md` |
+| `FORMAT.md` | file formats, size limits, JSON layouts | `environment/public/job/FORMAT.md` |
+| `datasheets/QA-W100_inspection.md` | the acceptance test, as the maker's inspection procedure | `environment/public/job/datasheets/` |
+| `datasheets/DS-W01_barrel.md` | barrel catalogue; the supplied barrel is BR-096-20 | same |
+| `datasheets/DS-W02_case.md` | case catalogue; the ordered case is CS-414-134 | same |
+| `datasheets/DS-W03_process.md` | print process and the printability test | same |
+| `datasheets/DS-W04_gear_rating.md` | Lewis form factors, 25 degrees | same; values in `geometry/data/lewis_y.json` |
+| `datasheets/DS-101` to `DS-501` | workstream A's supplier sheets: mainspring and barrel, materials, jewels, crown and stem, finger torque | `spikes/keyless/datasheets/` |
+| `datasheets/INDEX.md` | list of the documents | generated |
+| `supplied/barrel.stl` | the barrel, drum and arbor as one mesh | `geometry/data/barrel.stl` |
+| `tools/kernel.py` | geometry helpers, including the STEP loader the grader uses | `geometry/core.py` |
+| `tools/check_format.py` | file-format check only; runs no QA-W100 check | `environment/check_format_job.py` |
+| `delivery/` | empty; the agent writes here | |
 
-## Frame and units
+Rules for these documents (Decisions 16:02 and 17:56):
 
-Millimetres. Origin at a corner of board A. The PCB bottom face is at z = 0 and
-the top face at z = 1.6.
+- The work order names part numbers and cites QA-W100. It states no acceptance number itself.
+- Every graded number lives in exactly one cell of one document in `/app`. The map from constant to cell is
+  `environment/public/job/TRACEABILITY_WATCH.md`, which never goes into the image.
+- `environment/make_brief_job.py --check` fails if a document is out of date with the constants.
+  `make_bundle_job.py` fails if a graded number has no home cell, two home cells, or appears where it has no home,
+  and if a forbidden file name, the `NOT-FOR-AGENT` mark or a solution-leaking phrase would enter `/app`.
+- The hand speeds are stated (QA-W100 checks 7 to 9 and Part 2 check 1; Decisions 20:14).
+  `make_brief_job.hand_speeds()` fails if the grader's `HAND_SPEED` or `DAY_SPEED` change.
 
-## Supplied bodies
+Installed for the agent: Python 3, CadQuery 2.8.0, `manifold3d`, `trimesh`, `numpy`, `scipy` (`PROMPT.md`).
 
-Each is delivered as one clean manifold mesh, plus the numbers below.
+## 3. The delivery
 
-| Body | Final pose | Geometry |
-| --- | --- | --- |
-| Board A | Fixed | 70 x 45 x 1.6. Holes dia 3.2 at (3.5, 3.5), (66.5, 3.5), (3.5, 41.5), (66.5, 41.5). |
-| J1, USB-C (on board A, top side, -X edge) | With board | Body x -1.5..6, y 18..27, z 1.6..4.9. Plug keep-out: 12.5 x 7 section, 20 long, pointing -X. |
-| J2, audio jack (on board A, bottom side, +X edge) | With board | Body x 58..72.5, y 9..15, z -5..0. Plug keep-out: dia 8 cylinder, 20 long, pointing +X. |
-| C1, capacitor (on board A, top side) | With board | dia 8 x 10.5 tall at (15, 33). |
-| J4, battery connector (on board A, bottom side) | With board | x 9..15, y 38..43, z -4.5..0. |
-| Battery | Chosen by the agent | 48 x 30 x 7.5, below the board. |
-| Lid | Fixed | Flat plate 3.0 thick over the whole footprint, bottom face at z = 12.5. |
+One folder, `/app/delivery/`. Layouts are in `FORMAT.md`.
 
-## Printed parts
+| File | Content |
+|---|---|
+| `movement.json` | the 8-hour build (barrel speed class D) with hour, minute, seconds and 24-hour hands |
+| `variant_6h.json` | the 6-hour variant (speed class B), same calibre, same frame |
+| `assembly.json` | order and rigid-pose paths for every part of `movement.json` and the barrel |
+| `parts/<name>.step` | one STEP file per part; a part used in both movements is one file |
+| `scripts/` | optional; archived, never opened |
+| `report.json` | optional; the designer's claim per part: `pass`, `fail` or `not_tested` |
 
-- `base.stl`: one-piece tub with two closed connector windows.
-- `door.stl`: covers the battery opening in the floor.
+Format limits (`geometry/watch.py`, stated in `FORMAT.md`):
 
-## Limits
+| Limit | Value | Constant |
+|---|---|---|
+| Parts named in one movement file | 60 | `MAX_PARTS` |
+| Triangles per part after tessellation | 200,000 | `MAX_TRIANGLES` |
+| STEP file size | 16,777,216 bytes | `MAX_STEP_BYTES` |
+| STEP tessellation | 0.001 mm chordal, 0.1 rad | `STEP_LINEAR_DEFLECTION`, `STEP_ANGULAR_DEFLECTION` |
+| A STEP with more flat three-edged faces than this is a faceted mesh and is refused | 500 | `STEP_MAX_TRIANGLE_FACES` |
+| Volume change allowed when a part is united with itself | 0.5 % | `SELF_UNION_TOL` 0.005 |
+| One STEP read, in a child process | 120 s, 4096 MB | `STEP_TIMEOUT_S`, `STEP_MEMORY_MB` |
+| Movement file size | 1,048,576 bytes | `MAX_JSON_BYTES` |
+| `assembly.json` size | 67,108,864 bytes | `MAX_ASSEMBLY_BYTES` |
+| `scripts/` | 200 files, 4,194,304 bytes | `MAX_SCRIPT_FILES`, `MAX_SCRIPTS_BYTES` |
+| `report.json` size | 100,000 bytes | `REPORT_MAX_BYTES` in `spikes/keyless/constants.py` |
+| Tooth counts in `meshes` | 3 to 1000 | `MIN_TEETH`, `MAX_TEETH` |
+| Mobile materials | `AD-CW614N` (brass), `AD-C100-HT` (steel) | `MATERIAL_DESIGNATIONS` |
 
-- Envelope for printed parts: the reference design's bounding box plus 0.15 per
-  side. Nominal: x -2.0..73.5, y -2.0..47.0, z -10.25..12.5.
-- Minimum wall: 1.6.
-- Material budget: 1.15 x the reference design's printed volume.
-- Screws are out of scope. The board, lid and door are assumed screwed down, and
-  no check tests retention against a pull.
+## 4. The supplied barrel and the order
 
-## Assembly contract
+From `geometry/watch.py` (cells in DS-W01 section 3 and 4, DS-W02 section 2):
 
-The submission is `base.stl`, `door.stl` and `assembly.json`. The JSON gives a
-list of rigid poses for each body, in the fixed order board A, lid, battery,
-door. The battery comes after the lid because the battery must be serviceable
-without opening the case.
+| Item | Value | Constant |
+|---|---|---|
+| Barrel teeth, module, pressure angle | 96, 0.2 mm, 25 degrees | `BARREL_TEETH`, `BARREL_MODULE`, `PRESSURE_ANGLE` |
+| Axis | x = 0, y = 0 | fixed by `Movement` |
+| Toothed drum | z 0 to 1.0 | `BARREL_WHEEL_Z` |
+| Arbor | z -1.0 to 5.6, pivot radius 0.5 | `BARREL_ARBOR_Z`, `BARREL_ARBOR_R` |
+| Winding square | side 1.4, z 3.3 to 4.9 | `BARREL_SQUARE_SIDE`, `BARREL_SQUARE_Z` |
+| Spring chamber, core, bore | inner diameter 12.12, core radius 2.02, bore radius 2.0367 | `BARREL_INNER_D`, `BARREL_CORE_R`, `BARREL_BORE_R` |
+| 8-hour build | 1/8 turn per hour, clockwise from the dial | `BARREL_TURNS_PER_HOUR` |
+| 6-hour variant | 1/6 turn per hour, clockwise | `CHANGED_BARREL_TURNS_PER_HOUR` |
+| Case CS-414-134 | inner radius 20.7, inner height 13.4 | `CASE_RADIUS`, `CASE_HEIGHT` |
+| Smallest printable feature | 0.2 mm | `MIN_FEATURE` |
 
-1. The first pose puts the body wholly outside the envelope and at least 30 from
-   its final pose.
-2. The last pose is the final pose. It is fixed for board A, lid and door.
-3. No vertex moves more than 0.5 between consecutive poses.
-4. At most 2,000 poses per body.
-5. Every matrix is finite and is a proper rotation plus a translation
-   (R^T R = I and det = +1 within 1e-6).
-6. A pose passes if the moving body intersects each body already placed by at
-   most 0.2 mm3.
+The frame is right-handed and millimetres; +z is the dial side; every arbor is parallel to z.
 
-Only the listed poses are checked. Nothing is interpolated, in the tool or in
-the grader.
+## 5. Parts, checks and weights
 
-## Gates (each 0 or 1)
+The table of parts is `JOB_PARTS` in `tests/grade_watch.py`. The wording the agent reads is QA-W100 sections 5
+to 8. Each part has gates (conditions) and weighted checks. A part whose gates fail scores 0. Every other part
+is still graded. No part gates another.
 
-| ID | Gate | Definition |
-| --- | --- | --- |
-| G1 | Valid files | Each STL has at most 200,000 triangles and is one closed manifold shell with positive volume. ASCII and binary STL are both accepted. |
-| G2 | Envelope | Every printed vertex is inside the envelope, tolerance 0.01. |
-| G3 | Final pose | No two bodies intersect by more than 0.2 mm3. |
-| G4 | Contract | `assembly.json` obeys every rule of the assembly contract. |
-| G5 | Enclosed | With all bodies placed, a 1.0 sphere cannot pass from outside to the cavity except through the two keep-out sections grown by 3.0. 0.25 voxels. |
+| Part | What | Weight | Gates | Check weights (sum) |
+|---|---|---|---|---|
+| P1 | going train and hands, `movement.json` | 0.25 | files (C1), assembled (C2) | 23 |
+| P2 | 24-hour hand, `movement.json` | 0.10 | C1, C2, day hand declared (C3) | 4 |
+| P3 | 6-hour variant, `variant_6h.json` | 0.15 | C1, C2, C3, same frame (C4) | 27 (every P1 and P2 check) |
+| P4 | assembly, `assembly.json` for `movement.json` | 0.25 | C1 of `movement.json`, plan is valid JSON | 1 per part, barrel included |
+| P5 | crown winding | 0.25 | files | A's step weights, sum 1.0 |
 
-## Checks
+P5 is graded only when `KEYLESS_IN_JOB` is True in `geometry/keyless_job.py`. On main it is False, so the job
+under test is P1 to P4. See section 6.
 
-19 checks, total weight 23. The denominator is always all 19; a missing feature
-is a failed check.
+**Gates** (QA-W100 section 5, `geometry/watch.py`):
 
-| ID | Check | Definition | Weight |
-| --- | --- | --- | --- |
-| A1 | Board A path | Every pose passes. | 3 |
-| A2 | Lid path | Every pose passes. | 1 |
-| A3 | Battery path | Every pose passes, with board A and lid placed. | 3 |
-| A4 | Door path | Every pose passes. | 1 |
-| F1 | Board supported | Printed material within 0.1 of the PCB bottom over at least 4 mm2, inside the dia 7 ring of at least three holes. | 1 |
-| F2 | Board located | Moving board A 0.6 along +X, -X, +Y, -Y and -Z each makes its bare PCB intersect printed parts by more than 0.2 mm3. | 1 |
-| F3 | Battery held | Moving the battery 2.0 along each of the six axis directions intersects another body by more than 0.2 mm3. | 1 |
-| F4 | Component clearance | Every component on board A is at least 0.4 from printed parts. | 1 |
-| F5 | Battery swell | At least 1.0 free above the battery's top face. | 1 |
-| F6 | Battery lead | Centre of the battery's lead face within 40 of the centre of J4. | 1 |
-| K1 | J1 keep-out clear | Printed parts intersect the J1 plug keep-out by at most 0.2 mm3. | 1 |
-| K2 | J2 keep-out clear | Printed parts intersect the J2 plug keep-out by at most 0.2 mm3. | 1 |
-| K3 | J1 window size | At the wall mid-plane, open area inside the keep-out section grown by 3.0 is at most the area of that section grown by 1.0. | 1 |
-| K4 | J2 window size | Same as K3, for J2. | 1 |
-| W1 | Base wall thickness | Open the part with a 0.8 ball. The result is one connected piece, and no point of the part lies more than 0.5 from it. 0.2 voxels. | 1 |
-| W2 | Door wall thickness | Same as W1, for the door. | 1 |
-| S1 | Door stop | Moving the door 1.0 along +Z intersects the base by more than 0.2 mm3. | 1 |
-| S2 | Lid seated | Moving the lid 0.2 along -Z intersects the base by more than 0.2 mm3. | 1 |
-| M1 | Material | Total printed volume is at most the budget. | 1 |
+- **C1 files.** The movement file and every part file it names load as `FORMAT.md` says. Every mobile declares
+  a valid `material`. `hour`, `minute` and `seconds` hands are present.
+- **C2 assembled.** In the assembled pose, the frame (all fixed parts as one solid) and each mobile (barrel
+  included) intersect each other by at most 0.01 mm3 (`VOL_TOL`). The same holds between any two fixed parts
+  and between parts of one mobile. Fixed parts form one frame: joined when within 0.01 mm (`FRAME_JOIN`).
+- **C3 day hand declared.** `hands.day` names a mobile and a part that is not the hour, minute or seconds hand's
+  part (`job_day_declared`).
+- **C4 same frame.** `variant_6h.json` has the same `fixed` list, in order, and the same `case_centre` as
+  `movement.json` (`job_same_frame`).
 
-Notes:
+**P1 checks** (QA-W100 numbers; weights from `WEIGHTS` and `JOB_CHECKS_1` in `tests/grade_watch.py`):
 
-- F3 and F5 together put the battery's top face between 1.0 and 2.0 below the
-  board.
-- Voxel checks (G5, W1, W2) fill a voxel only when its centre is inside the
-  solid, never on a surface hit.
-- State the graded thresholds in the public spec, including any margin added for
-  voxel error.
+| No. | Key | Weight | Rule, with its numbers |
+|---|---|---|---|
+| 1 | `spin` | 1 | each mobile turned one turn in 72 steps of 5 degrees (`SPIN_STEPS`) never meets the frame by more than 0.01 mm3 |
+| 2 | `held` | 2 | each mobile moved 0.3 mm (`HELD_MOVE`) along ±x, ±y, ±z is stopped by the frame, or by a coaxial mobile (axes within 0.01 mm) that is itself held |
+| 3 | `seated` | 2 | each part of a multi-part mobile, moved 0.3 mm along ±x, ±y and one of ±z, meets its mobile's other parts by more than 0.01 mm3; the parts form one piece, each within 0.02 mm of the next (`SEAT_TOUCH`) |
+| 4 | `train` | 3 | every declared mesh passes the mesh test; no mobile gets two speeds; every mobile is driven from the barrel |
+| 5 | `tolerant` | 2 | the mesh test again with the driven mobile moved 0.03 mm (`MESH_SHIFT`) away from and towards the driver's axis |
+| 6 | `clear` | 1 | every undeclared pair of mobiles, turned at their speeds, 144 steps per turn (`CLEAR_STEPS`), meets by at most 0.01 mm3 |
+| 7 | `hour` | 2 | hour hand turns clockwise, 1/12 turn per hour (`HAND_SPEED`) |
+| 8 | `minute` | 2 | minute hand, 1 turn per hour |
+| 9 | `seconds` | 2 | seconds hand, 60 turns per hour |
+| 10 | `coaxial` | 1 | hour and minute axes within 0.01 mm (`COAX_TOL`) |
+| 11 | `hands` | 1 | each hand reaches at least 5 mm (`HAND_REACH`), lies wholly above every fixed part, and its centre of volume is at least 0.5 mm from its axis (`HAND_CENTRE_MIN`) |
+| 12 | `size` | 1 | everything within the case radius 20.7 of `case_centre` as it turns; total height at most 13.4 |
+| 13 | `printable` | 1 | every delivered part passes DS-W03's test: voxel 0.05 (`THIN_VOXEL`), erode 1.5 voxels, dilate 1, no point further than 0.2 mm from the printable body (`THIN_DEV`) |
+| 14 | `strength` | 2 | Lewis bending of the going train under 70.1 N·mm at the barrel (below) |
 
-## Score
+**Mesh test** (QA-W100 check 4; `Movement.mesh_run` in `geometry/watch.py`). For declared driver D (z_D teeth)
+and driven N (z_N), step i runs from 0 to 8 x max(z_D, z_N) - 1 (`SAMPLES_PER_TOOTH` 8). D turns
+counter-clockwise by i x 360 / (8 z_D) degrees and N clockwise by that angle x z_D / z_N.
+
+- No jam: at every step, and at i + 1/3 and i + 1/5 after every 8th step (`MESH_OFFGRID`), D and N meet by at
+  most 0.01 mm3.
+- Engaged: at every 4th step where they do not meet, their smallest distance is at most 0.1 mm (`ENGAGE_GAP`).
+- Drive: at every 8th step D turns a further 0.25 of its pitch (`DRIVE_FRACTION`). The new overlap V must be at
+  least 0.001 mm3 (`DRIVE_MIN_VOLUME`), and V / H must exceed 0.5 x m² (`DRIVE_AREA_RATIO`), H being the z extent
+  of that overlap and m = 2 x axis distance / (z_D + z_N).
+
+A mesh that fails drives nothing, so the hands it feeds do not turn.
+
+**Gear strength** (QA-W100 check 14; `strength_run` in `geometry/watch.py`; Decisions 17:56, 18:24, 20:34, 21:43):
+
+- Rated: the going train only, from the barrel to the seconds hand's mobile, through passing meshes,
+  breadth-first in declared order. The motion work and the 24-hour train are not rated. The barrel's own teeth
+  are not rated.
+- Load: T_barrel = 70.1 N·mm (`BARREL_TORQUE_MAX_NMM`), the upper end of the bridle slipping torque in DS-101
+  Table 2a. The work order states it as the load of the automatic member of the family.
+- At driver D: T_D = 70.1 x |n_barrel / n_D|; F = T_D / (m z_D / 2); b = the smallest drive-overlap height H.
+- Each gear: sigma = F / (b m Y(z)), Y from DS-W04 (`LEWIS_Y`). Pass when sigma is at most the allowable of the
+  material of the part that holds that gear's teeth (the part with the most drive overlap; `part_materials`
+  overrides the mobile's `material`).
+- Allowables (`DS201_ALLOWABLE_ROWS`, lowest tensile row per code): `AD-CW614N` 110 MPa, `AD-C100-HT` 725 MPa.
+  The corundum row (450 MPa, compressive) does not qualify.
+
+**P2 checks** (`WEIGHTS_2`): `day_hand` 3, the 24-hour hand turns clockwise at 1/24 turn per hour (`DAY_SPEED`);
+`day_place` 1, its axis is at least 6.0 mm from the hour axis (`DAY_HAND_OFFSET`), it reaches at least 3.0 mm
+(`DAY_HAND_REACH`), lies above the frame, and its centre of volume is at least 0.5 mm off its axis.
+
+**P3** runs every P1 and P2 check on `variant_6h.json` with the barrel at 1/6 turn per hour.
+
+**P4** (QA-W100 section 8; `Movement.assembly_replay`). Parts go in one at a time in `order`. A part is
+installed when its path is a list of proper rigid 4x4 poses (within 1e-6) ending at the identity, its first
+pose puts its bounding box wholly outside the movement's box grown by 5 mm (`ASM_CLEAR`), no vertex moves more
+than 0.2 mm between poses (`ASM_STEP`), it has 2 to 1,500 poses (`ASM_MAX_POSES`), and in every pose it meets
+each part already placed by at most 0.01 mm3. A part not in `order` stands in place from the start. A part that
+breaks a rule is not installed but still stands in place. s_4 = parts installed / parts (barrel included).
+
+## 6. Part 5, crown winding (switched off on main)
+
+Built by builder P (SESSION.md 21:31) and kept behind `KEYLESS_IN_JOB = False` until workstream A's keyless v2
+reference grades 1.0 in B's frame. When it is on:
+
+- `movement.json` carries a `keyless` section and may mark mobiles `friction_on` (FORMAT.md, generated only with
+  the switch on; preview with `python3 environment/make_brief_job.py --keyless OUT`).
+- QA-W100 gets a Part 5 with A's acceptance steps AT-0 to AT-6. Step weights, from `STEP_WEIGHTS` in
+  `spikes/keyless/constants.py`: assemble 0.05, wind 0.20, hold 0.15, run 0.20, backward 0.12, set 0.18,
+  return 0.10.
+- A's lengths are moved to our scale s = 1.617 in one table, `SCALE_TABLE` in `geometry/keyless_job.py`;
+  `check_table()` fails if A's values move. The power-reserve step takes its capacity from DS-101 Table 3,
+  spring L, 4.9 turns (`capacity_turns()`).
+- P5 runs A's engine through `tests/grade_keyless.py` in a fresh interpreter, phases in 3 spawned workers
+  (`KEYLESS_JOBS`), at most 5400 s (`KEYLESS_TIMEOUT_S`).
+- Keyless parts join Part 4's assembly.
+- The reward then divides by 1.0 instead of 0.75, and the honesty mean runs over five parts.
+
+## 7. Reward
+
+From `grade_job` and `job_honesty` in `tests/grade_watch.py`, exact fractions throughout.
 
 ```
-S = G * (0.5 * p^2 + 0.5 * [all 19 checks pass])
-G = G1 * G2 * G3 * G4 * G5
-p = (weight of checks passed) / 23
+s_p  = (weight of part p's checks that pass) / (sum of part p's check weights), or 0 if a gate of p fails
+R    = 1/2 x sum(w_p x s_p) / sum(w_p)  +  1/2 x [every gate and check of every graded part passes]
+h    = max(0, mean over graded parts of points(claim_p, part p passes in full))
+reward = R x (W_PRODUCT + W_HONESTY x h) / (W_PRODUCT + W_HONESTY)  =  R x (0.75 + 0.10 h) / 0.85
 ```
 
-Report strict pass rate (share of runs with S = 1) as the headline, with S and p
-beside it.
+- Part weights w_p: P1 0.25, P2 0.10, P3 0.15, P4 0.25 (`JOB_PARTS`); sum 0.75 with P5 off.
+- Points (`HONESTY_POINTS` in `spikes/keyless/constants.py`, imported, never copied):
 
-## Tools the agent gets (MCP)
+  | Claim | part passes | part does not pass |
+  |---|---|---|
+  | `pass` | 1 | -2 |
+  | `fail` | 0.5 | 1 |
+  | `not_tested` | 0.5 | 0.5 |
 
-`get_spec`, `load_part`, `measure`, `section`, `distance`, `interference`,
-`sweep`, `thickness`, `probe`, `submit`.
+- No report, an invalid one, or a part left out counts as `not_tested`.
+- So a full pass with a truthful report scores 1. A full pass with no report scores 16/17 = 0.941.
+  Do nothing scores 0.
+- The grader writes reward 0 first and overwrites it at the end. If A's constants cannot be imported the reward
+  is 0 and the details say why (fail closed).
 
-- Tools take mesh files and numbers only. They never execute submitted code.
-- Tools return geometry facts. No check IDs, no requirement names, no pass/fail
-  on a requirement.
-- `sweep` takes the same `assembly.json` as the grader and returns the worst
-  intersection volume and its pose index per body.
-- `submit` returns "accepted" or a format error.
-- Tools apply the same size caps as the grader (triangles, poses).
-- Part names are whitelisted. No path arguments.
+## 8. Grader and run
 
-## Grader
+- Call: `cd tests && python3 -I grade_watch.py /abs/delivery --reward FILE --details FILE`. It needs
+  `tests/grade_watch.py`, `geometry/` and `spikes/keyless/constants.py` (honesty term) beside it.
+- It never runs submitted code. It opens only the files the movement files and `assembly.json` name, plus
+  `report.json`. Symbolic links and paths outside the delivery are refused.
+- Each gate and check runs in its own try block with its own time limit. An exception or a timeout fails that
+  check only.
+- Time limits (`tests/grade_watch.py`, stated in QA-W100 section 4): 1800 s per condition or check
+  (`TIMEOUT_S`), 7200 s for the whole inspection (`JOB_TIME_LIMIT_S`). A check that would start after 7200 s
+  fails. Harbor's verifier timeout in `harbor/watch_one` is 7800 s, so the grader always writes its own reward.
+- Measured on the delivered reference (SESSION.md 23:04): 571 s, peak RSS 1.70 GB, on a loaded 4-CPU machine.
+- Harbor task: `harbor/watch_one/` (workstream A). Oracle = `python3 solution/reference_watch.py /app/delivery --job`.
+  The agent image holds only `/app` above. `build_task.py` refuses `solution/`, `tests/`, `geometry/`,
+  `SESSION.md`, `CLAUDE.md`, this file and the solution documents, by name and by sha256.
 
-- Runs in Harbor's separate verifier, from its own directory, with `python -I`.
-- Opens exactly three declared artifact files by absolute path. Ignores every
-  other file.
-- Loads the spec and the supplied bodies from its own image.
-- Never runs submitted code.
-- Writes reward 0 first, overwrites it at the end.
-- Each check runs in its own try block. An exception, a timeout or a non-finite
-  number fails that check.
-- Normalises each part with a self-union at load; rejects it if the volume
-  changes by more than 0.5%.
-- Tools and grader are built from one pinned image and share one geometry module.
+## 9. History
 
-## Anchor suite
-
-Submissions with expected scores, run as regression tests inside the one-command
-evaluation. Expected scores are hand estimates until measured.
-
-| Anchor | Expected S |
-| --- | --- |
-| Reference design | 1.0 |
-| Do nothing (no files) | 0 |
-| Half-written or unreadable file | 0 |
-| Any example file shipped in the instruction or README | 0 |
-| Whole wall removed and called a slot | 0 (G5) |
-| U-slot open to the rim | 0 (G5) |
-| Non-rigid, NaN or teleporting path | 0 (G4) |
-| Parts intersecting in the final pose | 0 (G3) |
-| Lazy tub: thick box, windows at the coarse limit, no pegs, straight-down path | under 0.25 |
-| Complete design, no valid board path (fails A1 only) | about 0.38 |
-| Complete design, no pegs (fails F2 only) | about 0.46 |
-| Complete design, blind pocket with no plug access (fails K2 only) | about 0.46 |
-
-Rules the suite asserts:
-
-1. Every cheat anchor scores below the complete design that fails only A1.
-2. Sweeping one reference parameter across a threshold flips the score where
-   this spec says it should.
-3. The worst legal submission (maximum triangles, maximum poses) is graded in
-   under half the verifier time limit.
+- **0.6 and earlier, the staged watch.** Four stages, each a fresh conversation inheriting frozen work: design,
+  extend (24-hour hand), change (barrel once per 6 hours, with a kept-parts factor), assemble. Chain score = the
+  product of the stage scores, each 0.5 p² + 0.5 [all pass]. The agent-facing text is
+  `environment/public/SPEC_WATCH.md` and `INSTRUCTION_WATCH_S1..S4.md`. The grader keeps that mode
+  (`grade_watch.py FOLDER --stage N [--prev FOLDER]`, the one-body `geometry/data/barrel_stage.stl`) only to
+  regrade old runs (`transcripts/watch4_chain_*`, `harbor/watch4/`). It still has the volume budget `light`
+  (`FIXED_VOLUME_MAX` 355, `MOBILE_VOLUME_MAX` 278), which 0.7 dropped because no datasheet gives such a limit.
+- **0.7 changes from 0.6** (Decisions 17:40): one brief and one grader call instead of four; linear part share
+  instead of p²; no frozen files; C3 and C4 replace the stage-2 lock and the stage-3 kept share; `light` dropped;
+  `strength` and the honesty factor added later the same day.
+- **Retired tasks.** Board in a Box (H1 and H2), Moving Day and Hold the Line were dropped because clean agents
+  scored 1.0 or close. Their specs are `environment/public/SPEC_H2.md`, `SPEC_MD.md`, and the H1 text of this
+  file at commit 071ab86 and earlier (`git show 071ab86:SPEC.md`).

@@ -1,0 +1,6 @@
+FORWARD first 3deg step ok= True moved {'winding_face_wheel': -0.222, 'winding_pinion': -2.849, 'stem': -3.0, 'barrel': -0.075}
+   failed resolve: moves {'barrel': (0.3016, 0.0), 'winding_face_wheel': (0.1341, 0.0), 'winding_pinion': (0.9531, 0.0)} overlaps>TOL {('sliding_clutch', 'winding_pinion'): 0.01524, ('barrel', 'barrel_click'): 0.00028}
+   failed resolve: moves {'barrel': (0.1508, 0.0), 'winding_face_wheel': (0.032, 0.0), 'winding_pinion': (0.1635, 0.0)} overlaps>TOL {('sliding_clutch', 'winding_pinion'): 0.0024}
+BACKWARD first 3deg step ok= True moved {'winding_face_wheel': 0.122, 'winding_pinion': 2.343, 'sliding_clutch': 0.03, 'stem': 3.0, 'barrel': -0.226}
+   failed resolve: moves {'barrel': (0.3016, 0.0)} overlaps>TOL {('barrel', 'barrel_click'): 0.00058}
+   failed resolve: moves {'barrel': (0.1508, 0.0)} overlaps>TOL {('barrel', 'barrel_click'): 0.00028}

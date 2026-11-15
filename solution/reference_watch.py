@@ -13,7 +13,7 @@ Like an agent, each stage copies the part files it keeps from the stage before a
 Stage 1 train: barrel 96 -> 24 ("third"), 60 -> 30 (centre, minute hand), 90 -> 12 ("fourth"),
 96 -> 12 (seconds). Motion work on the dial side: cannon 12 -> 36 (minute wheel), 12 -> 48 (hour wheel,
 a tube round the centre arbor). Stage 2 adds the 24-hour hand: hour wheel 48 -> 24 (day idler),
-its 12 -> 48 (day wheel). Stage 3 (barrel at 1/6 turn per hour) swaps the third wheel and the centre pinion
+its 10 -> 40 (day wheel, DAY_TEETH). Stage 3 (barrel at 1/6 turn per hour) swaps the third wheel and the centre pinion
 from 60/30 to 54/36. Stage 4 drops every part in from above in an order the layers allow.
 The case centre and plate radius are the smallest disc round everything that turns (case_geometry)."""
 import json

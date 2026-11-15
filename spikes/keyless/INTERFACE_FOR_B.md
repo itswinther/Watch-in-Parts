@@ -51,6 +51,26 @@ parts:
 The adapter's output is `parts` (`name -> Manifold`), `sup` (B's plates and arbor as Manifolds) and
 `defs`. These are exactly what `grade.make_world` takes.
 
+**In-process, serial (branch a/keyless-engine-fixes): never forks or spawns.**
+
+```python
+import grade as G
+# from files:
+product, gates, conds, steps, det = G.grade(sub_dir, data_dir, jobs=1)     # jobs=1: no ProcessPoolExecutor
+# from objects already in memory (B's adapter output); defs may carry "carrier" (another rot mobile)
+G.relieve_fits(parts, sup, defs)            # the rig's fit rule (load() does this for files)
+loaded = {"spec": spec, "parts": parts, "sup": sup}       # spec: the keyless.json dict (for "pull")
+ph, out, err = G.worker(("wind", loaded, defs, None))     # AT-1
+ph, first, err = G.worker(("first", loaded, defs, None))  # AT-2 + AT-3; first["state"] = start for the rest
+for phase in ("backward", "set", "return"):               # AT-4, AT-5, AT-6
+    ph, out, err = G.worker((phase, loaded, defs, first["state"]))
+```
+
+Each `worker` call builds its own world, phases it (`World.phase()`: settle, turn meshing wheels into
+their gaps, springs home) and runs one scenario in the calling process. Peak memory is one world:
+about 1 GB on the keyless reference. On Marco Lang's ml01 (crown wheel 193k triangles), the measured
+peak was 1.2 GB.
+
 ## 2. Fixed interface in B's frame
 
 Proposed below; B to confirm. Units are mm, in B's frame.
@@ -124,6 +144,14 @@ there, or offer an equivalent post. Extents are from the current reference, ×1.
     Angles and friction do not change.
   - **Validation:** regrade the reference (about 10 min in Docker) and rerun the anchors (about 1 h on
     4 containers).
+- **Lengths on the engine-fix branch that `SCALE_TABLE` needs (B's 21:31 point 2).** All are module
+  attributes or default arguments now, with the standalone values as defaults, so `UNSCALED` can go:
+  - engine, the three former floors: `RADIUS_FLOOR` 0.05 (Body radius), `LEVER_FLOOR` 0.05
+    (`World.budget` lever arm), `NEIGHBOUR_MARGIN` 0.05 (`World.neighbours`, not called by grade.py);
+  - engine, new on the branch: `SPRING_PUSH_ARC` 0.01, and `World.phase:budget` 0.3 (a default
+    argument, like `World.settle:budget`);
+  - constants, new on the branch: `FIT_CLEARANCE` 0.005, `FIT_CENTRE_TOL` 0.02, `FIT_EMPTY_INSET`
+    0.01, `PULL_RANGE` (0.4, 1.0), all linear in s. `FORCE_EPS` (1e-7 mm³) scales by s³.
 - **Risk:** a tighter fit of the setting train around B's motion work, which isn't modelled in the
   keyless frame yet.
 - **Decision 14:45:** one scale for the whole job, B's demonstration scale (about 1.6×); "v2 at 1:1" is

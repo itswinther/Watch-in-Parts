@@ -1,4 +1,5 @@
-"""NOT-FOR-AGENT (realcad test material; never copy into a task image).
+"""NOT-FOR-AGENT (realcad test material; never copy into a task image). LEGACY: only needed for the
+first run (pre-fix engine); since the engine fixes the rig phases and settles the movement itself.
 
 Phase the converted CAD: let the rig settle the mobiles once, then write the parts at the settled poses.
 
@@ -24,8 +25,8 @@ from convert_ml01 import man_tris, write_stl  # noqa: E402
 src, data, dst, dout = sys.argv[1:5]
 pre = {k: float(v) for k, v in (a.split("=") for a in sys.argv[5:])}   # turns applied before the settle
 R.apply(dict(R.REAL, WIND_SENSE=1.0))
-spec, parts, sup, defs = R.load(src, data)
-w = R.make_world(parts, sup, defs)
+spec, parts, sup, defs = R.G.load(src, data)
+w = R.G.make_world(parts, sup, defs)
 before = {n: round(w.pen(b), 6) for n, b in w.bodies.items() if b.kind != "fixed"}
 for k, v in pre.items():
     w.bodies[k].q = math.radians(v)
@@ -62,7 +63,7 @@ for d in defs:
         write_stl(os.path.join(dst, "parts", p + ".stl"), man_tris(parts[p].transform(T)))
     moved[d["name"]] = round(math.degrees(b.q), 4) if b.dof == "rot" else round(b.q, 5)
 json.dump(spec, open(os.path.join(dst, "keyless.json"), "w"), indent=1)
-w2 = R.make_world(*R.load(dst, dout)[1:])
+w2 = R.G.make_world(*R.G.load(dst, dout)[1:])
 final = {n: round(w2.pen(b), 6) for n, b in w2.bodies.items() if b.kind != "fixed"}
 print(json.dumps({"pre_turns_deg": pre, "final_rest_pen": final}, indent=1))
 print(json.dumps({"pen_before": before, "pen_after_settle": after, "baked_deg_or_mm": moved}, indent=1))

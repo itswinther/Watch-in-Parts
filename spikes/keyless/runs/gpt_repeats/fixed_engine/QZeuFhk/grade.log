@@ -1,0 +1,1 @@
+{"reward": 0.11029411764705882, "product": 0.125, "honesty": 0.0, "gates": {"files": true, "rest": true}, "conditions": {"held": true, "bounds": true}, "steps": {"assemble": true, "wind": true, "hold": false, "run": false, "backward": false, "set": false, "return": false}, "seconds": 1936.6}
