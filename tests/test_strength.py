@@ -28,6 +28,9 @@ from fractions import Fraction
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 sys.path.insert(0, ROOT)
 sys.path.insert(0, os.path.join(ROOT, "tests"))
+# the cases below place their pinions on main's 1.0 mm drum (z 0.1 to 0.9): run them on main's 6.6 mm barrel
+# unless told otherwise (geometry/watch.py defaults to the thin barrel on b/thin-4mm)
+os.environ.setdefault("WATCH_THIN_BARREL", "0")
 from geometry import core            # noqa: E402
 from geometry import watch as W      # noqa: E402
 from geometry.core import FormatError  # noqa: E402
