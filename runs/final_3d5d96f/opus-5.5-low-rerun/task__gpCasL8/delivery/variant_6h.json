@@ -1,0 +1,230 @@
+{
+ "barrel": "BR-096-30",
+ "case_centre": [
+  2.84,
+  0.0
+ ],
+ "fixed": [
+  "plate",
+  "plate2",
+  "dial"
+ ],
+ "mobiles": {
+  "a_wheel": {
+   "axis": [
+    9.684724,
+    4.779761
+   ],
+   "parts": [
+    "a_wheel_6h"
+   ],
+   "material": "AD-C100-HT"
+  },
+  "x_wheel": {
+   "axis": [
+    5.916104,
+    8.065716
+   ],
+   "parts": [
+    "x_wheel_6h"
+   ],
+   "material": "AD-C100-HT"
+  },
+  "x2_wheel": {
+   "axis": [
+    4.844305,
+    3.526628
+   ],
+   "parts": [
+    "x2_wheel_6h"
+   ],
+   "material": "AD-C100-HT"
+  },
+  "y_wheel": {
+   "axis": [
+    1.819126,
+    6.844899
+   ],
+   "parts": [
+    "y_wheel"
+   ],
+   "material": "AD-C100-HT"
+  },
+  "seconds_wheel": {
+   "axis": [
+    -2.397162,
+    5.27235
+   ],
+   "parts": [
+    "seconds_wheel",
+    "hand_seconds"
+   ],
+   "material": "AD-C100-HT"
+  },
+  "dm_wheel": {
+   "axis": [
+    5.391639,
+    0.882687
+   ],
+   "parts": [
+    "dm_wheel"
+   ],
+   "material": "AD-C100-HT"
+  },
+  "minute_wheel": {
+   "axis": [
+    2.84,
+    0.0
+   ],
+   "parts": [
+    "minute_wheel",
+    "hand_minute"
+   ],
+   "material": "AD-C100-HT"
+  },
+  "a2_wheel": {
+   "axis": [
+    11.036296,
+    -4.711705
+   ],
+   "parts": [
+    "a2_wheel_6h"
+   ],
+   "material": "AD-C100-HT"
+  },
+  "q_wheel": {
+   "axis": [
+    6.612357,
+    -5.535575
+   ],
+   "parts": [
+    "q_wheel_6h"
+   ],
+   "material": "AD-C100-HT"
+  },
+  "dh_wheel": {
+   "axis": [
+    2.555292,
+    -3.588724
+   ],
+   "parts": [
+    "dh_wheel"
+   ],
+   "material": "AD-C100-HT"
+  },
+  "hour_wheel": {
+   "axis": [
+    2.84,
+    0.0
+   ],
+   "parts": [
+    "hour_wheel",
+    "hand_hour"
+   ],
+   "material": "AD-C100-HT"
+  },
+  "day_wheel": {
+   "axis": [
+    -0.988351,
+    -7.663352
+   ],
+   "parts": [
+    "day_wheel",
+    "hand_day"
+   ],
+   "material": "AD-C100-HT"
+  }
+ },
+ "meshes": [
+  {
+   "driver": "barrel",
+   "driver_teeth": 96,
+   "driven": "a_wheel",
+   "driven_teeth": 12
+  },
+  {
+   "driver": "barrel",
+   "driver_teeth": 96,
+   "driven": "a2_wheel",
+   "driven_teeth": 24
+  },
+  {
+   "driver": "a_wheel",
+   "driver_teeth": 45,
+   "driven": "x_wheel",
+   "driven_teeth": 15
+  },
+  {
+   "driver": "a_wheel",
+   "driver_teeth": 45,
+   "driven": "x2_wheel",
+   "driven_teeth": 15
+  },
+  {
+   "driver": "x_wheel",
+   "driver_teeth": 45,
+   "driven": "y_wheel",
+   "driven_teeth": 12
+  },
+  {
+   "driver": "y_wheel",
+   "driver_teeth": 48,
+   "driven": "seconds_wheel",
+   "driven_teeth": 12
+  },
+  {
+   "driver": "x2_wheel",
+   "driver_teeth": 12,
+   "driven": "dm_wheel",
+   "driven_teeth": 24
+  },
+  {
+   "driver": "dm_wheel",
+   "driver_teeth": 12,
+   "driven": "minute_wheel",
+   "driven_teeth": 24
+  },
+  {
+   "driver": "a2_wheel",
+   "driver_teeth": 12,
+   "driven": "q_wheel",
+   "driven_teeth": 48
+  },
+  {
+   "driver": "q_wheel",
+   "driver_teeth": 12,
+   "driven": "dh_wheel",
+   "driven_teeth": 24
+  },
+  {
+   "driver": "dh_wheel",
+   "driver_teeth": 12,
+   "driven": "hour_wheel",
+   "driven_teeth": 12
+  },
+  {
+   "driver": "dh_wheel",
+   "driver_teeth": 12,
+   "driven": "day_wheel",
+   "driven_teeth": 24
+  }
+ ],
+ "hands": {
+  "minute": {
+   "mobile": "minute_wheel",
+   "part": "hand_minute"
+  },
+  "hour": {
+   "mobile": "hour_wheel",
+   "part": "hand_hour"
+  },
+  "seconds": {
+   "mobile": "seconds_wheel",
+   "part": "hand_seconds"
+  },
+  "day": {
+   "mobile": "day_wheel",
+   "part": "hand_day"
+  }
+ }
+}
