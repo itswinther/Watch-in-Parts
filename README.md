@@ -16,8 +16,10 @@ never sees a check, a score or a verdict.
   did not test it.
 - **Baselines:** do nothing **0.000**; stop early **0.157, 0.220, 0.333**.
 - **Run it:** `harbor run -p task -a oracle`, then `-a nop`, then `-a opencode -m <provider/model>`.
-- **What we do not show:** a valid run of a Claude model, and some grader thresholds the agent is not told.
-  Both are spelled out below.
+- **Claude models:** one valid run each at low thinking, both 0.422. Sonnet's has a plain fault. Opus's is a
+  near-miss on a threshold the agent is not told, and regrades differently on a second machine.
+- **What we do not show:** repeated Claude runs, and some grader thresholds the agent is not told. Both are
+  spelled out below.
 
 The repo is still named `board-in-a-box` after our first idea, which we dropped.
 
@@ -274,8 +276,8 @@ grader details are on branch `a/final-runs`, under `runs/final_4c5d8d3/` and `ru
 | nop (does nothing) | 2 | 0.000, 0.000 | once in local Docker, once on Modal |
 | Stop-early (three cut-off deliveries) | 3 | 0.157, 0.220, 0.333 | Part 1 only; Parts 1 and 2; Parts 1 to 3 |
 | GPT-6.1-sol (Codex) | 6 | 0.457, 0.447, 0.427, 0.467, 0.458, 0.427 (mean 0.447) | no run delivers a watch that fully works |
-| Sonnet 5.5 (OpenCode) | 0 valid | | see below |
-| Opus 5.5 (OpenCode) | 0 valid | | see below |
+| Sonnet 5.5, low thinking (OpenCode) | 1 valid | 0.422 | 5.75 mm; three mobiles not held; see below |
+| Opus 5.5, low thinking (OpenCode) | 1 valid | 0.422 (0.082 when regraded on another machine) | 4.08 mm; see below |
 | Fable 5.2 | not run | | |
 
 The six GPT-6.1-sol runs, check by check:
@@ -315,14 +317,27 @@ All six rewards were regraded on a second machine, outside Harbor, from the file
 three with grader `3d5d96f`, the other three with the grader on `main`. Rewards and failed checks were
 identical to workstream A's details files, except `k843CBe` after the fix above.
 
-**Claude models: no valid run with a watch.** Sonnet 5.5 delivered nothing in six runs: four at default and
-medium thinking (A 06:20), one more at medium (A 07:01) and one at low (A 07:44), each ending in a single reply
-of about 128,000 thinking tokens (see "How to run it"). Every other Claude run ended when our API credit ran out, and Harbor marks those
-invalid: Opus 5.5 at low and medium thinking had delivered nothing when cut off (15 and 35 steps). Sonnet 5.5 at
-low thinking is the one Claude run that built a watch before it was cut off (97 steps): 5.02 mm tall, 0.412,
-with 18 directions in which a mobile is not held and the seconds hand 0.22 mm below the top of the frame, and a
-report claiming all four parts pass. It is not a valid run and we do not count it, but it is the only sign we
-have of how a Claude model does: much thinner than GPT, also not working, and less honest about it.
+**Claude models: one valid run each, at low thinking (workstream A, Harbor + OpenCode, 15 Nov 08:39 and 08:42).**
+
+- **Sonnet 5.5: 0.422.** A complete movement, 5.75 mm tall. One check fails, `held`, in both builds: three
+  mobiles can be lifted straight out upwards, with nothing above them (zero contact). The report claims all four
+  parts pass, which costs 2/17 of the reward. Regraded on a second machine with the grader on `main`: the same
+  reward and the same failed check.
+- **Opus 5.5: 0.422 in workstream A's verifier, and we could not reproduce that number.** There it is a complete
+  movement, 4.08 mm tall, the closest to our 3.85 mm of any run, and one check fails: `tolerant`. One gear pair
+  still drives at 0.488 of the required overlap when its axis is moved 0.03 mm, against a limit of 0.5. Both
+  numbers are thresholds of ours that the agent is not told (known limits), so this failure is a close call on a
+  rule the agent could not read. Had it passed, the run would score 0.95: everything works, and it is 0.23 mm
+  thicker than our bar. The report claims all four parts pass.
+  Regraded on a second machine (x86, cadquery-ocp 7.9.3.1), the same delivery scores **0.082**: OpenCASCADE reads
+  one of its part files, `a_wheel_8h.step`, as two open shells instead of one solid, so the 8-hour build fails
+  the format gate. The file is the same; the two machines' CAD kernels read it differently. We have not found
+  which reading the judges' machine will give. This is a reproducibility fault of our environment (the image
+  does not pin the CAD kernel build), found at 08:50 on the last morning and not fixed.
+- **Before these:** Sonnet 5.5 delivered nothing in six runs (four at default and medium thinking, A 06:20; one
+  at medium, A 07:01; one at low, A 07:44), each ending in a single reply of about 128,000 thinking tokens (see
+  "How to run it"). Other Claude runs were cut off by our API credit limit, which Harbor marks invalid; one of
+  them, Sonnet at low thinking, had built a 5.02 mm watch scoring 0.412 with 18 unheld directions.
 
 Earlier briefs, for context only:
 
@@ -352,8 +367,9 @@ what we do not show.
   the spread is 0.04.
 - **Checkable:** the six deliveries and the grader's details files are on branch `a/final-runs`. Anyone can
   regrade them with the four shell lines under "How to run it".
-- **Not shown:** a valid run of a Claude model on the submitted task. The six runs used the Codex agent, not
-  OpenCode.
+- **Claude models under OpenCode:** one valid run each of Sonnet 5.5 and Opus 5.5, both 0.422. One run is not
+  "consistently", and the Opus number did not reproduce on a second machine (Results).
+- **Not shown:** repeated Claude runs. The six GPT runs used the Codex agent, not OpenCode.
 
 ### Meaningful difficulty (30 p)
 
@@ -451,6 +467,11 @@ Not done.
   `docs/CHECK_BASIS.md` marks the strength and `tolerant` numbers for replacement by a test of the movement as
   made; that replacement is not built. Of the faults in the GPT runs, `held` and `seated` rest on the 0.3 mm
   threshold; none rests on the strength numbers or the 0.03 mm shift.
+- **The CAD kernel build is not pinned.** The images install `cadquery==2.8.0`, which pulls whichever
+  `cadquery-ocp` build fits the machine. One delivered STEP file (Opus, `a_wheel_8h.step`) reads as one solid in
+  one verifier and as two open shells in another, which changes that run's reward from 0.422 to 0.082. Within
+  one machine the agent's own format checker and the verifier use the same kernel, so the agent can see what the
+  verifier will see; across machines a reward may not reproduce.
 - **The as-made test is not in the score.** A test of the watch as printed, within DS-W03's +/- 0.01 mm, exists
   (`geometry/asmade.py`, `spikes/asmade/asmade.py`; in the grader only with `WATCH_AS_MADE=1`, which the
   Harbor task does not set). Its results are reported beside the score, not in it.
