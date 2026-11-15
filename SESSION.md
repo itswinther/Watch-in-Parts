@@ -2485,6 +2485,5 @@ Mikael asks B (and itswinther) to answer these here, so both machines work to on
 
 - **A 07:14** **sonnet-5.5-low on the final task (3d5d96f, Harbor + OpenCode + API, 128k output):** task__8Wrjav3 reward 0.412, H 5.02 mm, fails hands,held, exception ApiUsageLimitError task__8Wrjav3 steps 97 cost $7.04 output 50184 reasoning 253327 length-stops 0;total $7.04;  Deliveries on `a/final-runs` (runs/final_3d5d96f/sonnet-5.5-low/).
 
-- **A 07:14** **sonnet-5.5-low on the final task (3d5d96f, Harbor + OpenCode + API, 128k output):** task__8Wrjav3 reward 0.412, H 5.02 mm, fails hands,held, exception ApiUsageLimitError task__8Wrjav3 steps 97 cost $7.04 output 50184 reasoning 253327 length-stops 0;total $7.04;  Deliveries on `a/final-runs` (runs/final_3d5d96f/sonnet-5.5-low/).
 
 - **A 07:14** **opus-5.5-medium on the final task (3d5d96f, Harbor + OpenCode + API, 128k output):** task__duDH2jb reward 0.000, H n/a mm, fails assembled,clear,coaxial,day_declared,day_hand,day_place,files,hands,held,hour,minute,plan,printable,same_frame,seated,seconds,size,spin,strength,tolerant,train, exception ApiUsageLimitError task__duDH2jb steps 35 cost $5.87 output 18985 reasoning 137232 length-stops 0;total $5.87;  Deliveries on `a/final-runs` (runs/final_3d5d96f/opus-5.5-medium/).
