@@ -16,9 +16,10 @@ never sees a check, a score or a verdict.
   did not test it.
 - **Baselines:** do nothing **0.000**; stop early **0.157, 0.220, 0.333**.
 - **Run it:** `harbor run -p task -a oracle`, then `-a nop`, then `-a opencode -m <provider/model>`.
-- **The strongest run we have:** Opus 5.5 at medium thinking, one run: a fully working movement, 4.23 mm tall,
-  every check passed, honest report: **0.925**. It loses its 0.075 on thickness alone: 0.38 mm thicker than our
-  3.85 mm. So the task can be done from what the agent is given, and the best agent is still below the reference.
+- **The strongest runs we have:** Opus 5.5 delivered a fully working movement twice, every check passed and the
+  report honest: **0.925** (medium thinking, 4.23 mm) and **0.811** (low thinking, on Modal, 4.92 mm). Both lose
+  score on thickness alone, against our 3.85 mm. So the task can be done from what the agent is given, and the
+  best agent is still below the reference.
 - **Other Claude runs:** Sonnet 5.5 and Opus 5.5 at low thinking, one valid run each, both 0.422.
 - **What we do not show:** repeated Claude runs, and some grader thresholds the agent is not told. Both are
   spelled out below, with the ten things we would change next.
@@ -290,6 +291,7 @@ grader details are on branch `a/final-runs`, under `runs/final_4c5d8d3/` and `ru
 | Sonnet 5.5, low thinking (OpenCode) | 1 valid | 0.422 | 5.75 mm; three mobiles not held; see below |
 | Opus 5.5, low thinking (OpenCode) | 1 valid | 0.422 (0.082 when regraded on another machine) | 4.08 mm; see below |
 | Opus 5.5, medium thinking (OpenCode) | 1 valid | **0.925** | 4.23 mm; every check passes; see below |
+| Opus 5.5, low thinking (OpenCode, on Modal) | 1 valid so far | **0.811** | 4.92 mm; every check passes; two more trials were still running at 09:25 |
 | Fable 5.2 | not run | | |
 
 The six GPT-6.1-sol runs, check by check:
@@ -338,6 +340,11 @@ identical to workstream A's details files, except `k843CBe` after the fix above.
   shows 0.943: it was graded when the bar was 3.95 mm.) This run shows two things. The task can be solved from
   the order and the sheets alone, including every threshold the agent is not told. And the thickness term does
   what it is for: the remaining gap to the reference, 0.075, is 0.38 mm of height.
+- **Opus 5.5 at low thinking, on Modal: 0.811, also a watch that fully works.** Run by a second team member
+  from the checked-in `task/` with the grader on `main` (branch `modal-runs`, `jobs-modal/opus-low/`, trial
+  `3hJXaYm`; Harbor marks it valid, agent time 50 minutes). Every gate and check passes, the report is honest,
+  the movement is 4.92 mm tall: s = 0.622, reward 1/2 + 1/2 x 0.622 = 0.811. This number is from Harbor's own
+  verifier on Modal; we have not regraded it separately.
 
 - **Sonnet 5.5: 0.422.** A complete movement, 5.75 mm tall. One check fails, `held`, in both builds: three
   mobiles can be lifted straight out upwards, with nothing above them (zero contact). The report claims all four
@@ -385,8 +392,9 @@ what we do not show.
   reward 1.000 (SESSION.md, A 05:49). It is a script, so it gives the same delivery every time.
 - **Frontier agent:** GPT-6.1-sol, six Harbor runs: 0.427 to 0.467, mean 0.447. All six are below one half;
   the spread is 0.04.
-- **The strongest result:** Opus 5.5 at medium thinking, one run, 0.925: a working watch, 0.38 mm thicker than
-  our bar. It is below the reference, by thickness alone. At low thinking the same model scored 0.422.
+- **The strongest results:** Opus 5.5, two working watches: 0.925 (medium thinking, 4.23 mm) and 0.811 (low
+  thinking, on Modal, 4.92 mm). Both are below the reference by thickness alone. A third Opus run, at low
+  thinking in local Docker, scored 0.422.
 - **Checkable:** the six deliveries and the grader's details files are on branch `a/final-runs`. Anyone can
   regrade them with the four shell lines under "How to run it".
 - **Other Claude runs under OpenCode:** one valid run each of Sonnet 5.5 and Opus 5.5 at low thinking, both
@@ -517,9 +525,9 @@ Not done.
 Reading our own results as someone who builds environments would, these are the faults that matter most, and
 the fix for each.
 
-1. **The reward hardly separates good from bad work below a working watch.** Eight of the nine valid agent runs that
+1. **The reward hardly separates good from bad work below a working watch.** Eight of the ten valid agent runs that
    delivered a watch score between 0.42 and 0.47: a 4 mm watch with one near-miss and a 12 mm watch with hands below the dial get about
-   the same. Half of the reward sits behind "every check passes"; one run reached it (0.925), and only there did
+   the same. Half of the reward sits behind "every check passes"; two runs reached it (0.925 and 0.811), and only there did
    thickness count.
    *Fix:* pay the working-watch half in steps (per build, per function: runs, shows the time, can be
    assembled), and let thickness scale each step, so that a better watch always scores more.
