@@ -152,8 +152,10 @@ Checks. Each passes or fails.
 10. **Hours and minutes on a common centre.** The axes of the hour hand's mobile and the minute hand's mobile are
     at most 0.01 mm apart.
 11. **Hands.** Each of the hour, minute and seconds hand parts reaches at least 5 mm from its mobile's axis;
-    lies wholly above the frame (its lowest point is no lower than the highest point of any fixed part); and
-    points: its centre of volume is at least 0.5 mm from its mobile's axis.
+    lies wholly above the frame (its lowest point is no lower than the highest point of any fixed part);
+    points: its centre of volume is at least 0.5 mm from its mobile's axis; and is slender: seen from the dial
+    side (the part projected along z onto the xy plane), the area it covers is at most 0.25 of the area of the
+    disc its tip sweeps, the circle about its mobile's axis through the point of the part furthest from that axis.
 12. **Fits the case.** Everything stays within the inner radius of the case named in the work order (DS-W02,
     section 2, column "Inner radius (mm)") of the vertical line through `case_centre` as it turns: every point of
     every fixed part, and, for each mobile, its largest distance from its own axis plus the distance from its axis
@@ -165,17 +167,16 @@ Checks. Each passes or fails.
 
     *Load case.* This calibre is the base of a family that includes an automatic version, whose barrel has a
     slipping bridle; the going train is rated for that version's barrel load. T_barrel is the upper end of the
-    bridle's slipping torque, DS-101, Table 2a, row "Slipping torque of the bridle (min. to max.)", column for
-    this series (N·mm), whatever mainspring the barrel of this build holds. The going train is stalled at its end,
-    so each of its meshes carries the full torque that reaches it.
+    slipping torque of the automatic version's bridle (DS-101, Table 2a), whatever mainspring the barrel of this
+    build holds. The going train is stalled at its end, so each of its meshes carries the full torque that reaches
+    it.
 
     *Meshes rated.* The going train: the declared meshes on the path from the barrel to the mobile that carries
     the seconds hand, through declared meshes that pass the mesh test (check 4); where there is more than one such
     path, the one a breadth-first search from the barrel finds first when it takes the meshes in their declared
-    order (so the one with the fewest meshes). The motion work, and any other mesh off that path, is not rated. If
-    the seconds hand's mobile is not reached from the barrel that way, this check fails. For each rated mesh, with
-    D the mobile that the declaration names as `driver`, N the one it names as `driven`, and z_D and z_N their
-    declared tooth counts:
+    order (so the one with the fewest meshes). If the seconds hand's mobile is not reached from the barrel that
+    way, this check fails. For each rated mesh, with D the mobile that the declaration names as `driver`, N the
+    one it names as `driven`, and z_D and z_N their declared tooth counts:
 
     - torque at D: T_D = T_barrel x |n_barrel / n_D| (N·mm), with n the turns per hour that the declared tooth
       counts give through meshes that pass the mesh test (the same speeds as the hand checks);
@@ -219,8 +220,9 @@ Checks:
    meshes that pass the mesh test of Part 1, and no mobile may be given two different speeds by the declared
    meshes.
 2. **24-hour hand placement.** Its mobile's axis is at least 6 mm from the axis of the hour hand's mobile;
-   the hand part reaches at least 3 mm from its mobile's axis; it lies wholly above the frame; and its
-   centre of volume is at least 0.5 mm from its mobile's axis.
+   the hand part reaches at least 3 mm from its mobile's axis; it lies wholly above the frame; its
+   centre of volume is at least 0.5 mm from its mobile's axis; and seen from the dial side it covers at most
+   0.25 of the area of the disc its tip sweeps, measured as in Part 1 check 11.
 
 ## 7. Part 3: the 6-hour variant (`variant_6h.json`)
 

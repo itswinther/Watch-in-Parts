@@ -295,3 +295,38 @@ python -I realcad/grade_real.py CONV/sub_ph CONV/data_ph --staged --details OUT.
 
 Not done: OM10 (needs an account); a run with `--pull 0.49` (it would not change the AT-5 block at
 0.12 mm); a longer AT-2 hold to tell a slow lock from no lock.
+
+## 6. After the engine fixes (branch `a/keyless-engine-fixes`, not merged)
+
+Sections 2 to 5 above are the first run on the unchanged grader (main, f07ecec). The branch fixes
+limitations 1 to 8 of section 4 in `engine.py`/`grade.py`, each with a test in `test_engine.py`, and
+states the rules in the brief (PROMPT.md). ml01 was converted again without the hand fixes those rules
+replace (`convert_ml01.py`; `--legacy` reproduces the first conversion), and graded by `grade_real.py
+--staged` on 954c9bc (one process, 9,655 s, peak about 1.7 GB; `staged_ml01_v3.json` in scratch).
+
+**Adjustments still made to the CAD, and why:**
+- **Spring bodies kept as hold-down plates.** The two flexures (Winkelhebelfeder 138,
+  Zeigerstellungsfeder 206) are split: the screwed plate stays as a fixed part (`fx_138_body`,
+  `fx_206_body`), the arm is replaced by the declared spring of the part it urges. In the watch, the
+  plates are what hold the yoke and the setting-wheel lever down (AT-0 Held).
+- **Position 2 pull 0.6 mm** (declared `pull`, an assumption): the second jumper notch is about 0.49 mm,
+  but on the rig the setting wheel only meets the sliding pinion from 0.54 mm. A rigid jumper cannot
+  be modelled, so the value is not ml01's own.
+- **Pose, springs, carrier** as in section 2 items 4, 5 and 6 (now in the public format: `carrier`,
+  springs pushing through contact). No bore clearance, no endshake, no hand phasing: the rig's fit rule
+  and its start-of-test phasing do that.
+- The sliding pinion is now `free` (as in the watch); the yoke spring moves it through the yoke.
+
+| Step | Before (main) | After (branch) | Numbers after |
+| --- | --- | --- | --- |
+| AT-0 Assemble | fail (Held) | **pass** | rest after the rig's settle and phase: max 2e-4 (as submitted up to 0.040 mm³); held; bounds (stem 5.75 out at +x) |
+| AT-1 Wind | pass | **pass** | 4.96 crown turns per barrel turn, not blocked |
+| AT-2 Hold | fail (drift) | **pass** | run-back 9.85°, held after 62 steps (drift 0.25° over the last 10) |
+| AT-3 Run | fail (AT-2's drift) | **pass** | reserve 47.8 h, runs free, then winds 6.3° |
+| AT-4 Backward | fail (dragged back, 111 blocked) | fail | not blocked, arbor -0.02°, minute 0°; but the forward turn after it does not wind (0°) |
+| AT-5 Set | fail (pull blocked at 0.12) | fail | pull reaches 0.6 unblocked; forward test turns set the hands (1.2°), backward ones block (6 of 6 steps) at 0.45 and 0.6 |
+| AT-6 Return | fail | fail | the same backward block at 0.6 and 0.45; position 1 winds again (5.1°) |
+
+Product: 0.10 before, **0.30 after** (AT-0 to AT-3).
+
+ML01_CAUSES_PENDING

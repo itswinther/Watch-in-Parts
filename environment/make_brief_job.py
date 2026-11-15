@@ -372,8 +372,10 @@ Checks. Each passes or fails.
 10. **Hours and minutes on a common centre.** The axes of the hour hand's mobile and the minute hand's mobile are
     at most {coax} mm apart.
 11. **Hands.** Each of the hour, minute and seconds hand parts reaches at least {reach} mm from its mobile's axis;
-    lies wholly above the frame (its lowest point is no lower than the highest point of any fixed part); and
-    points: its centre of volume is at least {hcm} mm from its mobile's axis.
+    lies wholly above the frame (its lowest point is no lower than the highest point of any fixed part);
+    points: its centre of volume is at least {hcm} mm from its mobile's axis; and is slender: seen from the dial
+    side (the part projected along z onto the xy plane), the area it covers is at most {has} of the area of the
+    disc its tip sweeps, the circle about its mobile's axis through the point of the part furthest from that axis.
 {fits}
 {printable}
 {strength}""".format(hs=hand_speeds(), vt=vt(), join=num(W.FRAME_JOIN), sp=sp, deg=num(360 / sp),
@@ -381,8 +383,9 @@ Checks. Each passes or fails.
            spt=W.SAMPLES_PER_TOOTH, pe=L["push_every"], pe2=2 * L["push_every"], ge=L["gap_every"],
            ge2=2 * L["gap_every"], f1=str(W.MESH_OFFGRID[0]), f2=str(W.MESH_OFFGRID[1]), gap=num(W.ENGAGE_GAP),
            frac=num(W.DRIVE_FRACTION), push=num(W.DRIVE_FRACTION * 360), dmin=num(W.DRIVE_MIN_VOLUME),
-           ratio=num(W.DRIVE_AREA_RATIO), tdepth=num(W.TEETH_MIN_DEPTH), rays=num(W.TEETH_RAYS), shift=num(W.MESH_SHIFT), cs=W.CLEAR_STEPS, reach=num(W.HAND_REACH),
-           hcm=num(W.HAND_CENTRE_MIN), speed=SPEED_CITE,
+           ratio=num(W.DRIVE_AREA_RATIO), tdepth=num(W.TEETH_MIN_DEPTH), rays=num(W.TEETH_RAYS), shift=num(W.MESH_SHIFT),
+           cs=W.CLEAR_STEPS, reach=num(W.HAND_REACH), hcm=num(W.HAND_CENTRE_MIN), has=num(W.HAND_AREA_MAX_SHARE),
+           speed=SPEED_CITE,
            fits=wrap("12. **Fits the case.** Everything stays within the inner radius of the case named in the work "
                      "order (%s) of the vertical line through `case_centre` as it turns: every point of every fixed "
                      "part, and, for each mobile, its largest distance from its own axis plus the distance from its "
@@ -409,9 +412,11 @@ Checks:
    meshes that pass the mesh test of Part 1, and no mobile may be given two different speeds by the declared
    meshes.
 2. **24-hour hand placement.** Its mobile's axis is at least {off} mm from the axis of the hour hand's mobile;
-   the hand part reaches at least {reach} mm from its mobile's axis; it lies wholly above the frame; and its
-   centre of volume is at least {hcm} mm from its mobile's axis.
-""".format(off=num(W.DAY_HAND_OFFSET), reach=num(W.DAY_HAND_REACH), hcm=num(W.HAND_CENTRE_MIN), hs=hand_speeds())
+   the hand part reaches at least {reach} mm from its mobile's axis; it lies wholly above the frame; its
+   centre of volume is at least {hcm} mm from its mobile's axis; and seen from the dial side it covers at most
+   {has} of the area of the disc its tip sweeps, measured as in Part 1 check 11.
+""".format(off=num(W.DAY_HAND_OFFSET), reach=num(W.DAY_HAND_REACH), hcm=num(W.HAND_CENTRE_MIN),
+           has=num(W.HAND_AREA_MAX_SHARE), hs=hand_speeds())
 
 
 def part3(L, S=None):
@@ -712,7 +717,8 @@ Each is at most {jb} bytes and names at most {mp} parts.
   "case_centre": [x, y],
   "fixed": ["part_name", ...],
   "mobiles": {{
-    "mobile_name": {{"axis": [x, y], "parts": ["part_name", ...]}},
+    "mobile_name": {{"axis": [x, y], "parts": ["part_name", ...], "material": "ordering code",
+                     "part_materials": {{"part_name": "ordering code"}}}},
 {fmob}    ...
   }},
   "meshes": [
@@ -905,7 +911,6 @@ millimetres): the drum and the arbor together, as one mesh. In that position:
 | Arbor core (inside the drum's bore) | z {wz0} mm to z {wz1} mm, radius {cr} mm |
 | Spring chamber inside the drum (not modelled in the mesh) | inner diameter {ind} mm |
 | Winding square | z {sq0} mm to z {sq1} mm, side {sq} mm, sides parallel to x and y |
-| Tooth phase | one tooth centred on the +x direction ({ph} degrees from +x, measured on the supplied mesh) |
 | Volume of the mesh | {vol} mm3 |
 
 ## 4. Speed classes
@@ -915,7 +920,7 @@ The steady running speed of the barrel in the movement, for each speed class.
 | Speed class | {scol} | {sense} |
 |---|---|---|
 {classes}""".format(table=table, no=supplied_barrel_no(), wz0=num(W.BARREL_WHEEL_Z[0]), wz1=num(W.BARREL_WHEEL_Z[1]),
-                    az0=num(W.BARREL_ARBOR_Z[0]), az1=num(W.BARREL_ARBOR_Z[1]), ph=num(B["phase"]), vol=num(B["volume"]),
+                    az0=num(W.BARREL_ARBOR_Z[0]), az1=num(W.BARREL_ARBOR_Z[1]), vol=num(B["volume"]),
                     scol=SPEED_COL, sense=SENSE_COL, classes=classes, bore=num(W.BARREL_BORE_R), ar=num(W.BARREL_ARBOR_R),
                     cr=num(round(W.BARREL_CORE_R, 3)), ind=num(W.BARREL_INNER_D), sq0=num(W.BARREL_SQUARE_Z[0]),
                     sq1=num(W.BARREL_SQUARE_Z[1]), sq=num(W.BARREL_SQUARE_SIDE))
@@ -1124,6 +1129,10 @@ def traceability_rows(L, B, S=None):
         cell("HAND_CENTRE_MIN (also Part 2 check 2)", W.HAND_CENTRE_MIN, Q, p1, "**Hands.**", None,
              [num(W.HAND_CENTRE_MIN)]),
         cell("hand wholly above the frame (`Movement.hand_shape`, margin 0)", 0.0, Q, p1, "**Hands.**", None, []),
+        cell("HAND_AREA_MAX_SHARE (`Movement.hand_area`: projection on xy / (pi x hand_reach ** 2))",
+             W.HAND_AREA_MAX_SHARE, Q, p1, "**Hands.**", None, [num(W.HAND_AREA_MAX_SHARE)]),
+        cell("HAND_AREA_MAX_SHARE (Part 2 check 2)", W.HAND_AREA_MAX_SHARE, Q, p2, "**24-hour hand placement.**",
+             None, [num(W.HAND_AREA_MAX_SHARE)]),
         cell("hands required by the loader (`Movement.__init__`): %s; `day` optional" % ", ".join(HANDS_REQUIRED), "",
              Q, p1, "**C1 Files.**", None, []),
         cell("C3: `hands.day` declared, its part not the hour, minute or seconds hand's part", "", Q, p2,

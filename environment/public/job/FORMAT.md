@@ -49,7 +49,8 @@ Each is at most 1,048,576 bytes and names at most 60 parts.
   "case_centre": [x, y],
   "fixed": ["part_name", ...],
   "mobiles": {
-    "mobile_name": {"axis": [x, y], "parts": ["part_name", ...]},
+    "mobile_name": {"axis": [x, y], "parts": ["part_name", ...], "material": "ordering code",
+                     "part_materials": {"part_name": "ordering code"}},
     ...
   },
   "meshes": [
