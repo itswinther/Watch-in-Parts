@@ -24,9 +24,6 @@ never sees a check, a score or a verdict.
 - **What we do not show:** repeated Claude runs, and some grader thresholds the agent is not told. Both are
   spelled out below, with the ten things we would change next.
 
-The project is called Watch in Parts. Its working name was `board-in-a-box`, after our first idea, which we
-dropped; a few file headers and old notes still carry that name.
-
 **Where to look first**
 
 | You want | Go to |
@@ -256,12 +253,9 @@ AGENT=codex CODEX_FORCE_AUTH_JSON=1 harbor/watch_one/run_all.sh openai/gpt-6.1-s
 It builds the task, checks the network settings, runs `harbor lint`, the oracle, nop and the model (OpenCode by
 default, agent cap 3 h), and summarises the results.
 
-**Sonnet 5.5 under OpenCode.** The task image lets one reply use the model's full output limit
-(`OPENCODE_EXPERIMENTAL_OUTPUT_TOKEN_MAX=128000`, set in `harbor/watch_one/build_task.py`; an earlier image
-capped it at 64,000). At that limit Sonnet 5.5, at default and at medium thinking, ended in a single reply of
-128,000 thinking tokens with nothing delivered, in four runs of four (SESSION.md, A 06:20). It read the order,
-the sheets and `kernel.py`, then tried to plan the whole movement in one reply and never wrote a script. No
-tool failed. We report these runs separately and do not count them in the gap.
+**Thinking level.** The image lets one reply use the model's full output limit (128,000 tokens). At default and
+medium thinking Sonnet 5.5 spends a whole reply thinking and delivers nothing (Results), so each Claude
+run states its thinking level in the results (with Harbor: `--effort low` or `--effort medium`).
 
 Without Harbor (Python 3.12 or 3.13, `pip install -r requirements.txt`, from the repo root):
 
@@ -365,15 +359,6 @@ identical to workstream A's details files, except `k843CBe` after the fix above.
   at medium, A 07:01; one at low, A 07:44), each ending in a single reply of about 128,000 thinking tokens (see
   "How to run it"). Other Claude runs were cut off by our API credit limit, which Harbor marks invalid; one of
   them, Sonnet at low thinking, had built a 5.02 mm watch scoring 0.412 with 18 unheld directions.
-
-Earlier briefs, for context only:
-
-- On the briefs that stated the acceptance test (four-part job), ten of ten local runs in Claude Code, outside
-  Harbor, scored 1.0 (Fable 5.2 and Opus 5.5 three each, Sonnet 5.5 four). With a stated 9.0 mm thickness
-  target, GPT, Opus and Sonnet all scored 1.000 (SESSION.md 04:05).
-- Round 2 (4.0 mm target stated, thin barrel, 12.7 mm case; `b/thin-4mm` 92d9622): GPT-6.1-sol scored 0.354 in
-  one run. H was 4.71 mm; P1 and P3 failed train, seconds, tolerant and strength; it claimed all four parts pass
-  (SESSION.md, A 04:31).
 
 All runs and logs are in [SESSION.md](SESSION.md).
 
@@ -572,16 +557,8 @@ the fix for each.
 | `visualizer/` | demo pages, open `index.html` (Replay) or `xray.html` in a browser. Replay shows each run's reward as first graded: Opus medium appears as 0.943 (bar then 3.95 mm; 0.925 on the submitted grader), and it includes one Sonnet run (0.412) that was cut off by our credit limit and is not counted in Results |
 | `SESSION.md` | shared log of the four sessions: decisions, requests, every result |
 
-## History
-
-Before this task we built and dropped nine others, including Board in a Box (an enclosure design), because
-clean agents scored at or near 1.0 (`spikes/README.md`, `SESSION.md`). The first watch version was four frozen
-stages (SPEC 0.6), where Fable and Opus scored 1.0 on every stage; its grader mode is kept to regrade old runs
-(`grade_watch.py FOLDER --stage N`). SPEC 0.7 made it one job with a stated acceptance test (QA-W100); every
-frontier model scored 1.0. SPEC 0.8 is the customer order described above. Earlier write-ups are in
-`docs/history/`.
-
 ## Team
 
-Four people, each working with a Claude session: itswinther, Mikael, Yoseph and Abhishek. How the sessions stay
-in step is in [CLAUDE.md](CLAUDE.md).
+Four people, each working with a Claude session: itswinther, Mikael, Yoseph and Abhishek. How the sessions
+stayed in step is in [CLAUDE.md](CLAUDE.md); every run is logged in [SESSION.md](SESSION.md). Earlier versions of
+the task and the ideas we dropped are in `docs/history/` and `spikes/`.
