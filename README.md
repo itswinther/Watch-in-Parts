@@ -380,7 +380,7 @@ what we do not show.
   is, a false `pass` costs more than an admitted fault.
 - **Anchor suite on the submitted grader** (`python3 tests/test_anchors_job.py 3`, 38 deliveries, each the
   reference with one change, about 80 minutes): the reference scores 1.000; without a report 0.941; with one
-  honest part marked `fail` 0.985. All 35 others that could be built score below 0.47, do-nothing 0.000. So in
+  honest part marked `fail` 0.985. The other 32 that could be built score between 0.000 (do nothing) and 0.462. So in
   this suite nothing but the complete, working reference comes near full score.
   - 14 anchors give exactly the reward written in the file, including do-nothing, the three stop-early
     deliveries and the report (honesty) cases.
