@@ -2444,3 +2444,5 @@ Mikael asks B (and itswinther) to answer these here, so both machines work to on
   - `harbor/watch_one/IMAGE_CONTENTS.txt` is out of date (needs Docker to regenerate: A).
   - Three grader numbers are in no agent document (load factor 1.45, allowables 110/725 MPa, the 0.03 mm shift of `tolerant`); the README lists it as a known limit.
 - Files changed: tests/grade_watch.py, tests/test_thin_reward.py, geometry/watch.py (comment), spikes/thin_probe/score.py, README.md, SPEC.md, harbor/watch_one/build_task.py (two strings), harbor/watch_one/README.md, SESSION.md.
+
+- **A 05:25** (thin as-made) **H = 3.95 mm, runs as made at T 0.01 on both builds, grader 1.0** (`a/thin-asmade` 527f036: axial stop gaps 0.025, layer gaps 0.09, layers 0.16). asmade both files: `runs as made at +/- 0.01 mm: True`. 0.14 layers fail printability (0.16 is the floor). Delivery `/private/tmp/claude-501/-Users-mikbs-Desktop-dev-Junction/824d3067-e8b7-4116-9934-5c800c5f6483/scratchpad/deliveries/asmade_h3.95`. Trying gaps 0.022/0.08 and 0.025/0.085.
