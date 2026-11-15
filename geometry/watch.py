@@ -68,6 +68,39 @@ if THIN_BARREL:
     BARREL_WHEEL_Z = tuple(v * THIN_BARREL_SCALE for v in BARREL_WHEEL_Z)
     BARREL_ARBOR_Z = tuple(v * THIN_BARREL_SCALE for v in BARREL_ARBOR_Z)
     BARREL_SQUARE_Z = tuple(v * THIN_BARREL_SCALE for v in BARREL_SQUARE_Z)
+# Barrel catalogue (branch a/barrel-catalogue): the agent may choose its barrel. Each entry is BR-096-20 (96 teeth,
+# module 0.2, every x/y size unchanged) scaled in z only, about z = 0, by the factor below; meshes in data/<id>/
+# (barrel.stl, barrel_drum.stl, barrel_arbor.stl; written by spikes/barrel_catalogue/make_barrels.py: BR-096-66 is
+# byte for byte data/, BR-096-30 byte for byte data/thin/). movement.json may name one under the top-level key
+# "barrel"; without it the loader keeps the barrel above (THIN_BARREL). Unscaled z of BR-096-20: drum (0, 1),
+# arbor (-1, 5.6), square (3.3, 4.9).
+BARREL_CATALOGUE = {"BR-096-66": 1.0, "BR-096-45": 4.5 / 6.6, "BR-096-30": 3.0 / 6.6}
+
+
+# Geometry the catalogue sheet may print (drawing data only): spring strip h x t x L (mm, demonstration scale s =
+# 1.617, DS-101 [^s]) and the 1:1 row it is cut from. Spring height = the drum height less 0.05 clearance, at 1:1
+# rounded down to 0.01 mm; t, L and the chamber are spring L's (DS-101 Table 1). BR-096-66 holds L itself.
+BARREL_SPRING_GEOMETRY = {
+    "BR-096-66": {"row": "L", "h_1to1": 0.48, "h": 0.78, "t": 0.162, "L": 437},
+    "BR-096-45": {"row": "L39", "h_1to1": 0.39, "h": 0.63, "t": 0.162, "L": 437},
+    "BR-096-30": {"row": "LT", "h_1to1": 0.25, "h": 0.40, "t": 0.162, "L": 437},
+}
+# GRADER-INTERNAL, not for the agent's documents: the spring's own torques (DS-101 formulas d1 to d3, M proportional
+# to h, so row L's values x h/0.48; turns and run time are L's). The strength check's load stays the bridle torque
+# BARREL_TORQUE_MAX_NMM for every barrel.
+BARREL_SPRING_TORQUE = {
+    "BR-096-66": {"torque_factor": 1.0, "M_el_nmm": 8.4, "n_el": 9.7, "turns_D6": 4.9, "run_h_D6": 40, "M_at_N_nmm": 4.5},
+    "BR-096-45": {"torque_factor": 0.39 / 0.48, "M_el_nmm": 6.8, "n_el": 9.7, "turns_D6": 4.9, "run_h_D6": 40, "M_at_N_nmm": 3.7},
+    "BR-096-30": {"torque_factor": 0.25 / 0.48, "M_el_nmm": 4.4, "n_el": 9.7, "turns_D6": 4.9, "run_h_D6": 40, "M_at_N_nmm": 2.4},
+}
+
+
+def barrel_z(barrel_id):
+    """{"wheel": drum z range, "arbor": arbor z range, "square": winding square z range} of a catalogue barrel."""
+    k = BARREL_CATALOGUE[barrel_id]
+    return {"wheel": (0.0, 1.0 * k), "arbor": (-1.0 * k, 5.6 * k), "square": (3.3 * k, 4.9 * k)}
+
+
 REF_KEPT_VOLUME_SHARE = 0.626   # stage 3: the reference keeps 0.6267 of the mobile volume and all of the fixed volume it receives (rounded down)
 VOL_TOL = 0.01              # mm3
 SPIN_STEPS = 72             # free-spin test: steps of 5 degrees
@@ -179,33 +212,39 @@ def cyl(x, y, z0, z1, r, seg=48):
 _MESHES = {}
 
 
-def mesh_path(name):
-    """The file of supplied mesh `name` (barrel, barrel_drum, barrel_arbor, barrel_stage): data/thin/ when
-    THIN_BARREL (the stage task's one-body barrel_stage is never thinned), else data/."""
+def mesh_path(name, barrel_id=None):
+    """The file of supplied mesh `name` (barrel, barrel_drum, barrel_arbor, barrel_stage): data/<barrel_id>/ for a
+    catalogue barrel (BARREL_CATALOGUE), else data/thin/ when THIN_BARREL (the stage task's one-body barrel_stage is
+    never thinned), else data/."""
     data = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
-    if THIN_BARREL and name != "barrel_stage":
+    if barrel_id is not None and name != "barrel_stage":
+        if barrel_id not in BARREL_CATALOGUE:
+            raise FormatError("movement.json: 'barrel' must be one of %s" % ", ".join(sorted(BARREL_CATALOGUE)))
+        data = os.path.join(data, barrel_id)
+    elif THIN_BARREL and name != "barrel_stage":
         data = os.path.join(data, "thin")
     return os.path.join(data, name + ".stl")
 
 
-def _mesh(name):
-    if name not in _MESHES:
-        _MESHES[name] = core.tris_to_manifold(core.read_stl(mesh_path(name), MAX_TRIANGLES, MAX_STL_BYTES))
-    return _MESHES[name]
+def _mesh(name, barrel_id=None):
+    key = (name, barrel_id)
+    if key not in _MESHES:
+        _MESHES[key] = core.tris_to_manifold(core.read_stl(mesh_path(name, barrel_id), MAX_TRIANGLES, MAX_STL_BYTES))
+    return _MESHES[key]
 
 
-def barrel():
+def barrel(barrel_id=None):
     """The supplied mainspring barrel as one solid (data/barrel.stl, the agent's supplied/barrel.stl): the union
     of the toothed drum and the arbor in their assembled position, axis on x = y = 0. The going-train checks
-    turn it as one mobile."""
-    return _mesh("barrel")
+    turn it as one mobile. barrel_id: a catalogue barrel instead (BARREL_CATALOGUE)."""
+    return _mesh("barrel", barrel_id)
 
 
-def barrel_bodies():
+def barrel_bodies(barrel_id=None):
     """The two bodies of the supplied barrel, {"barrel_drum": solid, "barrel_arbor": solid} (data/barrel_drum.stl,
     data/barrel_arbor.stl), for the crown-winding part: there the drum stands with the going train and the
     arbor is wound."""
-    return {n: _mesh(n) for n in ("barrel_drum", "barrel_arbor")}
+    return {n: _mesh(n, barrel_id) for n in ("barrel_drum", "barrel_arbor")}
 
 
 def barrel_stage():
@@ -264,7 +303,13 @@ class Movement:
         mob = doc.get("mobiles")
         if not isinstance(mob, dict) or not mob:
             raise FormatError("movement.json: 'mobiles' must be a non-empty object")
-        self.mobiles = {"barrel": {"axis": (0.0, 0.0), "solid": barrel() if barrel_solid is None else barrel_solid,
+        bid = doc.get("barrel")         # optional: a catalogue barrel (BARREL_CATALOGUE); default the supplied one
+        if bid is not None and (not isinstance(bid, str) or bid not in BARREL_CATALOGUE):
+            raise FormatError("movement.json: 'barrel' must be one of %s" % ", ".join(sorted(BARREL_CATALOGUE)))
+        self.barrel_id = bid
+        if barrel_solid is None:
+            barrel_solid = barrel(bid)
+        self.mobiles = {"barrel": {"axis": (0.0, 0.0), "solid": barrel_solid,
                                    "parts": {}}}
         for name, m in mob.items():
             if not NAME_RE.match(str(name)) or name == "barrel":

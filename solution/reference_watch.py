@@ -29,6 +29,12 @@ from geometry import watch as W
 from geometry import watch_gears_cad as GC
 
 union, box = GC.union, GC.box
+# barrel catalogue: REF_BARREL=<id> builds the reference for that catalogue barrel (its z constants) and names it in
+# movement.json and variant_6h.json; unset: the default barrel, no "barrel" key
+REF_BARREL = os.environ.get("REF_BARREL") or None
+if REF_BARREL:
+    _bz = W.barrel_z(REF_BARREL)
+    W.BARREL_WHEEL_Z, W.BARREL_ARBOR_Z, W.BARREL_SQUARE_Z = _bz["wheel"], _bz["arbor"], _bz["square"]
 _FILES = {}                # id(solid) -> the STEP file it was first written to
 _GEARS = {}                # part name -> (pinion, wheel) solids of a stage build, read by the one-job mode's split_wheels
 
@@ -97,6 +103,9 @@ if W.THIN_BARREL:
     Z_DAY = Z["E"]
     HAND_T = LAYER_T
     HAND0 = DIAL[1] + GAP
+    if HAND0 < W.BARREL_SQUARE_Z[1]:
+        # a taller (catalogue) barrel: the hands sweep over its axis, so they go above its winding square
+        HAND0 = W.BARREL_SQUARE_Z[1] + GAP
     MIN0 = HAND0 + HAND_T + GAP
     PIV = LAYER_T
     LO_PIV = PLATE[1] + GAP - PLATE[0] - 0.05
@@ -371,7 +380,8 @@ def build_stage1():
     parts["minute_hand"] = hand(C, MIN0, MIN0 + HAND_T, HANDS["minute"], 1.0, 0.35 + FIT)
     parts["seconds_hand"] = hand(S, SEC0, SEC0 + HAND_T, HANDS["seconds"], 0.9, 0.3 + FIT)
     parts.update(frame(P, with_day=False))
-    doc = {
+    doc = ({"barrel": REF_BARREL} if REF_BARREL else {})
+    doc.update({
         "case_centre": list(P["case"][0]),
         "fixed": ["main_plate"] + (["mid_plate"] if PO else []) + ["bridge", "dial", "barrel_cock"],
         "mobiles": {
@@ -393,7 +403,7 @@ def build_stage1():
         "hands": {"hour": {"mobile": "hour_wheel", "part": "hour_hand"},
                   "minute": {"mobile": "centre", "part": "minute_hand"},
                   "seconds": {"mobile": "seconds", "part": "seconds_hand"}},
-    }
+    })
     return doc, parts, P, phase
 
 
