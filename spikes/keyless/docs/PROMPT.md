@@ -38,7 +38,8 @@ stated direction.
 
 - **Stem axis:** the x axis (y = 0, z = 0). The crown end is at +x, outside the case.
 - **Stem positions:** position 1 (pushed in) is the stem as you submit it. Position 2 (pulled out) is
-  the stem moved $PULL towards +x.
+  the stem moved towards +x by the `pull` you declare in `keyless.json` ($PULL_LO to $PULL_HI), or by
+  $PULL if you declare none.
 - **Directions:** forward is turning the crown clockwise as seen from outside the case looking in
   (from +x towards -x), that is a negative rotation about +x. Backward is the opposite.
 - **Case:** a cylinder of radius $CASE_RADIUS about the line parallel to z through x = $CASE_CX,
@@ -84,7 +85,13 @@ stated direction.
   - `on_stem` (optional, `slide` along the x axis only): `true` if the mobile also turns with the stem;
     its own coordinate is then its slide, measured along its declared `direction` (which is `[1, 0, 0]`
     or `[-1, 0, 0]`).
+  - `carrier` (optional, `free` and `spring` only, not with `on_stem`): the name of another `free` or
+    `spring` mobile with `dof` `"rot"` that has no carrier itself. The mobile then also moves with the
+    carrier's rotation: its own `point` and `direction` are given as submitted (at rest) and are carried
+    along when the carrier turns.
 - `fixed`: a list of part names that never move.
+- `pull` (optional): a number from $PULL_LO to $PULL_HI, the stem's travel from position 1 to
+  position 2. Default $PULL.
 
 Example of the format only (one wheel turning on a bracket; not a keyless design):
 
@@ -133,19 +140,34 @@ The acceptance test is run on a simulated test rig:
   Parts are moved only by contact. A part pushed by another moves the least distance along its degree
   of freedom that the contact forces (with that friction) allow; if friction prevents it from giving
   way, it does not.
+- **Fits.** The rig gives every bore around a turning mobile's declared axis (a `rot` mobile, the
+  stem, the barrel arbor) $FIT_CLEARANCE mm of radial play, in that mobile's own parts and in any part
+  it turns in. Parts may therefore be drawn line to line at a pivot. Nothing else is changed.
 - **Spring-loaded parts** (kind `spring`) are urged towards their stated rest side by springs much
-  lighter than the mainspring. They give way first when pushed; if they cannot give way, they are pushed
-  along like any part. They return towards rest until they touch something, and their springs never
-  drive other parts.
+  lighter than the mainspring. They give way first when pushed, and only in the direction the contact
+  pushes them; if they cannot give way, they are pushed along like any part. Between steps they return
+  towards rest. On the way they push along any `free` or `spring` part in their path, but never a fixed
+  part, the stem, the barrel arbor, or another spring away from that spring's own rest side; where they
+  cannot push, they stop.
+- **Carried mobiles** move with their carrier's rotation (see `carrier`; a mobile `on_stem` turns with
+  the stem). A carrier that is pushed also answers for the mobiles it carries. A `free` mobile carried by
+  a carrier that is turning is light along its own freedom: where a contact pushes it that way within the
+  friction rule, it gives way first, like a spring. If it cannot give way, or giving way would push a
+  part behind it into something that cannot move, it drives what it touches.
 - **The mainspring** always urges the barrel arbor against winding. It is much stronger than any
   spring, and pushes whatever is in its way.
 - **The crown** is turned in steps of $STEP_DEG degrees and pulled or pushed in steps of $PULL_STEP. A
   step that cannot proceed is blocked, and nothing moves.
-- **At the start**, parts may overlap by up to 0.3 (surface travel) and settle before the test begins.
-- **What the rig does not model.** Parts do not bend, so a flexing arm or blade is rigid on the rig. Every
-  axis and slide line is fixed in the frame, so a mobile cannot ride on another mobile (for example, a
-  wheel carried on a swinging lever). A spring acts only on its own mobile. A design that depends on any
-  of these will not behave on the rig as it would in metal.
+- **At the start**, parts may overlap by up to 0.3 (surface travel). The rig first lets the movement
+  come to rest: each mobile clears its overlaps within that travel, meshing wheels are turned into their
+  gaps, and the springs return their parts. This is the starting state of every step. Coming to rest
+  is bounded (at most $PHASE_MAX_RESOLVES resolutions of the contacts, and at most $PHASE_MAX_SECONDS
+  seconds); where it stops, the movement is judged as it stands.
+- **What the rig does not model.** Parts do not bend, so a flexing arm or blade is rigid on the rig. A
+  mobile rides on another only through `carrier`, one level deep, and only on a carrier that turns; every
+  other axis and slide line is fixed in the frame. A spring has no body of its own: it is a force on its
+  own mobile, and it acts on other parts only through that mobile pushing them by contact, as described
+  above. A design that depends on anything else of this kind will not behave on the rig as it would in metal.
 
 ## The acceptance test
 
@@ -167,7 +189,8 @@ only if every step passes.
 ### AT-0 Assemble
 
 - **Files:** everything loads as described above.
-- **Rest:** at rest, as submitted, no two bodies overlap by more than $TOL mm³.
+- **Rest:** once the rig has let the movement come to rest (see "At the start"), no two bodies overlap
+  by more than $TOL mm³.
 - **Held:** every `free` and `spring` mobile is shifted $HOLD_SHIFT in each of the four directions ±u,
   ±v, where u and v are two perpendicular directions normal to its axis; `rot` mobiles are also shifted
   ±$HOLD_SHIFT along the axis. Each shift must overlap some other body by more than $TOL mm³.
@@ -185,13 +208,16 @@ AT-4, AT-5 and AT-6 each start from the state at the end of AT-2: crown let go, 
    - It takes between $WIND_LO and $WIND_HI crown turns per turn of the barrel arbor (measured over
      this turn).
    - The minute wheel moves at most $STILL_TOL degree.
-2. **AT-2 Hold.** The crown is let go for $HOLD_STEPS steps. It is now free to turn, pushed like any
+2. **AT-2 Hold.** The crown is let go for $HOLD_STEPS steps, or longer while the arbor is still running
+   back (up to $HOLD_MAX_STEPS steps, or until it has run back more than $RUNBACK degrees). It is now
+   free to turn, pushed like any
    free part. The mainspring pulls back. Every $TAP_EVERY steps the rig taps the
    movement: each free part moves up to $TAP_ARC (surface travel) in the direction it can move
    furthest, while spring-loaded parts return towards rest. The arbor runs back at most $RUNBACK
    degrees in all, and over the last $HELD_LAST_STEPS steps it moves at most $HELD_DRIFT degree: it is
    held.
-3. **AT-3 Run.**
+3. **AT-3 Run.** AT-3 starts from AT-2's end state and also requires AT-2's hold limits (run-back at
+   most $RUNBACK degrees and drift at most $HELD_DRIFT degrees).
    - **Reserve.** Fully wound, the mainspring stores $CAPACITY arbor turns. The run-back measured in
      AT-2 is lost from that. While the watch runs, the barrel turns once every $HOURS_PER_TURN hours,
      so the power reserve is (capacity − run-back) × $HOURS_PER_TURN hours. It must be at least
@@ -214,8 +240,9 @@ AT-4, AT-5 and AT-6 each start from the state at the end of AT-2: crown let go, 
      forward and, separately, $SWEEP_TURN degrees backward. No test turn may be blocked, and none may
      drive both trains (the arbor winding by more than $STILL_TOL degree and the minute wheel moving
      by more than $STILL_TOL degree).
-   - **End positions.** At position 1 the forward test turn must wind and not set. At position 2 it
-     must set and not wind.
+   - **End positions.** At position 1 the forward test turn must not set, and a forward turn of
+     $COUPLED_TURN degrees from there (never blocked) must wind the arbor by more than $STILL_TOL degree.
+     At position 2 the forward test turn must not wind; that it sets is judged by the turns below.
    - **Setting.** Then, in position 2, the crown is turned $SET_TURN degrees forward and $SET_TURN
      back. It is never blocked, the minute wheel turns at least $SET_MIN degrees each way, and the
      arbor never loses more than $HOLD_TOL degrees.

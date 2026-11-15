@@ -1,0 +1,307 @@
+{
+ "insert_after": {
+  "seconds": [
+   "ratchet",
+   "click_post",
+   "click",
+   "intermediate_post",
+   "intermediate_wheel",
+   "crown_post",
+   "crown_wheel",
+   "keyless_bridge",
+   "stem_bridge",
+   "winding_pinion",
+   "sliding_pinion",
+   "stem",
+   "yoke",
+   "yoke_stud_a",
+   "yoke_stud_b"
+  ],
+  "bridge": [
+   "setting_wheel",
+   "setting_post",
+   "setting_idler_seat",
+   "setting_idler",
+   "setting_idler_post",
+   "setting_cover"
+  ]
+ },
+ "merged_order": [
+  "main_plate",
+  "barrel",
+  "third",
+  "third_wheel_60",
+  "centre",
+  "centre_wheel_90",
+  "fourth",
+  "fourth_wheel_96",
+  "seconds",
+  "ratchet",
+  "click_post",
+  "click",
+  "intermediate_post",
+  "intermediate_wheel",
+  "crown_post",
+  "crown_wheel",
+  "keyless_bridge",
+  "stem_bridge",
+  "winding_pinion",
+  "sliding_pinion",
+  "stem",
+  "yoke",
+  "yoke_stud_a",
+  "yoke_stud_b",
+  "bridge",
+  "setting_wheel",
+  "setting_post",
+  "setting_idler_seat",
+  "setting_idler",
+  "setting_idler_post",
+  "setting_cover",
+  "cannon",
+  "minute_wheel_36",
+  "minute_wheel",
+  "hour_wheel",
+  "day",
+  "day_idler",
+  "dial",
+  "hour_hand",
+  "seconds_hand",
+  "day_hand",
+  "minute_hand"
+ ],
+ "replay_passed": true,
+ "paths": {
+  "ratchet": {
+   "motion": "straight down from above",
+   "first_pose_translation": [
+    0.0,
+    0.0,
+    13.59
+   ],
+   "poses": 73,
+   "last_pose": "identity",
+   "rotation": "none"
+  },
+  "click_post": {
+   "motion": "straight down from above",
+   "first_pose_translation": [
+    0.0,
+    0.0,
+    13.15
+   ],
+   "poses": 71,
+   "last_pose": "identity",
+   "rotation": "none"
+  },
+  "click": {
+   "motion": "straight down from above",
+   "first_pose_translation": [
+    0.0,
+    0.0,
+    12.65
+   ],
+   "poses": 68,
+   "last_pose": "identity",
+   "rotation": "none"
+  },
+  "intermediate_post": {
+   "motion": "straight down from above",
+   "first_pose_translation": [
+    0.0,
+    0.0,
+    13.86
+   ],
+   "poses": 74,
+   "last_pose": "identity",
+   "rotation": "none"
+  },
+  "intermediate_wheel": {
+   "motion": "straight down from above",
+   "first_pose_translation": [
+    0.0,
+    0.0,
+    13.59
+   ],
+   "poses": 73,
+   "last_pose": "identity",
+   "rotation": "none"
+  },
+  "crown_post": {
+   "motion": "straight down from above",
+   "first_pose_translation": [
+    0.0,
+    0.0,
+    13.42
+   ],
+   "poses": 72,
+   "last_pose": "identity",
+   "rotation": "none"
+  },
+  "crown_wheel": {
+   "motion": "straight down from above",
+   "first_pose_translation": [
+    0.0,
+    0.0,
+    13.15
+   ],
+   "poses": 71,
+   "last_pose": "identity",
+   "rotation": "none"
+  },
+  "keyless_bridge": {
+   "motion": "straight down from above",
+   "first_pose_translation": [
+    0.0,
+    0.0,
+    12.3
+   ],
+   "poses": 66,
+   "last_pose": "identity",
+   "rotation": "none"
+  },
+  "stem_bridge": {
+   "motion": "straight down from above",
+   "first_pose_translation": [
+    0.0,
+    0.0,
+    11.9
+   ],
+   "poses": 64,
+   "last_pose": "identity",
+   "rotation": "none"
+  },
+  "winding_pinion": {
+   "motion": "along the stem line from outside",
+   "first_pose_translation": [
+    8.0411,
+    18.0606,
+    0.0
+   ],
+   "poses": 106,
+   "last_pose": "identity",
+   "rotation": "none"
+  },
+  "sliding_pinion": {
+   "motion": "along the stem line from outside",
+   "first_pose_translation": [
+    7.5295,
+    16.9115,
+    0.0
+   ],
+   "poses": 99,
+   "last_pose": "identity",
+   "rotation": "none"
+  },
+  "stem": {
+   "motion": "along the stem line from outside",
+   "first_pose_translation": [
+    8.3989,
+    18.8641,
+    0.0
+   ],
+   "poses": 110,
+   "last_pose": "identity",
+   "rotation": "none"
+  },
+  "yoke": {
+   "motion": "straight down from above",
+   "first_pose_translation": [
+    0.0,
+    0.0,
+    11.85
+   ],
+   "poses": 64,
+   "last_pose": "identity",
+   "rotation": "none"
+  },
+  "yoke_stud_a": {
+   "motion": "straight down from above",
+   "first_pose_translation": [
+    0.0,
+    0.0,
+    11.9
+   ],
+   "poses": 64,
+   "last_pose": "identity",
+   "rotation": "none"
+  },
+  "yoke_stud_b": {
+   "motion": "straight down from above",
+   "first_pose_translation": [
+    0.0,
+    0.0,
+    11.9
+   ],
+   "poses": 64,
+   "last_pose": "identity",
+   "rotation": "none"
+  },
+  "setting_wheel": {
+   "motion": "straight down from above",
+   "first_pose_translation": [
+    0.0,
+    0.0,
+    10.4
+   ],
+   "poses": 56,
+   "last_pose": "identity",
+   "rotation": "none"
+  },
+  "setting_post": {
+   "motion": "straight down from above",
+   "first_pose_translation": [
+    0.0,
+    0.0,
+    9.9
+   ],
+   "poses": 54,
+   "last_pose": "identity",
+   "rotation": "none"
+  },
+  "setting_idler_seat": {
+   "motion": "straight down from above",
+   "first_pose_translation": [
+    0.0,
+    0.0,
+    11.9
+   ],
+   "poses": 64,
+   "last_pose": "identity",
+   "rotation": "none"
+  },
+  "setting_idler": {
+   "motion": "straight down from above",
+   "first_pose_translation": [
+    0.0,
+    0.0,
+    9.3
+   ],
+   "poses": 50,
+   "last_pose": "identity",
+   "rotation": "none"
+  },
+  "setting_idler_post": {
+   "motion": "straight down from above",
+   "first_pose_translation": [
+    0.0,
+    0.0,
+    11.9
+   ],
+   "poses": 64,
+   "last_pose": "identity",
+   "rotation": "none"
+  },
+  "setting_cover": {
+   "motion": "straight down from above",
+   "first_pose_translation": [
+    0.0,
+    0.0,
+    8.48
+   ],
+   "poses": 46,
+   "last_pose": "identity",
+   "rotation": "none"
+  }
+ }
+}
