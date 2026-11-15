@@ -25,30 +25,41 @@ A_DIR = os.path.join(ROOT, "spikes", "keyless")      # workstream A's engine and
 
 # ---------------------------------------------------------------------------------------------------------------
 # A's length constants at B's scale. (A's file, name, A's value there, the value scaled here, power of S, digits the
-# job value is rounded to or None, note). The job value is (scaled value) x S^power, rounded. check_table() compares
-# the third column with A's files, so a change on A's side is caught here rather than silently copied.
-# "World.settle:budget" and "World.step:main_try_arc" are default arguments of A's engine (lengths, mm of surface
-# travel); the others are module attributes.
+# job value is rounded to or None, note). The job value is (scaled value) x S^power, rounded; a pair (PULL_RANGE) is
+# scaled element by element. check_table() compares the third column with A's files, so a change on A's side is
+# caught here rather than silently copied. "World.phase:budget" is a default argument of A's engine (mm of surface
+# travel; World.phase passes it on to World.settle, so settle's own default is not used by the rig); the others are
+# module attributes. MAIN_TRY is in both of A's modules: the engine imports it from constants at import time, so the
+# engine's attribute is the one the rig uses, and both rows are set.
 SCALE_TABLE = (
     ("constants", "PULL", 0.9, 0.80, 1, 3,
      "position 2: VM-DS-401 Table 2 travel, 0.80 mm at 1:1 (Sellita SW200-1) x S = 1.294 (builder K's fitting pass); "
      "A's standalone v1 keeps 0.9 at its own scale (INTERFACE_FOR_B.md, notes)"),
+    ("constants", "PULL_RANGE", (0.4, 1.0), (0.4, 1.0), 1, None,
+     "a declared pull's range (A's keyless.json `pull`; the joined job declares none, so position 2 is PULL)"),
     ("constants", "PULL_STEP", 0.03, 0.03, 1, None, "stem pull per rig step"),
     ("constants", "TAP_ARC", 0.05, 0.05, 1, None, "AT-2 tap, surface travel of each free part"),
     ("constants", "HOLD_SHIFT", 0.3, 0.3, 1, None, "AT-0 held: the shift that must hit something"),
     ("constants", "STEM_PROTRUDE", 0.5, 0.5, 1, None, "AT-0 bounds: stem material at least this far outside the case"),
-    ("constants", "MAIN_TRY", 0.02, 0.02, 1, None, "mainspring's try per step (A's constants; the engine default below)"),
+    ("constants", "MAIN_TRY", 0.02, 0.02, 1, None, "mainspring's try per step (A's constants; see engine.MAIN_TRY)"),
+    ("constants", "FIT_CLEARANCE", 0.005, 0.005, 1, None, "the fit rule: radial play given to every empty bore of a turning axis"),
+    ("constants", "FIT_CENTRE_TOL", 0.02, 0.02, 1, None, "the fit rule: a hole is a bore of the axis within this"),
+    ("constants", "FIT_EMPTY_INSET", 0.01, 0.01, 1, None, "the fit rule: a bore is empty when nothing lies inside its radius less this"),
     ("engine", "TOL", 2e-4, 2e-4, 3, 7, "overlap two bodies may have and still only touch (mm3, x S^3)"),
+    ("engine", "FORCE_EPS", 1e-7, 1e-7, 3, None, "overlap difference below which a contact pushes neither way (mm3, x S^3)"),
     ("engine", "RELAX_MAX", 0.25, 0.25, 1, None, "a spring's return per step"),
     ("engine", "SCAN_ARC", 0.002, 0.002, 1, None, "search step for the clearing position"),
     ("engine", "MAX_STEP_TRAVEL", 0.06, 0.06, 1, None, "a step moving any surface further is split"),
-    ("engine", "World.settle:budget", 0.3, 0.3, 1, None, "start: overlap each mover may clear by settling"),
-    ("engine", "World.step:main_try_arc", 0.02, 0.02, 1, None, "mainspring's try per step"),
+    ("engine", "SPRING_PUSH_ARC", 0.01, 0.01, 1, None, "a returning spring's push increment on free parts"),
+    ("engine", "RADIUS_FLOOR", 0.05, 0.05, 1, None, "a body's radius about its axis is at least this"),
+    ("engine", "LEVER_FLOOR", 0.05, 0.05, 1, None, "budget(): a contact's lever arm is at least this"),
+    ("engine", "NEIGHBOUR_MARGIN", 0.05, 0.05, 1, None, "neighbours(): boxes closer than this are neighbours"),
+    ("engine", "MAIN_TRY", 0.02, 0.02, 1, None, "mainspring's try per step (World.step's default when None)"),
+    ("engine", "World.phase:budget", 0.3, 0.3, 1, None, "start: overlap each mover may clear by settling and phasing"),
 )
-# Lengths inside A's engine functions that cannot be scaled without editing the engine (left at A's values; they are
-# lower bounds on a lever arm or radius, 0.05 mm against 0.081 at S): Body.radius floor, World.budget's rb floor.
-UNSCALED = ("engine.Body.__init__: radius floor 0.05", "engine.World.budget: lever-arm floor 0.05",
-            "engine.World.neighbours: 0.05 (not called by grade.py)")
+# Every length of A's engine and grade module that the rig uses is in the table (INTERFACE_FOR_B.md, "Lengths on the
+# engine-fix branch"); nothing is left at A's scale.
+UNSCALED = ()
 
 # B's frame in place of A's frame constants (A: constants.py STEM_POINT, STEM_DIR, BARREL_AXIS, WIND_SENSE,
 # MINUTE_AXIS, CASE_*). The stem line is declared in the delivery; the minute body is the minute hand's mobile.
@@ -94,10 +105,17 @@ def _a_value(mods, where, name):
     return getattr(mods[where], name)
 
 
-def job_value(row):
-    _, _, _, base, power, digits, _ = row
+def _scale1(base, power, digits):
     v = base * S ** power
     return round(v, digits) if digits is not None else v
+
+
+def job_value(row):
+    """(scaled value) x S^power, rounded to the row's digits; element by element for a pair."""
+    _, _, _, base, power, digits, _ = row
+    if isinstance(base, tuple):
+        return tuple(_scale1(b, power, digits) for b in base)
+    return _scale1(base, power, digits)
 
 
 def scaled():
@@ -119,13 +137,19 @@ def check_table(mods=None):
         except (AttributeError, ValueError) as e:
             errs.append("%s.%s: not found in A's files (%s)" % (where, name, e))
             continue
-        if not (isinstance(live, (int, float)) and math.isclose(live, a_val, rel_tol=0, abs_tol=1e-15)):
+        lv = tuple(live) if isinstance(live, (tuple, list)) else (live,)
+        av = a_val if isinstance(a_val, tuple) else (a_val,)
+        if not (len(lv) == len(av) and all(isinstance(x, (int, float)) and not isinstance(x, bool)
+                                           and math.isclose(x, y, rel_tol=0, abs_tol=1e-15) for x, y in zip(lv, av))):
             errs.append("%s.%s: A's files hold %r, the table %r" % (where, name, live, a_val))
-        want = base * S ** power
-        got = job_value(row)
-        tol = 0.5 * 10 ** -digits if digits is not None else 1e-15 * max(1.0, abs(want))
-        if abs(got - want) > tol:
-            errs.append("%s.%s: job value %r is not %r x %r^%d" % (where, name, got, base, S, power))
+        bv = base if isinstance(base, tuple) else (base,)
+        gv = job_value(row)
+        gv = gv if isinstance(gv, tuple) else (gv,)
+        for b_, got in zip(bv, gv):
+            want = b_ * S ** power
+            tol = 0.5 * 10 ** -digits if digits is not None else 1e-15 * max(1.0, abs(want))
+            if abs(got - want) > tol:
+                errs.append("%s.%s: job value %r is not %r x %r^%d" % (where, name, got, b_, S, power))
         if base != a_val and "VM-DS" not in note:
             errs.append("%s.%s: scaled value %r differs from A's %r without a cited source" % (where, name, base, a_val))
     return errs
@@ -165,10 +189,9 @@ def job_constants(C):
     B's frame values in place of A's (WIND_SENSE; the case, the stem line and the minute body come from the delivery)."""
     import types
     ns = types.SimpleNamespace(**{k: getattr(C, k) for k in dir(C) if k.isupper()})
-    sc = scaled()
     for row in SCALE_TABLE:
         if row[0] == "constants":
-            setattr(ns, row[1], sc[row[1]])
+            setattr(ns, row[1], job_value(row))
     ns.WIND_SENSE = WIND_SENSE
     ns.CAPACITY_TURNS = capacity_turns()        # the supplied spring's turns, from DS-101 (A's 21:50 answer)
     for k in ("STEM_POINT", "STEM_DIR", "BARREL_AXIS", "MINUTE_AXIS", "CASE_CENTRE", "CASE_RADIUS", "CASE_Z"):
@@ -184,11 +207,10 @@ def apply_to_engine(E, G):
     if errs:
         raise RuntimeError("SCALE_TABLE disagrees with A's files: " + "; ".join(errs))
     ns = job_constants(G.C)
-    sc = scaled()
     for row in SCALE_TABLE:
         if row[0] != "engine":
             continue
-        name = row[1]
+        name, val = row[1], job_value(row)
         if ":" in name:
             cls, rest = name.split(".", 1)
             fn, arg = rest.split(":")
@@ -198,10 +220,10 @@ def apply_to_engine(E, G):
             # positional defaults line up with the last len(__defaults__) parameters (self excluded from neither)
             d = list(f.__defaults__)
             idx = names.index(arg) - (len(names) - len(d))
-            d[idx] = sc[name]
+            d[idx] = val
             f.__defaults__ = tuple(d)
         else:
-            setattr(E, name, sc[name])
+            setattr(E, name, val)
     G.C = ns
     return ns
 
@@ -356,6 +378,17 @@ def train_split(m):
 # ---------------------------------------------------------------------------------------------------------------
 # A's bodies from a delivery
 MINUTE = "minute_wheel"     # A's name of the body AT-1, AT-4 and AT-5 watch (here: the minute hand's mobile)
+# B's P5 rule for the minute mobile (Decisions 15:47, 17:46/18:45): it must be a free body in P5 (declared
+# friction_on, or driven from the barrel only through such a mobile), or the hands cannot be set while the going train
+# stands. Then the setting steps cannot be meaningful (with a fixed minute body "never both trains" holds trivially),
+# so AT-5 and AT-6 fail with this reason and are not run.
+SETTING_STEPS = ("set", "return")
+
+
+def minute_not_free_reason(minute):
+    return ("not run: the minute hand's mobile %r is part of the fixed going train in Part 5 (it is not declared "
+            "friction_on, nor driven from the barrel only through a friction_on mobile), so the hands cannot be set "
+            "while the going train stands; AT-5 and AT-6 fail" % minute)
 
 
 def build_world(m, k, solids):
@@ -398,26 +431,34 @@ def build_world(m, k, solids):
             carrier="stem" if e["on_stem"] else None)
     meta = {"fixed_going_train": [n for n in fixed_gt if n != minute], "free_going_train": free_gt,
             "minute_mobile": minute, "minute_free": minute in free_gt, "bounds": bounds(m, k, solids)}
+    if minute not in free_gt:
+        meta["setting_not_run"] = minute_not_free_reason(minute)
     return bodies, meta
 
 
 def bounds(m, k, solids):
     """AT-0 bounds in B's frame: every keyless part (stem excepted) within the case radius of case_centre; the whole
     movement with its keyless parts no taller than the case; stem material at least STEM_PROTRUDE x S outside the
-    case radius. Returns (passed, details)."""
+    case radius at its crown end (the side of case_centre that keyless.stem.direction points to). Returns (passed,
+    details)."""
     import numpy as np
     from . import watch as W
     from .core import verts
     cx, cy = m.case_centre
+    ux, uy = k["stem"]["direction"][0], k["stem"]["direction"][1]
     stem = set(k["stem"]["parts"])
     worst, protrude, zlo, zhi = -math.inf, -math.inf, math.inf, -math.inf
     for n, s_ in solids.items():
         V = verts(s_)
-        r = float(np.hypot(V[:, 0] - cx, V[:, 1] - cy).max()) - W.CASE_RADIUS
+        R = np.hypot(V[:, 0] - cx, V[:, 1] - cy) - W.CASE_RADIUS
         if n in stem:
-            protrude = max(protrude, r)
+            # only stem material at the crown end counts (A's bounds_check: the side of the case centre the stem's
+            # direction points to); material across the case centre at the far end does not
+            out = R[(V[:, 0] - cx) * ux + (V[:, 1] - cy) * uy > 0]
+            if out.size:
+                protrude = max(protrude, float(out.max()))
         else:
-            worst = max(worst, r)
+            worst = max(worst, float(R.max()))
         zlo, zhi = min(zlo, float(V[:, 2].min())), max(zhi, float(V[:, 2].max()))
     e = m.extent()
     zlo, zhi = min(zlo, e["z_min"]), max(zhi, e["z_max"])
@@ -425,7 +466,7 @@ def bounds(m, k, solids):
     ok = worst <= 1e-6 and (zhi - zlo) <= W.CASE_HEIGHT + 1e-9 and protrude >= need
     return ok, {"beyond_case_radius": round(worst, 4) if math.isfinite(worst) else None,
                 "height_with_keyless": round(zhi - zlo, 4), "case_height": W.CASE_HEIGHT,
-                "stem_protrude": round(protrude, 4), "stem_protrude_min": need}
+                "stem_protrude": round(protrude, 4) if math.isfinite(protrude) else None, "stem_protrude_min": need}
 
 
 def crop_fixed(bodies):

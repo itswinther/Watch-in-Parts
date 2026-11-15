@@ -131,6 +131,8 @@ workstream's file, say so in your entry. Never commit API keys.
 
 ## Decisions already made
 
+Superseded by `SPEC.md` 0.7: these are the retired Board in a Box task's decisions; the watch job's rules (STEP parts, its own files) are in `SPEC.md`.
+
 Raise these with your human before reopening them.
 
 - Submissions are STL plus a JSON path file. No STEP.

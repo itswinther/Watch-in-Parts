@@ -64,7 +64,7 @@ class _Fake:
 
 def _run(module, height):
     return {"module": module, "smallest_drive_height": height, "smallest_drive_overlap": 1.0, "smallest_drive_ratio": 10.0,
-            "worst_volume": 0.0, "largest_gap": 0.0}
+            "worst_volume": 0.0, "largest_gap": 0.0, "teeth_match": True}      # a mesh that passes the mesh test
 
 
 def case_arithmetic():

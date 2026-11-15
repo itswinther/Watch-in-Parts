@@ -58,7 +58,8 @@ def measure(pa, pb, axis_b, lin, ang):
     r = pair_movement(sa, sb, axis_b).mesh_run("a", TEETH_A, "b", TEETH_B)
     run = time.time() - t
     return {"lin": lin, "ang": ang, "tris_96": sa.num_tri(), "tris_12": sb.num_tri(), "load_s": load, "run_s": run,
-            "worst": r["worst_volume"], "gap": r["largest_gap"], "drive": r["smallest_drive_overlap"]}
+            "worst": r["worst_volume"], "gap": r["largest_gap"], "drive": r["smallest_drive_overlap"],
+            "teeth": (r["measured_teeth"]["a"], r["measured_teeth"]["b"]), "teeth_match": r["teeth_match"]}
 
 
 def row(d):
@@ -78,6 +79,10 @@ def main():
         assert d["worst"] <= W.VOL_TOL, "jam: worst overlap %.5f" % d["worst"]
         assert d["gap"] <= W.ENGAGE_GAP, "gap %.4f" % d["gap"]
         assert d["drive"] > W.VOL_TOL, "drive overlap %.5f" % d["drive"]
+        # the tooth-count condition of the mesh test: each gear's teeth counted on its STEP-read section
+        print("teeth counted on the sections at the meeting height: %d and %d (declared %d and %d)"
+              % (d["teeth"] + (TEETH_A, TEETH_B)))
+        assert d["teeth_match"] and d["teeth"] == (TEETH_A, TEETH_B), "teeth counted %s" % (d["teeth"],)
         mesh = core.tris_to_manifold  # noqa: the same path an STL takes
         # the CAD gear and the mesh gear of geometry/watch_gears.py have the same tooth form
         from geometry import watch_gears as G

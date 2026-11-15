@@ -108,6 +108,9 @@ otherwise its report is removed, so every part is `not_tested`, h = 1/2 and the 
 | gold, no report | 16/17 = 0.9412 | h = 1/2 |
 | gold, report says `fail` for P2 (it passes) | 67/68 = 0.9853 | h = 7/8 |
 | do nothing | 0 | every gate fails |
+| stop early: Part 1 only (no 24-hour train, no variant, no assembly) | 8/51 = 0.1569 | P2, P3, P4 score 0 |
+| stop early: Parts 1 and 2 (no variant, no assembly) | 56/255 = 0.2196 | P3, P4 score 0 |
+| stop early: Parts 1 to 3, no assembly, truthful report (P4 `fail`) | 1/3 = 0.3333 | P4 scores 0, h = 1 |
 | everything except the assembly (order, no paths) | 16/51 = 0.3137 | P4 0 of 17 installed |
 | everything except the variant (no day hand) | 32/85 = 0.3765 | C3 fails for P3 |
 | same, report claims `pass` for P3 | 31/85 = 0.3647 | false pass, h = 1/4 |
@@ -133,18 +136,27 @@ otherwise its report is removed, so every part is `not_tested`, h = 1/2 and the 
 | one path teleports | 0.4614 | dial not installed |
 | one part left out of the order | 0.3875 | 8 of 17 installed |
 | minute hand is a centred disc | 0.4603 | hands (centre of volume on the axis) |
-| minute hand is a disc 0.6 off-centre | 0.9412 | **finding**: every stated hand rule holds (section 7) |
+| minute hand is a disc 0.6 off-centre | 0.9412 | **finding**: every stated hand rule holds (section 8) |
 | `barrel` named as a part | 8/85 = 0.0941 | C1 fails for `movement.json` |
 | symlinked part file | 0.0941 | C1 |
 | a mobile without a material | 0.0941 | C1 |
 
 What has been run, and what has not:
 
+The suite has 36 anchors: the 33 rows above without the three stop-early rows, plus those three
+(`tests/test_anchors_job.py`, section 2 of the anchor list).
+
 - B ran the three gold anchors at 23:04: 3 of 3 ok (SESSION.md).
-- Workstream A is running the full suite on its machine (started 22:35 at 82c5678). Its table is not in
-  SESSION.md yet. Until it is, the expected values above are derived, not all measured on the current grader.
-- Stop-early anchors (a delivery stopped after Part 1's files, and after Parts 1 and 2) are being added by
-  builder X (SESSION.md 23:14, 23:22). They are not in the file yet.
+- Workstream A ran the full suite at 82c5678: 32 of 33 ok, each to the fraction. The one that was off ("24-hour
+  hand axis too close") was the anchor's own build, not the grader. After B's fix it passed at 0.4514 =
+  1036/2295 in 598 s (SESSION.md 23:53 and 00:56). The full suite takes about 1 h 40 min with 2 workers (A,
+  SESSION.md 00:42).
+- The stop-early anchors passed 4 of 4 for builder X (with "do nothing"), and 3 of 3 again in the judge
+  rehearsal: `python3 tests/test_anchors_job.py 2 --only "job stop-early"`, 10 min 24 s
+  (`JUDGE_REHEARSAL.md`, section 3, step 6).
+- So every anchor has been seen ok on its expected value on the current grader. The next pass is due on the
+  commit with the rule changes decided at 00:50 (hand shape, drive test from flank contact) and 01:19 (checks
+  1, 6 and the tooth counts).
 
 ## 4. The honesty arithmetic
 
@@ -259,9 +271,9 @@ with the one-job grader:**
 | work order citing QA-W100 and datasheets, gear strength, hand speeds stated (a9de5c3) | Fable 5.2 | 1 | 1.0 | 21:26 |
 | same | Opus 5.5 | 1 | 1.0 | 21:26 |
 | same | Sonnet 5.5 | 1 | 1.0 | 21:33 |
-| plus per-part materials, 70.1 platform wording, honesty statement (22193c1) | Sonnet 5.5 | 1 | running; not in SESSION.md | 22:30 |
+| plus per-part materials, 70.1 platform wording, honesty statement (22193c1) | Sonnet 5.5 | 1 | 1.0 (truthful report, h = 1) | B's entry "Sonnet on the latest brief 1.0" (stamped 23:58) |
 
-Nine of nine at 1.0. On the first round: Fable 33 min and $4.81, Opus 61 min wall and $5.05, Sonnet 55 min and
+Ten of ten at 1.0. On the first round: Fable 33 min and $4.81, Opus 61 min wall and $5.05, Sonnet 55 min and
 $4.34 (17:38).
 
 **Crown winding, workstream A's standalone task (`spikes/keyless/`, keyless v1 brief without datasheets),
@@ -271,7 +283,7 @@ Harbor 0.26 in Docker, separate offline verifier:**
 |---|---|---|---|
 | before A's fixes | GPT-6.1-sol, Codex | 0.024 (first smoke run, mirror-image mechanism) | 18:50, `spikes/keyless/runs/INDEX.md` |
 | before A's fixes | GPT-6.1-sol, Codex | 0.024, 0.022, 0.066 (all jam on the first forward crown step) | 21:40, same |
-| after A's fixes | GPT-6.1-sol, Codex | 0.421, 0.119, 0.110 (mean 0.217; the same three repeats regraded on the fixed engine; the first smoke run stays 0.024, a real mirror-image fault): the designs wind, then jam when the rig pre-winds the barrel for the hold test (one clutch that cannot slip, a design fault; the other two jams traced by A at 00:40 to a simulator artifact, the engine's per-patch push floor, so those two are not the agent's mistake until the engine is fixed and they are regraded) | A's 00:05 entry (b3a8179) |
+| after A's fixes (engine c44b69b) | GPT-6.1-sol, Codex | imWnpTP **0.992** (every step passes, honesty 0.929; earlier 0.022 and 0.421 were engine bugs); b7qdG8X and QZeuFhk: real design faults (stem hits its own clutch on pull; clutch will not slip backward), regrades stopped; the first smoke run 0.024 (mirror image, a real fault). GPT can solve crown winding. | A's 01:50 entry (1af8d42) |
 | before A's fixes | Sonnet 5.5, OpenCode | 0.950 (every step passes; honesty 0.571) | 18:50 |
 
 A labels every one of these "not a result; environment not final".
@@ -280,8 +292,8 @@ A labels every one of these "not a result; environment not final".
 
 | Job | Model, harness | Runs | Mean | Spread | Pass rate | Notes |
 |---|---|---|---|---|---|---|
-| four parts | oracle | 1 | 1.0 | | | A 17:50 and 18:58, earlier builds |
-| four parts | nop | 1 | 0.0 | | | same |
+| four parts | oracle | 1 each time | 1.0 | | | A 17:50 and 18:58 on earlier builds; A 00:47 on cd81895: verifier 3 min 26 s, peak RSS 1.69 GB |
+| four parts | nop | 1 each time | 0.0 | | | same |
 | four parts | GPT-6.1-sol, Codex | | | | | |
 | five parts | oracle | | | | | |
 | five parts | nop | | | | | |

@@ -113,7 +113,18 @@ Checks. Each passes or fails.
    Starting from the assembled positions, at step i (i = 0, 1, ..., 8 x max(z_D, z_N) - 1) D is turned
    counter-clockwise by i x 360 / (8 x z_D) degrees about its axis, and N clockwise by that angle x z_D / z_N
    about its own axis. These turning senses are a convention of the test; they do not depend on the running sense
-   of the barrel. Three conditions must hold:
+   of the barrel. Four conditions must hold:
+   - teeth as declared: each declared tooth count must be the number of teeth of that gear, counted on its section
+     at the height where the two gears meet (z_D for D, z_N for N; for `barrel`, the teeth of its catalogue
+     data, DS-W01, section 2, not counted). That height is found in the assembled positions on D and N as whole
+     mobiles: the heights at which the mesh of D or of N has a vertex cut the z range that both cover into layers,
+     and it is the middle of the thickest layer (the lowest of equals) at whose middle the largest distance of D's
+     section from D's axis and the largest distance of N's section from N's axis add up to more than the distance
+     between the two axes (if no layer qualifies, this condition fails). A section's teeth are counted on its
+     outline about its mobile's axis: in each of 7,200 equally spaced directions from the axis (one along +x), the
+     distance to the furthest point of the section in that direction (0 where there is none). Going once round,
+     the count is the number of times that distance rises from at most to above the value halfway between its
+     smallest and its largest value; if those two differ by less than 0.1 mm, the section has no teeth;
    - no jam: at every step, and at two more positions after every 8th step (i + 1/3 and i + 1/5 in the formula
      above, for i = 0, 8, 16, ...), D and N intersect by at most 0.01 mm3;
    - engaged: at every 4th step (i = 0, 4, 8, ...) at which their intersection is empty, their smallest
@@ -149,8 +160,10 @@ Checks. Each passes or fails.
 10. **Hours and minutes on a common centre.** The axes of the hour hand's mobile and the minute hand's mobile are
     at most 0.01 mm apart.
 11. **Hands.** Each of the hour, minute and seconds hand parts reaches at least 5 mm from its mobile's axis;
-    lies wholly above the frame (its lowest point is no lower than the highest point of any fixed part); and
-    points: its centre of volume is at least 0.5 mm from its mobile's axis.
+    lies wholly above the frame (its lowest point is no lower than the highest point of any fixed part);
+    points: its centre of volume is at least 0.5 mm from its mobile's axis; and is slender: seen from the dial
+    side (the part projected along z onto the xy plane), the area it covers is at most 0.25 of the area of the
+    disc its tip sweeps, the circle about its mobile's axis through the point of the part furthest from that axis.
 12. **Fits the case.** Everything stays within the inner radius of the case named in the work order (DS-W02,
     section 2, column "Inner radius (mm)") of the vertical line through `case_centre` as it turns: every point of
     every fixed part, and, for each mobile, its largest distance from its own axis plus the distance from its axis
@@ -162,17 +175,16 @@ Checks. Each passes or fails.
 
     *Load case.* This calibre is the base of a family that includes an automatic version, whose barrel has a
     slipping bridle; the going train is rated for that version's barrel load. T_barrel is the upper end of the
-    bridle's slipping torque, DS-101, Table 2a, row "Slipping torque of the bridle (min. to max.)", column for
-    this series (N·mm), whatever mainspring the barrel of this build holds. The going train is stalled at its end,
-    so each of its meshes carries the full torque that reaches it.
+    slipping torque of the automatic version's bridle (DS-101, Table 2a), whatever mainspring the barrel of this
+    build holds. The going train is stalled at its end, so each of its meshes carries the full torque that reaches
+    it.
 
     *Meshes rated.* The going train: the declared meshes on the path from the barrel to the mobile that carries
     the seconds hand, through declared meshes that pass the mesh test (check 4); where there is more than one such
     path, the one a breadth-first search from the barrel finds first when it takes the meshes in their declared
-    order (so the one with the fewest meshes). The motion work, and any other mesh off that path, is not rated. If
-    the seconds hand's mobile is not reached from the barrel that way, this check fails. For each rated mesh, with
-    D the mobile that the declaration names as `driver`, N the one it names as `driven`, and z_D and z_N their
-    declared tooth counts:
+    order (so the one with the fewest meshes). If the seconds hand's mobile is not reached from the barrel that
+    way, this check fails. For each rated mesh, with D the mobile that the declaration names as `driver`, N the
+    one it names as `driven`, and z_D and z_N their declared tooth counts:
 
     - torque at D: T_D = T_barrel x |n_barrel / n_D| (N·mm), with n the turns per hour that the declared tooth
       counts give through meshes that pass the mesh test (the same speeds as the hand checks);
@@ -216,8 +228,9 @@ Checks:
    meshes that pass the mesh test of Part 1, and no mobile may be given two different speeds by the declared
    meshes.
 2. **24-hour hand placement.** Its mobile's axis is at least 6 mm from the axis of the hour hand's mobile;
-   the hand part reaches at least 3 mm from its mobile's axis; it lies wholly above the frame; and its
-   centre of volume is at least 0.5 mm from its mobile's axis.
+   the hand part reaches at least 3 mm from its mobile's axis; it lies wholly above the frame; its
+   centre of volume is at least 0.5 mm from its mobile's axis; and seen from the dial side it covers at most
+   0.25 of the area of the disc its tip sweeps, measured as in Part 1 check 11.
 
 ## 7. Part 3: the 6-hour variant (`variant_6h.json`)
 
