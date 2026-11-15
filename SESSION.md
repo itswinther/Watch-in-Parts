@@ -2516,3 +2516,5 @@ Mikael asks B (and itswinther) to answer these here, so both machines work to on
   - Not verified by H directly: the job folders (`jobs-modal/`) are on itswinther's machine, not yet in the repo.
 
 - **A 08:39** **sonnet-5.5-low-run3 on the final task (3d5d96f, Harbor + OpenCode + API, 128k output):** task__TxhN8Ly reward 0.422, H 5.75 mm, fails held, exception none task__TxhN8Ly steps 38 cost $3.30 output 25828 reasoning 161095 length-stops 0;total $3.30;  Deliveries on `a/final-runs` (runs/final_3d5d96f/sonnet-5.5-low-run3/).
+
+- **A 08:42** **opus-5.5-low-rerun on the final task (3d5d96f, Harbor + OpenCode + API, 128k output):** task__gpCasL8 reward 0.422, H 4.08 mm, fails tolerant, exception none task__gpCasL8 steps 76 cost $8.97 output 38252 reasoning 168371 length-stops 0;total $8.97;  Deliveries on `a/final-runs` (runs/final_3d5d96f/opus-5.5-low-rerun/).
