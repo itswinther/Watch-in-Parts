@@ -228,6 +228,20 @@ This follows REAL_WATCH_WORK.md section 4 (Unitas/ETA 6497) where B's frame allo
   - AT-5 and AT-6 fail: the pull blocks at 0.37 mm, where the yoke starts to draw the sliding pinion. This is
     being fixed.
   - Wall time 3347 s, of which AT-1 took 2399 s.
+- **The same delivery's geometry on the fixed engine.** The pull block was the engine (a part carried by the stem
+  counted as a pusher), not the design: on a/keyless-engine-fixes af355d9, B's runner (`--jobs 3`, loaded box,
+  v5 delivery with mesh placeholders for the four curved parts) passes every step, AT-0 to AT-6: the pull reaches
+  1.294 unblocked, the minute wheel turns 139.6° forward and 127.2° back for 90° of crown in position 2, and the
+  return rewinds. Wall time 9658 s (2 h 41 min), peak RSS 0.62 GB: AT-5 alone took 8262 s and AT-1 4842 s,
+  over B's 5400 s Part 5 limit on this box.
+- **On main's engine (c44b69b) with all 21 parts as STEP, B's runner as the job grader runs it**
+  (`--p5-only`, `--jobs 3`, 5 GB, loaded box). s = 0.72: AT-0 to AT-4 pass (3.523 crown turns per arbor turn,
+  run-back 0.49°, 4.90 turns, 39.19 h; AT-1 took 3873 s, AT-4 1886 s). AT-5 and AT-6 did not fail: they were still
+  running at B's 5400 s limit, and the timeout keeps only finished phases. Peak RSS 1.17 GB.
+  - A pull diagnostic on the same world reaches 1.294 and comes back to 0 unblocked.
+  - The time is the setting phase. In position 2 every crown step turns B's motion work (minute wheel 139.6° for
+    90° of crown), and the engine scans each pushed body in 0.0032 mm steps of surface travel, so AT-5's turns cost
+    about 9000 evaluations per crown step against about 3400 when winding.
 - **Installation order.** It passes B's section 8 replay merged into the job plan: section 8a.
 - **STEP.** `--deliver` writes all 21 parts as B-reps that load through B's STEP reader as real solids (no part
   over one flat triangular face; the largest file, the crown wheel, is 15.3 MB of the 16 MB limit).
@@ -247,7 +261,7 @@ This follows REAL_WATCH_WORK.md section 4 (Unitas/ETA 6497) where B's frame allo
       Against the 200-pose mesh the slices are within 0.0015 mm almost everywhere; the round trip differs from
       the design mesh by 0.020 and 0.024 mm³, mostly the 0.0005 mm growth.
 
-## 10. What the engine-fix branch (a/keyless-engine-fixes, not merged) would allow
+## 10. What the engine-fix branch would allow (merged on main as c44b69b; v2 does not use these yet)
 
 - **A pivoted setting lever and a sprung yoke instead of the slide.** With "springs push through links" the yoke
   spring could push the sliding pinion through the yoke, as in every modern calibre. Main's engine only lets
