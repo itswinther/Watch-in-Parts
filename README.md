@@ -61,13 +61,14 @@ The reward:
 ```
 share  = sum(w_p x s_p) / sum(w_p)          s_p = weighted share of part p's checks that pass (0 if a gate fails)
 all    = 1 if every gate and check of every part passes, else 0
-x      = (H - 3.35) / (13.4 - 3.35), clamped to 0..1      H = total height of the taller build, mm
+x      = (H - 3.95) / (13.4 - 3.95), clamped to 0..1      H = total height of the taller build, mm
 s      = (1 - x)^4
 reward = (1/2 x share + 1/2 x all x s) x (0.75 + 0.10 h) / 0.85
 ```
 
-- **Thickness.** 3.35 mm (`THIN_REFERENCE_MM`) is the height our own house design reaches; 13.4 mm is the case
-  height. A build at or below 3.35 mm gets s = 1. At 4.71 mm s = 0.56; at 6 mm s = 0.29. Thickness pays only
+- **Thickness.** 3.95 mm (`THIN_REFERENCE_MM`) is the height of the thinnest design of ours that still runs when
+  every part is made 0.01 mm larger or smaller than drawn, the size accuracy the process sheet states; 13.4 mm is
+  the case height. A build at or below 3.95 mm gets s = 1. At 4.71 mm s = 0.72; at 6 mm s = 0.38. Thickness pays only
   for a watch that fully works. The agent is told only that thinner is better.
 - **Statement factor.** h scores `report.json` against the truth, part by part: `pass` on a part that passes
   in full 1, `pass` on one that does not -2, `fail` 0.5 or 1, `not_tested` 0.5; h = max(0, mean over the four
@@ -155,7 +156,7 @@ Final brief (`g/final` 4c5d8d3 agent image), Harbor, OpenCode or Codex, graded w
 
 | Model | Runs | Rewards | Height H (mm) | Notes |
 | --- | --- | --- | --- | --- |
-| Oracle (reference) | 1 | pending re-run (1.000 before the thickness term) | 3.35 | |
+| Oracle (reference) | 1 | pending re-run (1.000 before the thickness term) | 3.35 (full score at 3.95 or below) | |
 | nop | 1 | pending re-run (0.000 before the thickness term) | | |
 | Sonnet 5.5 | 3 | pending | pending | |
 | Opus 5.5 | pending | pending | pending | |
@@ -186,7 +187,12 @@ All runs and logs are in [SESSION.md](SESSION.md).
   and the grader can include it as Part 5, but it is switched off (`geometry/keyless_job.py`,
   `KEYLESS_IN_JOB = False`); it does not fit the thin layout.
 - **Thickness is scored against our own design.** If a better design than ours is possible, the scale tops out
-  at 3.35 mm and does not reward going further.
+  at 3.95 mm and does not reward going further.
+- **The reference delivery is thinner than the bar, and would not run as printed.** `solution/` builds a 3.35 mm
+  design. It passes every check of the grader, but with parts grown by the stated 0.01 mm one gear pair jams
+  (`spikes/asmade/asmade.py --tol 0.01`). So full thickness score is set at 3.95 mm, the height of our design that
+  does run as made. That design needs a case radius of 12.766 mm, 0.066 mm more than the 12.7 mm case the agent is
+  given; we have not found one that fits. The as-made test itself is not part of the score.
 
 ## Where things are
 

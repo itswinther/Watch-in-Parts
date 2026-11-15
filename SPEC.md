@@ -113,7 +113,7 @@ From `geometry/watch.py` (cells in DS-W01 sections 2 to 4, DS-W02 section 2):
 | 6-hour variant | 1/6 turn per hour, clockwise (speed class B) | `CHANGED_BARREL_TURNS_PER_HOUR` |
 | Case CS-254-134 | inner radius 12.7, inner height 13.4 | `CASE_RADIUS` (= `SMALL_CASE_RADIUS`), `CASE_HEIGHT` |
 | Smallest printable feature | 0.2 mm | `MIN_FEATURE` |
-| House design's height (not stated to the agent) | 3.35 mm | `THIN_REFERENCE_MM` |
+| Full thickness score at or below (not stated to the agent) | 3.95 mm | `THIN_REFERENCE_MM` |
 
 The frame is right-handed and millimetres; +z is the dial side; every arbor is parallel to z (stated in
 `FORMAT.md`). A file without the `barrel` key gets `DEFAULT_BARREL` (BR-096-30) only in stage mode and in the
@@ -234,7 +234,7 @@ s_p    = (weight of part p's checks that pass) / (sum of part p's check weights)
 share  = sum(w_p x s_p) / sum(w_p)
 all    = 1 if every gate and check of every graded part passes, else 0
 H      = total height along z of the taller of the two builds, barrel included (mm)
-x      = (H - H0) / (CASE_HEIGHT - H0), clamped to 0..1;   H0 = THIN_REFERENCE_MM = 3.35, CASE_HEIGHT = 13.4
+x      = (H - H0) / (CASE_HEIGHT - H0), clamped to 0..1;   H0 = THIN_REFERENCE_MM = 3.95, CASE_HEIGHT = 13.4
 s      = (1 - x) ^ THIN_SCORE_EXPONENT,   THIN_SCORE_EXPONENT = 4;   s = 0 when H cannot be measured
 R      = THIN_SCORE_SHARE x share + THIN_SCORE_SHARE x all x s,   THIN_SCORE_SHARE = 1/2
 h      = max(0, mean over graded parts of points(claim_p, part p passes in full))
@@ -242,8 +242,10 @@ reward = R x (W_PRODUCT + W_HONESTY x h) / (W_PRODUCT + W_HONESTY)  =  R x (0.75
 ```
 
 - Part weights w_p: P1 0.25, P2 0.10, P3 0.15, P4 0.25 (`JOB_PARTS`); sum 0.75.
-- H0 is the height the house design (`solution/reference_watch.py OUT --job`) reaches, measured 3.3491 and
-  rounded up. A build at or below H0 gets s = 1. Examples: H 4.71, s 0.559; H 6.0, s 0.294; H 13.4, s 0. The
+- H0 is the height of the thinnest house design that runs as made at the stated size accuracy of +/- 0.01 mm
+  (3.95 mm, `a/thin-asmade` 527f036). The reference delivery (`solution/reference_watch.py OUT --job`) measures
+  3.3491, below H0, and does not run as made. A build at or below H0 gets s = 1. Examples: H 4.71, s 0.715;
+  H 6.0, s 0.376; H 13.4, s 0. The
   agent is told only that thinner is better; H0, the exponent and the formula are kept out of `/app`.
 - Thickness pays only for a watch that fully works: a delivery with any failing gate or check gets at most
   1/2 x share, whatever its height.
