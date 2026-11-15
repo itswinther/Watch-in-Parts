@@ -124,7 +124,7 @@ RUN pip install --no-cache-dir {pip} \\
  && python -c "import cadquery, manifold3d, scipy, trimesh; print('ok')"
 # OpenCode caps one response at 32,000 output tokens, and Anthropic's "max" thinking variant can spend
 # 31,999 of them on thinking, leaving an empty turn. Raise the cap so no turn can end empty.
-ENV OPENCODE_EXPERIMENTAL_OUTPUT_TOKEN_MAX=64000
+ENV OPENCODE_EXPERIMENTAL_OUTPUT_TOKEN_MAX=128000
 WORKDIR /app
 COPY app/ /app/
 """.format(opencode=OPENCODE, codex=CODEX, pip=PIP)

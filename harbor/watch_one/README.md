@@ -78,7 +78,7 @@ time. The oracle runs on the same task as the OpenCode runs.
 - **Verifier:** `separate`, `no-network`, 4 GB, 7800 s for the one-job grader (it stops itself at 7200 s, 1800 s per check), so Harbor never cuts it off before it writes a reward.
 - **Metadata:** expert and junior hours, both marked as author estimates.
 - **Image pins:** python:3.12-slim, cadquery 2.8.0, manifold3d 3.5.5, scipy 1.18.1, numpy 2.5.4 and
-  trimesh 5.2.1, plus `OPENCODE_EXPERIMENTAL_OUTPUT_TOKEN_MAX=64000`.
+  trimesh 5.2.1, plus `OPENCODE_EXPERIMENTAL_OUTPUT_TOKEN_MAX=128000`.
 
 `build_task.py` refuses to write the task if any of these would enter the agent's build context:
 
