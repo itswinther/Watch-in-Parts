@@ -2353,3 +2353,40 @@ Mikael asks B (and itswinther) to answer these here, so both machines work to on
 
 - **A 04:40** Harbor on g/final 7bf638b first stopped at build: A's build_task.py still required a single supplied/barrel.stl; the catalogue bundle ships one mesh per barrel. **Fixed on branch `a/harbor-catalogue` 007c599 (= g/final + one commit to harbor/watch_one/build_task.py)**: accepts any supplied/*.stl, lets the shipped barrel meshes through the leak guard. **G/B: merge 007c599 into g/final before "thin brief final".** With it the task builds (lint clean, 15 files in /app); oracle x1 + nop x1 running now, result ~05:00.
 - **B 04:40** (to A 04:39 and G) **The Harbor oracle fix was NOT in g/final 7bf638b; merged now: `g/final` aa028e0** = 7bf638b + `b/thin-cat` d39beb3. With d39beb3, `solution/reference_watch.py OUT --job` with no flags or env builds the passing thin delivery (catalogue barrel, small case, one-part mobiles), and `harbor/watch_one/build_task.py` checks that the catalogue meshes are in the image. `make_brief_job.py --check` is up to date on aa028e0. **A: your oracle run on 7bf638b will likely give 0.120 again, so please rerun the oracle and nop on aa028e0.** B is grading solve.sh's line on aa028e0 here now (result in about 10 min). Note: G's entry is stamped 05:30, but `date` gives 04:4x here, so the cut-off at 06:00 is about 1 h 15 min away.
+
+### 2026-11-15 04:41 | analysis (no workstream), to A (Mikael) and B (itswinther): is Part 5 a real gap? `docs/P5_GAP_DOSSIER.md` | itswinther + Claude
+- Did: read every Part 5 delivery against the brief its agent saw; regraded two on main's engine; probed the failing steps; wrote `docs/P5_GAP_DOSSIER.md` (per delivery, per step, the reference, per model, risks, the runs that would settle it). No grader, engine, reference or brief changed; no model run.
+- **Verdict: not a gap today.**
+  - On main's engine GPT passes every step in 2 of 4 deliveries (0.992, 0.9916, 0.2849, 0.095; mean 0.59) and Sonnet in 1 of 1 (0.950). Fable and Opus: no Part 5 runs.
+  - All five deliveries are A's standalone v1 task (`/app/BRIEF.md`, stem on x, case r 8.7), not the job's Part 5. Main's engine grades them against rules their agents never read (COUPLED_TURN 30 → 90, SET_MIN 5 → 2, AT-3 needs AT-2's limits, longer hold, fit and spring rules).
+- **A, a new engine artifact: b7qdG8X's AT-5/AT-6 "stem hits its own clutch" (A 01:50) is the rig's 0.03 mm pull step, not the design.**
+  - The collar is 0.015 thick and sits 0.0023 from the clutch. One pull step puts the whole collar inside the clutch, so the overlap is flat to ±0.002 of slide. `force_signs` then returns both signs, and `push` stops after 6 flat samples (0.012 searched, 0.0248 needed).
+  - With the stem pulled 0.03, the clutch's slide is free from +0.0248 to +0.13.
+  - Pulled in 0.01 or 0.005 steps, the same parts reach 0.9 with no block.
+  - Proposal (needs a yes): `push` keeps scanning to its budget when the overlap is flat both ways, or the brief states that a pushing face must be thicker than one pull step. In the job, the 0.2 mm printability rule should already prevent this (not tested).
+- **A and B: QZeuFhk's "clutch won't slip backward" is gone on main's engine.** Backward 120° from rest: 0 blocked. The rig's 45° pre-wind: 0 of 90 blocked, the clutch slips. Consistent with A's 0.992.
+- **Still unexplained:** b7qdG8X's AT-4. The 360° backward turn passes, then the forward 90° is blocked 30 of 30, although the same turn from AT-2's end winds 14.99°. Also the GPT prelim's AT-1 (the mirror image) on main's engine.
+- **Risks a judge could use to zero the gap:**
+  - (1) wrong task;
+  - (2) rules the agents never saw;
+  - (3) three engine artifacts already found in this task;
+  - (4) grader time: imWnpTP 3651 s here (loaded) against the standalone 3600 s limit, and the job's own Part 5 reference times out at 5400 s (A 04:32);
+  - (5) no reference with a recorded 1.0 on c44b69b: the standalone one was last graded before af355d9;
+  - (6) stale docs. README line 75 and SOLUTION_WATCH line 286 call b7qdG8X and QZeuFhk real design faults; `runs/INDEX.md` shows first-engine numbers only; imWnpTP's report "misstated one result" is wrong (it marked AT-2 `not_tested`: 6.5/7 = 0.929).
+- Verified by (command and result): main's `spikes/keyless/grade.py`, `constants.py`, `engine.py` and `data/` copied to a scratch folder, run with `python -I grade.py SUB data --reward R --details D --jobs 2` (Python 3.13, manifold3d 3.5.5):
+  - b7qdG8X: reward 0.284874 (AT-0 to AT-3 pass), 3431 s.
+  - imWnpTP: 0.991597 (all pass), 3651 s.
+  - Probes `pull_probe`, `pull_trace`, `pull_fine` (b7qdG8X) and `back_probe`, `prewind_probe` (QZeuFhk), with the numbers above. Commands and numbers are in the dossier.
+- Not verified, or assumed:
+  - The standalone reference on main's engine (my regrade was stopped unfinished at itswinther's request, about 04:30).
+  - b7qdG8X's AT-4 cause.
+  - b7qdG8X's AT-5/AT-6 run from AT-2's end state at a 0.01 step (stopped before output).
+  - The prelim mirror on main's engine (stopped).
+  - The Sonnet prelim and QZeuFhk scores are A's (04:06), not mine.
+  - The budget figures for Fable and Opus runs are list-price estimates.
+- Files changed: docs/P5_GAP_DOSSIER.md (new), SESSION.md (this entry).
+- Need from others:
+  - **A:** say yes or no to the `push` proposal. Grade the standalone reference once on c44b69b if Part 5 is to be presented. Look at b7qdG8X's AT-4 if you have the replay.
+  - **B and E:** correct the README and SOLUTION_WATCH lines (wording suggested in the dossier, section 8).
+  - **itswinther and Mikael:** decide whether any Part 5 gap claim is made. If so, it needs clean k = 5 runs per frontier model on the task actually submitted, after its reference grades 1.0 within the time limit (dossier, section 6).
+- Next: none planned; this session stops here unless asked.
