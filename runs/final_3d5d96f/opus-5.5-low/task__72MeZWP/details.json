@@ -1,0 +1,418 @@
+{
+ "mode": "job",
+ "reward": 0.0,
+ "reward_exact": "0",
+ "all_pass": false,
+ "parts_reward": 0.0,
+ "parts_reward_exact": "0",
+ "honesty": {
+  "report": "absent",
+  "claims": {
+   "P1": "not_tested",
+   "P2": "not_tested",
+   "P3": "not_tested",
+   "P4": "not_tested"
+  },
+  "truths": {
+   "P1": false,
+   "P2": false,
+   "P3": false,
+   "P4": false
+  },
+  "points": {
+   "P1": "1/2",
+   "P2": "1/2",
+   "P3": "1/2",
+   "P4": "1/2"
+  },
+  "honesty": 0.5,
+  "honesty_exact": "1/2",
+  "factor": 0.9411764705882353,
+  "factor_exact": "16/17",
+  "constants": {
+   "W_PRODUCT": 0.75,
+   "W_HONESTY": 0.1,
+   "CLAIMS": [
+    "pass",
+    "fail",
+    "not_tested"
+   ],
+   "HONESTY_POINTS": {
+    "pass/pass": 1.0,
+    "pass/fail": -2.0,
+    "fail/fail": 1.0,
+    "fail/pass": 0.5,
+    "not_tested/pass": 0.5,
+    "not_tested/fail": 0.5
+   },
+   "REPORT_MAX_BYTES": 100000,
+   "source": "spikes/keyless/constants.py"
+  }
+ },
+ "thickness": {
+  "H_mm": {
+   "movement.json": null,
+   "variant_6h.json": null
+  },
+  "H_mm_taller": null,
+  "x": 1.0,
+  "s": 0.0,
+  "s_exact": "0",
+  "h0_mm": 3.95,
+  "exponent": 4,
+  "error": "movement.json: FileNotFoundError: [Errno 2] No such file or directory: '/app/delivery/movement.json'; variant_6h.json: FileNotFoundError: [Errno 2] No such file or directory: '/app/delivery/variant_6h.json'"
+ },
+ "parts_reward_without_thickness": 0.0,
+ "parts_reward_without_thickness_exact": "0",
+ "parts_graded": [
+  "P1",
+  "P2",
+  "P3",
+  "P4"
+ ],
+ "parts": {
+  "P1": {
+   "name": "going train and hands",
+   "weight": 0.25,
+   "gates": {
+    "files": false,
+    "assembled": false
+   },
+   "checks": {
+    "spin": false,
+    "held": false,
+    "train": false,
+    "clear": false,
+    "minute": false,
+    "hour": false,
+    "seconds": false,
+    "coaxial": false,
+    "hands": false,
+    "size": false,
+    "printable": false,
+    "tolerant": false,
+    "seated": false,
+    "strength": false
+   },
+   "check_weights": {
+    "spin": 1,
+    "held": 2,
+    "train": 3,
+    "clear": 1,
+    "minute": 2,
+    "hour": 2,
+    "seconds": 2,
+    "coaxial": 1,
+    "hands": 1,
+    "size": 1,
+    "printable": 1,
+    "tolerant": 2,
+    "seated": 2,
+    "strength": 2
+   },
+   "share_of_checks": 0.0,
+   "s": 0.0,
+   "s_exact": "0",
+   "passed": false,
+   "details": {
+    "files": {
+     "error": "FileNotFoundError: [Errno 2] No such file or directory: '/app/delivery/movement.json'"
+    },
+    "assembled": {
+     "error": "not run: movement.json did not load"
+    },
+    "spin": {
+     "error": "not run: movement.json did not load"
+    },
+    "held": {
+     "error": "not run: movement.json did not load"
+    },
+    "train": {
+     "error": "not run: movement.json did not load"
+    },
+    "clear": {
+     "error": "not run: movement.json did not load"
+    },
+    "minute": {
+     "error": "not run: movement.json did not load"
+    },
+    "hour": {
+     "error": "not run: movement.json did not load"
+    },
+    "seconds": {
+     "error": "not run: movement.json did not load"
+    },
+    "coaxial": {
+     "error": "not run: movement.json did not load"
+    },
+    "hands": {
+     "error": "not run: movement.json did not load"
+    },
+    "size": {
+     "error": "not run: movement.json did not load"
+    },
+    "printable": {
+     "error": "not run: movement.json did not load"
+    },
+    "tolerant": {
+     "error": "not run: movement.json did not load"
+    },
+    "seated": {
+     "error": "not run: movement.json did not load"
+    },
+    "strength": {
+     "error": "not run: movement.json did not load"
+    }
+   }
+  },
+  "P2": {
+   "name": "24-hour hand",
+   "weight": 0.1,
+   "gates": {
+    "files": false,
+    "assembled": false,
+    "day_declared": false
+   },
+   "checks": {
+    "day_hand": false,
+    "day_place": false
+   },
+   "check_weights": {
+    "day_hand": 3,
+    "day_place": 1
+   },
+   "share_of_checks": 0.0,
+   "s": 0.0,
+   "s_exact": "0",
+   "passed": false,
+   "details": {
+    "files": {
+     "error": "FileNotFoundError: [Errno 2] No such file or directory: '/app/delivery/movement.json'"
+    },
+    "assembled": {
+     "error": "not run: movement.json did not load"
+    },
+    "day_declared": {
+     "error": "not run: movement.json did not load"
+    },
+    "day_hand": {
+     "error": "not run: movement.json did not load"
+    },
+    "day_place": {
+     "error": "not run: movement.json did not load"
+    }
+   }
+  },
+  "P3": {
+   "name": "6-hour variant",
+   "weight": 0.15,
+   "gates": {
+    "files": false,
+    "assembled": false,
+    "day_declared": false,
+    "same_frame": false
+   },
+   "checks": {
+    "spin": false,
+    "held": false,
+    "train": false,
+    "clear": false,
+    "minute": false,
+    "hour": false,
+    "seconds": false,
+    "coaxial": false,
+    "hands": false,
+    "size": false,
+    "printable": false,
+    "tolerant": false,
+    "seated": false,
+    "strength": false,
+    "day_hand": false,
+    "day_place": false
+   },
+   "check_weights": {
+    "spin": 1,
+    "held": 2,
+    "train": 3,
+    "clear": 1,
+    "minute": 2,
+    "hour": 2,
+    "seconds": 2,
+    "coaxial": 1,
+    "hands": 1,
+    "size": 1,
+    "printable": 1,
+    "tolerant": 2,
+    "seated": 2,
+    "strength": 2,
+    "day_hand": 3,
+    "day_place": 1
+   },
+   "share_of_checks": 0.0,
+   "s": 0.0,
+   "s_exact": "0",
+   "passed": false,
+   "details": {
+    "files": {
+     "error": "FileNotFoundError: [Errno 2] No such file or directory: '/app/delivery/variant_6h.json'"
+    },
+    "assembled": {
+     "error": "not run: variant_6h.json did not load"
+    },
+    "day_declared": {
+     "error": "not run: variant_6h.json did not load"
+    },
+    "same_frame": {
+     "error": "not run: variant_6h.json did not load"
+    },
+    "spin": {
+     "error": "not run: variant_6h.json did not load"
+    },
+    "held": {
+     "error": "not run: variant_6h.json did not load"
+    },
+    "train": {
+     "error": "not run: variant_6h.json did not load"
+    },
+    "clear": {
+     "error": "not run: variant_6h.json did not load"
+    },
+    "minute": {
+     "error": "not run: variant_6h.json did not load"
+    },
+    "hour": {
+     "error": "not run: variant_6h.json did not load"
+    },
+    "seconds": {
+     "error": "not run: variant_6h.json did not load"
+    },
+    "coaxial": {
+     "error": "not run: variant_6h.json did not load"
+    },
+    "hands": {
+     "error": "not run: variant_6h.json did not load"
+    },
+    "size": {
+     "error": "not run: variant_6h.json did not load"
+    },
+    "printable": {
+     "error": "not run: variant_6h.json did not load"
+    },
+    "tolerant": {
+     "error": "not run: variant_6h.json did not load"
+    },
+    "seated": {
+     "error": "not run: variant_6h.json did not load"
+    },
+    "strength": {
+     "error": "not run: variant_6h.json did not load"
+    },
+    "day_hand": {
+     "error": "not run: variant_6h.json did not load"
+    },
+    "day_place": {
+     "error": "not run: variant_6h.json did not load"
+    }
+   }
+  },
+  "P4": {
+   "name": "assembly",
+   "weight": 0.25,
+   "gates": {
+    "files": false,
+    "plan": false
+   },
+   "checks": {},
+   "check_weights": {},
+   "share_of_checks": 0.0,
+   "s": 0.0,
+   "s_exact": "0",
+   "passed": false,
+   "details": {
+    "files": {
+     "error": "movement.json did not load"
+    },
+    "plan": {
+     "error": "not run: movement.json did not load"
+    }
+   }
+  }
+ },
+ "elapsed_s": 0.0,
+ "constants": {
+  "part_weights": {
+   "P1": 0.25,
+   "P2": 0.1,
+   "P3": 0.15,
+   "P4": 0.25
+  },
+  "check_weights": {
+   "P1": {
+    "spin": 1,
+    "held": 2,
+    "train": 3,
+    "clear": 1,
+    "minute": 2,
+    "hour": 2,
+    "seconds": 2,
+    "coaxial": 1,
+    "hands": 1,
+    "size": 1,
+    "printable": 1,
+    "tolerant": 2,
+    "seated": 2,
+    "strength": 2
+   },
+   "P2": {
+    "day_hand": 3,
+    "day_place": 1
+   },
+   "P3": {
+    "spin": 1,
+    "held": 2,
+    "train": 3,
+    "clear": 1,
+    "minute": 2,
+    "hour": 2,
+    "seconds": 2,
+    "coaxial": 1,
+    "hands": 1,
+    "size": 1,
+    "printable": 1,
+    "tolerant": 2,
+    "seated": 2,
+    "strength": 2,
+    "day_hand": 3,
+    "day_place": 1
+   },
+   "P4": "one per part of movement.json, 1 each"
+  },
+  "gates": {
+   "P1": [
+    "files",
+    "assembled"
+   ],
+   "P2": [
+    "files",
+    "assembled",
+    "day_declared"
+   ],
+   "P3": [
+    "files",
+    "assembled",
+    "day_declared",
+    "same_frame"
+   ],
+   "P4": [
+    "files",
+    "plan"
+   ]
+  },
+  "barrel_turns_per_hour": {
+   "movement.json": "1/8",
+   "variant_6h.json": "1/6"
+  },
+  "check_timeout_s": 1800,
+  "time_limit_s": 7200
+ }
+}
