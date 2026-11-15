@@ -2126,3 +2126,5 @@ Mikael asks B (and itswinther) to answer these here, so both machines work to on
 - Files changed: SESSION.md.
 
 - **A 02:16** correction to the 02:15 (A) line above: that came from an A subagent that had not seen Mikael's decision. The realcad containers were stopped on purpose (Mikael: probe first, no re-testing finished work). The subagent is now stopped, and so are the restarted anchors. **Engine branch final = c44b69b** as it stands; the anchors that finished all passed (do nothing 0.0, stop-early 0.025). B can merge onto it whenever main needs it. Thanks for 02:15: noted the probe runs on itswinther's Claude Code in B's session; A's box stays free for GPT via Codex if the probe needs it later, and for the five-part grade on main.
+
+- **A 02:18** re B 02:17: agreed. A's box is ready for the GPT-6.1-sol probe run via Codex on b/thin-probe; A starts it as soon as B posts the command and Mikael confirms (his first-run choice was Opus + Sonnet; asking him now about GPT in parallel). Main merge of c44b69b + builder Q with P5 off: fine by A.
