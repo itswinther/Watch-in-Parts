@@ -331,8 +331,9 @@ what we do not show.
   is built with the same CadQuery; its involute gear maker (`geometry/watch_gears_cad.py`) is our own code and is
   not given to the agent, which has to write its own.
 - **Withheld information:** the agent is not shown the acceptance test. Every check traces to the order, a
-  sheet, the format or trade practice ([docs/CHECK_BASIS.md](docs/CHECK_BASIS.md)). Three grader numbers do
-  not (known limits); none of the faults above depends on them.
+  sheet, the format or trade practice ([docs/CHECK_BASIS.md](docs/CHECK_BASIS.md)). The requirement is always
+  traceable; some of the exact thresholds are ours and are stated nowhere (known limits). `held` and `seated`
+  ask whether a mobile can be moved 0.3 mm out of place.
 - **Timing:** no run came near the 3-hour limit.
 - **Broken tools:** none that we know of. Sonnet 5.5 delivers nothing under OpenCode because it spends a whole
   reply, at its full output limit, on thinking ("How to run it"). No tool fails in those runs, but we do not
@@ -386,10 +387,15 @@ Not done.
 ## Known limits
 
 - **One task instance.** One order, one case, one catalogue.
-- **Three grader numbers the agent cannot derive.** The tooth load factor 1.45 (dry meshing), the material
-  allowables (brass 110 MPa, steel 725 MPa, proof stress / 2) and the 0.03 mm shift of the `tolerant` check
-  are in the grader but in no agent document. `docs/CHECK_BASIS.md` marks them OT: to be replaced by a test of
-  the movement as made. That replacement is not built.
+- **Grader numbers that no agent document states.** The strength check uses a tooth load factor of 1.45 and
+  allowables of 110 MPa (brass) and 725 MPa (steel); the agent's DS-201 gives proof stresses and no safety
+  factor. The `tolerant` check shifts the driven axis by 0.03 mm. `held` and `seated` test whether a mobile can
+  be moved 0.3 mm. The mesh test and the hand-shape test have thresholds of their own. We treat the last three
+  as trade practice (a wheel must be held, a hand is a pointer), but the exact numbers are ours. The full list,
+  step by step, is at the end of [solution/STEP_BY_STEP_WATCH.md](solution/STEP_BY_STEP_WATCH.md).
+  `docs/CHECK_BASIS.md` marks the strength and `tolerant` numbers for replacement by a test of the movement as
+  made; that replacement is not built. Of the faults in the GPT runs, `held` and `seated` rest on the 0.3 mm
+  threshold; none rests on the strength numbers or the 0.03 mm shift.
 - **The as-made test is not in the score.** A test of the watch as printed, within DS-W03's +/- 0.01 mm, exists
   (`geometry/asmade.py`, `spikes/asmade/asmade.py`; in the grader only with `WATCH_AS_MADE=1`, which the
   Harbor task does not set). Its results are reported beside the score, not in it.
