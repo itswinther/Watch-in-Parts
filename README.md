@@ -237,49 +237,64 @@ Grading the reference takes a few minutes (188 s in the Harbor oracle run; about
 
 ## Results
 
-Every number here is from the submitted task: agent image `4c5d8d3`, grader `3d5d96f` (same agent files; the
-grader adds the thickness term). Runs are in Harbor, sandboxed, web tools denied. Deliveries and grader details
-are on branch `a/final-runs`, under `runs/final_4c5d8d3/`.
+Every number here is from the submitted task. The agent's files are those of commit `4c5d8d3` in every run;
+the rewards are from the grader on `main`. Runs are in Harbor, sandboxed, web tools denied. Deliveries and
+grader details are on branch `a/final-runs`, under `runs/final_4c5d8d3/` and `runs/final_3d5d96f/`.
 
 | Agent | Runs | Reward | Notes |
 | --- | --- | --- | --- |
 | Oracle (our reference) | 1 | 1.000 | H 3.35 mm, built in the container in 37 s |
 | nop (does nothing) | 1 | 0.000 | |
-| GPT-6.1-sol (Codex) | 3 | 0.457, 0.447, 0.427 (mean 0.444) | no run delivers a watch that fully works |
+| Stop-early (three cut-off deliveries) | 3 | 0.157, 0.220, 0.333 | Part 1 only; Parts 1 and 2; Parts 1 to 3 |
+| GPT-6.1-sol (Codex) | 6 | 0.457, 0.447, 0.427, 0.467, 0.458, 0.427 (mean 0.447) | no run delivers a watch that fully works |
 | Sonnet 5.5 (OpenCode) | 0 valid | | see below |
 | Opus 5.5 (OpenCode) | 0 valid | | see below |
-| Fable 5.2 | not run yet | | |
+| Fable 5.2 | not run | | |
 
-The three GPT-6.1-sol runs, check by check:
+The six GPT-6.1-sol runs, check by check:
 
 | Run | Reward | Share of checks | Height H | What fails |
 | --- | --- | --- | --- | --- |
-| `dQKXa6k` | 0.457 | 0.956 | 9.60 mm | `held` in P1 and P3: one mobile can be pushed sideways out of place |
+| `dQKXa6k` | 0.457 | 0.956 | 9.60 mm | `held` in P1 and P3: one mobile is stopped sideways by 0.006 mm3 of contact, under the 0.01 limit (0.037 in the other directions) |
 | `fhhWYjp` | 0.447 | 0.934 | 11.80 mm | `seated` and `clear` in P1 and P3: a wheel is not seated on its arbor; the minute and seconds mobiles overlap as they turn (0.0106 mm3 against a limit of 0.01) |
-| `oVS4tLK` | 0.427 | 0.894 | 11.15 mm | `held` and `clear` in P1 and P3: the seconds mobile can drop out downwards, minute and seconds overlap (0.034 mm3). `day_place` in P2 and P3: the 24-hour hand lies 0.4 mm below the top of the frame |
+| `oVS4tLK` | 0.427 | 0.894 | 11.15 mm | `held` and `clear` in P1 and P3: nothing stops the seconds mobile dropping out downwards; minute and seconds overlap (0.034 mm3). `day_place` in P2 and P3: the 24-hour hand lies 0.4 mm below the top of the frame |
+| `UVsdmwL` | 0.467 | 0.978 | 12.10 mm | `clear` in P1 and P3: the minute and seconds mobiles overlap as they turn (0.088 mm3) |
+| `k843CBe` | 0.458 | 0.959 | 11.95 mm | `day_place` in P2 and P3: the 24-hour hand's centre of volume is 0.41 mm from its axis; the grader asks 0.5 (a threshold of ours, see known limits) |
+| `owFDECg` | 0.427 | 0.894 | 10.05 mm | `hands` and `seated` in P1 and P3: the hour and seconds hands lie 0.25 and 0.6 mm below the top of the frame; four wheels are not seated. `day_place`: the 24-hour hand lies 0.6 mm below the top of the frame |
+
+**A grader fault we found in these runs and fixed.** `k843CBe` first also failed `hands`: its seconds hand, drawn
+at exactly the ordered 5.000 mm, measured 4.99994 mm on our mesh. The check had no allowance for our own
+meshing accuracy (0.001 mm, `FORMAT.md`). It has one now. That run went from 0.448 to 0.458; no other run and
+no other check changed.
 
 How to read these:
 
 - **The reward is below one half because the watch does not work, not because half of it is missing.** Each
-  run passes 89 to 96 % of the weighted checks, and the assembly plan (P4) passes in all three. Half of the
-  reward is paid only when every check of every part passes, and none of the three reaches that.
-- **Thickness did not change these three scores**, because it only applies to a watch that fully works. Had
-  the faults been fixed at the delivered heights, the thickness scores would be 0.025, 0.0008 and 0.003: the
-  watches are 9.6 to 11.8 mm against 3.85 mm. The order says "as thin as you can".
-- **The model said so itself.** All three reports state P1 to P3 `not_tested` and P4 `pass`. That is truthful,
+  run passes 89 to 98 % of the weighted checks, and the assembly plan (P4) passes in all six. Half of the
+  reward is paid only when every check of every part passes, and none of the six reaches that.
+- **Thickness did not change these six scores**, because it only applies to a watch that fully works. Had
+  the faults been fixed at the delivered heights, the thickness scores would all be 0.025 or less: the
+  watches are 9.6 to 12.1 mm against 3.85 mm. The order says "as thin as you can".
+- **The model said so itself.** All six reports state P1 to P3 `not_tested` and P4 `pass`. That is truthful,
   and costs 3/68 of the reward.
-- **It stopped early.** The three agents ran for 810 to 2,036 s (14 to 34 minutes) of a 10,800 s limit.
-- One of the faults is marginal: the 0.0106 mm3 overlap in `fhhWYjp`. That run also fails `seated`, so its
-  score does not depend on it.
+- **It stopped early.** The first three agents ran for 810 to 2,036 s (14 to 34 minutes) of a 10,800 s limit
+  (times for the other three are not logged yet).
+- **Not every fault is equally clear.** Four runs have a fault nobody would argue with (a mobile that can fall
+  out, hands below the frame, overlaps of 0.03 to 0.09 mm3). Two rest on a number close to a threshold of ours:
+  `dQKXa6k` (held by 0.006 mm3 against 0.01) and `k843CBe` (hand shape 0.41 against 0.5). Even if those two
+  were passed, their thickness scores would be 0.025 and 0.0005, and their rewards 0.49 and 0.48.
 
-These three rewards were graded three times with grader `3d5d96f`: in Harbor's verifier, again in Docker by
-workstream A (SESSION.md, A 05:48), and a third time on another machine outside Harbor from the files on
-`a/final-runs`. All three gave the same rewards to six decimals and the same failed checks.
+All six rewards were regraded on a second machine, outside Harbor, from the files on `a/final-runs`: the first
+three with grader `3d5d96f`, the other three with the grader on `main`. Rewards and failed checks were
+identical to workstream A's details files, except `k843CBe` after the fix above.
 
-**Claude models: no scored watch yet.** Sonnet 5.5 at default and medium thinking delivered nothing in four
-runs of four (see "How to run it"). Earlier Sonnet runs and one Opus 5.5 run ended when our API credit ran out;
-Harbor marks those invalid (SESSION.md, A 05:46). Sonnet at low thinking, Opus and three more GPT runs are in
-progress and this table will be updated.
+**Claude models: no valid run.** Sonnet 5.5 at default and medium thinking delivered nothing in five runs of
+five (see "How to run it"). Every other Claude run ended when our API credit ran out, and Harbor marks those
+invalid: Opus 5.5 at low and medium thinking had delivered nothing when cut off (15 and 35 steps). Sonnet 5.5 at
+low thinking is the one Claude run that built a watch before it was cut off (97 steps): 5.02 mm tall, 0.412,
+with 18 directions in which a mobile is not held and the seconds hand 0.22 mm below the top of the frame, and a
+report claiming all four parts pass. It is not a valid run and we do not count it, but it is the only sign we
+have of how a Claude model does: much thinner than GPT, also not working, and less honest about it.
 
 Earlier briefs, for context only:
 
@@ -305,11 +320,12 @@ what we do not show.
 
 - **Reference run:** `solution/reference_watch.py`, replayed by Harbor's oracle agent inside the container:
   reward 1.000 (SESSION.md, A 05:49). It is a script, so it gives the same delivery every time.
-- **Frontier agent:** GPT-6.1-sol, three Harbor runs: 0.457, 0.447, 0.427. All three are below one half; the
-  spread is 0.03.
-- **Checkable:** the three deliveries and the grader's details files are on branch `a/final-runs`. Anyone can
+- **Frontier agent:** GPT-6.1-sol, six Harbor runs: 0.427 to 0.467, mean 0.447. All six are below one half;
+  the spread is 0.04.
+- **Checkable:** the six deliveries and the grader's details files are on branch `a/final-runs`. Anyone can
   regrade them with the four shell lines under "How to run it".
-- **Not shown:** a valid run of a Claude model on the submitted task, and more than three runs.
+- **Not shown:** a valid run of a Claude model on the submitted task. The six runs used the Codex agent, not
+  OpenCode.
 
 ### Meaningful difficulty (30 p)
 
@@ -317,13 +333,13 @@ what we do not show.
 > information and tools needed to do better are available to it. Zero points: the gap comes from unfairly
 > withheld information, trick wording, impossible timing, or broken tools.
 
-- **The mistakes, by name** (table under Results): a mobile that is not held in place (two runs), mobiles that
-  overlap as they turn (two runs), a wheel not seated on its arbor (one run), a 24-hour hand below the top of
-  the frame (one run). Each is a measured fault in the delivered parts, in the details file.
+- **The mistakes, by name** (table under Results): mobiles that overlap as they turn (three runs of six), a mobile
+  that is not held in place (two), wheels not seated on their arbors (two), a 24-hour hand below the top of the
+  frame (two), hour and seconds hands below it (one), a 24-hour hand of the wrong shape (one). Each is a measured fault in the delivered parts, in the details file.
 - **The decisions behind them:**
   - The agent decided when it was done. It stopped after 14 to 34 minutes of 3 hours.
-  - It decided not to test its own watch. All three reports say P1 to P3 `not_tested`.
-  - It decided how thin to go. All three are 9.6 to 11.8 mm in a case that allows 13.4 mm; our designs are
+  - It decided not to test its own watch. All six reports say P1 to P3 `not_tested`.
+  - It decided how thin to go. All six are 9.6 to 12.1 mm in a case that allows 13.4 mm; our designs are
     3.35 and 3.85 mm.
 - **Information and tools available:** the order, seven supplier sheets, the file format, CadQuery, and
   `tools/kernel.py` with the factory's own STEP loader, intersection volume and smallest distance. These are

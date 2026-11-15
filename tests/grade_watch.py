@@ -228,7 +228,10 @@ def _check_table(m, runs, speeds, conflicts, driven, thin_cache=None, job=False)
     def hand_ok(h, reach):
         above, centre = m.hand_shape(h)
         r = m.hand_reach(h)
-        ok = r >= reach and above >= 0.0 and centre >= W.HAND_CENTRE_MIN
+        # the length is read from the meshed solid, which may lie up to STEP_LINEAR_DEFLECTION inside the drawn
+        # surface (FORMAT.md): a hand drawn at exactly the ordered length must not fail on that (itswinther, 15 Nov
+        # 07:30; GPT run k843CBe measured 4.99994 for a 5.000 hand)
+        ok = r >= reach - W.STEP_LINEAR_DEFLECTION and above >= 0.0 and centre >= W.HAND_CENTRE_MIN
         info = {"reach": r, "above_fixed": above, "centre_from_axis": centre}
         if job:
             area, share = m.hand_area(h)

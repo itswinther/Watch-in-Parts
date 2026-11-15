@@ -163,7 +163,7 @@ is P1 to P4. See section 6.
 | 8 | `minute` | 2 | minute hand, 1 turn per hour |
 | 9 | `seconds` | 2 | seconds hand, 60 turns per hour |
 | 10 | `coaxial` | 1 | hour and minute axes within 0.01 mm (`COAX_TOL`) |
-| 11 | `hands` | 1 | each hand reaches at least 5 mm (`HAND_REACH`), lies wholly above every fixed part, and its centre of volume is at least 0.5 mm from its axis (`HAND_CENTRE_MIN`), and seen from the dial side it covers at most 0.25 of the disc its tip sweeps (`HAND_AREA_MAX_SHARE`, one-job mode) |
+| 11 | `hands` | 1 | each hand reaches at least 5 mm (`HAND_REACH`; measured on the meshed solid, so a reach within the meshing accuracy of 0.001 mm, `STEP_LINEAR_DEFLECTION`, below the length counts), lies wholly above every fixed part, and its centre of volume is at least 0.5 mm from its axis (`HAND_CENTRE_MIN`), and seen from the dial side it covers at most 0.25 of the disc its tip sweeps (`HAND_AREA_MAX_SHARE`, one-job mode) |
 | 12 | `size` | 1 | everything within the case radius 12.7 (`CASE_RADIUS`) of `case_centre` as it turns; total height at most 13.4 (`CASE_HEIGHT`) |
 | 13 | `printable` | 1 | every delivered part passes DS-W03's test: voxel 0.05 (`THIN_VOXEL`), erode 1.5 voxels, dilate 1, no point further than 0.2 mm from the printable body (`THIN_DEV`) |
 | 14 | `strength` | 2 | Lewis bending of the going train under 70.1 N·mm at the barrel (below) |
@@ -199,7 +199,7 @@ A mesh that fails drives nothing, so the hands it feeds do not turn.
 
 **P2 checks** (`WEIGHTS_2`): `day_hand` 3, the 24-hour hand turns clockwise at 1/24 turn per hour (`DAY_SPEED`);
 `day_place` 1, its axis is at least 6.0 mm from the hour axis (`DAY_HAND_OFFSET`), it reaches at least 3.0 mm
-(`DAY_HAND_REACH`), lies above the frame, its centre of volume is at least 0.5 mm off its axis, and it covers at
+(`DAY_HAND_REACH`, with the same 0.001 mm meshing allowance), lies above the frame, its centre of volume is at least 0.5 mm off its axis, and it covers at
 most 0.25 of the disc its tip sweeps.
 
 **P3** runs every P1 and P2 check on `variant_6h.json` with the barrel at 1/6 turn per hour.
