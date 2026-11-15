@@ -16,8 +16,10 @@ never sees a check, a score or a verdict.
   did not test it.
 - **Baselines:** do nothing **0.000**; stop early **0.157, 0.220, 0.333**.
 - **Run it:** `harbor run -p task -a oracle`, then `-a nop`, then `-a opencode -m <provider/model>`.
-- **Claude models:** one valid run each at low thinking, both 0.422. Sonnet's has a plain fault. Opus's is a
-  near-miss on a threshold the agent is not told, and regrades differently on a second machine.
+- **The strongest run we have:** Opus 5.5 at medium thinking, one run: a fully working movement, 4.23 mm tall,
+  every check passed, honest report: **0.925**. It loses its 0.075 on thickness alone: 0.38 mm thicker than our
+  3.85 mm. So the task can be done from what the agent is given, and the best agent is still below the reference.
+- **Other Claude runs:** Sonnet 5.5 and Opus 5.5 at low thinking, one valid run each, both 0.422.
 - **What we do not show:** repeated Claude runs, and some grader thresholds the agent is not told. Both are
   spelled out below, with the ten things we would change next.
 
@@ -287,6 +289,7 @@ grader details are on branch `a/final-runs`, under `runs/final_4c5d8d3/` and `ru
 | GPT-6.1-sol (Codex) | 6 | 0.457, 0.447, 0.427, 0.467, 0.458, 0.427 (mean 0.447) | no run delivers a watch that fully works |
 | Sonnet 5.5, low thinking (OpenCode) | 1 valid | 0.422 | 5.75 mm; three mobiles not held; see below |
 | Opus 5.5, low thinking (OpenCode) | 1 valid | 0.422 (0.082 when regraded on another machine) | 4.08 mm; see below |
+| Opus 5.5, medium thinking (OpenCode) | 1 valid | **0.925** | 4.23 mm; every check passes; see below |
 | Fable 5.2 | not run | | |
 
 The six GPT-6.1-sol runs, check by check:
@@ -326,7 +329,15 @@ All six rewards were regraded on a second machine, outside Harbor, from the file
 three with grader `3d5d96f`, the other three with the grader on `main`. Rewards and failed checks were
 identical to workstream A's details files, except `k843CBe` after the fix above.
 
-**Claude models: one valid run each, at low thinking (workstream A, Harbor + OpenCode, 15 Nov 08:39 and 08:42).**
+**Claude models (workstream A, Harbor + OpenCode, 15 Nov 08:39 to 08:56).**
+
+- **Opus 5.5 at medium thinking: 0.925, the one run that delivers a watch that fully works.** 24 parts, 80
+  steps, about 15.50 USD. Every gate and check of all four parts passes, on workstream A's verifier and again on
+  a second machine. The report claims all four parts pass, and that is true. The movement is 4.23 mm tall; full
+  thickness score is at 3.85 mm, so s = 0.850 and the reward is 1/2 + 1/2 x 0.850 = 0.925. (A's details file
+  shows 0.943: it was graded when the bar was 3.95 mm.) This run shows two things. The task can be solved from
+  the order and the sheets alone, including every threshold the agent is not told. And the thickness term does
+  what it is for: the remaining gap to the reference, 0.075, is 0.38 mm of height.
 
 - **Sonnet 5.5: 0.422.** A complete movement, 5.75 mm tall. One check fails, `held`, in both builds: three
   mobiles can be lifted straight out upwards, with nothing above them (zero contact). The report claims all four
@@ -374,11 +385,15 @@ what we do not show.
   reward 1.000 (SESSION.md, A 05:49). It is a script, so it gives the same delivery every time.
 - **Frontier agent:** GPT-6.1-sol, six Harbor runs: 0.427 to 0.467, mean 0.447. All six are below one half;
   the spread is 0.04.
+- **The strongest result:** Opus 5.5 at medium thinking, one run, 0.925: a working watch, 0.38 mm thicker than
+  our bar. It is below the reference, by thickness alone. At low thinking the same model scored 0.422.
 - **Checkable:** the six deliveries and the grader's details files are on branch `a/final-runs`. Anyone can
   regrade them with the four shell lines under "How to run it".
-- **Claude models under OpenCode:** one valid run each of Sonnet 5.5 and Opus 5.5, both 0.422. One run is not
-  "consistently", and the Opus number did not reproduce on a second machine (Results).
-- **Not shown:** repeated Claude runs. The six GPT runs used the Codex agent, not OpenCode.
+- **Other Claude runs under OpenCode:** one valid run each of Sonnet 5.5 and Opus 5.5 at low thinking, both
+  0.422; the Opus one did not reproduce on a second machine (Results).
+- **Not shown:** repeated Claude runs: each Claude number is one run, which is not "consistently". With Opus at
+  medium thinking the gap is 0.075, not one half; we do not know how often it reaches a working watch. The six
+  GPT runs used the Codex agent, not OpenCode.
 
 ### Meaningful difficulty (30 p)
 
@@ -399,6 +414,8 @@ what we do not show.
   enough to test "held", "overlap while turning" and "hand above the frame" before delivering. The reference
   is built with the same CadQuery; its involute gear maker (`geometry/watch_gears_cad.py`) is our own code and is
   not given to the agent, which has to write its own.
+- **It can be done:** Opus 5.5 at medium thinking passed every check from the same order, sheets and tools,
+  without being told a single threshold.
 - **Withheld information:** the agent is not shown the acceptance test. Every check traces to the order, a
   sheet, the format or trade practice ([docs/CHECK_BASIS.md](docs/CHECK_BASIS.md)). The requirement is always
   traceable; some of the exact thresholds are ours and are stated nowhere (known limits). `held` and `seated`
@@ -500,16 +517,17 @@ Not done.
 Reading our own results as someone who builds environments would, these are the faults that matter most, and
 the fix for each.
 
-1. **The reward hardly separates good from bad work.** Every agent run scores between 0.42 and 0.47: a 4 mm
-   watch with one near-miss and a 12 mm watch with hands below the dial get about the same. Half of the reward
-   sits behind "every check passes", nobody reached it, so the thickness term has not yet changed a score.
+1. **The reward hardly separates good from bad work below a working watch.** Eight of the nine valid agent runs that
+   delivered a watch score between 0.42 and 0.47: a 4 mm watch with one near-miss and a 12 mm watch with hands below the dial get about
+   the same. Half of the reward sits behind "every check passes"; one run reached it (0.925), and only there did
+   thickness count.
    *Fix:* pay the working-watch half in steps (per build, per function: runs, shows the time, can be
    assembled), and let thickness scale each step, so that a better watch always scores more.
 2. **A complete but faulty watch scores little more than stopping early** (0.42 to 0.47 against 0.33 for three
    flawless parts of four). *Fix:* the same graded term; and weight the checks by what a fault costs the
    wearer, not evenly.
-3. **Some pass marks are numbers the agent cannot read**, and three of the eight scored runs rest on a close
-   call against one of them. *Fix:* state every threshold in a supplier sheet or the format sheet, or replace
+3. **Some pass marks are numbers the agent cannot read**, and three of the eight runs that fell short rest on a
+   close call against one of them. *Fix:* state every threshold in a supplier sheet or the format sheet, or replace
    the check with the outcome it stands for (the movement as made, running), and score a band around each
    threshold instead of a hard edge.
 4. **One delivered file gets two rewards on two machines.** *Fix:* pin the CAD kernel build in both images,
