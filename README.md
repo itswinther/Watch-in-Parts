@@ -19,7 +19,7 @@ never sees a check, a score or a verdict.
 - **Claude models:** one valid run each at low thinking, both 0.422. Sonnet's has a plain fault. Opus's is a
   near-miss on a threshold the agent is not told, and regrades differently on a second machine.
 - **What we do not show:** repeated Claude runs, and some grader thresholds the agent is not told. Both are
-  spelled out below.
+  spelled out below, with the ten things we would change next.
 
 The project is called Watch in Parts. The repo is still named `board-in-a-box` after our first idea, which we
 dropped.
@@ -488,6 +488,39 @@ Not done.
   (`spikes/asmade/asmade.py --tol 0.01`). So full thickness score is set at 3.85 mm, the height of our design that
   does run as made. That design needs a case radius of 12.766 mm, 0.066 mm more than the 12.7 mm case the agent is
   given; we have not found one that fits. The as-made test itself is not part of the score.
+
+## What we would change next
+
+Reading our own results as someone who builds environments would, these are the faults that matter most, and
+the fix for each.
+
+1. **The reward hardly separates good from bad work.** Every agent run scores between 0.41 and 0.47: a 4 mm
+   watch with one near-miss and a 12 mm watch with hands below the dial get about the same. Half of the reward
+   sits behind "every check passes", nobody reached it, so the thickness term has not yet changed a score.
+   *Fix:* pay the working-watch half in steps (per build, per function: runs, shows the time, can be
+   assembled), and let thickness scale each step, so that a better watch always scores more.
+2. **A complete but faulty watch scores little more than stopping early** (0.43 to 0.47 against 0.33 for three
+   flawless parts of four). *Fix:* the same graded term; and weight the checks by what a fault costs the
+   wearer, not evenly.
+3. **Some pass marks are numbers the agent cannot read**, and three of the eight scored runs rest on a close
+   call against one of them. *Fix:* state every threshold in a supplier sheet or the format sheet, or replace
+   the check with the outcome it stands for (the movement as made, running), and score a band around each
+   threshold instead of a hard edge.
+4. **One delivered file gets two rewards on two machines.** *Fix:* pin the CAD kernel build in both images,
+   and have the verifier refuse to grade if its kernel is not the pinned one.
+5. **Nobody has shown a delivery that scores 1.0 and meets every stated condition.** The reference fits the
+   case but would not run as printed; the design that runs as printed needs a slightly larger case. *Fix:* one
+   reference that does both, with the as-made test in the score, and the full-score height taken from it.
+6. **Too few runs on the judged harness.** *Fix:* eight runs per model under OpenCode, on Modal, with the
+   thinking level fixed and stated.
+7. **We know which checks failed, not yet which decision caused each.** *Fix:* read each transcript back from
+   the failed check to the step that introduced the fault, and publish that trace per run.
+8. **The fault anchors are written for an older layout.** *Fix:* regenerate every expected value from the
+   current reference, and run the suite in CI on every change to the grader.
+9. **One task instance.** *Fix:* vary the order: case size, barrel catalogue, hand layout, the variant's
+   speed. The grader already reads these from constants; the reference script would have to become a solver.
+10. **A run is slow and costly** (up to three hours, about 9 USD for one Opus run). *Fix:* a smaller order
+    (two hands, one build) as an easier rung of the same task.
 
 ## Where things are
 
