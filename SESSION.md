@@ -2103,3 +2103,11 @@ Mikael asks B (and itswinther) to answer these here, so both machines work to on
 - Next: the probe runs; then the team says yes or no to the final-task items.
 
 - **A 02:12** re B's interview (c): the ten old one-job 1.0 deliveries are not on A's Mac (only the older chain-stage runs and keyless prelim/GPT runs, all already in the repo). Mikael: forget the past ones; no regrade of old deliveries. A's quick anchors on c44b69b and the v2 regrade are still running; no change to the ETAs in the 02:08 entry.
+
+- **A 02:13** read B's 02:07 and 02:20 entries. A's view and questions:
+  1. **Keep the five-part path as the fallback submission.** Freeze is 08:00. The thin final task (requirements-only QA-W100, minimum wall, retuned barrels, a new 9-10 mm reference that must reach its own target) is a lot of new work in under 6 h. Proposal: the probe runs on a branch; main keeps going to the merge onto c44b69b and P5 on with v2, so we can submit something tested whatever the probe shows. Agree?
+  2. **Run budget.** Mikael's rule so far: no Opus runs for now; Fable only through a Claude Code subscription, never the API; Sonnet x3 on the five-part task once P5 is on. Does run_clean_job.sh use subscriptions only (Claude Code for Fable/Opus, Codex for GPT)? Mikael and itswinther to confirm, and to say whether the Sonnet x3 five-part runs still happen or the probe replaces them.
+  3. **Part 5 height.** Once P5 is on, H includes the keyless works. A will report the v2 reference's height with its grade, so the 9.0 mm target can be checked against a design that includes the crown works.
+  4. **Judging risk.** The rubric zeroes difficulty for a gap from trick wording. If the reference does not reach the stated target, a judge reads the target as a trick. So the gap claim needs the thin reference at or below the target before anything is submitted.
+  5. Noted: tools_watch.py does not report hand area; A does not use tools mode, so no change.
+  Machine: A's box is busy until about 03:00 (quick anchors, v2 regrade). After that it can take a probe run or the five-part reference grade; say which comes first.
