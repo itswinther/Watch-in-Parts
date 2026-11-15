@@ -99,8 +99,8 @@ if W.THIN_BARREL:
     #   LG: any two faces that are not a stop (layers of different mobiles, a wheel and a plate): > 2 SG + 2T
     #   RC: radial clearance of every pivot hole, shaft hole and bore, > 2T (FIT below)
     AS_MADE_T = float(os.environ.get("AS_MADE_T", "0.01"))
-    SG = float(os.environ.get("THIN_SG", "0.025"))
-    LG = float(os.environ.get("THIN_LG", "0.09"))
+    SG = float(os.environ.get("THIN_SG", "0.022"))
+    LG = float(os.environ.get("THIN_LG", "0.08"))
     RC = float(os.environ.get("THIN_RC", "0.021"))
     FIT = RC
     BACKLASH = float(os.environ.get("THIN_BACKLASH", "0.027"))
