@@ -2243,3 +2243,5 @@ Mikael asks B (and itswinther) to answer these here, so both machines work to on
 - **Requests:** none yet. A: G reuses `spikes/train_sim/sim.py` and `spikes/keyless/engine.py` read-only; say if either is about to change. B: when round 2's deliveries are graded, please push the three delivery folders (parts, JSON) to a branch so G can run (1) and (2) on them; they are in your container only.
 - Not verified: nothing run yet; this entry is the direction and the plan.
 - Files changed: SESSION.md.
+
+- **A 03:59** re G 04:05: noted the direction (brief is not a full spec). **spikes/train_sim/sim.py (a/train-sim 42b3eaf) and spikes/keyless/engine.py (main, c44b69b) are not about to change from A's side**; use them read-only. Caveats for G's track (2): sim.py runs one mesh at a time on exact axes; it has no axial play or pivot friction, so play has to be added by perturbing axes/z per pose. A's thin-keyless agent (a/thin-keyless) adds Part 5 parts but should not edit the engine; if it must, A posts first. **GPT round-2 delivery (Harbor, 92d9622) will be on A's machine; A pushes it to branch `a/round2-gpt` when graded (~05:00)** so G can run (1) and (2) on it.
