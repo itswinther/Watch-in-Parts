@@ -194,7 +194,9 @@ How to read these:
 - One of the faults is marginal: the 0.0106 mm3 overlap in `fhhWYjp`. That run also fails `seated`, so its
   score does not depend on it.
 
-The three GPT rewards were regraded by workstream A in Docker with grader `3d5d96f` (SESSION.md, A 05:48). A second, independent regrade outside Harbor is running; its result goes here.
+These three rewards were graded three times with grader `3d5d96f`: in Harbor's verifier, again in Docker by
+workstream A (SESSION.md, A 05:48), and a third time on another machine outside Harbor from the files on
+`a/final-runs`. All three gave the same rewards to six decimals and the same failed checks.
 
 **Claude models: no valid result yet.** Sonnet 5.5 at default thinking produced no delivery (see "How to run
 it"). The Sonnet runs at low and medium thinking and the one Opus 5.5 run ended when our API credit ran out;
@@ -211,49 +213,92 @@ Earlier briefs, for context only:
 
 All runs and logs are in [SESSION.md](SESSION.md).
 
-## The judging criteria, and where we stand on each
+## The judging rubric, and our answer to each point
 
-The four criteria and their points as we noted them from the organisers' brief. We list what is shown and
-what is not.
+The rubric text is the organisers', quoted in full. Under each we say what we show, with where to check it, and
+what we do not show.
 
-**1. Gap between frontier agents and the reference (30).**
+### The gap (30 p)
 
-- Shown: reference 1.000, do-nothing 0.000, GPT-6.1-sol 0.457 / 0.447 / 0.427 in three valid Harbor runs.
-- Context: on the first briefs, which stated the acceptance test and had a roomier case, every frontier model
-  we ran scored 1.0. The submitted brief differs in several ways at once (no stated test, no target, a smaller
-  case, a barrel catalogue), so we cannot say which change produces the gap.
-- Not shown: any valid Claude run on the submitted task. Three runs of one model is the whole evidence today.
+> Full points: the frontier agent consistently scores below a stronger reference run your team demonstrates;
+> both results can be reproduced across repeated runs. Zero points: no measurable gap, or the claimed gap
+> cannot be reproduced or checked against a demonstrated reference run.
 
-**2. Meaningful difficulty (30).**
+- **Reference run:** `solution/reference_watch.py`, replayed by Harbor's oracle agent inside the container:
+  reward 1.000 (SESSION.md, A 05:49). It is a script, so it gives the same delivery every time.
+- **Frontier agent:** GPT-6.1-sol, three Harbor runs: 0.457, 0.447, 0.427. All three are below one half; the
+  spread is 0.03.
+- **Checkable:** the three deliveries and the grader's details files are on branch `a/final-runs`. Anyone can
+  regrade them with the four shell lines under "How to run it".
+- **Not shown:** a valid run of a Claude model on the submitted task, and more than three runs.
 
-- Each failed check names a physical fault in the delivered parts (table above), with the measured number in
-  the grader's details file.
-- The agent had what it needed: the order, the sheets, CadQuery, the factory's own STEP loader and a kernel
-  with intersection volume and smallest distance. It used 14 to 34 minutes of 3 hours and reported its own
-  parts as not tested.
-- Every check traces to the order, a sheet, the file format or trade practice
-  ([docs/CHECK_BASIS.md](docs/CHECK_BASIS.md)). The three numbers that do not are listed under known limits;
-  none of the faults above depends on them.
-- Not done: a transcript-level trace of each fault to the decision that caused it.
+### Meaningful difficulty (30 p)
 
-**3. Reward integrity (25).**
+> Full points: you can explain the agent's main mistakes and connect them to decisions in the task; the
+> information and tools needed to do better are available to it. Zero points: the gap comes from unfairly
+> withheld information, trick wording, impossible timing, or broken tools.
 
-- Separate offline verifier; it reads only the delivered files and never runs submitted code; reward 0 is
-  written first; each check runs in its own try block with a time limit.
-- Oracle 1.000 and nop 0.000 in Harbor on the submitted grader.
-- The leak guard on the agent's folder refuses the solution, the full-score height and the formula.
-- A false `pass` in the report costs more than an admitted fault.
-- Not done on the submitted version: the full anchor suite (`tests/test_anchors_job.py`) has not been re-run
-  on the thin layout; one anchor is known to be out of date there. No exploit hunt was run against this
-  version.
+- **The mistakes, by name** (table under Results): a mobile that is not held in place (two runs), mobiles that
+  overlap as they turn (two runs), a wheel not seated on its arbor (one run), a 24-hour hand below the top of
+  the frame (one run). Each is a measured fault in the delivered parts, in the details file.
+- **The decisions behind them:**
+  - The agent decided when it was done. It stopped after 14 to 34 minutes of 3 hours.
+  - It decided not to test its own watch. All three reports say P1 to P3 `not_tested`.
+  - It decided how thin to go. All three are 9.6 to 11.8 mm in a case that allows 13.4 mm; our designs are
+    3.35 and 3.85 mm.
+- **Information and tools available:** the order, seven supplier sheets, the file format, CadQuery, and
+  `tools/kernel.py` with the factory's own STEP loader, intersection volume and smallest distance. These are
+  enough to test "held", "overlap while turning" and "hand above the frame" before delivering. The reference
+  is built with the same libraries.
+- **Withheld information:** the agent is not shown the acceptance test. Every check traces to the order, a
+  sheet, the format or trade practice ([docs/CHECK_BASIS.md](docs/CHECK_BASIS.md)). Three grader numbers do
+  not (known limits); none of the faults above depends on them.
+- **Timing:** no run came near the 3-hour limit.
+- **Broken tools:** one, and we exclude it. Under OpenCode, Sonnet 5.5 at default thinking spends a whole
+  reply on thinking and delivers nothing ("How to run it"). We report those runs as invalid, not as a gap.
+- **Not done:** a trace of each fault through the agent's transcript to the step where it was introduced.
 
-**4. Craft (15).**
+### Reward integrity (25 p)
 
-- One command builds the task and runs oracle, nop and a model. The same grader runs outside Harbor with four
-  shell lines.
-- `SPEC.md` names the constant behind every number.
-- Known limits are listed below, including the ones that weaken our own claims.
-- Not done: a dry run from a clean clone by someone who did not write this.
+> Full points: the reward measures success at the task and holds up when judges try to exploit it; doing
+> nothing or stopping early earns little or no credit; completing the task well remains the best way to score.
+> Zero points: an exploit, scoring loophole, or strategy that avoids the task earns a better score than
+> successful play.
+
+- **Doing nothing:** 0.000 in Harbor (nop agent); an empty delivery folder grades 0.000000 outside Harbor.
+- **Stopping early:** three stop-early deliveries are defined in `tests/test_anchors_job.py` (Part 1 only; Parts 1
+  and 2; Parts 1 to 3 with no assembly plan). Their rewards on the submitted grader are being re-run and go here.
+- **Completing the task well is the best way to score:** half of the reward is paid only when every check of
+  every part passes, and that half is scaled by thickness. A partial delivery cannot pass one half.
+- **Measures success at the task:** the checks are geometric tests of the delivered solids: nothing overlaps,
+  every mobile turns and is held, every mesh drives, the hands turn at the right speeds, every part can be put
+  in along its stated path.
+- **Against exploits:** the verifier is a separate offline container; it reads only the files the delivery
+  names, refuses links and outside paths, and never runs submitted code. Reward 0 is written first. Each check
+  has its own try block and time limit. The report can only lower the reward: a truthful one leaves it as it
+  is, a false `pass` costs more than an admitted fault.
+- **Not done on the submitted version:** the full anchor suite (`tests/test_anchors_job.py`, the reference with
+  one fault each and the expected reward) has not been re-run since the layout became thin, and one anchor is
+  known to be out of date. No exploit hunt was run against this version. Earlier hunts are in
+  `docs/history/`.
+
+### Craft (15 p)
+
+> Full points: the environment's rules and behavior make sense for the setting; judges can run the evaluation
+> from your README with one command and reproduce your reported results. Zero points: the environment only
+> works in your demo, or judges cannot reproduce the evaluation.
+
+- **Makes sense for the setting:** the task is a movement designer's job from a customer order and supplier
+  sheets, and its numbers come from real calibres ("Why it is hard, and why that is fair").
+- **One command:** `harbor/watch_one/run_all.sh MODEL K` builds the task and runs oracle, nop and the model.
+- **Reproduce:** oracle 1.000 and nop 0.000 were reproduced in Harbor on the submitted grader; the GPT
+  deliveries can be regraded from `a/final-runs`.
+- **Rules in one place:** `SPEC.md` names the constant and file behind every number.
+- **Not done:** a run of the README from a clean clone by someone who did not write it.
+
+### Tiebreaker: a smaller model that improves after training
+
+Not done.
 
 ## Known limits
 
