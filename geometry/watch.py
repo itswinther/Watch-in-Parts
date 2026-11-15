@@ -48,6 +48,11 @@ CHANGED_BARREL_TURNS_PER_HOUR = Fraction(1, 6)
 # unchanged), read from spikes/thin_4mm/data/. The z constants of the barrel follow. The strength load case
 # (BARREL_TORQUE_MAX_NMM, the automatic version's bridle) is kept at full value: conservative.
 THIN_BARREL = os.environ.get("WATCH_THIN_BARREL", "") == "1"
+# spike only (branch a/thin-po), OFF by default: THIN_CASE_RADIUS=15.5 (say) checks the size requirement against
+# that inner radius instead of CASE_RADIUS (a 43.5 mm diving case: movement about 31 mm across)
+THIN_CASE_RADIUS = float(os.environ["THIN_CASE_RADIUS"]) if os.environ.get("THIN_CASE_RADIUS") else None
+if THIN_CASE_RADIUS is not None:
+    CASE_RADIUS = THIN_CASE_RADIUS
 THIN_BARREL_SCALE = 3.0 / 6.6
 if THIN_BARREL:
     BARREL_WHEEL_Z = tuple(v * THIN_BARREL_SCALE for v in BARREL_WHEEL_Z)
